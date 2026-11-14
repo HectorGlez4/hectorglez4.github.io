@@ -9,6 +9,7 @@ import { parse as parsearYaml } from 'yaml';
 import {
   CABECERA_DE_APROBACIONES,
   analizarAprobaciones,
+  aprobarTrasInterrupcion,
   fallosDeAprobaciones,
   leerAprobaciones,
   mismoAgente,
@@ -54,6 +55,8 @@ describe('35.11 — los dos agentes', () => {
   it('se comparan recortados y en minúsculas', () => {
     expect(mismoAgente('Ana', ' ana ')).toBe(true);
     expect(mismoAgente('Ana', 'Beatriz')).toBe(false);
+    // La misma letra compuesta o descompuesta es el mismo agente.
+    expect(mismoAgente('He\u0301ctor', 'H\u00e9ctor')).toBe(true);
   });
 
   it.each<[string, string | undefined, string | undefined, RegExp | undefined]>([
@@ -120,6 +123,26 @@ describe('35.11 — el analizador y el escritor', () => {
     await writeFile(rutas.aprobacionesDeAtribuidas, '', 'utf8');
     await registrarAprobaciones(rutas, [entrada('buzz-x')]);
     expect((await readFile(rutas.aprobacionesDeAtribuidas, 'utf8')).startsWith(CABECERA_DE_APROBACIONES)).toBe(true);
+  });
+});
+
+describe('35.11 — tras una pasada interrumpida', () => {
+  it('anota la aprobación de lo ya publicado y devuelve el mismo error', async () => {
+    const rutas = await corpusVacio();
+    const error = new Error('se cortó');
+    expect(await aprobarTrasInterrupcion(rutas, [entrada('buzz-x')], error)).toBe(error);
+    expect(await leerAprobaciones(rutas)).toEqual([entrada('buzz-x')]);
+    expect(error.message).toBe('se cortó');
+  });
+
+  it('si tampoco puede anotarla, lo añade al error nombrando la Cita, en vez de callarlo', async () => {
+    const rutas = await corpusVacio();
+    await mkdir(rutas.raiz, { recursive: true });
+    await writeFile(rutas.aprobacionesDeAtribuidas, 'otra: cosa\n', 'utf8');
+    const error = new Error('se cortó');
+    const devuelto = (await aprobarTrasInterrupcion(rutas, [entrada('buzz-x')], error)) as Error;
+    expect(devuelto).toBe(error);
+    expect(devuelto.message).toMatch(/^se cortó Tampoco se anotó la aprobación de buzz-x en corpus\/aprobaciones-de-atribuidas\.yml/u);
   });
 });
 
@@ -248,7 +271,7 @@ describe('35.11 — los instantes, de un historial de git real', () => {
         entradas.map((e, i) => ({ entrada: e, ...(instantes.entradas[i] !== undefined ? { instante: instantes.entradas[i]! } : {}) })),
       );
     };
-    return { escribirCita, anotar, commit, juzgar };
+    return { escribirCita, anotar, commit, juzgar, git, citaRuta: cita };
   }
 
   it('la Cita y su entrada en el mismo commit pasan; un texto cambiado en un commit posterior rompe', async () => {
@@ -287,6 +310,26 @@ describe('35.11 — los instantes, de un historial de git real', () => {
     await r.escribirCita('Primera letra.', 'aptaParaPortada: true\n');
     await r.commit();
     expect(await r.juzgar('Primera letra.')).toEqual([]);
+  });
+
+  it('lo que hay en HEAD se lee de HEAD: tras una fusión, un cambio más reciente de la principal no tapa el texto de la rama', async () => {
+    const r = await repositorio();
+    await r.escribirCita('Primera letra.');
+    await r.anotar(1);
+    await r.commit();
+    const principal = (await r.git('rev-parse', '--abbrev-ref', 'HEAD')).stdout.trim();
+    // La rama retraduce y la aprueba; después, la principal toca otro campo del mismo fichero.
+    await r.git('checkout', '-q', '-b', 'retraduccion');
+    await r.escribirCita('Segunda letra.');
+    await r.anotar(2);
+    await r.commit();
+    await r.git('checkout', '-q', principal);
+    await r.escribirCita('Primera letra.', 'aptaParaPortada: true\n');
+    await r.commit();
+    await r.git('-c', 'user.name=Prueba', '-c', 'user.email=prueba@ejemplo.org', 'merge', '-q', '--no-edit', 'retraduccion');
+    expect(readFileSync(join(r.citaRuta), 'utf8')).toMatch(/Segunda letra\.[\s\S]*aptaParaPortada/u);
+    // La última transición por fecha es la de la principal, con la letra vieja; HEAD tiene la nueva.
+    expect(await r.juzgar('Segunda letra.')).toEqual([]);
   });
 
   it('fuera de un repositorio dice por qué no se fía del historial', async () => {

@@ -642,9 +642,22 @@ export function lineaDelJuicioDeTraduccion(juicio: JuicioDeSmC6): string[] {
   if (juicio.estado === 'bajo-minimo') {
     return [`La traducción propia no se juzga: ningún par de meses cerrados seguidos llega a ${juicio.minimo} traducciones propias publicadas.`];
   }
-  if (juicio.saltos.length === 0) return ['La traducción propia no salta en ningún par de meses cerrados seguidos que llega al mínimo.'];
+  if (juicio.estado === 'sin-auditar') {
+    return [
+      `La traducción propia no se juzga: los pares de meses que llegan a ${juicio.minimo} traducciones propias no tienen ` +
+        `la segunda muestra auditada en los dos meses (pares que acaban en ${juicio.meses.join(', ')}).`,
+    ];
+  }
+  const sinAuditar =
+    juicio.sinAuditar === undefined
+      ? []
+      : [`Sin juzgar, por faltarles la segunda muestra: los pares que acaban en ${juicio.sinAuditar.join(', ')}.`];
+  if (juicio.saltos.length === 0) {
+    return ['La traducción propia no salta en ningún par de meses cerrados seguidos auditado que llega al mínimo.', ...sinAuditar];
+  }
   return [
     ...juicio.saltos.flatMap((s) => [`La traducción propia salta en ${s.mes}:`, ...s.motivos.map((m) => `  · ${m}`)]),
+    ...sinAuditar,
     'Qué hacer lo decide Héctor.',
   ];
 }
@@ -663,6 +676,8 @@ export function lineaDelJuicio(juicio: JuicioDeSmC6): string[] {
         'Un cero de reclamaciones puede ser el cero del tráfico, no el de la calidad.',
     ];
   }
+  // Solo el juicio de la traducción propia da «sin-auditar»; el de SM-C6 juzga también las peticiones.
+  if (juicio.estado === 'sin-auditar') return ['SM-C6 no se juzga: a sus pares de meses les falta la auditoría.'];
   if (juicio.saltos.length === 0) return ['SM-C6 no salta en ningún par de meses cerrados seguidos que llega al mínimo.'];
   return [
     ...juicio.saltos.flatMap((s) => [`SM-C6 salta en ${s.mes}:`, ...s.motivos.map((m) => `  · ${m}`)]),

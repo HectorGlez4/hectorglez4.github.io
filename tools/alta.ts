@@ -65,7 +65,13 @@ import {
   ORIGEN_TRADUCCION_PROPIA,
   type Clase,
 } from '../src/lib/clase.ts';
-import { agentesDe, MOTIVO_AGENTES_SIN_TRADUCCION, registrarAprobaciones, type Agentes } from './lib/aprobaciones.ts';
+import {
+  agentesDe,
+  aprobarTrasInterrupcion,
+  MOTIVO_AGENTES_SIN_TRADUCCION,
+  registrarAprobaciones,
+  type Agentes,
+} from './lib/aprobaciones.ts';
 import {
   fallosDeAtribuidas,
   fichaPlaneada,
@@ -237,7 +243,12 @@ export interface InformeDeAlta {
    * Historia 35.11 — si el registro de aprobaciones no se pudo escribir tras publicar: el motivo, y
    * las traducciones propias que se movieron a `corpus/_revision/` (AD-2), sin anotar su clase.
    */
-  aprobacionesSinAnotar?: { motivo: string; devueltas: string[] };
+  aprobacionesSinAnotar?: {
+    motivo: string;
+    devueltas: string[];
+    /** Las que no se pudieron mover: siguen publicadas sin aprobación. */
+    sinDevolver: string[];
+  };
 }
 
 /** Una entrada que la pasada publica (o publicaría, en el ensayo), con sus Temas y su clase. */
@@ -421,11 +432,20 @@ export async function darDeAltaLote(
     try {
       pasada = await recorrer(true, enCurso);
     } catch (fallo) {
-      throw await anotarTrasInterrupcion(
+      const error = await anotarTrasInterrupcion(
         rutas,
         enCurso.map((p) => ({ slug: p.slug, clase: p.clase, fecha: hoy })),
         fallo,
       );
+      // Historia 35.11 — lo ya publicado como traducción propia lleva su aprobación, si se puede; si
+      // no, el error que sube lo dice.
+      throw agentes === undefined
+        ? error
+        : await aprobarTrasInterrupcion(
+            rutas,
+            enCurso.filter((p) => p.traduccionPropia !== undefined).map((p) => ({ slug: p.slug, ...agentes, fecha: hoy })),
+            error,
+          );
     }
   }
   const { informe } = pasada;
@@ -444,18 +464,24 @@ export async function darDeAltaLote(
         informe.aprobaciones = aprobaciones;
       } catch (fallo) {
         const devueltas: string[] = [];
+        const sinDevolver: string[] = [];
         for (const p of propias) {
           try {
             await mover(p.traduccionPropia!.ruta, rutas.revision);
             devueltas.push(p.slug);
           } catch {
-            // La que no se mueve sigue publicada sin aprobación: el build lo dirá.
+            // La que no se mueve sigue publicada sin aprobación: el parte la nombra.
+            sinDevolver.push(p.slug);
           }
         }
         const fuera = new Set(devueltas);
         aPublicar = aPublicar.filter((p) => !fuera.has(p.slug));
         informe.publicadas = informe.publicadas.filter((c) => !fuera.has(c.slug));
-        informe.aprobacionesSinAnotar = { motivo: fallo instanceof Error ? fallo.message : String(fallo), devueltas };
+        informe.aprobacionesSinAnotar = {
+          motivo: fallo instanceof Error ? fallo.message : String(fallo),
+          devueltas,
+          sinDevolver,
+        };
       }
     }
     /*
@@ -1033,6 +1059,10 @@ export function formatearInforme(informe: InformeDeAlta): string {
       ...informe.aprobacionesSinAnotar.devueltas.map(
         (slug) => `  ${slug} se movió a corpus/_revision/, sin anotar su clase.`,
       ),
+      ...informe.aprobacionesSinAnotar.sinDevolver.map(
+        (slug) =>
+          `  ${slug} no se pudo mover: sigue publicada sin aprobación y el build no la deja pasar; muévala a corpus/_revision/.`,
+      ),
     );
   }
 
@@ -1153,6 +1183,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   for (const [bandera, campo] of [['--propone', 'propone'], ['--aprueba', 'aprueba']] as const) {
     const i = argumentos.indexOf(bandera);
     if (i === -1) continue;
+    if (argumentos.filter((x) => x === bandera).length > 1) {
+      process.stderr.write(`«${bandera}» está repetida: cada traducción propia la proponen y la aprueban un agente cada vez.\n`);
+      process.exit(2);
+    }
     const valor = argumentos[i + 1];
     if (valor === undefined || valor.startsWith('--')) {
       process.stderr.write(`«${bandera}» necesita el nombre de un agente.\n`);

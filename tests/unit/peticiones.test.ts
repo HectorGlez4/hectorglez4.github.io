@@ -6,7 +6,7 @@ import { promisify } from 'node:util';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
-import { principal, problemasDeLasConstantes, type Constantes } from '../../tools/peticion.ts';
+import { lineaDelJuicioDeTraduccion, principal, problemasDeLasConstantes, type Constantes } from '../../tools/peticion.ts';
 import {
   CABECERA_DE_AUDITORIAS,
   CABECERA_DE_PETICIONES_DE_RETIRADA,
@@ -821,6 +821,20 @@ describe('35.11 — SM-C6: la segunda muestra, solo de traducción propia', () =
       maximo: 0.2,
       saltos: [],
     });
+  });
+
+  it('un par sobre el mínimo sin la segunda muestra en uno de sus meses no se juzga, y se dice, no «no salta»', () => {
+    // Ninguno auditado: no hay juicio, y la consulta lo dice nombrando el par.
+    const ninguno = juicioDeTraduccionSmC6([mes('2026-09', 50), mes('2026-10', 50, 0.9)], { minimo: 10, maximo: 0.2 });
+    expect(ninguno).toEqual({ estado: 'sin-auditar', minimo: 10, meses: ['2026-10'] });
+    expect(lineaDelJuicioDeTraduccion(ninguno).join('\n')).toMatch(/no tienen la segunda muestra auditada.*2026-10/su);
+    // Uno auditado y otro no: se juzga el auditado y se nombra el que falta.
+    const mezcla = juicioDeTraduccionSmC6([mes('2026-08', 50, 0.1), mes('2026-09', 50, 0.1), mes('2026-10', 50)], {
+      minimo: 10,
+      maximo: 0.2,
+    });
+    expect(mezcla).toEqual({ estado: 'juzgado', minimo: 10, maximo: 0.2, saltos: [], sinAuditar: ['2026-10'] });
+    expect(lineaDelJuicioDeTraduccion(mezcla).join('\n')).toMatch(/Sin juzgar, por faltarles la segunda muestra: .*2026-10/u);
   });
 
   it('el registro admite la segunda muestra con sus resultados, los dos o ninguno, y mal-traducida solo en ella', () => {

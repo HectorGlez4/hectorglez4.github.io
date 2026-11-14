@@ -72,9 +72,13 @@ export const CABECERA_DE_APROBACIONES = [
   '',
 ].join('\n');
 
-/** Si dos agentes son el mismo: recortados y en minúsculas. */
+/**
+ * Si dos agentes son el mismo: recortados, en minúsculas y en la misma forma Unicode (NFC), para
+ * que «Héctor» compuesto y descompuesto no pasen por dos agentes.
+ */
 export function mismoAgente(a: string, b: string): boolean {
-  return a.trim().toLowerCase() === b.trim().toLowerCase();
+  const forma = (x: string) => x.normalize('NFC').trim().toLowerCase();
+  return forma(a) === forma(b);
 }
 
 /** Por qué un agente no vale, o `undefined`. */
@@ -243,6 +247,33 @@ export async function registrarAprobaciones(
     throw new Error(`${NOMBRE}: tras escribir no se relee lo escrito (${releido.length} entradas). Revíselo.`);
   }
   return ruta;
+}
+
+/**
+ * Tras una pasada interrumpida que ya publicó traducciones propias: intenta anotar su aprobación y,
+ * si no se puede, lo añade al mensaje del error que sube (para que el parte lo diga y no lo descubra
+ * el build). Devuelve el mismo error.
+ */
+export async function aprobarTrasInterrupcion(
+  rutas: Pick<Rutas, 'aprobacionesDeAtribuidas' | 'raiz'>,
+  entradas: readonly AprobacionRegistrada[],
+  error: unknown,
+): Promise<unknown> {
+  if (entradas.length === 0) return error;
+  try {
+    await registrarAprobaciones(rutas, entradas);
+    return error;
+  } catch (fallo) {
+    const nota =
+      ` Tampoco se anotó la aprobación de ${entradas.map((e) => e.slug).join(', ')} en ${NOMBRE} ` +
+      `(${fallo instanceof Error ? fallo.message : String(fallo)}): publicadas sin aprobación, el build ` +
+      'no las deja pasar: muévalas a corpus/_revision/ y apruébelas de nuevo con los dos agentes.';
+    if (error instanceof Error) {
+      error.message += nota;
+      return error;
+    }
+    return new Error(`${String(error)}.${nota}`);
+  }
 }
 
 /**

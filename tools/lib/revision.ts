@@ -61,6 +61,7 @@ import {
 import { claseDe, claseQueCorresponde, esAtribuida, ORIGEN_TRADUCCION_PROPIA, type Clase } from '../../src/lib/clase.ts';
 import {
   agentesDe,
+  aprobarTrasInterrupcion,
   MOTIVO_AGENTES_SIN_TRADUCCION,
   registrarAprobaciones,
   type Agentes,
@@ -495,7 +496,14 @@ export interface ResultadoDeDecision {
    * las traducciones propias que volvieron a `corpus/_revision/` con su contenido de antes (sin
    * entrada de clase). La orden sale con 1.
    */
-  aprobacionesSinAnotar?: { motivo: string; devueltas: string[] };
+  aprobacionesSinAnotar?: {
+    motivo: string;
+    devueltas: string[];
+    /** Las que no se pudieron mover de vuelta: siguen publicadas sin aprobación. */
+    sinDevolver: string[];
+    /** Las que volvieron a `corpus/_revision/` pero con el contenido publicado, no el de antes. */
+    sinRestaurar: string[];
+  };
 }
 
 /**
@@ -566,7 +574,8 @@ export async function aprobar(
    * Historia 35.11 — los agentes, antes de escribir nada: con una traducción propia en la pasada,
    * los dos y distintos; sin ninguna, ninguno.
    */
-  const conTraduccion = [...new Set(slugs)].some((slug) => lote.find((c) => c.slug === slug)?.traduccionPropia === true);
+  const propiasEnRevision = new Set(lote.filter((c) => c.traduccionPropia === true).map((c) => c.slug));
+  const conTraduccion = slugs.some((slug) => propiasEnRevision.has(slug));
   const dados = opciones.agentes?.propone !== undefined || opciones.agentes?.aprueba !== undefined;
   let agentes: Agentes | undefined;
   if (conTraduccion) {
@@ -878,17 +887,19 @@ export async function aprobar(
     }
   } catch (fallo) {
     // Historia 35.11 — lo ya publicado como traducción propia lleva su aprobación, si se puede.
-    if (agentes !== undefined && propiasEscritas.length > 0) {
-      await registrarAprobaciones(
-        rutas,
-        propiasEscritas.map((p) => ({ slug: p.slug, ...agentes, fecha: hoy })),
-      ).catch(() => undefined);
-    }
-    throw await anotarTrasInterrupcion(
+    // Si tampoco se puede anotar, el error que sube lo dice (`aprobarTrasInterrupcion`).
+    const error = await anotarTrasInterrupcion(
       rutas,
       escritas.map((e) => ({ slug: e.slug, clase: e.clase, fecha: hoy })),
       fallo,
     );
+    throw agentes === undefined
+      ? error
+      : await aprobarTrasInterrupcion(
+          rutas,
+          propiasEscritas.map((p) => ({ slug: p.slug, ...agentes, fecha: hoy })),
+          error,
+        );
   }
 
   /*
@@ -902,16 +913,23 @@ export async function aprobar(
       await registrarAprobaciones(rutas, entradas);
       resultado.aprobaciones = entradas;
     } catch (fallo) {
-      const devueltas = await devolverAlaRevision(propiasEscritas);
+      const { devueltas, sinDevolver, sinRestaurar } = await devolverAlaRevision(propiasEscritas);
       const fuera = new Set(devueltas);
       for (let i = escritas.length - 1; i >= 0; i--) if (fuera.has(escritas[i]!.slug)) escritas.splice(i, 1);
       resultado.publicadas = resultado.publicadas.filter((slug) => {
         const publicada = publicadaComo.get(slug);
         return publicada === undefined || !fuera.has(publicada);
       });
+      // Lo que el parte contaba de las devueltas como publicadas deja de contarse.
+      resultado.renombradas = resultado.renombradas.filter((r) => !fuera.has(r.a));
+      resultado.conSaltos = resultado.conSaltos.filter((c) => !fuera.has(c.slug));
+      resultado.avisos = resultado.avisos.filter((a) => !fuera.has(a.slug));
+      for (const [candidata, publicada] of publicadaComo) if (fuera.has(publicada)) publicadaComo.delete(candidata);
       resultado.aprobacionesSinAnotar = {
         motivo: fallo instanceof Error ? fallo.message : String(fallo),
         devueltas,
+        sinDevolver,
+        sinRestaurar,
       };
     }
   }
@@ -1061,18 +1079,27 @@ async function reescribirConSlug(
  */
 async function devolverAlaRevision(
   propias: readonly { slug: string; de: string; publicada: string; contenido: string }[],
-): Promise<string[]> {
+): Promise<{ devueltas: string[]; sinDevolver: string[]; sinRestaurar: string[] }> {
   const devueltas: string[] = [];
+  const sinDevolver: string[] = [];
+  const sinRestaurar: string[] = [];
   for (const propia of propias) {
     try {
       await rename(propia.publicada, propia.de);
-      await writeFile(propia.de, propia.contenido, 'utf8');
-      devueltas.push(propia.slug);
     } catch {
-      // La que no vuelve sigue publicada sin aprobación: el build lo dirá.
+      // La que no vuelve sigue publicada sin aprobación: el parte la nombra.
+      sinDevolver.push(propia.slug);
+      continue;
+    }
+    // Ya no está publicada, vuelva o no su contenido de antes.
+    devueltas.push(propia.slug);
+    try {
+      await writeFile(propia.de, propia.contenido, 'utf8');
+    } catch {
+      sinRestaurar.push(propia.slug);
     }
   }
-  return devueltas;
+  return { devueltas, sinDevolver, sinRestaurar };
 }
 
 /**

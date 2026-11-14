@@ -266,7 +266,8 @@ function componer(
             ...sinPartida,
             texto: cambio.texto,
             origen: cambio.origen,
-            atestiguaciones: (cambio.atestiguaciones ?? []).map((url) => ({ url, consultadaEl: hoy })),
+            // Una URL repetida en las banderas se anota una vez.
+            atestiguaciones: [...new Set(cambio.atestiguaciones ?? [])].map((url) => ({ url, consultadaEl: hoy })),
           },
           nota: `Sustituida la traducción propia por la versión que circula (origen: ${cambio.origen}); sin partida.`,
         };

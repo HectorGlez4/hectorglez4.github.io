@@ -834,7 +834,18 @@ export type JuicioDeSmC6 =
   | { estado: 'sin-valores'; faltan: string[] }
   | { estado: 'sin-pareja' }
   | { estado: 'bajo-minimo'; minimo: number }
-  | { estado: 'juzgado'; minimo: number; maximo: number; saltos: { mes: string; motivos: string[] }[] };
+  | {
+      estado: 'juzgado';
+      minimo: number;
+      maximo: number;
+      saltos: { mes: string; motivos: string[] }[];
+      /**
+       * Historia 35.11 — solo en el juicio de la traducción propia: los pares que llegan al mínimo y
+       * no se juzgan porque a alguno de sus meses le falta la segunda muestra (el segundo mes del par).
+       */
+      sinAuditar?: string[];
+    }
+  | { estado: 'sin-auditar'; minimo: number; meses: string[] };
 
 /**
  * El juicio de SM-C6 — Historia 35.8 [ASSUMPTION del PRD]. Salta en el segundo de dos meses
@@ -903,16 +914,22 @@ export function juicioDeTraduccionSmC6(
   const saltos: { mes: string; motivos: string[] }[] = [];
   let juzgadas = 0;
   let parejas = 0;
+  const sinAuditar: string[] = [];
   for (let i = 1; i < cerrados.length; i += 1) {
     const a = cerrados[i - 1];
     const b = cerrados[i];
     if (mesSiguiente(a.mes) !== b.mes) continue;
     parejas += 1;
     if (a.traducciones < minimo || b.traducciones < minimo) continue;
-    juzgadas += 1;
     const ta = a.auditoriaDeTraduccion;
     const tb = b.auditoriaDeTraduccion;
-    if (ta !== undefined && tb !== undefined && ta.proporcion > maximo && tb.proporcion > maximo) {
+    // Un par sin la segunda muestra en alguno de sus meses no se juzga: no es «no salta».
+    if (ta === undefined || tb === undefined) {
+      sinAuditar.push(b.mes);
+      continue;
+    }
+    juzgadas += 1;
+    if (ta.proporcion > maximo && tb.proporcion > maximo) {
       saltos.push({
         mes: b.mes,
         motivos: [
@@ -922,8 +939,10 @@ export function juicioDeTraduccionSmC6(
     }
   }
   if (parejas === 0) return { estado: 'sin-pareja' };
-  if (juzgadas === 0) return { estado: 'bajo-minimo', minimo };
-  return { estado: 'juzgado', minimo, maximo, saltos };
+  if (juzgadas === 0) {
+    return sinAuditar.length > 0 ? { estado: 'sin-auditar', minimo, meses: sinAuditar } : { estado: 'bajo-minimo', minimo };
+  }
+  return { estado: 'juzgado', minimo, maximo, saltos, ...(sinAuditar.length > 0 ? { sinAuditar } : {}) };
 }
 
 /** Las peticiones sin resolver pasado el plazo; sin plazo, `undefined` (no se juzga). */

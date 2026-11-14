@@ -18,7 +18,7 @@
  */
 
 import { fileURLToPath } from 'node:url';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, relative, sep } from 'node:path';
 import { realpath } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -29,12 +29,14 @@ import {
   leerFichasDeObra,
   leerRegistroDeClases,
   rutasDelCorpus,
+  separarFrontmatter,
 } from '../tools/lib/corpus.ts';
 import { fallosDeClases } from '../tools/lib/clases.ts';
 import { fallosDeAtribuidas, lineaDelBuild, textoDeVariante } from '../tools/lib/atribuidas.ts';
 import { claseDe, esAtribuida, ORIGEN_TRADUCCION_PROPIA } from '../src/lib/clase.ts';
 import { leerFormasVedadas } from '../tools/lib/formasVedadas.ts';
 import {
+  analizarAprobaciones,
   fallosDeAprobaciones,
   leerAprobaciones,
   type AprobacionConInstante,
@@ -53,7 +55,19 @@ function relativaALaRaiz(raiz: string, ruta: string): string {
   return normalizada.startsWith(`${prefijo}/`) ? normalizada.slice(prefijo.length + 1) : normalizada;
 }
 
-const ejecutarGit = (cwd: string, args: string[]) => promisify(execFile)('git', args, { cwd });
+const ejecutarGit = (cwd: string, args: string[]) =>
+  promisify(execFile)('git', args, { cwd, maxBuffer: 256 * 1024 * 1024 });
+
+/** El contenido de un fichero en `HEAD`, o `undefined` si `HEAD` no lo tiene (o no hay `HEAD`). */
+const contenidoEnHead = (tope: string, fisica: string): Promise<string | undefined> =>
+  ejecutarGit(tope, ['show', `HEAD:${relative(tope, fisica).split(sep).join('/')}`]).then(
+    (r) => r.stdout,
+    () => undefined,
+  );
+
+/** Si dos entradas del registro son la misma, campo a campo. */
+const mismaEntrada = (a: AprobacionRegistrada, b: AprobacionRegistrada | undefined): boolean =>
+  b !== undefined && a.slug === b.slug && a.propone === b.propone && a.aprueba === b.aprueba && a.fecha === b.fecha;
 
 /** Una traducción propia publicada, leída del disco. */
 interface PropiaEnDisco {
@@ -69,7 +83,9 @@ const instanteDe = (t: TransicionFechada): number => Date.parse(t.fecha);
  * traducción propia: la última transición de su fichero que cambió `texto` (el alta cuenta), o «sin
  * commitear» si el `texto` del disco no es el de `HEAD` o el fichero no está en `HEAD`. El de cada
  * entrada *i* del registro: la primera versión del registro con más de *i* entradas (solo añade), o
- * «sin commitear» si `HEAD` no la tiene. Sin historial fiable, `motivo` y ningún instante.
+ * «sin commitear» si `HEAD` no la tiene igual, campo a campo. Lo que hay en `HEAD` se lee de `HEAD`
+ * (`git show`), no de la transición más reciente por fecha: tras una fusión, la última por fecha
+ * puede no ser la de `HEAD`. Sin historial fiable, `motivo` y ningún instante.
  */
 export async function instantesDeLasAprobaciones(
   raiz: string,
@@ -105,14 +121,24 @@ export async function instantesDeLasAprobaciones(
   }
   const recientes = (ruta: string) => [...(historial.get(ruta) ?? [])].sort((a, b) => instanteDe(b) - instanteDe(a));
 
+  const textoEnHead = (contenido: string | undefined): unknown => {
+    if (contenido === undefined) return undefined;
+    try {
+      return separarFrontmatter(contenido)?.texto;
+    } catch {
+      return undefined;
+    }
+  };
+  const textosEnHead = await Promise.all(
+    rutasDeLasPropias.map(async (ruta) => textoEnHead(await contenidoEnHead(estado.tope as string, ruta))),
+  );
   const textos = new Map<string, Instante>();
   propias.forEach((propia, i) => {
-    const transiciones = recientes(rutasDeLasPropias[i] as string);
-    const enHead = transiciones[0]?.despues;
-    if (enHead === undefined || enHead === null || enHead === VERSION_OPACA || enHead.texto !== propia.texto) {
+    if (textosEnHead[i] !== propia.texto) {
       textos.set(propia.slug, 'sin-commitear');
       return;
     }
+    const transiciones = recientes(rutasDeLasPropias[i] as string);
     const ultimo = transiciones.find((t) => cambiaronLosCampos(t, ['texto']));
     textos.set(propia.slug, ultimo === undefined ? 'sin-commitear' : instanteDe(ultimo));
   });
@@ -124,9 +150,15 @@ export async function instantesDeLasAprobaciones(
     return Array.isArray(lista) ? lista.length : 0;
   };
   const delRegistro = recientes(rutaDelRegistro).reverse();
-  const enHead = delRegistro.length === 0 ? 0 : cuantas(delRegistro[delRegistro.length - 1] as TransicionFechada);
-  const instantes = entradas.map((_, i): Instante | undefined => {
-    if (i >= enHead) return 'sin-commitear';
+  let enHead: AprobacionRegistrada[];
+  try {
+    const contenido = await contenidoEnHead(estado.tope, rutaDelRegistro);
+    enHead = contenido === undefined || contenido.trim() === '' ? [] : analizarAprobaciones(contenido);
+  } catch {
+    enHead = [];
+  }
+  const instantes = entradas.map((entrada, i): Instante | undefined => {
+    if (!mismaEntrada(entrada, enHead[i])) return 'sin-commitear';
     const primera = delRegistro.find((t) => cuantas(t) > i);
     return primera === undefined ? 'sin-commitear' : instanteDe(primera);
   });

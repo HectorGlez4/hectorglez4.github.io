@@ -83,6 +83,10 @@ if (temas.length > 0 && aAprobar.length === 0) {
 const agentes: { propone?: string; aprueba?: string } = {};
 for (const [bandera, campo] of [['--propone', 'propone'], ['--aprueba', 'aprueba']] as const) {
   if (!argumentos.includes(bandera)) continue;
+  if (argumentos.filter((x) => x === bandera).length > 1) {
+    process.stderr.write(`«${bandera}» está repetida: cada traducción propia la proponen y la aprueban un agente cada vez.\n`);
+    process.exit(2);
+  }
   if (aAprobar.length === 0) {
     process.stderr.write(`«${bandera}» solo acompaña a «--aprobar»: los dos agentes son de la traducción propia que se aprueba.\n`);
     process.exit(2);
@@ -257,8 +261,14 @@ if (aAprobar.length > 0) {
     fallo = true;
     lineas.push(
       `  ! corpus/aprobaciones-de-atribuidas.yml no se pudo escribir: ${resultado.aprobacionesSinAnotar.motivo}`,
-      ...resultado.aprobacionesSinAnotar.devueltas.map(
-        (slug) => `      ${slug} vuelve a corpus/_revision/ con su contenido de antes, sin anotar su clase.`,
+      ...resultado.aprobacionesSinAnotar.devueltas.map((slug) =>
+        resultado.aprobacionesSinAnotar!.sinRestaurar.includes(slug)
+          ? `      ${slug} vuelve a corpus/_revision/, sin anotar su clase, pero con el contenido publicado: no se pudo restaurar el de antes.`
+          : `      ${slug} vuelve a corpus/_revision/ con su contenido de antes, sin anotar su clase.`,
+      ),
+      ...resultado.aprobacionesSinAnotar.sinDevolver.map(
+        (slug) =>
+          `      ${slug} no se pudo mover de vuelta: sigue publicada sin aprobación y el build no la deja pasar; muévala a corpus/_revision/.`,
       ),
     );
   }

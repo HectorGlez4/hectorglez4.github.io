@@ -568,8 +568,8 @@ npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida         # la ses
   rechaza el par, también en `npm run atribuida -- variante`): una Variante es una versión que circula,
   y con ella el texto sería esa versión. La Variante tampoco admite ese
   origen (`ORIGENES_DE_VARIANTE`): es la letra que circula en otra región. La clase de siempre **nunca
-  se traduce** (§4.11). Una candidata sin `texto` sigue rechazada: el español lo escribe alguien, y
-  **aprobarla sigue siendo de una persona**. El lote es una lista YAML de candidatas con
+  se traduce** (§4.11). Una candidata sin `texto` sigue rechazada: el español lo escribe alguien. La
+  atribuida con cualquier otro origen **la aprueba una persona** (por convención, sin puerta). El lote es una lista YAML de candidatas con
   `texto`, `personaje` y/o `autor` (slugs que ya existen: se dan de alta con sus órdenes, nunca
   tecleando el campo), `obra`, `año` o `referencia` (la Procedencia que el esquema exige), `origen`,
   `atestiguaciones` (`{url, consultadaEl}`), `partida` con la traducción propia, y si acaso
