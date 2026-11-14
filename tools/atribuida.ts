@@ -21,12 +21,14 @@
  *
  * Códigos: 2 es la forma de la invocación (suborden desconocida, argumentos de menos o de más,
  * bandera desconocida, repetida, vacía o sin valor, `variante` sin `--region` o `--origen`), 1 lo que la
- * invocación dice; en ninguno de los dos se escribe nada.
+ * invocación dice; en ninguno de los dos se escribe nada, salvo en `proponer`, que escribe en
+ * `corpus/_revision/` las candidatas que pasan aunque salga con 1 por las que rechaza (el parte lo dice).
  */
 
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join, relative, resolve, isAbsolute } from 'node:path';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, extname, join, relative, resolve, isAbsolute, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parse as parsearYaml } from 'yaml';
 import { cambiarAtribuida, type CambioDeAtribuida } from './lib/cambioDeAtribuida.ts';
 import {
@@ -39,7 +41,7 @@ import {
   proponerAtribuidas,
 } from './lib/siembraAtribuida.ts';
 import { SEMILLA_DE_ATRIBUIDAS } from '../src/lib/umbrales.ts';
-import { rutasDelCorpus } from './lib/corpus.ts';
+import { fechaLocal, rutasDelCorpus } from './lib/corpus.ts';
 import { motivosDeArgumentosNoReconocidos, opcion, raizDeCorpusDe, terminar } from './lib/cli.ts';
 
 const USO = [
@@ -152,22 +154,35 @@ async function semilla(slug: string): Promise<never> {
   const entrada = entradaDeSemilla(slug, SEMILLA_DE_ATRIBUIDAS);
   if (entrada === undefined) terminar({ ok: false, motivos: [motivoFueraDeLaSemilla(slug, SEMILLA_DE_ATRIBUIDAS), 'No se ha pedido nada.'] });
 
-  const salida = resolve(opcion(argumentos, '--salida') ?? join('semillas', `${slug}.json`));
-  const dentro = relative(resolve('corpus'), salida);
-  if (!salida.endsWith('.json')) {
+  // Las rutas se juzgan contra la raíz del proyecto —la de esta orden—, no contra el directorio de trabajo.
+  const proyecto = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+  const semillas = join(proyecto, 'semillas');
+  const salida = resolve(opcion(argumentos, '--salida') ?? join(semillas, `${slug}.json`));
+  if (extname(salida).toLowerCase() !== '.json') {
     terminar({ ok: false, motivos: [`«${salida}» no es un fichero .json. No se ha pedido nada.`] });
   }
-  if (dentro === '' || (!dentro.startsWith('..') && !isAbsolute(dentro))) {
+  if (dentroDe(join(proyecto, 'corpus'), salida)) {
     terminar({
       ok: false,
       motivos: [`«${salida}» está dentro de corpus/: la semilla no se versiona ni es contenido. No se ha pedido nada.`],
     });
   }
-  if (existsSync(salida)) {
+  // Dentro del repositorio, solo en semillas/, que git ignora: en otro sitio se podría versionar.
+  if (dentroDe(proyecto, salida) && !dentroDe(semillas, salida)) {
     terminar({
       ok: false,
       motivos: [
-        `La semilla de «${slug}» ya se descargó en ${salida}: la página se pide una sola vez, y no se ha pedido de nuevo.`,
+        `«${salida}» está en el repositorio fuera de semillas/: la semilla no se versiona, y solo semillas/ está ` +
+          'ignorado. No se ha pedido nada.',
+      ],
+    });
+  }
+  const yaDescargada = existsSync(salida) ? salida : await semillaYaDescargada(semillas, entrada.pagina);
+  if (yaDescargada !== undefined) {
+    terminar({
+      ok: false,
+      motivos: [
+        `La semilla de «${slug}» ya se descargó en ${yaDescargada}: la página se pide una sola vez, y no se ha pedido de nuevo.`,
       ],
     });
   }
@@ -184,7 +199,7 @@ async function semilla(slug: string): Promise<never> {
       terminar({ ok: false, motivos: [`«${entrada.pagina}» respondió ${respuesta.status}. No se ha escrito nada.`] });
     }
     const tipo = (respuesta.headers.get('content-type') ?? '').toLowerCase();
-    if (!tipo.startsWith('text/html')) {
+    if (!tipo.startsWith('text/html') && !tipo.startsWith('application/xhtml+xml')) {
       terminar({ ok: false, motivos: [`«${entrada.pagina}» no devolvió HTML sino «${tipo || 'sin tipo declarado'}». No se ha escrito nada.`] });
     }
     html = await respuesta.text();
@@ -199,9 +214,23 @@ async function semilla(slug: string): Promise<never> {
   if (frases.length === 0) {
     terminar({ ok: false, motivos: [`En «${entrada.pagina}» no se reconoce ninguna frase con quién la dice. No se ha escrito nada.`] });
   }
-  await mkdir(dirname(salida), { recursive: true });
-  const hoy = new Date().toISOString().slice(0, 10);
-  await writeFile(salida, `${JSON.stringify(componerSemilla(entrada, hoy, frases), null, 2)}\n`, { encoding: 'utf8', flag: 'wx' });
+  // La jornada local, como la del registro de sesiones.
+  const hoy = fechaLocal(new Date());
+  try {
+    await mkdir(dirname(salida), { recursive: true });
+    await writeFile(salida, `${JSON.stringify(componerSemilla(entrada, hoy, frases), null, 2)}\n`, { encoding: 'utf8', flag: 'wx' });
+  } catch (fallo) {
+    const codigo = (fallo as { code?: unknown }).code;
+    terminar({
+      ok: false,
+      motivos: [
+        codigo === 'EEXIST'
+          ? `${salida} apareció mientras se pedía la página: no se ha reescrito («una sola vez»).`
+          : `No se pudo escribir ${salida}: ${fallo instanceof Error ? fallo.message : String(fallo)}.`,
+        'La página ya se pidió; no se ha escrito nada.',
+      ],
+    });
+  }
   terminar({
     ok: true,
     ruta: salida,
@@ -211,6 +240,32 @@ async function semilla(slug: string): Promise<never> {
       'versión que circula y su origen, y se propone con «npm run atribuida -- proponer <lote.yaml>».',
     ].join('\n'),
   });
+}
+
+/** Si `ruta` es `base` o cuelga de ella (segmento a segmento; sin distinguir mayúsculas donde el disco no lo hace). */
+function dentroDe(base: string, ruta: string): boolean {
+  const plegar = (p: string) => (process.platform === 'darwin' || process.platform === 'win32' ? p.toLowerCase() : p);
+  const rel = relative(plegar(base), plegar(ruta));
+  return rel === '' || (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
+}
+
+/** El fichero de `semillas/` que ya guarda la página, si lo hay: la página se pide una sola vez, sea cual sea el nombre. */
+async function semillaYaDescargada(semillas: string, pagina: string): Promise<string | undefined> {
+  let nombres: string[];
+  try {
+    nombres = await readdir(semillas);
+  } catch {
+    return undefined;
+  }
+  for (const nombre of nombres.filter((n) => extname(n).toLowerCase() === '.json')) {
+    try {
+      const leida = JSON.parse(await readFile(join(semillas, nombre), 'utf8')) as { pagina?: unknown };
+      if (leida?.pagina === pagina) return join(semillas, nombre);
+    } catch {
+      // Un fichero que no se deja leer no dice nada de esta página.
+    }
+  }
+  return undefined;
 }
 
 /** La propuesta — Historia 35.10: el lote a `corpus/_revision/`, nunca a `corpus/citas/`. */

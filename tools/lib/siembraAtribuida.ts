@@ -28,6 +28,7 @@ import {
   SEMILLA_DE_ATRIBUIDAS,
   type EntradaDeSemilla,
 } from '../../src/lib/umbrales.ts';
+import { rm } from 'node:fs/promises';
 import { fallosDeDuplicados, textoDeVariante, type CitaParaAtribuidas } from './atribuidas.ts';
 import { MOTIVO_CLASE_TECLEADA, slugsConOtraClase } from './clases.ts';
 import {
@@ -50,9 +51,9 @@ export const MOTIVO_SIN_ESCALA =
 
 const FORMA_DE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
-/** Si un anfitrión es BrainyQuote o un subdominio suyo. */
+/** Si un anfitrión es BrainyQuote: `brainyquote.com` o `www.brainyquote.com`, y ningún otro subdominio. */
 function esDeBrainyQuote(host: string): boolean {
-  return host === 'brainyquote.com' || host.endsWith('.brainyquote.com');
+  return host === 'brainyquote.com' || host === 'www.brainyquote.com';
 }
 
 /**
@@ -74,11 +75,19 @@ export function problemasDeLaSemilla(semilla: readonly EntradaDeSemilla[]): stri
     let valida = false;
     try {
       const url = new URL(String(entrada?.pagina));
-      valida = url.protocol === 'https:' && esDeBrainyQuote(url.hostname) && url.username === '' && url.password === '';
+      // Una página y nada más: sin puerto, sin consulta ni fragmento, sin credenciales.
+      valida =
+        url.protocol === 'https:' &&
+        esDeBrainyQuote(url.hostname) &&
+        url.port === '' &&
+        url.search === '' &&
+        url.hash === '' &&
+        url.username === '' &&
+        url.password === '';
     } catch {
       valida = false;
     }
-    if (!valida) problemas.push(`${donde}: la página «${String(entrada?.pagina)}» no es una dirección https:// de brainyquote.com.`);
+    if (!valida) problemas.push(`${donde}: la página «${String(entrada?.pagina)}» no es una dirección https:// de brainyquote.com (o www.), sin puerto, consulta ni fragmento.`);
   }
   return problemas;
 }
@@ -103,7 +112,26 @@ export interface FraseDeLaSemilla {
   quien: string;
 }
 
-const ENTIDADES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', '#39': "'" };
+const ENTIDADES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  rsquo: '\u2019',
+  lsquo: '\u2018',
+  rdquo: '\u201d',
+  ldquo: '\u201c',
+  mdash: '\u2014',
+  ndash: '\u2013',
+  hellip: '\u2026',
+};
+
+/** Un punto de código de una entidad numérica, o la entidad tal cual si no es Unicode (`fromCodePoint` lanzaría). */
+function puntoDeCodigo(codigo: number, todo: string): string {
+  return Number.isFinite(codigo) && codigo >= 0 && codigo <= 0x10ffff ? String.fromCodePoint(codigo) : todo;
+}
 
 /** El texto de un fragmento de HTML: sin etiquetas, con las entidades leídas y los blancos colapsados. */
 function textoDe(html: string): string {
@@ -111,8 +139,8 @@ function textoDe(html: string): string {
     .replace(/<[^>]*>/gu, ' ')
     .replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+[0-9]*);/giu, (todo, nombre: string) => {
       const n = nombre.toLowerCase();
-      if (n.startsWith('#x')) return String.fromCodePoint(Number.parseInt(n.slice(2), 16));
-      if (n.startsWith('#')) return String.fromCodePoint(Number.parseInt(n.slice(1), 10));
+      if (n.startsWith('#x')) return puntoDeCodigo(Number.parseInt(n.slice(2), 16), todo);
+      if (n.startsWith('#')) return puntoDeCodigo(Number.parseInt(n.slice(1), 10), todo);
       return ENTIDADES[n] ?? todo;
     })
     .replace(/\s+/gu, ' ')
@@ -196,6 +224,24 @@ export type ResultadoDePropuesta =
 const MOTIVO_SIN_ESPAÑOL =
   'sin versión en español que circule: falta «texto». La semilla está en inglés y el sitio no traduce; ' +
   'una frase sin doblaje ni traducción publicada no entra (FR-68).';
+
+/**
+ * Los campos que admite una entrada del lote. Lo demás se rechaza nombrándolo: una errata
+ * (`atestiguacion:`) o un campo que no decide el lote —el `slug`, `estadoDerechos`, `aptaParaPortada`,
+ * que es curación— no se descarta en silencio. `clase` tiene su propio motivo.
+ */
+const CAMPOS_DEL_LOTE = new Set([
+  'texto',
+  'personaje',
+  'autor',
+  'temas',
+  'obra',
+  'año',
+  'referencia',
+  'atestiguaciones',
+  'origen',
+  'variante',
+]);
 
 const MOTIVO_SIN_DUEÑO = 'sin Personaje ni Autor: lo que llega sin ninguno de los dos no se publica (FR-68).';
 
@@ -284,6 +330,13 @@ export async function proponerAtribuidas(
     const autor = typeof entrada.autor === 'string' && entrada.autor !== '' ? entrada.autor : undefined;
 
     if ('clase' in entrada) motivos.push(MOTIVO_CLASE_TECLEADA);
+    const ajenos = Object.keys(entrada).filter((k) => k !== 'clase' && !CAMPOS_DEL_LOTE.has(k));
+    if (ajenos.length > 0) {
+      motivos.push(
+        `${ajenos.map((k) => `«${k}»`).join(', ')} no ${ajenos.length === 1 ? 'es un campo' : 'son campos'} del lote: ` +
+          `una entrada lleva solo ${[...CAMPOS_DEL_LOTE].map((k) => `«${k}»`).join(', ')}.`,
+      );
+    }
     if (texto === '') motivos.push(MOTIVO_SIN_ESPAÑOL);
     if (personaje === undefined && autor === undefined) motivos.push(MOTIVO_SIN_DUEÑO);
     if (personaje !== undefined && !slugsDePersonaje.has(personaje)) {
@@ -298,8 +351,14 @@ export async function proponerAtribuidas(
     for (const dueño of [personaje, autor]) {
       if (dueño !== undefined && !enLaSemilla.has(dueño)) motivos.push(motivoFueraDeLaSemilla(dueño, semilla));
     }
-    if (personaje === undefined && autor !== undefined && autorPorSlug.has(autor)) {
-      const clase = claseQueCorresponde({}, autorPorSlug.get(autor)!);
+    // La clase se deriva, nunca se teclea: con Personaje es atribuida; sin él, la del Autor.
+    const clase =
+      personaje !== undefined
+        ? claseQueCorresponde({ personaje }, {})
+        : autor !== undefined && autorPorSlug.has(autor)
+          ? claseQueCorresponde({}, autorPorSlug.get(autor)!)
+          : undefined;
+    if (clase !== undefined) {
       if (!esAtribuida({ clase })) {
         motivos.push(
           `el Autor «${autor}» es de dominio público y sin Personaje la Cita sería de la clase de siempre, que ` +
@@ -307,6 +366,7 @@ export async function proponerAtribuidas(
         );
       }
     }
+    if (entrada.temas !== undefined && !Array.isArray(entrada.temas)) motivos.push('«temas» tiene que ser una lista de slugs de Tema.');
     const temasDeclarados = Array.isArray(entrada.temas) ? entrada.temas : [];
     const desconocidos = temasDeclarados.filter((t) => typeof t !== 'string' || !slugsDeTema.has(t));
     if (desconocidos.length > 0) {
@@ -330,11 +390,10 @@ export async function proponerAtribuidas(
       ...(temasDeclarados.length > 0 ? { temas: temasDeclarados } : {}),
       slug,
       ...(Object.keys(procedencia).length > 0 ? { procedencia } : {}),
-      clase: CLASE_ATRIBUIDA,
+      ...(clase !== undefined ? { clase } : {}),
       ...(entrada.atestiguaciones !== undefined ? { atestiguaciones: entrada.atestiguaciones } : {}),
       ...(entrada.origen !== undefined ? { origen: entrada.origen } : {}),
       ...(entrada.variante !== undefined ? { variante: entrada.variante } : {}),
-      ...(entrada.aptaParaPortada !== undefined ? { aptaParaPortada: entrada.aptaParaPortada } : {}),
     };
 
     if (motivos.length === 0) {
@@ -385,20 +444,32 @@ export async function proponerAtribuidas(
       });
       motivos.push(...fallos.map((f) => f.motivo));
     }
-    if (texto !== '') anterioresDelLote.push({ ...propia, slug: `entrada ${indice + 1} del lote` });
-
     if (motivos.length > 0) {
       rechazadas.push({ indice, texto, motivos });
       continue;
     }
+    // Solo cuenta como anterior la que se va a escribir: una rechazada no bloquea su corrección.
+    anterioresDelLote.push({ ...propia, slug: `entrada ${indice + 1} del lote` });
     ocupados.add(slug);
     aEscribir.push({ indice, slug, dueño, cita, dominios });
   }
 
+  // Sin vuelta atrás a medias: si una escritura falla, se quitan las ya escritas de esta pasada.
   const escritas: CandidataEscrita[] = [];
-  for (const { indice, slug, dueño, cita, dominios } of aEscribir) {
-    const ruta = await escribirCita(rutas.revision, nombreDeFicheroDeCita(dueño, slug), cita);
-    escritas.push({ indice, slug, ruta, dominios, sinJuzgarMinimo: minimo === undefined });
+  try {
+    for (const { indice, slug, dueño, cita, dominios } of aEscribir) {
+      const ruta = await escribirCita(rutas.revision, nombreDeFicheroDeCita(dueño, slug), cita);
+      escritas.push({ indice, slug, ruta, dominios, sinJuzgarMinimo: minimo === undefined });
+    }
+  } catch (fallo) {
+    await Promise.all(escritas.map((e) => rm(e.ruta, { force: true })));
+    return {
+      ok: false,
+      motivos: [
+        `No se pudo escribir en corpus/_revision/: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+        'Se han quitado las candidatas que esta pasada había escrito: no se ha escrito nada.',
+      ],
+    };
   }
   return { ok: true, escritas, rechazadas };
 }
@@ -424,6 +495,12 @@ export function formatearPropuesta(resultado: Extract<ResultadoDePropuesta, { ok
       '',
       'Nada se ha publicado: aprobar es de una persona, con «npx tsx tools/revisar.ts --aprobar <slug> --temas <tema>».',
     );
+    if (resultado.rechazadas.length > 0) {
+      lineas.push(
+        'Las propuestas ya están en corpus/_revision/: el lote corregido lleva solo las rechazadas, porque',
+        'volver a proponer las escritas sería un duplicado de su propia candidata.',
+      );
+    }
   }
   return lineas.join('\n');
 }

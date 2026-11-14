@@ -161,6 +161,18 @@ describe('Historia 35.10 — la lista de la semilla de prueba', () => {
     expect(problemas.join('\n')).toMatch(/está repetido/u);
     expect(problemas.join('\n')).toMatch(/no es una dirección https:\/\/ de brainyquote\.com/u);
   });
+
+  it('solo brainyquote.com o www., sin puerto, consulta ni fragmento', () => {
+    expect(problemasDeLaSemilla([{ slug: 'a', pagina: 'https://brainyquote.com/authors/a-quotes' }])).toEqual([]);
+    for (const pagina of [
+      'https://www.brainyquote.com:8443/authors/a-quotes',
+      'https://www.brainyquote.com/authors/a-quotes?pg=2',
+      'https://www.brainyquote.com/authors/a-quotes#arriba',
+      'https://espejo.brainyquote.com/authors/a-quotes',
+    ]) {
+      expect(problemasDeLaSemilla([{ slug: 'a', pagina }]), pagina).toHaveLength(1);
+    }
+  });
 });
 
 describe('Historia 35.10 — el lector de la página (sin red)', () => {
@@ -168,6 +180,15 @@ describe('Historia 35.10 — el lector de la página (sin red)', () => {
     expect(frasesDeLaPagina(HTML)).toEqual([
       { frase: 'To infinity & beyond!', quien: 'Buzz Lightyear' },
       { frase: "The Star Command's pride.", quien: 'Buzz Lightyear' },
+    ]);
+  });
+
+  it('lee las entidades tipográficas y deja tal cual una numérica fuera de Unicode, sin romper', () => {
+    const pagina =
+      '<a title="view quote">It&rsquo;s &ldquo;time&rdquo; &mdash; now&hellip; &#x110000; &#99999999;</a>' +
+      '<a title="view author">Buzz</a>';
+    expect(frasesDeLaPagina(pagina)).toEqual([
+      { frase: 'It\u2019s \u201ctime\u201d \u2014 now\u2026 &#x110000; &#99999999;', quien: 'Buzz' },
     ]);
   });
 
@@ -266,6 +287,67 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     expect(resultado.rechazadas[0].motivos.join(' ')).toMatch(motivo);
     expect(await revision(rutas)).toEqual(['woody--hay-una-serpiente-en-mi-bota.md']);
     expect(formatearPropuesta(resultado)).toMatch(/No se ha escrito nada\./u);
+  });
+
+  it.each([
+    ['un campo que no es del lote', { atestiguacion: [] }, /«atestiguacion» no es un campo del lote/u],
+    ['un slug tecleado', { slug: 'buzz-a-mano' }, /«slug» no es un campo del lote/u],
+    ['unos temas que no son lista', { temas: TEMA_PUBLICADO }, /«temas» tiene que ser una lista/u],
+  ])('rechaza %s nombrándolo, sin escribir nada', async (_, campos, motivo) => {
+    const rutas = await corpusDePrueba();
+    const resultado = await proponerAtribuidas(rutas, [deBuzz(campos)], { semilla: SEMILLA, minAtestiguaciones: 2 });
+    expect(resultado.ok && resultado.escritas).toEqual([]);
+    expect(resultado.ok && resultado.rechazadas[0].motivos.join(' ')).toMatch(motivo);
+    expect(await revision(rutas)).toEqual(['woody--hay-una-serpiente-en-mi-bota.md']);
+  });
+
+  it('una entrada rechazada no bloquea su corrección más abajo en el mismo lote', async () => {
+    const rutas = await corpusDePrueba();
+    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: undefined }), deBuzz()], {
+      semilla: SEMILLA,
+      minAtestiguaciones: 2,
+    });
+    expect(resultado.ok && resultado.rechazadas.map((r) => r.indice)).toEqual([0]);
+    expect(resultado.ok && resultado.escritas.map((e) => e.indice)).toEqual([1]);
+    expect(resultado.ok && formatearPropuesta(resultado)).toMatch(/el lote corregido lleva solo las rechazadas/u);
+  });
+
+  it('un slug ya ocupado —en revisión, en el lote o con la otra clase— toma -2, -3…, y la candidata de antes no se toca', async () => {
+    const rutas = await corpusDePrueba();
+    const ocupada = join(rutas.revision, 'buzz--al-rescate-que-la-galaxia-no-se.md');
+    await writeFile(
+      ocupada,
+      citaValida({
+        clase: 'atribuida',
+        estadoDerechos: undefined,
+        fuente: undefined,
+        temas: undefined,
+        ...ATESTIGUADA,
+        slug: 'buzz-al-rescate-que-la-galaxia-no-se',
+        texto: 'Al rescate, que la galaxia no se olvida de los suyos ni de noche.',
+        autor: undefined,
+        personaje: 'buzz',
+        procedencia: { año: 1995 },
+      }),
+      'utf8',
+    );
+    await writeFile(
+      rutas.clasesDeCita,
+      'clases:\n  - { slug: "buzz-al-rescate-que-la-galaxia-no-se-2", clase: siempre, fecha: "2026-11-01" }\n',
+      'utf8',
+    );
+    const antes = await readFile(ocupada, 'utf8');
+    const resultado = await proponerAtribuidas(
+      rutas,
+      [deBuzz(), deBuzz({ texto: 'Al rescate, que la galaxia no se rinde jamás ante nadie del espacio.' })],
+      { semilla: SEMILLA, minAtestiguaciones: 2 },
+    );
+    expect(resultado.ok && resultado.rechazadas).toEqual([]);
+    expect(resultado.ok && resultado.escritas.map((e) => e.slug)).toEqual([
+      'buzz-al-rescate-que-la-galaxia-no-se-3',
+      'buzz-al-rescate-que-la-galaxia-no-se-4',
+    ]);
+    expect(await readFile(ocupada, 'utf8')).toBe(antes);
   });
 
   it('una Autora viva sin Personaje con Ficha de Obra pasa; dentro del lote, la segunda igual se rechaza', async () => {
@@ -370,7 +452,7 @@ describe('Historia 35.10 — por proceso, con el árbol: la semilla vacía lo ni
     await writeFile(lote, `- texto: "Al rescate, que la galaxia no se defiende sola."\n  personaje: "buzz"\n`, 'utf8');
     const r = await correr({}, ['proponer', lote, '--corpus', rutas.raiz]);
     expect(r.codigo).toBe(1);
-    expect(r.error).toMatch(/SEMILLA_DE_ATRIBUIDAS/u);
+    expect(r.error).toMatch(/SEMILLA_DE_ATRIBUIDAS[\s\S]*pregunta 18/u);
     expect(await revision(rutas)).toEqual(['woody--hay-una-serpiente-en-mi-bota.md']);
   });
 
@@ -431,6 +513,17 @@ describe('Historia 35.10 — por proceso, en una copia del proyecto con la semil
     expect(segunda.codigo).toBe(1);
     expect(segunda.error).toMatch(/una sola vez/u);
     expect(segunda.peticiones).toEqual([]);
+    // Con otro nombre en semillas/, la página ya está descargada: tampoco se vuelve a pedir.
+    const otra = await correr(GUION_DE_BUZZ, ['semilla', 'buzz', '--salida', 'semillas/otra.json'], orden, proyecto);
+    expect(otra.codigo).toBe(1);
+    expect(otra.error).toMatch(/una sola vez/u);
+    expect(otra.peticiones).toEqual([]);
+    expect(existsSync(join(proyecto, 'semillas', 'otra.json'))).toBe(false);
+    // Desde otro directorio de trabajo, la salida por omisión sigue siendo la de semillas/ del proyecto.
+    await mkdir(join(proyecto, 'tools', 'sub'), { recursive: true });
+    const desdeDentro = await correr(GUION_DE_BUZZ, ['semilla', 'buzz'], orden, join(proyecto, 'tools', 'sub'));
+    expect(desdeDentro.codigo).toBe(1);
+    expect(desdeDentro.peticiones).toEqual([]);
   });
 
   it.each([
@@ -453,6 +546,8 @@ describe('Historia 35.10 — por proceso, en una copia del proyecto con la semil
     for (const argumentos of [
       ['semilla', 'woody'],
       ['semilla', 'buzz', '--salida', 'corpus/semilla.json'],
+      ['semilla', 'buzz', '--salida', 'corpus/..semilla.json'],
+      ['semilla', 'buzz', '--salida', 'src/semilla.json'],
       ['semilla', 'buzz', '--salida', 'semillas/buzz.txt'],
     ]) {
       const r = await correr(GUION_DE_BUZZ, argumentos, orden, proyecto);

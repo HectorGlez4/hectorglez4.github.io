@@ -5,7 +5,7 @@ created: '2026-11-14'
 status: 'done'
 baseline_revision: 'd82e6badb3b016b7be17847dc9f77bec27aa362f'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
 warnings: [oversized]
@@ -18,6 +18,20 @@ deferred:
   - summary: 'El lector de la página de BrainyQuote (anclas title="view quote" / title="view author") es [ASSUMPTION]: no se ha contrastado con la página real, porque ningún agente la pide. Si la página real no casa, la orden sale con 1 sin escribir y se ajusta el lector.'
     severity: medium
     location: 'tools/lib/siembraAtribuida.ts'
+  - summary: >-
+      Pendiente de Héctor: las condiciones de uso y el robots.txt de BrainyQuote para la petición de la semilla, y la nota de derechos de la lista en inglés que se guarda sin versionar.
+    evidence: |-
+      Revisión externa (blind-hunter, pasada 1): nada comprueba ni documenta los términos de BrainyQuote antes de pedir la página. La elección de la fuente es de FR-68 y la semilla de Héctor; ningún agente pide la página.
+    location: >-
+      tools/atribuida.ts
+    severity: low
+  - summary: >-
+      DOMINIOS_QUE_NO_ATESTIGUAN solo declara brainyquote.com: ningún espejo suyo queda excluido de verdad.
+    evidence: |-
+      ac-auditor, hueco 2: src/lib/atestiguaciones.ts:29 es ['brainyquote.com']; viene de la 35.1b, no de esta historia. Qué espejos se declaran lo decide Héctor.
+    location: >-
+      src/lib/atestiguaciones.ts:29
+    severity: low
 ---
 
 <intent-contract>
@@ -120,6 +134,34 @@ deferred:
 
 (Las capas de revisión son externas y esta pasada no trae hallazgos: las corre el orquestador después.)
 
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 20: (high 0, medium 7, low 13)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 22: (high 0, medium 1, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` La guardia de `corpus/` de `semilla` comparaba con `startsWith('..')`: `corpus/..semilla.json` se escribía dentro. Ahora juzga segmento a segmento (`dentroDe`), sin distinguir mayúsculas en darwin/win32.
+  - `[medium]` `[patch]` `semilla` resolvía `corpus/` y `semillas/` contra el directorio de trabajo: ahora contra la raíz del proyecto (la de la orden, `import.meta.url`).
+  - `[medium]` `[patch]` `--salida` admitía cualquier `.json` del repositorio fuera de `corpus/` (versionable): dentro del repositorio solo se admite bajo `semillas/`, que git ignora.
+  - `[medium]` `[patch]` Una entidad numérica fuera de Unicode (`&#x110000;`) hacía lanzar `String.fromCodePoint` tras la única petición: se deja tal cual.
+  - `[medium]` `[patch]` Los campos desconocidos del lote se descartaban en silencio (una errata, un `slug` o un `aptaParaPortada` tecleados): ahora se rechazan nombrándolos; `aptaParaPortada` ya no pasa del lote a la candidata.
+  - `[medium]` `[patch]` Si una escritura de `proponer` fallaba a medias, quedaban candidatas sin parte y la excepción escapaba: se quitan las de la pasada y sale con 1 nombrando el fallo.
+  - `[medium]` `[patch]` Pruebas de la ocupación del slug (verification-gap): una candidata de `_revision/` con el mismo arranque, una entrada anterior del lote y un slug del registro con la otra clase dan `-3`/`-4`, y el fichero de revisión sigue byte a byte.
+  - `[low]` `[patch]` `mkdir`/`writeFile` de `semilla` sin capturar (y el `EEXIST` del hueco entre comprobar y escribir): salen con 1 y su motivo.
+  - `[low]` `[patch]` La extensión `.json` se juzga sin distinguir mayúsculas.
+  - `[low]` `[patch]` `application/xhtml+xml` se admite como HTML.
+  - `[low]` `[patch]` `descargadaEl` es la jornada local (`fechaLocal`), como el registro de sesiones.
+  - `[low]` `[patch]` `textoDe` lee `&rsquo;`, `&lsquo;`, `&ldquo;`, `&rdquo;`, `&mdash;`, `&ndash;`, `&hellip;`.
+  - `[low]` `[patch]` La página de la semilla: solo `brainyquote.com` o `www.`, como dice el Design Notes, y sin puerto, consulta ni fragmento.
+  - `[low]` `[patch]` La clase de la candidata se deriva con `claseQueCorresponde` también con Personaje, en vez de escribirse fija.
+  - `[low]` `[patch]` Una entrada rechazada ya no cuenta como «anterior del lote»: no bloquea su corrección más abajo.
+  - `[low]` `[patch]` Con escritura parcial, el parte dice que el lote corregido lleva solo las rechazadas; la cabecera de `tools/atribuida.ts` ya no afirma que con 1 no se escribe nada.
+  - `[low]` `[patch]` `temas` que no es una lista se rechaza en vez de perderse.
+  - `[low]` `[patch]` `--ayuda` junto a `--clase-de-cita` muestra la ayuda y sale con 0 (las formas de `--clase-de-cita` siguen saliendo con 2); fuera la línea en blanco sobrante.
+  - `[low]` `[patch]` «Una sola vez» por página: antes de pedir, `semilla` busca en `semillas/` un fichero con la misma `pagina`, sea cual sea su nombre.
+  - `[low]` `[patch]` La prueba por proceso de `proponer` con la lista vacía comprueba también la pregunta 18.
+
 ## Design Notes
 
 - **La lista lleva la página.** Cada entrada es `{slug, pagina}`: la dirección de BrainyQuote la declara Héctor con el slug, en vez de adivinarla por el nombre; la orden solo admite `https://` de `brainyquote.com` (o `www.`). El slug tiene que ser, al proponer, un Personaje de `corpus/personajes/` o un Autor de `corpus/autores/` (lo dan de alta sus órdenes; `proponer` no crea ninguno), y todo Personaje y Autor que declare una candidata tiene que estar en la lista.
@@ -174,3 +216,45 @@ en verde (89/89 con la prueba de la siembra). `corpus/` sin cambios.
 
 **Riesgos.** El lector de BrainyQuote es un supuesto sin contrastar (diferido). `dist/` no se ha
 reconstruido para compararlo: el único cambio de `src/` es una constante que ninguna página importa.
+
+### Pasada de revisión 1 (capas externas, 2026-11-14)
+
+**Qué se cambió.** Veinte parches, ninguno de la intent-contract: `semilla` juzga sus rutas contra la raíz
+del proyecto y segmento a segmento (`corpus/..x.json` ya no entra en `corpus/`), dentro del repositorio
+solo escribe bajo `semillas/`, no vuelve a pedir una página que `semillas/` ya guarda con otro nombre,
+captura los fallos de escritura, admite `.JSON` y `application/xhtml+xml`, fecha con la jornada local y
+solo acepta `brainyquote.com`/`www.` sin puerto, consulta ni fragmento; el lector no rompe con una
+entidad fuera de Unicode y lee las tipográficas; `proponer` rechaza los campos que no son del lote
+(`aptaParaPortada` incluido), y los `temas` que no son lista, deriva la clase también con Personaje, no
+deja que una rechazada bloquee su corrección, deshace la pasada si una escritura falla y orienta tras una
+escritura parcial; `objetivo.ts --ayuda` gana a `--clase-de-cita`.
+
+**Ficheros.**
+- `tools/atribuida.ts` — guardias de ruta (`dentroDe`, raíz del proyecto, solo `semillas/`), «una sola vez» por página, escritura capturada, cabecera de códigos.
+- `tools/lib/siembraAtribuida.ts` — página de la semilla estricta, entidades, campos del lote, clase derivada, lote sin bloqueo por rechazadas, vuelta atrás, parte.
+- `tools/objetivo.ts` — `--ayuda` gana; fuera la línea en blanco.
+- `tests/unit/siembra-atribuida.test.ts` — páginas, entidades, campos ajenos, `temas`, rechazada corregida, ocupación de slug (`-3`/`-4`, revisión intacta), rutas de `--salida`, otra salida y otro cwd, pregunta 18 por proceso.
+- `tests/unit/objetivo-cli.test.ts` — `--ayuda` con `--clase-de-cita`.
+
+**Hallazgos.** 20 parches (7 medios, 13 bajos), 2 diferidos (términos de BrainyQuote; espejos sin
+declarar, de la 35.1b), 22 rechazados (lector bajo `[ASSUMPTION]` ya diferido —título con comillas,
+anclas seguidas, paginación—, tope de tamaño del cuerpo, colisión de Fichas dentro del lote —la
+aprobación las resuelve—, `temas: []` de la matriz frente a la convención de omitir de AGENTS.md, el 2
+del lote mal formado antes que la semilla —es la forma—, el reintento de la misma jornada y resultado
+—es la matriz—, el acoplamiento con `auditar` —`salud.ts` cuenta las atribuidas aparte—, la lectura sin
+captura de `leerCitas` y la validación de `analizarRegistro` —anteriores—, lectores de la cadencia —el
+único es `objetivo.ts`—, el idioma del texto y la semilla estricta —Design Notes—, `dist/` sin prueba
+propia y el slug de la semilla sin cotejar con el Corpus antes de pedir).
+
+**Revisión de seguimiento recomendada: sí.** Parches de esta pasada: 0 altos, 7 medios, 13 bajos;
+puntuación 3×7 + 13 = 34 (≥ 5).
+
+**Verificación.** `npx vitest run tests/unit/siembra-atribuida.test.ts` 54/54;
+`atribuidas`, `atribuida-cli`, `objetivo-cli`, `objetivo` y `andamiaje` 214/214; `npx astro check`
+0 errores; `npm test` completo, desatendido: 195 ficheros, 8494/8494 en verde; `git status --short corpus/`
+vacío.
+
+**Riesgos.** El lector de BrainyQuote sigue sin contrastar (diferido). «Una sola vez» se protege con lo
+que hay en `semillas/`: borrar el fichero, o escribir fuera del repositorio con `--salida`, permite
+volver a pedir la página.
+

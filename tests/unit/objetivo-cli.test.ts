@@ -378,6 +378,16 @@ describe('Historia 35.10 — la sesión de siembra de la atribuida dice su clase
     expect(codigo).toBe(2);
     expect(existsSync(join(corpus, FICHERO_DE_SESIONES))).toBe(false);
   });
+
+  it('con --ayuda gana la ayuda: 0 y no escribe nada, aunque la clase vaya mal', async () => {
+    const corpus = await conUnaAtribuida();
+    for (const extra of [['--clase-de-cita', 'atribuida'], ['--clase-de-cita', 'siempre']]) {
+      const { codigo, salida } = await correr(['--corpus', corpus, '--ayuda', ...extra]);
+      expect(codigo, extra.join(' ')).toBe(0);
+      expect(salida).toMatch(/--clase-de-cita atribuida/u);
+    }
+    expect(existsSync(join(corpus, FICHERO_DE_SESIONES))).toBe(false);
+  });
 });
 
 describe('Historia 11.3 — la anulación del editor queda registrada', () => {

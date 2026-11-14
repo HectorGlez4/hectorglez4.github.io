@@ -89,7 +89,8 @@ const USO = [
  * el campo. Es la forma de la invocación, y sale con 2.
  */
 const conClaseDeCita = argumentos.includes('--clase-de-cita');
-if (conClaseDeCita) {
+// Con «--ayuda» gana la ayuda: la clase no se juzga.
+if (conClaseDeCita && !argumentos.includes('--ayuda')) {
   const dada = opcion(argumentos, '--clase-de-cita');
   const motivos: string[] = [];
   if (dada !== CLASE_ATRIBUIDA) {
@@ -124,7 +125,6 @@ if (argumentos.includes('--ayuda')) {
   process.stdout.write(`${USO}\n`);
   process.exit(0);
 }
-
 
 /** El valor de una opción, con los blancos colapsados a «no se ha dado». */
 function valor(clave: string): string | undefined {
