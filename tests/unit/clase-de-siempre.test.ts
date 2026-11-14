@@ -7,10 +7,10 @@ import {
   type Cita,
   type Tema,
 } from '../../src/lib/publicado.ts';
-import { verHuecos } from '../../src/lib/huecos.ts';
+import { citasQueCabenDe, verHuecos } from '../../src/lib/huecos.ts';
 import { aptasParaPortada } from '../../src/lib/citaDelDia.ts';
 import { fijacionesSinAtribuidas } from '../../src/lib/portada.ts';
-import { auditar } from '../../src/lib/salud.ts';
+import { auditar, sinTraduccionDeclarada } from '../../src/lib/salud.ts';
 import { slugsSembrados } from '../../tools/lib/epocas.ts';
 import { fallosDeAtribuidas, type CitaParaAtribuidas } from '../../tools/lib/atribuidas.ts';
 import { entradaVedada, type FormaVedada } from '../../tools/lib/formasVedadas.ts';
@@ -105,7 +105,24 @@ describe('35.7 — destacados, suelo y huecos', () => {
     expect(huecos.anunciadosBajoUmbral).toEqual([]);
   });
 
-  it('MIN_CITAS_POR_TEMA sigue contando las dos clases (AD-11)', () => {
+  it('verHuecos: el margen de cada Autor se mide contra el total de la clase de siempre', () => {
+    const autores = [
+      { slug: 'seneca', nombre: 'Séneca' },
+      { slug: 'epicteto', nombre: 'Epicteto' },
+      { slug: 'vivo', nombre: 'Una viva', vivo: true },
+    ];
+    const citas = [
+      { slug: 's0', autor: 'seneca' },
+      ...Array.from({ length: 19 }, (_, i) => ({ slug: `e${i}`, autor: 'epicteto' })),
+      ...Array.from({ length: 10 }, (_, i) => ({ slug: `v${i}`, autor: 'vivo', clase: 'atribuida' })),
+    ];
+    const seneca = verHuecos(citas, [], autores).margenPorAutor.find((m) => m.autor === 'seneca')!;
+    expect(seneca.caben).toBe(citasQueCabenDe(1, 20));
+    // Contra todas las publicadas el margen sería otro: la prueba distingue los dos totales.
+    expect(citasQueCabenDe(1, 20)).not.toBe(citasQueCabenDe(1, 30));
+  });
+
+    it('MIN_CITAS_POR_TEMA sigue contando las dos clases (AD-11)', () => {
     const temas: Tema[] = [{ slug: 'tiempo', nombre: 'El tiempo', descripcion: 'x' } as unknown as Tema];
     const citas = [
       ...Array.from({ length: MIN_CITAS_POR_TEMA - 1 }, (_, i) => cita(`s${i}`, { temas: ['tiempo'] })),
@@ -147,6 +164,18 @@ describe('35.7 — la salud del Corpus y SM-C1', () => {
     expect(informe.publicadas.porcentajeCompleta).toBe(50);
     expect(informe.atribuidas).toBe(1);
     expect(informe.porAutor.map((a) => a.autor)).toEqual(['seneca']);
+  });
+
+  it('las traducidas sin traducción no cuentan la atribuida, aunque traiga Fuente', () => {
+    const deOtra = new Set(['seneca']);
+    const conFuente = { autor: 'seneca', procedencia: { obra: 'Cartas', año: 62 }, fuente: { id: 'wikisource-es' } };
+    const sinAtribuida = sinTraduccionDeclarada([{ slug: 'a', ...conFuente }], deOtra);
+    expect(sinAtribuida.total).toBe(1);
+    const conAtribuida = sinTraduccionDeclarada(
+      [{ slug: 'a', ...conFuente }, { slug: 'b', ...conFuente, clase: 'atribuida' }],
+      deOtra,
+    );
+    expect(conAtribuida.total).toBe(1);
   });
 });
 

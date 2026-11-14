@@ -176,8 +176,11 @@ un commit que solo lo toca no fecha ni avisa.
 (k, y «cada una» solo sin atribuidas), los destacados y el suelo, el hueco y el margen de
 `npm run huecos`/`objetivo`, el cruce por época (un Autor `vivo` no siembra ninguna), la aptitud de
 portada y sus fijaciones, la Pieza (pregunta 27) y la procedencia completa de `tools/auditoria.ts` y
-de la sesión registrada (SM-C1). La auditoría da aparte las atribuidas publicadas y las bajas por
-cambio de clase. `MIN_CITAS_POR_TEMA` sigue contando las dos.
+de la sesión registrada (SM-C1), y la deuda de cotejo de la auditoría. La auditoría da aparte las
+atribuidas publicadas y las bajas por cambio de clase; con `formas-vedadas.yml` ilegible escribe el
+informe sin esa cifra —nunca un cero— y sale con 1. El `citasPublicadas` de la sesión registrada
+sigue contando las dos clases, para que la serie mida lo mismo. `MIN_CITAS_POR_TEMA` sigue contando
+las dos.
 
 **Las biografías no son obras, y no se siembran.** La semblanza de un Autor sale de una Fuente
 **mutable** —Wikipedia en español—, que solo entra por revisión: la misma orden, con el enlace

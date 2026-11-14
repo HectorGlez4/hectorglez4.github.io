@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -145,6 +145,62 @@ describe('35.7 — quién lo escribe', () => {
     }
     expect((await leerFormasVedadas(rutas)).map((e) => [e.slug, e.motivo])).toEqual([['seneca-con-procedencia', 'cotejo-fallido']]);
     expect(await readdir(rutas.revision)).toEqual(['seneca--con-procedencia.md']);
+  });
+});
+
+describe('35.7 — quién lo escribe, desde la terminal', () => {
+  const dirDelCorpus = (rutas: Rutas) => join(rutas.citas, '..');
+  const revisar = async (rutas: Rutas, args: string[]) => {
+    try {
+      const { stdout, stderr } = await ejecutar(
+        'npx',
+        ['tsx', join(RAIZ_DEL_REPO, 'tools/revisar.ts'), '--corpus', dirDelCorpus(rutas), ...args],
+        { cwd: RAIZ_DEL_REPO },
+      );
+      return { codigo: 0, salida: `${stdout}${stderr}` };
+    } catch (fallo) {
+      const f = fallo as { code?: number; stdout?: string; stderr?: string };
+      return { codigo: f.code ?? -1, salida: `${f.stdout ?? ''}${f.stderr ?? ''}` };
+    }
+  };
+
+  it('la aprobación que deja una de siempre sin Procedencia en revisión la anota como sin-procedencia', async () => {
+    const rutas = await corpusDePrueba();
+    await candidataSinFuente(rutas, 'sin-procedencia', 'Una frase sin procedencia ninguna que aprobar.');
+    const resultado = await aprobar(rutas, ['seneca-sin-procedencia']);
+    expect(resultado.publicadas).toEqual([]);
+    expect((await leerFormasVedadas(rutas)).map((e) => [e.slug, e.motivo])).toEqual([['seneca-sin-procedencia', 'sin-procedencia']]);
+  });
+
+  it('revisar --rechazar dice la forma vedada y sale con 0; con el registro ilegible sale con 1 y no borra nada', async () => {
+    const rutas = await corpusDePrueba();
+    await candidataSinFuente(rutas, 'una', TEXTO, { obra: 'Cartas', año: 62 });
+    await candidataSinFuente(rutas, 'otra', 'Otra frase de Séneca que también se rechaza.', { obra: 'Cartas', año: 62 });
+    const bien = await revisar(rutas, ['--rechazar', 'seneca-una']);
+    expect(bien.codigo, bien.salida).toBe(0);
+    expect(bien.salida).toContain('⊘ seneca-una: su forma queda vedada a la atribuida (cotejo-fallido)');
+
+    await writeFile(rutas.formasVedadas, 'formas: [roto\n', 'utf8');
+    const mal = await revisar(rutas, ['--rechazar', 'seneca-otra']);
+    expect(mal.codigo, mal.salida).toBe(1);
+    expect(mal.salida).toContain('No se ha rechazado ninguna candidata.');
+    expect(await readdir(rutas.revision)).toEqual(['seneca--otra.md']);
+  });
+
+  it('revisar --aprobar sale con 1 y lo dice si no puede anotar las formas que deja vedadas', async () => {
+    const rutas = await corpusDePrueba();
+    await candidataSinFuente(rutas, 'una', TEXTO, { obra: 'Cartas', año: 62 });
+    // Un registro legible en el que no se puede escribir: se lee, y el añadido falla.
+    await writeFile(rutas.formasVedadas, CABECERA_DE_FORMAS_VEDADAS, 'utf8');
+    await chmod(rutas.formasVedadas, 0o444);
+    try {
+      const salida = await revisar(rutas, ['--aprobar', 'seneca-una']);
+      expect(salida.codigo, salida.salida).toBe(1);
+      expect(salida.salida).toContain('Las formas vedadas no se anotaron en corpus/formas-vedadas.yml');
+      expect(await readFile(rutas.formasVedadas, 'utf8')).toBe(CABECERA_DE_FORMAS_VEDADAS);
+    } finally {
+      await chmod(rutas.formasVedadas, 0o644);
+    }
   });
 });
 

@@ -477,7 +477,7 @@ export interface Huecos {
 export function verHuecos(
   citas: CitaParaHuecos[],
   temas: TemaParaHuecos[],
-  autores: AutorParaHuecos[],
+  todosLosAutores: AutorParaHuecos[],
   temasAnunciadosEnPortada: string[] = [],
   colecciones: ColeccionParaHuecos[] = [],
   /*
@@ -493,16 +493,15 @@ export function verHuecos(
    * `anunciadosBajoUmbral`, que compara con la regla de publicación (`MIN_CITAS_POR_TEMA` cuenta
    * las dos clases).
    */
-  const deSiempre = citas.filter((c) => !esAtribuida(c));
-  autores = autores.filter((a) => a.vivo !== true);
+  const deSiempre = new Set(citas.filter((c) => !esAtribuida(c)));
+  const autores = todosLosAutores.filter((a) => a.vivo !== true);
   const porTema = new Map<string, number>();
   const publicadasPorTema = new Map<string, number>();
   for (const tema of temas) porTema.set(tema.slug, 0);
   for (const cita of citas) {
-    const deLaClaseDeSiempre = !esAtribuida(cita);
     for (const tema of cita.temas ?? []) {
       publicadasPorTema.set(tema, (publicadasPorTema.get(tema) ?? 0) + 1);
-      if (deLaClaseDeSiempre) porTema.set(tema, (porTema.get(tema) ?? 0) + 1);
+      if (deSiempre.has(cita)) porTema.set(tema, (porTema.get(tema) ?? 0) + 1);
     }
   }
 
@@ -573,7 +572,7 @@ export function verHuecos(
     .map(([autor, suyas]) => ({
       autor,
       citas: suyas,
-      caben: citasQueCabenDe(suyas, deSiempre.length),
+      caben: citasQueCabenDe(suyas, deSiempre.size),
     }))
     // De menos margen a más, desempatado por slug en español como el resto de esta vista:
     // sin desempate, dos Autores con las mismas Citas cambiarían de orden según se leyeran

@@ -232,7 +232,12 @@ if (anula) {
  */
 const salud = auditar(citas as unknown as CitaParaAuditar[]);
 const resultado = {
-  citasPublicadas: salud.publicadas.total,
+  /*
+   * Historia 35.7 — `auditar` cuenta solo la clase de siempre, pero esta clave de la serie ha
+   * contado siempre **todas** las publicadas: se suman las atribuidas para que siga midiendo lo
+   * mismo entre entradas. Solo `procedenciaCompleta` pasa a medirse sobre la clase de siempre.
+   */
+  citasPublicadas: salud.publicadas.total + salud.atribuidas,
   procedenciaCompleta: salud.publicadas.porcentajeCompleta,
   /*
    * Sobre la base del suelo desde la v6 —todos menos los de tradición `otra`—, no sobre el

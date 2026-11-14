@@ -862,14 +862,17 @@ export async function retirarCita(
    * —vive, o su plazo corre: la Cita vuelve como atribuida con otro slug—, `retirada` si no. El
    * registro se lee antes de tocar nada: ilegible, no se retira.
    */
+  let motivoVedado: MotivoDeFormaVedada;
   try {
     await leerFormasVedadas(rutas);
+    // El Autor y su dominio, también antes de mover: un fallo aquí es una negativa, no una excepción.
+    const autorDeLaCita =
+      cita.autor === undefined ? undefined : (await leerAutores(rutas)).find((a) => a.slug === cita.autor);
+    motivoVedado =
+      autorDeLaCita !== undefined && !esDeDominioPublico(dueñoAutor(autorDeLaCita)) ? 'cambio-de-clase' : 'retirada';
   } catch (fallo) {
     return { ok: false, motivos: [`${fallo instanceof Error ? fallo.message : String(fallo)} No se ha retirado nada.`] };
   }
-  const autorDeLaCita = cita.autor === undefined ? undefined : (await leerAutores(rutas)).find((a) => a.slug === cita.autor);
-  const motivoVedado: MotivoDeFormaVedada =
-    autorDeLaCita !== undefined && !esDeDominioPublico(dueñoAutor(autorDeLaCita)) ? 'cambio-de-clase' : 'retirada';
   const vedada = entradaVedada(cita.texto, motivoVedado, fechaLocal(new Date()), slug);
 
   const censoAntes = await leerCensoBruto(rutas);
@@ -908,14 +911,23 @@ export async function retirarCita(
       } catch {
         /* lo dice el motivo */
       }
-      if (devuelta && censoAntes !== undefined && censoDespues !== undefined) await escribirCenso(rutas, censoAntes);
+      let censoRestituido = true;
+      if (devuelta && censoAntes !== undefined && censoDespues !== undefined) {
+        try {
+          await escribirCenso(rutas, censoAntes);
+        } catch {
+          censoRestituido = false;
+        }
+      }
       return {
         ok: false,
         motivos: [
           `No se pudo anotar la forma en corpus/formas-vedadas.yml: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
-          devuelta
-            ? 'La Cita ha vuelto a corpus/citas/ y el censo está como estaba: no se ha retirado nada.'
-            : `Y la Cita no pudo volver: está en ${destino}. Devuélvala a ${dirname(cita.ruta)} a mano.`,
+          !devuelta
+            ? `Y la Cita no pudo volver: está en ${destino}. Devuélvala a ${dirname(cita.ruta)} a mano.`
+            : censoRestituido
+              ? 'La Cita ha vuelto a corpus/citas/ y el censo está como estaba: no se ha retirado nada.'
+              : `La Cita ha vuelto a corpus/citas/, pero el censo no se pudo restituir: devuelva «${slug}» a ${FICHERO_DEL_CENSO} a mano.`,
         ],
       };
     }
@@ -938,7 +950,11 @@ export async function retirarCita(
       `  Motivo: ${motivo.trim()}`,
       `  Huella del texto retirado: ${huellaDeTexto(cita.texto)}`,
       ...(vedada !== undefined
-        ? [`  Su forma queda vedada a la atribuida en corpus/formas-vedadas.yml (${vedada.motivo}).`]
+        ? [
+            vedada.motivo === 'cambio-de-clase'
+              ? '  Su forma se anota en corpus/formas-vedadas.yml como baja por cambio de clase (cambio-de-clase): no veda su vuelta como atribuida.'
+              : `  Su forma queda vedada a la atribuida en corpus/formas-vedadas.yml (${vedada.motivo}).`,
+          ]
         : []),
       censoDespues === undefined
         ? `No estaba en el censo de ${FICHERO_DEL_CENSO}; siguen ${pendientes} pendientes.`

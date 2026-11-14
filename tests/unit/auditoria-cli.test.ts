@@ -91,8 +91,11 @@ describe('Historia 35.7 — tools/auditoria.ts, la atribuida aparte', () => {
       publicadas: { total: number; porcentajeCompleta: number };
       atribuidas: number;
       bajasPorCambioDeClase: number;
+      cotejo: { conDocumento: number };
     };
     expect(json.publicadas.total).toBe(1);
+    // La atribuida trae Fuente y aun así no cuenta como cotejada con su documento.
+    expect(json.cotejo.conDocumento).toBe(1);
     expect(json.atribuidas).toBe(1);
     expect(json.bajasPorCambioDeClase).toBe(1);
 
@@ -100,5 +103,17 @@ describe('Historia 35.7 — tools/auditoria.ts, la atribuida aparte', () => {
     expect(stdout).toMatch(/Atribuidas publicadas: +1 /u);
     expect(stdout).toMatch(/Bajas por cambio de clase: +1 /u);
     expect(stdout).toContain('léase como una bajada de SM-C1');
+    expect(stdout).toMatch(/Citas de siempre publicadas: 1 /u);
+
+    // Con el registro ilegible el informe sale sin la cifra de bajas —nunca un cero— y con 1.
+    await writeFile(join(corpus, 'formas-vedadas.yml'), 'formas: [roto\n', 'utf8');
+    const ilegible = await correr(['--json']).then(
+      () => ({ code: 0, stdout: '' }),
+      (fallo: { code: number; stdout: string }) => fallo,
+    );
+    expect(ilegible.code).toBe(1);
+    const parcial = JSON.parse(ilegible.stdout) as { bajasPorCambioDeClase?: number; bajasSinLeer?: string };
+    expect(parcial.bajasPorCambioDeClase).toBeUndefined();
+    expect(parcial.bajasSinLeer).toMatch(/formas-vedadas/u);
   });
 });

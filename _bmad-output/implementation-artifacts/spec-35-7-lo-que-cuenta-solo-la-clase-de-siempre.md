@@ -5,7 +5,7 @@ created: '2026-11-14'
 status: 'done'
 baseline_revision: '281328151309233f068d168ac51531cf36e8e2eb'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/AGENTS.md'
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
@@ -21,6 +21,20 @@ deferred:
     evidence: 'epics.md Story 35.7 (salud del Corpus); FR-16 v9.1.'
   - summary: 'Las series que parte `DESPLIEGUE_DE_LA_ATRIBUIDA` [ASSUMPTION]: `sm8` —la Página de Personaje emite `vista-de-superficie`, que SM-8 cuenta— y `continuacion-de-cita` —la Página de Cita atribuida no lleva Cómo citar, pasaje ni Tarjeta de Obra en el mismo orden, y cambia la continuación (SM-4/SM-3) y SM-C5—. No parte `lectura` (la Personaje es una unidad nueva, sin serie de antes; las de siempre no cambian) ni `busqueda` (sin evento ni tramo nuevos). SM-C5 declara su llegada con la marca «la primera Cita atribuida publicada en vivo, no el merge».'
     evidence: 'src/lib/umbrales.ts CORTES_DE_SERIE_DECLARADOS; tools/lib/lineaBase.ts juiciosPorVentanas (SM-C5).'
+  - summary: >-
+      Rechazar (o dejar en revisión al aprobar) una candidata de siempre cuyo texto coincide con una atribuida ya publicada de otro slug anota una forma que veda a esa atribuida viva, y el siguiente build rompe sobre una Cita que ya estaba en el sitio; ni `rechazar` ni `aprobar` lo avisan antes de anotar. Si deben avisar o negarse, o si la veda solo alcanza lo que entra después, lo decide Héctor (bmad-architecture, AD-32).
+    evidence: |-
+      tools/lib/revision.ts registra `porVedar` y las rechazadas sin cotejarlas contra las atribuidas publicadas; integraciones/clases.ts juzga toda atribuida publicada contra todo el registro (`fallosDeAtribuidas` con `vedadas`). Hallazgo edge-case-hunter, pasada 1.
+    location: >-
+      tools/lib/revision.ts (rechazar, aprobar)
+    severity: medium
+  - summary: >-
+      Un Autor que no es `vivo` pero cuyo plazo de derechos corre (solo puede tener atribuidas) sigue contando en la tradición, el suelo y el margen de `verHuecos` y como sembrado en `slugsSembrados`; la historia nombra solo al Autor `vivo`. Si el criterio debe ser `esDeDominioPublico(dueñoAutor(a))`, lo decide Héctor (bmad-create-epics-and-stories).
+    evidence: |-
+      src/lib/huecos.ts y tools/lib/epocas.ts filtran `vivo === true`; `documentar --retirar` ya usa `esDeDominioPublico` para derivar `cambio-de-clase`, así que las dos superficies usan criterios distintos para «Autor solo de atribuidas». Hallazgo edge-case-hunter, pasada 1.
+    location: >-
+      src/lib/huecos.ts verHuecos; tools/lib/epocas.ts slugsSembrados
+    severity: medium
 ---
 
 <intent-contract>
@@ -134,6 +148,29 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15 (high 0, medium 5, low 10)
+- defer: 2 (high 0, medium 2, low 0)
+- reject: 18 (high 0, medium 6, low 12)
+- addressed_findings:
+  - `[medium]` `[patch]` `tools/auditoria.ts` con `formas-vedadas.yml` ilegible seguía con 0, contra la regla «las órdenes que lo leen se niegan con 1»: ahora escribe el informe sin la cifra (`bajasSinLeer`, nunca cero) y sale con 1; prueba por proceso en `auditoria-cli.test.ts` y AGENTS.md al día.
+  - `[medium]` `[patch]` La deuda de cotejo de la auditoría (`resumenDeCotejo`) contaba como «con documento» a la atribuida con Fuente: ahora recibe solo la clase de siempre; aserción `cotejo.conDocumento` en `auditoria-cli.test.ts`.
+  - `[medium]` `[patch]` `tools/objetivo.ts` cambiaba en silencio el significado de `citasPublicadas` de `sesiones-de-sembrado.yml`: suma de nuevo las atribuidas (`salud.publicadas.total + salud.atribuidas`); solo `procedenciaCompleta` pasa a la clase de siempre. AGENTS.md lo dice.
+  - `[medium]` `[patch]` La vuelta atrás de `retirarCita` cuando anotar falla tras mover la Cita no tenía prueba: `documentacion.test.ts` la fuerza con el registro de solo lectura y exige la Cita y el censo como estaban.
+  - `[medium]` `[patch]` Los caminos de salida de `tools/revisar.ts` no tenían prueba: `formas-vedadas.test.ts` corre la orden y comprueba la línea ⊘ de `--rechazar`, el 1 sin borrar nada con el registro ilegible y el 1 con «Las formas vedadas no se anotaron» en `--aprobar`.
+  - `[low]` `[patch]` La etiqueta «Citas publicadas» de la auditoría nombraba otra cantidad: pasa a «Citas de siempre publicadas», diciendo que la línea de cifras del sitio cuenta las dos.
+  - `[low]` `[patch]` `retirarCita`: la lectura de Autores y `esDeDominioPublico` entran en el `try` previo (negativa, no excepción), y la restitución del censo en la vuelta atrás tiene su propio `try` y lo dice si falla.
+  - `[low]` `[patch]` El parte de `retirarCita` decía «queda vedada» para una entrada `cambio-de-clase`, que no veda: ahora la nombra como baja por cambio de clase que no veda.
+  - `[low]` `[patch]` `tools/lib/piezas.ts`: quitada la línea en blanco que separaba el comentario del Personaje de su `if`.
+  - `[low]` `[patch]` La cabecera de `tools/lib/formasVedadas.ts` atribuía escritura a la retirada por petición de la 35.8, que no existe: retirado.
+  - `[low]` `[patch]` `verHuecos` reasignaba su parámetro `autores` y derivaba dos veces la clase de siempre: parámetro `todosLosAutores`, `deSiempre` como un solo conjunto que usan el hueco de Tema y el margen.
+  - `[low]` `[patch]` Ninguna aserción leía `caben` con atribuidas presentes: prueba nueva en `clase-de-siempre.test.ts` que distingue el total de la clase de siempre del de todas.
+  - `[low]` `[patch]` El salto de la atribuida en `sinTraduccionDeclarada` no tenía prueba: caso puro en `clase-de-siempre.test.ts` con una atribuida con Fuente de Autor `otra`.
+  - `[low]` `[patch]` La aprobación que anota `sin-procedencia` no tenía prueba: caso en `formas-vedadas.test.ts`.
+  - `[low]` `[patch]` El aviso «es atribuida» de `npm run jornada -- listar` no tenía prueba: caso por proceso en `jornadas.test.ts`.
+
 ## Verification
 
 **Commands:**
@@ -168,3 +205,24 @@ Status: done
 **Verificación.** `npm test` 193 ficheros / 8.327 pruebas en verde; `npx astro check` 0 errores; `FECHA_JORNADA=2026-11-14 npm run build` en la base (worktree desacoplado en `2813281513`) y en la rama, `diff -rq -x pagefind` sin diferencias (repetido tras los últimos cambios).
 
 **Riesgos residuales.** Los supuestos del frontmatter `deferred` (hueco de Tema, quién escribe `cambio-de-clase`, motivo del rechazo, periodo de las bajas, series del corte) los decide Héctor. La rama de `retirarCita` en que la anotación falla **tras** mover la Cita (devolverla) no tiene prueba propia; la de registro ilegible, sí.
+
+### Pasada de revisión 1 (2026-11-14, sobre `fb35359edd`)
+
+**Resumen.** Cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor): 15 parches, 2 diferidos, 18 rechazados, ningún intent_gap ni bad_spec. Los parches cierran lo que se desviaba del contrato o de la serie (la auditoría sale con 1 con el registro ilegible; la deuda de cotejo sin atribuidas; `citasPublicadas` de la sesión vuelve a contar las dos clases), endurecen `retirarCita` y su parte, limpian `verHuecos`, `piezas.ts` y la cabecera de `formasVedadas.ts`, y añaden las pruebas que faltaban (vuelta atrás de la retirada, salidas de `revisar`, `caben`, `sinTraduccionDeclarada`, `sin-procedencia`, aviso de `jornada listar`).
+
+**Ficheros de esta pasada.**
+- `tools/auditoria.ts` — sale con 1 con `formas-vedadas.yml` ilegible; cotejo solo de siempre; etiqueta «Citas de siempre publicadas».
+- `tools/objetivo.ts` — `citasPublicadas` suma las atribuidas: la serie sigue midiendo lo mismo.
+- `tools/lib/documentacion.ts` — lectura de Autores dentro del `try`; restitución del censo protegida; parte de `cambio-de-clase` sin «vedada».
+- `src/lib/huecos.ts` — sin reasignar el parámetro; `deSiempre` como un solo conjunto.
+- `tools/lib/piezas.ts`, `tools/lib/formasVedadas.ts` — línea en blanco y mención a la 35.8.
+- `AGENTS.md` — la auditoría con el registro ilegible y el `citasPublicadas` de la sesión.
+- Pruebas: `auditoria-cli`, `clase-de-siempre`, `documentacion`, `formas-vedadas`, `jornadas`.
+
+**Hallazgos.** Parches 15 (medium 5, low 10). Diferidos 2: la veda que alcanza a una atribuida ya publicada al rechazar una de siempre con su mismo texto, y el Autor con plazo vigente que no es `vivo`. Rechazados 18 (entre ellos: retirar una atribuida, que `localizarPublicada` ya impide; el motivo del rechazo, el periodo de las bajas y el campo del hueco, ya diferidos a Héctor; `cambio-de-clase` que no veda nunca y `fijacionesSinAtribuidas`, que fija el `<intent-contract>`; la redacción de la línea de cifras y «léase como una bajada», que son del epic; la asimetría de formas, que no existe porque las dos pasan por `normalizar`).
+
+**Revisión de seguimiento.** `followup_review_recommended: true`: 0 high, 5 medium y 10 low entre los parches, puntuación 3×5 + 10 = 25 ≥ 5.
+
+**Verificación.** `npx vitest run` de los 12 ficheros tocados o cercanos (383 pruebas) en verde; `npx astro check` 0 errores; `npm test` desacoplado: 193 ficheros / 8.334 pruebas en verde (log `.claude/v9-ralph/logs/s-35/triage-35.7-1-npmtest.log`). El `diff` de `dist/` no se repitió: lo único de `src/` que cambia es una refactorización sin efecto de `verHuecos`, que ninguna página importa (`publicado.ts` solo toma `cuentaParaElSuelo`).
+
+**Riesgos residuales.** Los dos diferidos nuevos y los supuestos anteriores, para Héctor.

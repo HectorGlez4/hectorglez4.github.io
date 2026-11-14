@@ -10,6 +10,7 @@
 
 import { porcentajeEnEspañol } from '../src/lib/formato.ts';
 import { auditar, sinTraduccionDeclarada, type CitaParaAuditar } from '../src/lib/salud.ts';
+import { esAtribuida } from '../src/lib/clase.ts';
 import { leerAutores, leerCensoDeCotejo, leerCitas, rutasDelCorpus } from './lib/corpus.ts';
 import { resumenDeCotejo } from './lib/cotejo.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
@@ -35,7 +36,13 @@ const informe = auditar(publicadas as unknown as CitaParaAuditar[]);
  * aquí: esta herramienta no tiene pruebas, y un recuento que miente en silencio en el
  * informe que existe para medir SM-C1 es peor que no tener informe.
  */
-const cotejo = resumenDeCotejo(publicadas, await leerCensoDeCotejo(rutas));
+// Historia 35.7 — la deuda de cotejo es de la clase de siempre: una atribuida con Fuente no está
+// «cotejada con su documento» (la línea de cifras tampoco la cuenta), y contarla aquí mezclaría
+// las dos clases en el mismo informe que da SM-C1 sin ellas.
+const cotejo = resumenDeCotejo(
+  publicadas.filter((c) => !esAtribuida(c)),
+  await leerCensoDeCotejo(rutas),
+);
 
 /*
  * Historia 19.1 — las Citas de obra traducida que no declaran traducción. Una cifra, no un
@@ -85,7 +92,7 @@ if (argumentos.includes('--json')) {
     'Salud del Corpus',
     '════════════════',
     '',
-    `Citas publicadas:            ${total.total}  (de la clase de siempre: SM-C1 no cuenta las atribuidas)`,
+    `Citas de siempre publicadas: ${total.total}  (SM-C1 no cuenta las atribuidas; la línea de cifras del sitio, sí)`,
     `Con procedencia completa:    ${total.completa}  ` +
       `(${porcentajeEnEspañol(total.porcentajeCompleta)} %)`,
     `Con procedencia parcial:     ${total.parcial}`,
@@ -141,4 +148,14 @@ if (argumentos.includes('--json')) {
   }
 
   process.stdout.write(`${lineas.join('\n')}\n`);
+}
+
+/*
+ * Historia 35.7 — con `corpus/formas-vedadas.yml` ilegible el informe se escribe igual, sin la
+ * cifra de bajas (ausencia antes que cero), pero la orden sale con 1: el registro no se deja
+ * leer, y quien encadena órdenes por su código tiene que verlo.
+ */
+if (falloDeVedadas !== undefined) {
+  process.stderr.write(`${falloDeVedadas}\n`);
+  process.exitCode = 1;
 }

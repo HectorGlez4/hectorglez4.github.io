@@ -324,7 +324,6 @@ export async function componerPieza(
      * Personaje se firma con él en todo lo que sale del sitio (`firmaDeCita`): compuesta aquí
      * saldría atribuida solo al Autor, o sin firma. Se rechaza, como en el material del Kit.
      */
-
     if (cita.personaje !== undefined) {
       motivos.push(
         `La Cita «${slug}» la dice un Personaje («${cita.personaje}»), y la Pieza solo firma ` +
