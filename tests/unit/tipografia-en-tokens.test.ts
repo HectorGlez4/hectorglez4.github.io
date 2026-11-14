@@ -44,6 +44,7 @@ const EMPAREJAMIENTOS_EXCEPCIONALES: readonly { fichero: string; selector: strin
   { fichero: 'src/components/FilaDeBloque.astro', selector: '.fila-de-bloque a', interlineado: 'autor' },
   { fichero: 'src/components/ListaDeObras.astro', selector: '.titulo', interlineado: 'autor' },
   { fichero: 'src/components/TarjetaDeObra.astro', selector: '.titulo', interlineado: 'autor' },
+  { fichero: 'src/pages/index.astro', selector: '.titulo-de-obra', interlineado: 'autor' },
 ];
 
 /** El nombre CSS de cada token de tipografía del frontmatter de DESIGN.md. */
