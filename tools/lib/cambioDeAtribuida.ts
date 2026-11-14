@@ -59,6 +59,7 @@ import {
   type ValoresDeLaPuerta,
 } from './atribuidas.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra, type PlanDeFicha } from './obras.ts';
+import { leerFormasVedadas, type FormaVedada } from './formasVedadas.ts';
 
 /** Las cinco subórdenes, en el orden en que se nombran. */
 export const SUBORDENES_DE_ATRIBUIDA = ['obra', 'autor', 'personaje', 'variante', 'texto'] as const;
@@ -319,11 +320,14 @@ export async function cambiarAtribuida(
   let autores: Awaited<ReturnType<typeof leerAutores>>;
   let personajes: Awaited<ReturnType<typeof leerPersonajes>>;
   let fichasEnDisco: Awaited<ReturnType<typeof leerFichasDeObra>>;
+  // Historia 35.7 — las formas vedadas: el texto o la Variante nuevos tampoco pueden coincidir.
+  let vedadas: FormaVedada[];
   try {
-    [autores, personajes, fichasEnDisco] = await Promise.all([
+    [autores, personajes, fichasEnDisco, vedadas] = await Promise.all([
       leerAutores(rutas),
       leerPersonajes(rutas),
       leerFichasDeObra(rutas),
+      leerFormasVedadas(rutas),
     ]);
   } catch (fallo) {
     return negar(`El Corpus no se deja leer (${fallo instanceof Error ? fallo.message : String(fallo)}).`);
@@ -407,6 +411,7 @@ export async function cambiarAtribuida(
     autoresConFichaNueva: planDaFichaAlAutor(plan) && typeof nuevos.autor === 'string' ? [nuevos.autor] : [],
     comparables: enRevision.filter((c) => typeof c.texto === 'string').map(paraElJuicio),
     juzgar: new Set([cambio.slug]),
+    vedadas,
     valores: puerta,
   });
   const motivos = motivosDe(fallos, cambio.slug);

@@ -26,6 +26,7 @@
  * AD-5 — Derivación pura: recibe lo leído, no lee disco.
  */
 
+import { esAtribuida } from './clase.ts';
 import {
   META_AUTORES_DE_OTRA_TRADICION,
   MIN_CITAS_POR_COLECCION,
@@ -43,6 +44,11 @@ export interface AutorParaHuecos {
   slug: string;
   nombre: string;
   tradicion?: 'latinoamericana' | 'peninsular' | 'otra';
+  /**
+   * Historia 35.7 — un Autor `vivo` es solo de atribuidas: no entra en la tradición, el suelo ni
+   * el margen, que cuentan la clase de siempre (AD-1, AD-11).
+   */
+  vivo?: unknown;
 }
 
 /**
@@ -65,6 +71,8 @@ export interface CitaParaHuecos {
   /** Historia 35.4 — la de un Personaje sin Autor no lo lleva, y no cuenta para ninguno. */
   autor?: string;
   temas?: string[];
+  /** Historia 35.7 — la clase, tal como la lee `esAtribuida`: la atribuida no cuenta en los huecos. */
+  clase?: unknown;
 }
 
 export interface HuecoDeTema {
@@ -478,11 +486,23 @@ export function verHuecos(
    */
   epocas: EpocaParaHuecos[] = [],
 ): Huecos {
+  /*
+   * Historia 35.7 — los huecos cuentan solo la clase de siempre (AD-1, AD-11): la atribuida no
+   * cierra el hueco de ningún Tema, no suma a ningún Autor ni al total del techo, y el Autor `vivo`
+   * —solo de atribuidas— no entra en la tradición ni en el margen. Lo único que cuenta las dos es
+   * `anunciadosBajoUmbral`, que compara con la regla de publicación (`MIN_CITAS_POR_TEMA` cuenta
+   * las dos clases).
+   */
+  const deSiempre = citas.filter((c) => !esAtribuida(c));
+  autores = autores.filter((a) => a.vivo !== true);
   const porTema = new Map<string, number>();
+  const publicadasPorTema = new Map<string, number>();
   for (const tema of temas) porTema.set(tema.slug, 0);
   for (const cita of citas) {
+    const deLaClaseDeSiempre = !esAtribuida(cita);
     for (const tema of cita.temas ?? []) {
-      porTema.set(tema, (porTema.get(tema) ?? 0) + 1);
+      publicadasPorTema.set(tema, (publicadasPorTema.get(tema) ?? 0) + 1);
+      if (deLaClaseDeSiempre) porTema.set(tema, (porTema.get(tema) ?? 0) + 1);
     }
   }
 
@@ -545,7 +565,7 @@ export function verHuecos(
    * porque las Citas ya están en la mano; el techo, en cambio, sale de `umbrales.ts`.
    */
   const citasPorAutor = new Map<string, number>(autores.map((a) => [a.slug, 0]));
-  for (const cita of citas) {
+  for (const cita of deSiempre) {
     if (cita.autor === undefined) continue;
     citasPorAutor.set(cita.autor, (citasPorAutor.get(cita.autor) ?? 0) + 1);
   }
@@ -553,7 +573,7 @@ export function verHuecos(
     .map(([autor, suyas]) => ({
       autor,
       citas: suyas,
-      caben: citasQueCabenDe(suyas, citas.length),
+      caben: citasQueCabenDe(suyas, deSiempre.length),
     }))
     // De menos margen a más, desempatado por slug en español como el resto de esta vista:
     // sin desempate, dos Autores con las mismas Citas cambiarían de orden según se leyeran
@@ -587,7 +607,7 @@ export function verHuecos(
     },
     margenPorAutor,
     anunciadosBajoUmbral: temasAnunciadosEnPortada.filter(
-      (slug) => (porTema.get(slug) ?? 0) < MIN_CITAS_POR_TEMA,
+      (slug) => (publicadasPorTema.get(slug) ?? 0) < MIN_CITAS_POR_TEMA,
     ),
   };
 }

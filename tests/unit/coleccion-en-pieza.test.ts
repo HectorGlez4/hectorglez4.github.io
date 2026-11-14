@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { seleccionDeColeccion } from '../../src/lib/coleccionEnPieza.ts';
+import { MOTIVO_DE_ATRIBUIDA_FUERA_DE_LA_PIEZA, seleccionDeColeccion } from '../../src/lib/coleccionEnPieza.ts';
 import { MINIMO_DE_CITAS } from '../../src/lib/pieza.ts';
 import { colgarObras, type FichaDeObra } from '../../src/lib/obras.ts';
 import {
@@ -201,6 +201,15 @@ describe('Historia 13.3 — se excluye, pero se dice con su motivo', () => {
 
     expect(seleccion.citas.map((c) => c.slug)).not.toContain('atribuida');
     expect(seleccion.fuera.find((f) => f.slug === 'atribuida')!.motivo).toContain('Personaje');
+  });
+
+  it('una atribuida queda fuera con el motivo de la pregunta 27, antes que cualquier otro (35.7)', () => {
+    const atribuida: Cita = { ...cita('atribuida', frase(400)), clase: 'atribuida' };
+    const seleccion = seleccionDeColeccion(publicada([atribuida, ...nBreves()]), autores);
+
+    expect(seleccion.citas.map((c) => c.slug)).not.toContain('atribuida');
+    expect(seleccion.fuera.find((f) => f.slug === 'atribuida')!.motivo).toBe(MOTIVO_DE_ATRIBUIDA_FUERA_DE_LA_PIEZA);
+    expect(MOTIVO_DE_ATRIBUIDA_FUERA_DE_LA_PIEZA).toContain('pregunta 27');
   });
 
   it('un Autor cuya ficha no trae nombre queda fuera por la misma razón', () => {

@@ -14,7 +14,7 @@ import type { APIRoute } from 'astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { DESCRIPCION_DEL_SITIO, MARCA } from '../lib/marca.ts';
-import { fijacionesDeclaradas } from '../lib/portada.ts';
+import { fijacionesDeclaradas, fijacionesSinAtribuidas } from '../lib/portada.ts';
 import { conjuntoPublicable } from '../lib/publicado.ts';
 import { canalRss, entradasDelCanal } from '../lib/sindicacion.ts';
 
@@ -25,7 +25,8 @@ export const GET: APIRoute = async ({ site }) => {
     aptasParaPortada(conjunto.citas),
     conjunto.autores,
     jornada,
-    fijacionesDeclaradas(portada),
+    // Historia 35.7 — sin las fijaciones que nombran una atribuida (pregunta 22).
+    fijacionesSinAtribuidas(fijacionesDeclaradas(portada), conjunto.citas),
   );
 
   return new Response(

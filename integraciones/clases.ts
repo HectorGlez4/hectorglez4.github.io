@@ -4,8 +4,9 @@
  * El esquema juzga cada Cita sola. Esta integración juzga las relaciones con
  * `fallosDeClases` (`tools/lib/clases.ts`): que toda Cita publicada esté en
  * `corpus/clases-de-cita.yml` con su clase, que ningún slug tenga dos, que la de siempre sea de
- * un Autor de dominio público y la atribuida de un dueño con derechos vigentes. Lee el registro
- * solo para romper: ningún byte de `dist/` sale de él.
+ * un Autor de dominio público y la atribuida de un dueño con derechos vigentes. Desde la 35.7
+ * compara además cada atribuida con `corpus/formas-vedadas.yml`. Lee los dos registros solo para
+ * romper: ningún byte de `dist/` sale de ellos.
  *
  * Como las claves de orden (`integraciones/claves.ts`): rompe en `astro:build:start` y solo
  * avisa en `astro dev`.
@@ -24,6 +25,7 @@ import {
 import { fallosDeClases } from '../tools/lib/clases.ts';
 import { fallosDeAtribuidas, lineaDelBuild, textoDeVariante } from '../tools/lib/atribuidas.ts';
 import { claseDe, esAtribuida } from '../src/lib/clase.ts';
+import { leerFormasVedadas } from '../tools/lib/formasVedadas.ts';
 
 /** La ruta relativa a la raíz, con barras `/`, que es como se teclea. */
 function relativaALaRaiz(raiz: string, ruta: string): string {
@@ -38,11 +40,13 @@ export default function clasesDeCita(): AstroIntegration {
 
   async function revisar(): Promise<string[]> {
     const rutas = rutasDelCorpus(join(raiz, 'corpus'));
-    const [autores, citas, registro, fichas] = await Promise.all([
+    // Historia 35.7 — `corpus/formas-vedadas.yml` se lee solo para romper: ilegible, rompe.
+    const [autores, citas, registro, fichas, vedadas] = await Promise.all([
       leerAutores(rutas),
       leerCitas(rutas.citas),
       leerRegistroDeClases(rutas),
       leerFichasDeObra(rutas),
+      leerFormasVedadas(rutas),
     ]);
     const deClases = fallosDeClases(
       citas.map((c) => ({
@@ -81,13 +85,15 @@ export default function clasesDeCita(): AstroIntegration {
       autores,
       // Con su ruta relativa a la raíz: el fallo de un tope por Obra nombra el fichero de la ficha.
       fichas: fichas.map((f) => ({ ...f, ruta: relativaALaRaiz(raiz, f.ruta) })),
+      // Historia 35.7 — la comparación con las formas vedadas, contra lo versionado (AD-32).
+      vedadas,
     }).map(lineaDelBuild);
     return [...deClases, ...deAtribuidas];
   }
 
   const titular = (n: number) =>
     `Clases de Cita: ${n} ${n === 1 ? 'desacuerdo' : 'desacuerdos'} entre las Citas, sus Autores, ` +
-    'corpus/clases-de-cita.yml y la puerta de la atribuida (sus constantes, sus topes, sus Fichas de Obra). Toda Cita publicada está registrada con su clase, la de siempre es de ' +
+    'corpus/clases-de-cita.yml y la puerta de la atribuida (sus constantes, sus topes, sus Fichas de Obra, corpus/formas-vedadas.yml). Toda Cita publicada está registrada con su clase, la de siempre es de ' +
     'dominio público y la atribuida de un dueño con derechos vigentes, por su puerta y dentro de sus topes.';
 
   return {

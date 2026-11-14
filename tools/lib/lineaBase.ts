@@ -447,6 +447,8 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
       llegadas: [
         { deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' },
         { deDondeLlega: 'DESPLIEGUE_DEL_PASAJE', marca: 'el primer despliegue con valor en MAX_CARACTERES_DEL_PASAJE, no el merge' },
+        // Historia 35.7 — la Página de Cita atribuida, sin «Cómo citar» ni pasaje.
+        { deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA', marca: 'la primera Cita atribuida publicada en vivo, no el merge' },
       ],
     },
     palanca: 'quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor',

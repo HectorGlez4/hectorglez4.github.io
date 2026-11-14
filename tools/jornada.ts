@@ -169,9 +169,11 @@ try {
          */
         const aviso = !j.publicada
           ? '  ← ya no es una Cita publicada: ese día rotará otra'
-          : !j.apta
-            ? '  ← ya no está marcada apta para portada: ese día rotará otra'
-            : '';
+          : j.atribuida
+            ? '  ← es atribuida, y una atribuida no sale en portada (pregunta 22): ese día rotará otra'
+            : !j.apta
+              ? '  ← ya no está marcada apta para portada: ese día rotará otra'
+              : '';
         return `  ${j.pasada ? '·' : '→'} ${j.jornada}  ${j.cita}${aviso}`;
       });
 

@@ -86,7 +86,8 @@ import {
   type PlanDeFicha,
 } from './obras.ts';
 import { formaDeObra } from '../../src/lib/obras.ts';
-import { esAtribuida } from '../../src/lib/clase.ts';
+import { dueñoAutor, esAtribuida, esDeDominioPublico } from '../../src/lib/clase.ts';
+import { entradaVedada, registrarFormasVedadas, leerFormasVedadas, type MotivoDeFormaVedada } from './formasVedadas.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
 import { negativaPorAlcance } from './alcance.ts';
@@ -820,7 +821,10 @@ export async function documentarCita(
  * (AD-10), así que el sitio del motivo es el mensaje del commit que mueve el fichero; un
  * registro de retiradas sería un segundo origen de verdad sobre algo que `git log` ya
  * cuenta mejor. Que la orden lo exija es lo que impide que la retirada ocurra sin que nadie
- * lo haya pensado, y que lo devuelva escrito es para poder copiarlo al commit.
+ * lo haya pensado, y que lo devuelva escrito es para poder copiarlo al commit. Lo único que
+ * sí se anota es la **forma** del texto en `corpus/formas-vedadas.yml` (Historia 35.7), con un
+ * motivo del conjunto cerrado y derivado —`retirada` o `cambio-de-clase`—, para que lo retirado
+ * no vuelva como atribuida; el motivo tecleado sigue yendo solo al commit.
  */
 export async function retirarCita(
   rutas: Rutas,
@@ -852,6 +856,22 @@ export async function retirarCita(
   }));
   if (negativa !== undefined) return negativa;
 
+  /*
+   * Historia 35.7 — la forma de lo que se retira queda vedada a la atribuida (AD-32), con su
+   * motivo derivado y nunca tecleado: `cambio-de-clase` si su Autor ya no es de dominio público
+   * —vive, o su plazo corre: la Cita vuelve como atribuida con otro slug—, `retirada` si no. El
+   * registro se lee antes de tocar nada: ilegible, no se retira.
+   */
+  try {
+    await leerFormasVedadas(rutas);
+  } catch (fallo) {
+    return { ok: false, motivos: [`${fallo instanceof Error ? fallo.message : String(fallo)} No se ha retirado nada.`] };
+  }
+  const autorDeLaCita = cita.autor === undefined ? undefined : (await leerAutores(rutas)).find((a) => a.slug === cita.autor);
+  const motivoVedado: MotivoDeFormaVedada =
+    autorDeLaCita !== undefined && !esDeDominioPublico(dueñoAutor(autorDeLaCita)) ? 'cambio-de-clase' : 'retirada';
+  const vedada = entradaVedada(cita.texto, motivoVedado, fechaLocal(new Date()), slug);
+
   const censoAntes = await leerCensoBruto(rutas);
   const censoDespues =
     censoAntes === undefined ? undefined : censoSinLaCita(censoAntes, slug);
@@ -876,6 +896,31 @@ export async function retirarCita(
     };
   }
 
+  // Historia 35.7 — se anota la forma; si no se puede, la Cita vuelve a su sitio y no se retira.
+  if (vedada !== undefined) {
+    try {
+      await registrarFormasVedadas(rutas, [vedada]);
+    } catch (fallo) {
+      let devuelta = false;
+      try {
+        await mover(destino, dirname(cita.ruta));
+        devuelta = true;
+      } catch {
+        /* lo dice el motivo */
+      }
+      if (devuelta && censoAntes !== undefined && censoDespues !== undefined) await escribirCenso(rutas, censoAntes);
+      return {
+        ok: false,
+        motivos: [
+          `No se pudo anotar la forma en corpus/formas-vedadas.yml: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+          devuelta
+            ? 'La Cita ha vuelto a corpus/citas/ y el censo está como estaba: no se ha retirado nada.'
+            : `Y la Cita no pudo volver: está en ${destino}. Devuélvala a ${dirname(cita.ruta)} a mano.`,
+        ],
+      };
+    }
+  }
+
   // Historia 22.2 — si esta Cita era la que sostenía el título de su ficha, se pone al día.
   const obraRetirada = cita.procedencia?.obra;
   const titulos =
@@ -892,6 +937,9 @@ export async function retirarCita(
       `«${slug}» retirada a ${rutas.revision} el ${fechaLocal(new Date())}.`,
       `  Motivo: ${motivo.trim()}`,
       `  Huella del texto retirado: ${huellaDeTexto(cita.texto)}`,
+      ...(vedada !== undefined
+        ? [`  Su forma queda vedada a la atribuida en corpus/formas-vedadas.yml (${vedada.motivo}).`]
+        : []),
       censoDespues === undefined
         ? `No estaba en el censo de ${FICHERO_DEL_CENSO}; siguen ${pendientes} pendientes.`
         : `Sale del censo de ${FICHERO_DEL_CENSO}: quedan ${pendientes} pendientes de cotejo.`,

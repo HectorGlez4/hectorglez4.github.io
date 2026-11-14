@@ -11,6 +11,7 @@
  */
 
 import { gradoDeProcedencia, type GradoDeProcedencia, type Procedencia } from './admision.ts';
+import { esAtribuida } from './clase.ts';
 
 export interface CitaParaAuditar {
   slug: string;
@@ -19,6 +20,8 @@ export interface CitaParaAuditar {
   procedencia?: Procedencia;
   /** La Fuente declarada, si la hay: solo importa su presencia (Historia 19.1). */
   fuente?: unknown;
+  /** Historia 35.7 — la clase, tal como la lee `esAtribuida`: la atribuida no entra en SM-C1. */
+  clase?: unknown;
 }
 
 export interface Recuento {
@@ -31,7 +34,13 @@ export interface Recuento {
 }
 
 export interface AuditoriaDelCorpus {
+  /** Las publicadas de la clase de siempre: SM-C1 no cuenta la atribuida (Historia 35.7). */
   publicadas: Recuento;
+  /**
+   * Cuántas atribuidas hay publicadas, aparte (FR-16 v9.1): ni en el numerador ni en el
+   * denominador de la procedencia completa.
+   */
+  atribuidas: number;
   /** Un recuento por Autor, ordenado de peor a mejor salud: lo que hay que atender. */
   porAutor: (Recuento & { autor: string })[];
 }
@@ -54,7 +63,13 @@ function recontar(citas: CitaParaAuditar[]): Recuento {
   };
 }
 
-export function auditar(citas: CitaParaAuditar[]): AuditoriaDelCorpus {
+export function auditar(todas: CitaParaAuditar[]): AuditoriaDelCorpus {
+  /*
+   * Historia 35.7 — la procedencia completa y SM-C1 se calculan solo sobre la clase de siempre
+   * (SM-C1 v9.1): sacar del denominador lo que no se comprobó contra su documento subiría la
+   * cifra sin que el Corpus mejorara. Las atribuidas se cuentan aparte.
+   */
+  const citas = todas.filter((c) => !esAtribuida(c));
   const porAutor = new Map<string, CitaParaAuditar[]>();
   for (const cita of citas) {
     // Historia 35.4 — la Cita de un Personaje sin Autor no cuenta para ninguno.
@@ -66,6 +81,7 @@ export function auditar(citas: CitaParaAuditar[]): AuditoriaDelCorpus {
 
   return {
     publicadas: recontar(citas),
+    atribuidas: todas.length - citas.length,
     porAutor: [...porAutor.entries()]
       .map(([autor, suyas]) => ({ autor, ...recontar(suyas) }))
       .sort(
@@ -95,6 +111,8 @@ export function sinTraduccionDeclarada(
 ): { total: number; porAutor: { autor: string; citas: number }[] } {
   const porAutor = new Map<string, number>();
   for (const c of citas) {
+    // Historia 35.7 — la atribuida no entra en la salud del Corpus.
+    if (esAtribuida(c)) continue;
     // Solo las que tienen documento: una Cita sin Fuente no puede traer la traducción que
     // su documento declararía, y contarla mezclaría dos deudas distintas.
     if (c.fuente === undefined || c.fuente === null) continue;

@@ -43,6 +43,7 @@ import { dueñoDeCita, dueñoDeFicha, fichaDeCita, indiceDeFichas, type FichaDeO
 import { formaParaComparar, parecidoEntre, type FormaParaComparar } from './parecido.ts';
 import { motivoDeAtestiguacionesEscasas } from '../../src/lib/admision.ts';
 import type { PlanDeFicha } from './obras.ts';
+import { describirFormaVedada, vedanALaAtribuida, type FormaVedada } from './formasVedadas.ts';
 
 /** Los cinco valores que gobiernan la puerta. Sin alguno, está cerrada. */
 export interface ValoresDeLaPuerta {
@@ -154,6 +155,11 @@ export interface EntradaDelJuicio {
   comparables?: readonly CitaParaAtribuidas[];
   /** Solo se juzgan estas atribuidas (por slug); por omisión, todas las de `citas`. */
   juzgar?: ReadonlySet<string>;
+  /**
+   * Historia 35.7 — las formas vedadas de `corpus/formas-vedadas.yml`: una atribuida cuyo texto o
+   * Variante coincide con una que la veda (`vedanALaAtribuida`) no se publica.
+   */
+  vedadas?: readonly FormaVedada[];
   valores?: ValoresDeLaPuerta;
   referencia?: ReferenciaDeDerechos;
 }
@@ -364,7 +370,39 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
       break;
     }
   }
+
+  // ── Las formas vedadas (Historia 35.7, AD-32): la misma `parecidoEntre`, contra el registro ──
+  if (entrada.vedadas !== undefined && entrada.vedadas.length > 0) {
+    for (const c of juzgadas) {
+      const suyas = formasDe(c);
+      for (const vedada of vedanALaAtribuida(entrada.vedadas, c.slug)) {
+        const ajena = formaVedadaParaComparar(vedada.forma);
+        const coincidencia = suyas.map((suya) => parecidoEntre(suya, ajena)).find((x) => x !== undefined);
+        if (coincidencia === undefined) continue;
+        fallos.push(
+          deUna(
+            c,
+            `la atribuida «${c.slug}» coincide con la forma vedada ${describirFormaVedada(vedada)} de ` +
+              `corpus/formas-vedadas.yml (parecido ${coincidencia.parecido.toFixed(2)}): lo que no pasó el ` +
+              'cotejo, o se retiró, no vuelve como atribuida.',
+          ),
+        );
+        break;
+      }
+    }
+  }
   return fallos;
+}
+
+/** La forma de una entrada del registro para comparar, una vez por forma. */
+const FORMAS_VEDADAS = new Map<string, FormaParaComparar>();
+function formaVedadaParaComparar(forma: string): FormaParaComparar {
+  let f = FORMAS_VEDADAS.get(forma);
+  if (f === undefined) {
+    f = formaParaComparar(forma);
+    FORMAS_VEDADAS.set(forma, f);
+  }
+  return f;
 }
 
 /**

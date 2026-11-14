@@ -103,6 +103,19 @@ describe('Historia 35.1b — una atribuida no se fija (pregunta 22)', () => {
     expect(resultado.ok ? '' : resultado.motivos.join('\n')).toMatch(/«ana-atribuida» es atribuida.*pregunta 22/u);
     expect(existsSync(rutas.portada)).toBe(false);
   });
+
+  it('listar marca muda la fijación escrita a mano que nombra una atribuida, aunque esté marcada (35.7)', async () => {
+    const rutas = await corpusDePrueba({ fijaciones: { [MANANA]: 'ana-atribuida' } });
+    await writeFile(
+      join(rutas.citas, 'ana--atribuida.md'),
+      cita('ana-atribuida', true).replace('---\n', '---\nclase: "atribuida"\n'),
+      'utf8',
+    );
+    const inventario = await inventarioDeJornadas(rutas, HOY);
+    expect(inventario.ok).toBe(true);
+    if (!inventario.ok) return;
+    expect(inventario.jornadas[0]).toMatchObject({ publicada: true, apta: false, atribuida: true });
+  });
 });
 
 describe('Historia 13.1 — fijar varias jornadas de una sentada', () => {

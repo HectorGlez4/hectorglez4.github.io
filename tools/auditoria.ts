@@ -13,6 +13,7 @@ import { auditar, sinTraduccionDeclarada, type CitaParaAuditar } from '../src/li
 import { leerAutores, leerCensoDeCotejo, leerCitas, rutasDelCorpus } from './lib/corpus.ts';
 import { resumenDeCotejo } from './lib/cotejo.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
+import { bajasPorCambioDeClase, leerFormasVedadas } from './lib/formasVedadas.ts';
 
 const argumentos = process.argv.slice(2);
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
@@ -49,6 +50,20 @@ const traducidasSinTraduccion = sinTraduccionDeclarada(
   deTradicionOtra,
 );
 
+/*
+ * Historia 35.7 — SM-C1 se calcula solo sobre la clase de siempre (`auditar` deja fuera la
+ * atribuida), y el informe da aparte cuántas atribuidas hay publicadas y cuántas bajas por cambio
+ * de clase anota `corpus/formas-vedadas.yml` desde que existe (FR-16 v9.1). Un registro ilegible
+ * no tumba el informe: la cifra se omite y se dice por qué, nunca se escribe cero.
+ */
+let bajasPorCambio: number | undefined;
+let falloDeVedadas: string | undefined;
+try {
+  bajasPorCambio = bajasPorCambioDeClase(await leerFormasVedadas(rutas));
+} catch (fallo) {
+  falloDeVedadas = fallo instanceof Error ? fallo.message : String(fallo);
+}
+
 if (argumentos.includes('--json')) {
   process.stdout.write(
     `${JSON.stringify(
@@ -57,6 +72,7 @@ if (argumentos.includes('--json')) {
         enRevision: enRevision.length,
         cotejo,
         traducidasSinTraduccion,
+        ...(bajasPorCambio !== undefined ? { bajasPorCambioDeClase: bajasPorCambio } : { bajasSinLeer: falloDeVedadas }),
       },
       null,
       2,
@@ -69,7 +85,7 @@ if (argumentos.includes('--json')) {
     'Salud del Corpus',
     '════════════════',
     '',
-    `Citas publicadas:            ${total.total}`,
+    `Citas publicadas:            ${total.total}  (de la clase de siempre: SM-C1 no cuenta las atribuidas)`,
     `Con procedencia completa:    ${total.completa}  ` +
       `(${porcentajeEnEspañol(total.porcentajeCompleta)} %)`,
     `Con procedencia parcial:     ${total.parcial}`,
@@ -101,6 +117,15 @@ if (argumentos.includes('--json')) {
       ? 'Ninguna Cita publicada queda sin cotejar: el censo está vacío.'
       : 'Son las anteriores a la v3, sin documento de Fuente. Las saca del censo la 11.4.',
     `Traducidas sin traducción:   ${traducidasSinTraduccion.total}  (con documento, de Autor de tradición «otra»; una cifra, no un error)`,
+    '',
+    // Historia 35.7 — la atribuida, aparte (FR-16 v9.1).
+    `Atribuidas publicadas:       ${informe.atribuidas}  (fuera de SM-C1: ni en el numerador ni en el denominador)`,
+    bajasPorCambio !== undefined
+      ? `Bajas por cambio de clase:   ${bajasPorCambio}  (de corpus/formas-vedadas.yml)`
+      : `Bajas por cambio de clase:   sin leer — ${falloDeVedadas}`,
+    ...(bajasPorCambio !== undefined && bajasPorCambio > 0
+      ? ['Cada baja por cambio de clase es una Cita que salió de SM-C1: léase como una bajada de SM-C1.']
+      : []),
     '',
     'Por Autor — de peor a mejor salud',
     '─────────────────────────────────',

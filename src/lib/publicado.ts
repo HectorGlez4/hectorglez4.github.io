@@ -358,15 +358,21 @@ export function autoresPublicados(autores: readonly Autor[], citas: readonly Cit
  * tiene clave de orden, como `agruparPorClave` de `src/lib/directorios.ts`: el build ya lo para
  * antes, en `integraciones/claves.ts`, y adivinarle un sitio escondería el fallo.
  */
-export function autoresDestacados(autores: readonly Autor[], citas: readonly Pick<Cita, 'autor'>[]): Autor[] {
+export function autoresDestacados(
+  autores: readonly Autor[],
+  citas: readonly (Pick<Cita, 'autor'> & { clase?: unknown })[],
+): Autor[] {
   const recuento = new Map<string, number>();
   for (const cita of citas) {
-    // Historia 35.4 — una Cita sin Autor no cuenta para ninguno.
+    // Historia 35.4 — una Cita sin Autor no cuenta para ninguno. Historia 35.7 — la atribuida no
+    // suma a ningún Autor (AD-11): los destacados cuentan solo la clase de siempre.
+    if (esAtribuida(cita)) continue;
     if (cita.autor !== undefined) recuento.set(cita.autor, (recuento.get(cita.autor) ?? 0) + 1);
   }
 
   const publicados = autores
-    .filter((autor) => (recuento.get(autor.slug) ?? 0) > 0)
+    // Historia 35.7 — un Autor `vivo` no entra: no es de la clase de siempre (AD-1).
+    .filter((autor) => autor.vivo !== true && (recuento.get(autor.slug) ?? 0) > 0)
     .map((autor) => {
       if (autor.ordenAlfabetico === undefined) {
         throw new Error(
@@ -433,15 +439,18 @@ export function esCitaDocumentada(cita: Cita): boolean {
  * La línea de cifras con la que abre la portada — Historia 28.1, AD-11, UX-DR56.
  *
  * Es la **única** redactora de la línea: ni la página la compone ni `tools/lib/cifras.ts` cuenta
- * por ella. n son las Citas publicadas, m los Autores publicados (`autoresPublicados`, la misma
- * regla que las páginas de Autor) y k las Citas documentadas (`esCitaDocumentada`).
+ * por ella. n son las Citas publicadas de las dos clases, m los Autores publicados
+ * (`autoresPublicados`, la misma regla que las páginas de Autor; nunca los Personajes) y k las
+ * Citas de la clase de siempre documentadas (`esCitaDocumentada`, sin las que `esAtribuida`
+ * reconoce) — Historia 35.7, FR-9 v9.1.
  *
  * **Si queda censo se decide sin leer el fichero del censo de pendientes.** La puerta de la
  * Historia 11.2 —`cotejoDeCitas()`, la integración enganchada en `astro.config.mjs`— rompe el
  * build si una Cita publicada sin `fuente` no está censada, si una censada declara `fuente` o si
  * un slug censado no es una Cita publicada: en todo build que llega aquí, «queda censo» es
- * exactamente «k < n». Mientras quede, la línea da k y **nunca** dice «cada una»; con el censo
- * vacío, todas están cotejadas y lo dice así.
+ * exactamente «k < n» entre las de siempre. Mientras quede —o haya alguna atribuida publicada,
+ * que no se coteja—, la línea da k y **nunca** dice «cada una»; con el censo vacío y ninguna
+ * atribuida, todas están cotejadas y lo dice así.
  *
  * La redacción es la de la UX v8.2 (UX-DR56), que manda: «cada una cotejada con el texto de su
  * fuente», y con censo la forma con «;». AD-11 de la espina dice todavía «cada una con su fuente»;
@@ -455,7 +464,9 @@ export function lineaDeCifras(citas: readonly Cita[], autores: readonly Autor[])
   const n = citas.length;
   if (n === 0) return undefined;
   const m = autoresPublicados(autores, citas).length;
-  const k = citas.filter(esCitaDocumentada).length;
+  // Historia 35.7 — k cuenta solo lo cotejado de la clase de siempre: la atribuida no se coteja,
+  // así que con alguna publicada k < n y la línea nunca dice «cada una» (UX-DR57).
+  const k = citas.filter((c) => !esAtribuida(c) && esCitaDocumentada(c)).length;
   const deCitas = `${milesEnEspañol(n)} ${n === 1 ? 'cita' : 'citas'}`;
   const deAutores = `de ${milesEnEspañol(m)} ${m === 1 ? 'autor' : 'autores'}`;
   if (k < n) {

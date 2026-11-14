@@ -158,6 +158,27 @@ distingue a un Autor del homónimo que el Corpus no desambigua —«Séneca» co
 Cuando el documento no declara autor —o firma «Anónimo», que es lo mismo—, el informe de
 `extraer` lo dice —«Autor sin cotejar»— para que se vea que la puerta no actuó.
 
+**Lo que se rechaza o se retira no vuelve como atribuida** (Historia 35.7, AD-32).
+`corpus/formas-vedadas.yml` **solo añade** `{forma, slug?, motivo, fecha}` —la forma canónica de
+`normalizar`, con `motivo` de `cotejo-fallido | sin-procedencia | retirada | cambio-de-clase`—, y lo
+escriben solas las órdenes: `revisar --rechazar` anota cada candidata de siempre antes de borrarla
+(`sin-procedencia` si no trae Procedencia, `cotejo-fallido` si no), la aprobación anota la de siempre
+que deja en revisión por el cotejo (sin Fuente) o por la Procedencia —sin repetir una entrada igual—,
+y `documentar --retirar` anota lo que retira. El alta, la aprobación y `npm run atribuida` se niegan
+ante una atribuida cuyo texto o Variante coincide (`parecidoEntre`) con una forma de ahí, nombrando
+la entrada, y el build rompe por lo mismo (lo lee solo para romper). Una entrada `cambio-de-clase`
+no veda nada, ni una con `slug` a la Cita de ese slug. No se edita a mano ni se siembra con las
+candidatas de `corpus/_revision/`; con el registro ilegible, rechazar, aprobar y retirar se niegan
+sin escribir. Que solo añada lo comprueba `npm test` contra el primer padre, como el de clases, y
+un commit que solo lo toca no fecha ni avisa.
+
+**Lo que cuenta solo la clase de siempre** (Historia 35.7, AD-11): la línea de cifras de la portada
+(k, y «cada una» solo sin atribuidas), los destacados y el suelo, el hueco y el margen de
+`npm run huecos`/`objetivo`, el cruce por época (un Autor `vivo` no siembra ninguna), la aptitud de
+portada y sus fijaciones, la Pieza (pregunta 27) y la procedencia completa de `tools/auditoria.ts` y
+de la sesión registrada (SM-C1). La auditoría da aparte las atribuidas publicadas y las bajas por
+cambio de clase. `MIN_CITAS_POR_TEMA` sigue contando las dos.
+
 **Las biografías no son obras, y no se siembran.** La semblanza de un Autor sale de una Fuente
 **mutable** —Wikipedia en español—, que solo entra por revisión: la misma orden, con el enlace
 permanente de una revisión (`oldid=N`), y sin él se niega con código 1 sin pedir nada:
@@ -750,8 +771,11 @@ que la orden lee sin nombrar ninguna ruta. Ningún módulo de `src/`, `integraci
 (2026-10-25, la jornada UTC en que la 23 llegó al sitio en vivo; se lo dio la 23.11, en un commit
 aparte),
 `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` (vacía; la anota él el día de la 25.3 y de la 25.7) y
-`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7) y `DESPLIEGUE_DE_CITAR_Y_LLEVARSE` (sin
-valor; la jornada UTC en que termina «Desplegar» de la Épica 30, que pone él en un commit aparte).
+`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7), `DESPLIEGUE_DE_CITAR_Y_LLEVARSE` (sin
+valor; la jornada UTC en que termina «Desplegar» de la Épica 30, que pone él en un commit aparte) y
+`DESPLIEGUE_DE_LA_ATRIBUIDA` (sin valor; la jornada UTC del primer día con una Cita atribuida
+publicada en vivo, nunca la del merge; su corte parte `sm8` y `continuacion-de-cita`, y SM-C5 la
+declara entre sus llegadas — Historia 35.7).
 Ningún agente les da valor. Los **cortes de
 serie** viven en `CORTES_DE_SERIE_DECLARADOS`, una lista de constantes de despliegue sin ninguna
 fecha escrita —`CORTES_DE_SERIE` filtra las que llegaron y `CORTES_DE_SM8` es su proyección—: un
@@ -1005,6 +1029,12 @@ código 2: una retirada sin motivo no es una retirada, es una desaparición. Y s
 código 1, sin mover nada, si la retirada deja otra Cita a más de tres saltos de la portada
 —un Tema que cae bajo `MIN_CITAS_POR_TEMA`—, nombrándola con su Tema y su recuento (NFR-5,
 Historia 26.8); para comprobarlo lee el Corpus entero, y un fichero ilegible también la niega.
+
+**Retirar anota la forma** en `corpus/formas-vedadas.yml` (Historia 35.7), con un motivo derivado y
+nunca tecleado: `cambio-de-clase` si el Autor de la Cita ya no es de dominio público —vive, o su plazo
+corre: la Cita vuelve como atribuida con otro slug—, y `retirada` en lo demás. El parte lo dice; si
+el registro no se deja leer, o no se puede anotar, no se retira nada (la Cita vuelve a su sitio). El
+motivo tecleado sigue yendo solo al commit.
 
 ## Retirar un Autor
 

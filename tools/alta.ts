@@ -70,6 +70,7 @@ import {
   slugsConOtraClase,
 } from './lib/clases.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra, type PlanDeFicha } from './lib/obras.ts';
+import { leerFormasVedadas } from './lib/formasVedadas.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './lib/alcance.ts';
 import type { TemaBajoUmbral } from '../src/lib/publicado.ts';
 
@@ -232,6 +233,8 @@ export async function darDeAltaLote(
   const slugsDePersonaje = new Set((await leerPersonajes(rutas)).map((p) => p.slug));
   // Historia 35.1 — el registro de clases se lee antes de escribir nada: ilegible, nada se escribe.
   const registro = await leerRegistroDeClases(rutas);
+  // Historia 35.7 — las formas vedadas a la atribuida, antes de escribir nada: ilegibles, nada se escribe.
+  const vedadas = await leerFormasVedadas(rutas);
   const temas = await leerTemas(rutas);
   const yaPublicadas = await leerCitas(rutas.citas);
   const enRevisionYa = await leerCitas(rutas.revision);
@@ -716,6 +719,7 @@ export async function darDeAltaLote(
             ...delLote.filter((_, i) => i !== indice && !apartadas.has(i)),
           ],
           juzgar: new Set([propia.slug]),
+          vedadas,
           ...(opciones.puerta !== undefined ? { valores: opciones.puerta } : {}),
         });
         motivos.push(...motivosDe(fallos, propia.slug));

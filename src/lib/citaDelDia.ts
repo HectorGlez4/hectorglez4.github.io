@@ -20,6 +20,7 @@ import type { Autor, Cita } from './publicado.ts';
 import { ordenDeLaListaDeObras, type ObraResuelta } from './obras.ts';
 import { compararPorClave } from './normalizar.ts';
 import { OBRAS_DE_LA_PORTADA } from './umbrales.ts';
+import { esAtribuida } from './clase.ts';
 
 /** Una jornada en ISO 8601, `AAAA-MM-DD`. */
 export type Jornada = string;
@@ -147,9 +148,14 @@ export function citaDelDia(
   return { cita: orden[indice], fijada: false };
 }
 
-/** Las Citas marcadas como aptas para portada — FR-15, marcado por `tools/portada.ts`. */
+/**
+ * Las Citas marcadas como aptas para portada — FR-15, marcado por `tools/portada.ts`.
+ *
+ * Historia 35.7 — una atribuida nunca está entre las aptas, aunque una ficha a mano la marcara
+ * (pregunta 22): lo pregunta a `esAtribuida`, el único lector de la clase.
+ */
 export function aptasParaPortada(citas: Cita[]): Cita[] {
-  return citas.filter((c) => c.aptaParaPortada);
+  return citas.filter((c) => c.aptaParaPortada && !esAtribuida(c));
 }
 
 /** El resto de dividir por `divisor` (> 0), siempre entre 0 y `divisor` − 1, también con `n` negativo. */

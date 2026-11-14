@@ -37,6 +37,7 @@ import LoQueRota from '../components/LoQueRota.astro';
 import Rotulo from '../components/Rotulo.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
+import { fijacionesSinAtribuidas } from '../lib/portada.ts';
 import {
   ETIQUETA_DE_LA_BUSQUEDA,
   PARAMETROS_DE_LA_BUSQUEDA,
@@ -91,7 +92,12 @@ const cifras = lineaDeCifras(conjunto.citas, conjunto.autores);
 const colecciones = conjunto.colecciones;
 
 const jornada = jornadaDelBuild(process.env, new Date());
-const seleccion = citaDelDia(aptasParaPortada(conjunto.citas), jornada, portada.fijaciones);
+// Historia 35.7 — una fijación que nombra una atribuida se descarta (pregunta 22).
+const seleccion = citaDelDia(
+  aptasParaPortada(conjunto.citas),
+  jornada,
+  fijacionesSinAtribuidas(portada.fijaciones, conjunto.citas),
+);
 const autorDelDia = seleccion
   ? conjunto.autores.find((a) => a.slug === seleccion.cita.autor)
   : undefined;

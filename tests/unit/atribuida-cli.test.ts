@@ -188,6 +188,22 @@ describe('Historia 35.6 — `texto` y `variante`', () => {
     expect(datos).toEqual({ ...previos, texto: nuevo });
   });
 
+  it('un texto nuevo igual a una forma vedada se niega nombrando la entrada (35.7)', async () => {
+    const directorio = await enDisco();
+    const nuevo = 'Hasta el infinito y más allá, ¡guardián del cosmos!';
+    const forma = 'hasta el infinito y mas alla guardian del cosmos';
+    await writeFile(
+      join(directorio, 'formas-vedadas.yml'),
+      `formas:\n  - { forma: "${forma}", slug: "seneca-hasta-el-infinito", motivo: retirada, fecha: "2026-11-14" }\n`,
+      'utf8',
+    );
+    const antes = await instantanea(directorio);
+    const r = await cambiar(directorio, { tipo: 'texto', slug: A1, texto: nuevo });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivos.join('\n')).toContain(`forma vedada «${forma}» (retirada, 2026-11-14, seneca-hasta-el-infinito)`);
+    expect(await instantanea(directorio)).toEqual(antes);
+  });
+
   it('un texto parecido a la Variante, y no al texto, también vale', async () => {
     const directorio = await enDisco();
     const nuevo = 'Hasta el infinito y aún más allá, vigía de estrellas.';

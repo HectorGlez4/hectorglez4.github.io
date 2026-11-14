@@ -1,0 +1,21 @@
+# Formas vedadas a la Cita atribuida — Historia 35.7, Épica 35, AD-32
+#
+# QUÉ REGISTRA. La forma canónica (AD-3) de cada texto que no puede volver a entrar como
+# Cita atribuida: una candidata de la clase de siempre que no pasó el cotejo o no traía
+# Procedencia, y toda Cita retirada. Una línea por forma: forma, slug si lo hay, motivo
+# (cotejo-fallido, sin-procedencia, retirada o cambio-de-clase) y la jornada en que se anotó.
+#
+# SOLO AÑADE. Ninguna entrada se reescribe ni se borra. `npm test` comprueba que el fichero
+# del commit empieza, byte a byte, por el del commit padre.
+#
+# NO SE EDITA A MANO. Lo escriben `npx tsx tools/revisar.ts --rechazar`, la aprobación que
+# deja una candidata de siempre en revisión por el cotejo o por la Procedencia, y
+# `npm run documentar -- --retirar`. Una entrada cambio-de-clase no veda nada, y una entrada
+# con slug no veda la Cita de ese mismo slug.
+#
+# Lo leen el alta, la aprobación y `npm run atribuida`, que se niegan ante una atribuida
+# cuyo texto o Variante coincide con una forma de aquí, y el build (integraciones/clases.ts),
+# que rompe por lo mismo. No es una colección: ningún byte de dist/ sale de él y no fecha ni
+# avisa ninguna superficie.
+
+formas:

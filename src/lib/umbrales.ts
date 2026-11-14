@@ -244,6 +244,23 @@ export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
  */
 export const DESPLIEGUE_DEL_PASAJE: string | undefined = undefined;
 
+/**
+ * La llegada en vivo de la Cita atribuida — la Épica 35, AD-9, AD-13, Historia 35.7.
+ *
+ * Es la jornada UTC del **primer día en que hay una Cita atribuida publicada en vivo**: el
+ * despliegue que sigue a que Héctor dé valor a los topes y al buzón de la puerta y apruebe la
+ * primera. **Nunca la del merge**: con la puerta cerrada, el merge no cambia ninguna página. Si el
+ * merge y la primera atribuida llegan en el mismo despliegue, es la misma jornada. `undefined`
+ * mientras no haya llegado; **le da valor Héctor, en un commit aparte, y ningún agente la elige.**
+ *
+ * La primera atribuida cambia la Página de Cita —la atribuida no lleva «Cómo citar», pasaje ni
+ * edición— y trae la Página de Personaje, que emite su vista de superficie: su entrada en
+ * `CORTES_DE_SERIE_DECLARADOS` parte SM-8 y la continuación de la Página de Cita (con SM-C5), y
+ * nada más —ni la lectura, cuya unidad nueva no tiene serie de antes, ni la búsqueda, sin evento
+ * ni tramo nuevos—.
+ */
+export const DESPLIEGUE_DE_LA_ATRIBUIDA: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -294,7 +311,8 @@ export interface CorteLlegado extends CorteDeSerie {
  * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
  * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
  * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
- * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2).
+ * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2); la
+ * de la primera atribuida (35.7), SM-8 y la continuación de la Página de Cita.
  * Cada entrada nombra su constante en `deDondeLlega`, y una prueba lo coteja con su `jornada:`.
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
@@ -321,6 +339,12 @@ export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
     deDondeLlega: 'DESPLIEGUE_DEL_PASAJE',
     que: '“Lee el pasaje” en la Página de Cita',
     series: ['continuacion-de-cita'],
+  },
+  {
+    jornada: DESPLIEGUE_DE_LA_ATRIBUIDA,
+    deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA',
+    que: 'la primera Cita atribuida publicada',
+    series: ['sm8', 'continuacion-de-cita'],
   },
 ];
 

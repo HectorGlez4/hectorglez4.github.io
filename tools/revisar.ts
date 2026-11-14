@@ -213,12 +213,32 @@ if (aAprobar.length > 0) {
       `      Anótelas con «${ORDEN_SEMBRAR_CLASES}» antes de construir.`,
     );
   }
+  // Historia 35.7 — las formas de siempre que esta pasada deja vedadas a la atribuida.
+  for (const vedada of resultado.vedadas) {
+    lineas.push(`  ⊘ ${vedada.slug ?? vedada.forma}: su forma queda vedada a la atribuida (${vedada.motivo}) en corpus/formas-vedadas.yml.`);
+  }
+  if (resultado.vedadasSinAnotar !== undefined) {
+    fallo = true;
+    lineas.push(`  ! Las formas vedadas no se anotaron en corpus/formas-vedadas.yml: ${resultado.vedadasSinAnotar}`);
+  }
 }
 
 if (aRechazar.length > 0) {
-  const resultado = await rechazar(rutas, aRechazar);
+  let resultado: Awaited<ReturnType<typeof rechazar>>;
+  try {
+    resultado = await rechazar(rutas, aRechazar);
+  } catch (error) {
+    // Historia 35.7 — sin poder anotar las formas vedadas, no se rechaza ninguna.
+    process.stderr.write(
+      `${error instanceof Error ? error.message : String(error)}\nNo se ha rechazado ninguna candidata.\n`,
+    );
+    process.exit(1);
+  }
   lineas.push(`Rechazadas: ${resultado.rechazadas.length}`);
   for (const slug of resultado.rechazadas) lineas.push(`  – ${slug}`);
+  for (const vedada of resultado.vedadas) {
+    lineas.push(`  ⊘ ${vedada.slug ?? vedada.forma}: su forma queda vedada a la atribuida (${vedada.motivo}) en corpus/formas-vedadas.yml.`);
+  }
   for (const slug of resultado.noEncontradas) {
     fallo = true;
     lineas.push(`  ? ${slug} — no está entre las candidatas pendientes.`);

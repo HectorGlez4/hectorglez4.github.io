@@ -524,6 +524,20 @@ describe('Historia 13.2 — la orden rechaza en vez de descartar en silencio', (
     expect(await instantanea(corpus)).toEqual(antes);
   });
 
+  it('una atribuida se rechaza con 1, nombrando el slug y la pregunta 27, sin escribir nada (35.7)', async () => {
+    const corpus = await enDisco(
+      corpusCon({ 1: textoBreve(1) }, {
+        'citas/seneca--atribuida.md': citaValida({ slug: 'seneca-atribuida', texto: textoBreve(3), clase: 'atribuida' }),
+      }),
+    );
+    const antes = await instantanea(corpus);
+    const fallida = await correr(corpus, ['componer', '--red', 'instagram', slugDe(1), 'seneca-atribuida']);
+    expect(fallida.codigo).toBe(1);
+    expect(fallida.error).toContain('«seneca-atribuida» es atribuida');
+    expect(fallida.error).toContain('pregunta 27');
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
   it('un Autor sin nombre en su ficha se rechaza por la misma razón', async () => {
     const corpus = await enDisco(
       corpusCon({ 1: textoBreve(1), 2: textoBreve(2) }, {

@@ -369,6 +369,11 @@ export interface JornadaFijada {
    * otra Cita, que es lo que `citaDelDia` hace a propósito para no dejar la portada muda.
    */
   apta: boolean;
+  /**
+   * Historia 35.7 — la Cita es atribuida: nunca es apta (pregunta 22), aunque una ficha a mano la
+   * marcara, y la fijación queda muda.
+   */
+  atribuida: boolean;
 }
 
 /**
@@ -401,7 +406,8 @@ export async function inventarioDeJornadas(
         cita,
         pasada: jornada < hoy,
         publicada: porSlug.has(cita),
-        apta: porSlug.get(cita)?.aptaParaPortada === true,
+        apta: porSlug.get(cita)?.aptaParaPortada === true && !esAtribuida(porSlug.get(cita)!),
+        atribuida: porSlug.has(cita) && esAtribuida(porSlug.get(cita)!),
       })),
   };
 }

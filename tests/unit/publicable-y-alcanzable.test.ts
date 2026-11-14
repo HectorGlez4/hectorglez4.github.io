@@ -1129,14 +1129,16 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(clases(hijos[2])).toContain('del-dia');
     });
 
-    it('la línea dice las cifras del Corpus, con el censo vacío: «cada una cotejada»', async () => {
+    it('la línea dice las cifras del Corpus: con el censo vacío y atribuidas, sin «cada una» (35.7)', async () => {
       const html = await portada();
       const linea = /<p class="cifras[^"]*"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1].replace(/\s+/g, ' ').trim();
       // 53 Citas de Séneca, todas con Fuente: el andamio les escribe el documento. Y las
-      // `MIN_CITAS_POR_PERSONAJE` atribuidas de Séneca que dice Batman (35.3b), con Fuente: hasta
-      // la 35.7, que deja la línea en lo cotejado de la clase de siempre, cuentan en n.
+      // `MIN_CITAS_POR_PERSONAJE` atribuidas de Séneca que dice Batman (35.3b), también con
+      // Fuente: cuentan en n, pero k cuenta solo lo cotejado de la clase de siempre, así que con
+      // el censo vacío la línea va en la redacción 1 (UX-DR57, Historia 35.7).
+      const deSiempre = CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length;
       expect(linea).toBe(
-        `${CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length + MIN_CITAS_POR_PERSONAJE} citas de 1 autor, cada una cotejada con el texto de su fuente.`,
+        `${deSiempre + MIN_CITAS_POR_PERSONAJE} citas de 1 autor; ${deSiempre} cotejadas con el texto de su fuente.`,
       );
     });
 

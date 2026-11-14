@@ -175,6 +175,12 @@ export const FICHERO_DE_DESCARTES = 'descartes-de-candidatos.yml';
  */
 export const FICHERO_DE_CLASES = 'clases-de-cita.yml';
 
+/**
+ * El registro de formas vedadas a la atribuida — Historia 35.7, AD-32. Solo añade; lo leen y lo
+ * escriben `tools/lib/formasVedadas.ts`, y el build lo lee solo para romper.
+ */
+export const FICHERO_DE_FORMAS_VEDADAS = 'formas-vedadas.yml';
+
 export interface Rutas {
   raiz: string;
   citas: string;
@@ -351,6 +357,8 @@ export interface Rutas {
   descartesDeCandidatos: string;
   /** El registro de clases de Cita — Historia 35.1. Solo añade. */
   clasesDeCita: string;
+  /** El registro de formas vedadas a la atribuida — Historia 35.7. Solo añade. */
+  formasVedadas: string;
   /**
    * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
    *
@@ -394,6 +402,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     candidatosPorEpoca: join(raizCorpus, FICHERO_DE_CANDIDATOS),
     descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
     clasesDeCita: join(raizCorpus, FICHERO_DE_CLASES),
+    formasVedadas: join(raizCorpus, FICHERO_DE_FORMAS_VEDADAS),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }

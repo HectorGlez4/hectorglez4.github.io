@@ -51,6 +51,7 @@ import { REDES, enlaceConOrigen, esRedValida, type Red } from '../../src/lib/red
 import { rutaDeColeccion } from '../../src/lib/superficies.ts';
 import { admiteImagen } from '../../src/lib/tramos.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
+import { esAtribuida } from '../../src/lib/clase.ts';
 import { leerAutores, leerCitas, leerColecciones, type Rutas } from './corpus.ts';
 import {
   coleccionesParaHuecos,
@@ -287,6 +288,18 @@ export async function componerPieza(
       continue;
     }
 
+    /*
+     * Historia 35.7 — la Pieza reúne lo que el sitio promete, y la atribuida no se coteja: no entra
+     * en ninguna (pregunta 27, FR-30 v9.1). Se rechaza nombrándola.
+     */
+    if (esAtribuida(cita)) {
+      motivos.push(
+        `La Cita «${slug}» es atribuida, y una atribuida no entra en una Pieza (pregunta 27): ` +
+          'no se compone.',
+      );
+      continue;
+    }
+
     if (!admiteImagen(cita.texto)) {
       /*
        * La misma regla que le niega la Imagen de Cita, dicha con su nombre. No es un límite
@@ -311,6 +324,7 @@ export async function componerPieza(
      * Personaje se firma con él en todo lo que sale del sitio (`firmaDeCita`): compuesta aquí
      * saldría atribuida solo al Autor, o sin firma. Se rechaza, como en el material del Kit.
      */
+
     if (cita.personaje !== undefined) {
       motivos.push(
         `La Cita «${slug}» la dice un Personaje («${cita.personaje}»), y la Pieza solo firma ` +

@@ -15,7 +15,14 @@
 
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
-import { citaAdmisible } from '../../src/lib/admision.ts';
+import { citaAdmisible, gradoDeProcedencia } from '../../src/lib/admision.ts';
+import {
+  entradaVedada,
+  leerFormasVedadas,
+  registrarFormasVedadas,
+  type FormaVedada,
+  type MotivoDeFormaVedada,
+} from './formasVedadas.ts';
 import { cargaDeCandidata, type SeñalDeOrden } from '../../src/lib/ordenDeRevision.ts';
 import { esAparatoDeLaFuente, esTrozoDeCitaAjena, tienePuntuacionRota } from './extraccion.ts';
 import {
@@ -118,6 +125,13 @@ export interface CandidataEnRevision {
    * Se omite si no hay ninguna. Como `duplicaA`, señala y no bloquea nada.
    */
   parecidas?: Parecida[];
+  /**
+   * Historia 35.7 — una de siempre a la que el cotejo no deja publicarse (no declara Fuente:
+   * `motivoParaNoPublicar`): dejarla en revisión anota su forma en `corpus/formas-vedadas.yml`.
+   */
+  faltaCotejo?: true;
+  /** Historia 35.7 — una de siempre cuya Procedencia es ausente: lo mismo, con `sin-procedencia`. */
+  faltaProcedencia?: true;
   /** Si pasaría la puerta de admisión ahora mismo, y qué le falta si no. */
   admisible: boolean;
   motivos: string[];
@@ -331,6 +345,11 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
           : {}),
       ...(parecidas.has(candidata.slug) ? { parecidas: parecidas.get(candidata.slug)! } : {}),
       ...cargaYSeñales(candidata.texto ?? ''),
+      // Historia 35.7 — solo de la clase de siempre: la atribuida no se coteja ni se veda.
+      ...(!esAtribuida(candidata) && sinDocumento !== undefined ? { faltaCotejo: true as const } : {}),
+      ...(!esAtribuida(candidata) && gradoDeProcedencia(candidata.procedencia ?? undefined) === 'ausente'
+        ? { faltaProcedencia: true as const }
+        : {}),
       admisible:
         comprobacion.success &&
         sinDocumento === undefined &&
@@ -440,6 +459,24 @@ export interface ResultadoDeDecision {
    */
   avisos: { slug: string; duplicaA?: CandidataEnRevision['duplicaA']; parecidas: Parecida[] }[];
   noEncontradas: string[];
+  /**
+   * Historia 35.7 — las formas que la orden anotó en `corpus/formas-vedadas.yml`: las de siempre
+   * que rechaza, o que la aprobación deja en revisión por el cotejo o por la Procedencia.
+   */
+  vedadas: FormaVedada[];
+  /**
+   * Si la aprobación no pudo anotarlas —un fallo de disco—: el motivo. Lo aprobado sigue
+   * aprobado, y la orden sale con 1.
+   */
+  vedadasSinAnotar?: string;
+}
+
+/**
+ * El motivo con que se veda la forma de una candidata de siempre — Historia 35.7: sin Procedencia,
+ * `sin-procedencia`; en lo demás, `cotejo-fallido`.
+ */
+export function motivoDeLaCandidata(candidata: Pick<CandidataEnRevision, 'faltaProcedencia'>): MotivoDeFormaVedada {
+  return candidata.faltaProcedencia === true ? 'sin-procedencia' : 'cotejo-fallido';
 }
 
 /**
@@ -478,6 +515,7 @@ export async function aprobar(
     noEncontradas: [],
     conSaltos: [],
     avisos: [],
+    vedadas: [],
   };
 
   /*
@@ -502,6 +540,11 @@ export async function aprobar(
    * aprueba), y la clase de cada candidata se deriva de su Autor: no se teclea.
    */
   const registro = await leerRegistroDeClases(rutas);
+  // Historia 35.7 — las formas vedadas, antes de escribir nada: ilegibles, nada se aprueba.
+  const vedadas = await leerFormasVedadas(rutas);
+  // Las de siempre que esta pasada deja en revisión por el cotejo o por la Procedencia.
+  const porVedar: FormaVedada[] = [];
+  const hoyDeLaPasada = fechaLocal(new Date());
   const autorPorSlug = new Map((await leerAutores(rutas)).map((a) => [a.slug, a]));
   // Historia 35.2 — el Personaje de una candidata existe en corpus/personajes/, o el build rompería.
   const personajesDelCorpus = new Set((await leerPersonajes(rutas)).map((p) => p.slug));
@@ -569,6 +612,14 @@ export async function aprobar(
     }
     if (!candidata.admisible) {
       resultado.rechazadasPorAdmision.push({ slug, motivos: candidata.motivos });
+      /*
+       * Historia 35.7 — la de siempre que el cotejo o la Procedencia dejan en revisión no vuelve
+       * como atribuida: su forma se anota en `corpus/formas-vedadas.yml` (AD-32).
+       */
+      if (candidata.faltaCotejo === true || candidata.faltaProcedencia === true) {
+        const entrada = entradaVedada(candidata.texto ?? '', motivoDeLaCandidata(candidata), hoyDeLaPasada, slug);
+        if (entrada !== undefined) porVedar.push(entrada);
+      }
       continue;
     }
     if (candidata.personaje !== undefined && !personajesDelCorpus.has(candidata.personaje)) {
@@ -656,6 +707,7 @@ export async function aprobar(
         ],
         comparables: lote.filter((c) => c !== candidata).map(candidataParaAtribuidas),
         juzgar: new Set([propia.slug]),
+        vedadas,
         ...(opciones.puerta !== undefined ? { valores: opciones.puerta } : {}),
       });
       const suyos = motivosDe(fallos, propia.slug);
@@ -787,6 +839,13 @@ export async function aprobar(
     );
   } catch (fallo) {
     resultado.registroSinAnotar = fallo instanceof Error ? fallo.message : String(fallo);
+  }
+
+  // Historia 35.7 — las formas que esta pasada deja vedadas, en un solo añadido (sin repetir).
+  try {
+    resultado.vedadas = await registrarFormasVedadas(rutas, porVedar);
+  } catch (fallo) {
+    resultado.vedadasSinAnotar = fallo instanceof Error ? fallo.message : String(fallo);
   }
 
   /*
@@ -979,16 +1038,34 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
     noEncontradas: [],
     conSaltos: [],
     avisos: [],
+    vedadas: [],
   };
 
-  for (const slug of slugs) {
+  /*
+   * Historia 35.7 — una candidata de siempre rechazada no vuelve como atribuida: su forma se anota
+   * en `corpus/formas-vedadas.yml` **antes** de borrar nada, en un solo añadido. Si el registro no
+   * se deja leer o escribir, no se rechaza ninguna: lanza, y nada se ha borrado.
+   */
+  const encontradas: CandidataEnRevision[] = [];
+  for (const slug of [...new Set(slugs)]) {
     const candidata = lote.find((c) => c.slug === slug);
     if (candidata === undefined) {
       resultado.noEncontradas.push(slug);
       continue;
     }
+    encontradas.push(candidata);
+  }
+  const hoy = fechaLocal(new Date());
+  resultado.vedadas = await registrarFormasVedadas(
+    rutas,
+    encontradas
+      .filter((c) => !esAtribuida(c))
+      .map((c) => entradaVedada(c.texto ?? '', motivoDeLaCandidata(c), hoy, c.slug))
+      .filter((e): e is FormaVedada => e !== undefined),
+  );
+  for (const candidata of encontradas) {
     await rm(candidata.ruta, { force: true });
-    resultado.rechazadas.push(slug);
+    resultado.rechazadas.push(candidata.slug);
   }
 
   return resultado;
