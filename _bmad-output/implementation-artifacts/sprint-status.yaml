@@ -533,7 +533,7 @@ development_status:
   35-5-los-personajes-en-los-directorios-y-en-la-búsqueda: review  # v9-ralph 2026-11-14: Personajes en los Directorios (sección tras la A–Z en /autores/ y /obras/) y en /buscar/ (personaje=, optgroup, filtro de Pagefind); topes de los guiones de búsqueda y filtro subidos con la cifra medida; una pasada de revisión (2 parches); diferidos para Héctor en el spec
   35-6-la-variante-de-españa-y-la-única-orden-que-cambia-una-atribu: review  # v9-ralph 2026-11-15: la Variante de España de la atribuida y npm run atribuida, la única orden que cambia una atribuida (la puerta sigue cerrada en el árbol); dos pasadas de revisión; supuestos para Héctor en el spec
   35-7-lo-que-cuenta-solo-la-clase-de-siempre: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 22 parches; 8 diferidos para Héctor en el spec
-  35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: backlog
+  35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 28 parches; diferidos para Héctor en el spec (BUZON_DE_PETICIONES y las constantes de SM-C6 sin valor; EXPERIENCE.md 3.2.6 por bmad-ux)
   35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog  # bloqueada: tras la 32.4 (bloqueada para Héctor, bmad-ux), la 32.5, la 33.2 y la 35.4 (v9-ralph 2026-11-09)
   35-10-la-siembra-acotada-desde-brainyquote: backlog
   epic-35-retrospective: optional
