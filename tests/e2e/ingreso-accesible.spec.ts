@@ -19,6 +19,7 @@ import {
   paginaEnDist,
 } from '../unit/ayuda/construir.js';
 import { desviacionDelBarrido, sinDecidir } from './ayuda/barrido.ts';
+import { auditar } from './ayuda/desplegables.ts';
 
 /**
  * Historia 14.2 — la invitación a sostener el sitio, barrida **con el Modelo encendido**.
@@ -558,27 +559,34 @@ test.describe('encendida sigue sin ser un muro — NFR-10, UX-DR36', () => {
  * mira lo que el navegador tiene delante de cada enlace: sale a pestaña nueva y lo dice en su
  * nombre, `rel="sponsored noopener"`, y la declaración de afiliado le llega por
  * `aria-describedby`.
+ *
+ * Historia 32.4 — el bloque vive dentro de «Dónde leer esta obra», un `<details>` cerrado al
+ * cargar: axe no juzga el contraste de lo que no se pinta, así que la página se barre cerrada y
+ * otra vez con el desplegable abierto, y lo demás se mira con él abierto, como lo ve el visitante.
  */
 test.describe('las ediciones en venta encendidas pasan el barrido de accesibilidad', () => {
+  const bloque = (page: Page) => page.locator(`[${MARCA_DE_INGRESO}="afiliacion-de-libros"]`);
   const enlaces = (page: Page) => page.locator(`[${MARCA_DE_INGRESO}="afiliacion-de-libros"] a`);
 
-  test('la Página de Obra pasa la auditoría automática', async ({ page }) => {
+  /** Abre, con un clic en su `<summary>`, el desplegable que aloja el bloque, y exige verlo. */
+  async function abrirDondeLeer(page: Page): Promise<void> {
+    const desplegable = page.locator('details.desplegable', { has: bloque(page) });
+    await expect(desplegable).toHaveCount(1);
+    await expect(bloque(page)).toBeHidden();
+    await desplegable.locator(':scope > summary').click();
+    await expect(bloque(page)).toBeVisible();
+  }
+
+  test('la Página de Obra pasa la auditoría automática, cerrada y abierta', async ({ page }) => {
     await irA(page, OBRA);
-    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
-    const resumen = resultado.violations.flatMap((v) =>
-      v.nodes.map((n) => `${v.id}: ${v.help} — ${n.target.join(' ')}`),
-    );
-    expect(resumen, resumen.join('\n')).toEqual([]);
-    expect(await desviacionDelBarrido(page, resultado), `${OBRA}: el barrido no corrió lo que pide`).toEqual({
-      faltan: [],
-      sobran: [],
-    });
-    const dudas = sinDecidir(resultado);
-    expect(dudas, `${OBRA}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+    await auditar(page, OBRA, 'con «Dónde leer esta obra» cerrado');
+    await abrirDondeLeer(page);
+    await auditar(page, OBRA, 'con «Dónde leer esta obra» abierto');
   });
 
   test('cada enlace dice a dónde va, que abre pestaña nueva y que es de afiliado', async ({ page }) => {
     await irA(page, OBRA);
+    await abrirDondeLeer(page);
     await expect(enlaces(page)).toHaveCount(2);
     const nombres = [
       /^Edición impresa en Librería de Prueba \(se abre en una pestaña nueva\)$/,
@@ -602,6 +610,7 @@ test.describe('las ediciones en venta encendidas pasan el barrido de accesibilid
 
   test('el contraste del bloque pasa la regla de axe', async ({ page }) => {
     await irA(page, OBRA);
+    await abrirDondeLeer(page);
     const { violations } = await new AxeBuilder({ page })
       .include(`[${MARCA_DE_INGRESO}="afiliacion-de-libros"]`)
       .withRules(['color-contrast'])

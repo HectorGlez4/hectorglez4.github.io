@@ -681,7 +681,10 @@ describe('Historia 22.9 — encendida, construida', () => {
     // Contenido en el `<details>` de «Dónde leer esta obra» (32.4) y después del grupo «Gratis».
     const seccion = seccionDondeLeer(pagina);
     expect(seccion).toContain(bloque);
-    expect(seccion.indexOf('Gratis')).toBeGreaterThan(-1);
+    // El rótulo de grupo, no la palabra suelta: «Gratis» es el `p.rotulo-de-grupo`, antes del bloque.
+    const rotulo = seccion.search(/<p class="rotulo-de-grupo"[^>]*>Gratis<\/p>/);
+    expect(rotulo).toBeGreaterThan(-1);
+    expect(seccion.indexOf(bloque)).toBeGreaterThan(rotulo);
     expect(seccion.indexOf(bloque)).toBeGreaterThan(seccion.lastIndexOf('class="linea tomado"'));
     expect(pagina.split(bloque)).toHaveLength(2);
     // Una descripción que ya cierra con punto no lleva otro.

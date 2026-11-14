@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '0eb8fdaf5f6de5ee073bd9b5a8a6a606cde292cc'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-32-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-32-3-el-incipit-lo-declara-una-persona-y-la-pagina-lo-ensena-plegado.md'
@@ -19,6 +19,20 @@ deferred:
     location: >-
       src/pages/obra/[autor]/[slug]/[...page].astro
     severity: medium
+  - summary: >-
+      pendiente de Héctor (bmad-ux): con k = 1 y n > 1 la plantilla de UX-DR127 da «De esta edición se tomaron 1 de sus {n} citas.», sin concordancia.
+    evidence: |-
+      UX-DR127 fija literalmente «De esta edición se tomaron {k} de sus {n} citas.» y solo exceptúa k = n y n = 1; `textoDeLoTomado` la sigue al pie de la letra y `tests/unit/atribucion.test.ts` y `tests/unit/obra-pagina.test.ts` la fijan. Con dos Fuentes, una que aporta una sola Cita lo pinta en el sitio (revisión de la 32.4, blind-hunter y edge-case-hunter). La forma concordada —«se tomó 1 de sus {n} citas» o «se tomó una de sus {n} citas»— es redacción de la UX, no de la implementación.
+    location: >-
+      src/lib/atribucion.ts (textoDeLoTomado)
+    severity: medium
+  - summary: >-
+      La puerta de primera pantalla de 360 × 640 pasa con 1,5 px de margen (638,5 px) y es solo e2e, que el CI no corre.
+    evidence: |-
+      `tests/e2e/incipit.spec.ts` sobre la Obra sintética de Larra con Ficha técnica completa e incipit mide 638,5 px; cualquier píxel más bajo la Cabecera (la 25.6 «Compartir en» va bajo el listado, pero una métrica de fuente o la 33.2 dentro del desplegable cerrado no) la rompe, y solo se ve corriendo `npm run test:e2e` en local, como exige la épica antes del merge.
+    location: >-
+      tests/e2e/incipit.spec.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -136,6 +150,17 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 3: (high 0, medium 1, low 2)
+- defer: 2: (high 0, medium 1, low 1)
+- reject: 24
+- addressed_findings:
+  - `[medium]` `[patch]` El barrido de la afiliación encendida (`tests/e2e/ingreso-accesible.spec.ts`) auditaba «Ediciones en venta» dentro de un `<details>` cerrado: ahora abre «Dónde leer esta obra» con un clic en su `<summary>` (exigiendo el bloque oculto antes y visible después), barre la página cerrada y abierta con `auditar`, y mira nombres, descripción y contraste del bloque con él abierto.
+  - `[low]` `[patch]` `tests/unit/ediciones-en-venta.test.ts` buscaba la palabra «Gratis» en cualquier parte del `<details>`: ahora exige el `p.rotulo-de-grupo` «Gratis» y que el bloque de ventas vaya detrás de él.
+  - `[low]` `[patch]` SM-C4 no declaraba `palanca`: la gana con lo que dice el PRD §7 («si baja, se juzga lo que se movió»; lo decide Héctor), y `tests/unit/linea-base.test.ts` la exige.
+
 ## Design Notes
 
 - **Primera pantalla, estimación previa.** La 32.3 midió 669,5 px (Larra, Ficha técnica completa, salto y «Cómo empieza» cerrado). El salto costaba 24 + 44 = 68 px; «Dónde leer» cerrado cuesta 44 + filete, y «Cómo empieza» pierde su margen y su filete superior al pasar a hermano. Queda ≈ 646 px: probablemente por encima de 640. Si la medida lo confirma, es el Block If (lo decide Héctor con `bmad-ux`), no un ajuste de distancias por nuestra cuenta. En el Corpus real (sin Wikidata ni incipit) la prueba de toda página 1 cambia ≈ +2 px.
@@ -191,3 +216,22 @@ Baseline: 0eb8fdaf5f6de5ee073bd9b5a8a6a606cde292cc (la reanudación; el trabajo 
 - `tests/e2e/tipografia-calculada.spec.ts -g "cambian obra: cada" --update-snapshots` — regenerados y verdes.
 
 **Riesgos residuales.** La puerta de la primera pantalla pasa con 1,5 px de margen en el peor caso sintético (Larra con Ficha técnica completa e incipit): cualquier px más bajo la Cabecera la vuelve a romper. UX-DR124/UX-DR129 en los artefactos de planificación siguen diciendo otro sitio para «Cómo citar» hasta que Héctor lo asiente con `bmad-ux` (diferido).
+
+### Pasada de revisión 1 (2026-11-14)
+
+**Resumen.** Cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor). Lo que solo repite la divergencia de las decisiones 1 y 1b frente a UX-DR124/UX-DR129 y la épica no es hueco de intención: lo delegó Héctor (chat, 2026-11-14) y su asiento en DESIGN.md/EXPERIENCE.md ya estaba diferido para él (`bmad-ux`).
+
+**Ficheros de esta pasada.**
+- `tests/e2e/ingreso-accesible.spec.ts` — el barrido de la afiliación encendida abre «Dónde leer esta obra» por su `<summary>` y audita cerrada y abierta; nombres, descripción y contraste del bloque, con él abierto.
+- `tests/unit/ediciones-en-venta.test.ts` — «Gratis» como `p.rotulo-de-grupo`, antes del bloque de ventas.
+- `tools/lib/lineaBase.ts` — SM-C4 declara su `palanca` (PRD §7); `tests/unit/linea-base.test.ts` la exige.
+
+**Revisión.** 3 parches (0 high, 1 medium, 1 + 1 low), 2 diferidos (la concordancia de UX-DR127 con k = 1, para Héctor con `bmad-ux`; el margen de 1,5 px de la puerta de primera pantalla), 24 rechazados (entre ellos: las salidas de las páginas 2+ ya quedan fuera de la unidad por `lugarDe`, la medida de prosa la da `Desplegable.astro`, `citasSinDocumento` se queda por decisión del spec, la retirada del ancla es criterio de la historia, el `h3` de `EdicionesEnVenta` es de la 33.2, la isla de copiar ya la vigila `como-citar-obra-build.test.ts`, y la línea de `sprint-status.yaml` la escribe el cierre del bucle). Recomendación de revisión de seguimiento: `true` (parches 0 high, 1 medium, 2 low; puntuación 3 × 1 + 2 = 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/linea-base.test.ts` — 104 verdes; `tests/unit/ediciones-en-venta.test.ts` — 55 verdes.
+- `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` — 12 verdes (la Página de Obra, cerrada y abierta).
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` (desatendido) — 175 ficheros, 7.927 pruebas, verde.
+
+**Riesgos residuales.** Los de la pasada anterior, más la frase «se tomaron 1 de sus {n} citas» en el sitio hasta que Héctor redacte la forma concordada en UX-DR127.

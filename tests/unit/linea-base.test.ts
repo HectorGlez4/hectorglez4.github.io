@@ -1875,6 +1875,8 @@ describe('Historia 32.4 — SM-C4, la continuación desde el listado de la Pági
     expect(SM_C4.deDondeLlega).toBe('DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO');
     expect(SM_C4.tasas).toEqual(['continuacion-desde-listado']);
     expect(SM_C4.corte).toEqual({ serie: 'continuacion-de-obra', deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT' });
+    // Si salta, el informe nombra qué se juzga (PRD §7: «si baja, se juzga lo que se movió»).
+    expect(SM_C4.palanca).toMatch(/lo decide Héctor$/);
     // Es la llegada de un juicio, no un corte de serie.
     expect(CORTES_DE_SERIE_DECLARADOS.some((c) => c.que.includes('Obra como destino'))).toBe(false);
   });

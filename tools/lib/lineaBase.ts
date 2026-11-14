@@ -470,6 +470,9 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
     deDondeLlega: 'DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO',
     tasas: ['continuacion-desde-listado'],
     corte: { serie: 'continuacion-de-obra', deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT' },
+    // PRD §7, SM-C4 (v9): «si baja, se juzga lo que se movió». Qué se mueve lo decide Héctor.
+    palanca:
+      'juzgar lo que se movió sobre el listado de la página 1 de la Obra —«Dónde leer esta obra», la Ficha técnica y el incipit—; lo decide Héctor',
   },
   {
     nombre: 'la continuación de los Directorios',
