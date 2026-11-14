@@ -535,7 +535,7 @@ development_status:
   35-7-lo-que-cuenta-solo-la-clase-de-siempre: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 22 parches; 8 diferidos para Héctor en el spec
   35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 28 parches; diferidos para Héctor en el spec (BUZON_DE_PETICIONES y las constantes de SM-C6 sin valor; EXPERIENCE.md 3.2.6 por bmad-ux)
   35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog  # bloqueada: tras la 32.4 (bloqueada para Héctor, bmad-ux), la 32.5, la 33.2 y la 35.4 (v9-ralph 2026-11-09)
-  35-10-la-siembra-acotada-desde-brainyquote: backlog
+  35-10-la-siembra-acotada-desde-brainyquote: review  # v9-ralph 2026-11-14: dos pasadas, 31 parches; con la traducción propia que decidió Héctor el 14/11 (FR-68 enmendado, pendiente de bmad-prd, bmad-architecture y bmad-spec); semilla vacía, la siembra real es de Héctor
   epic-35-retrospective: optional
 
 action_items:
