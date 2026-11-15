@@ -44,7 +44,8 @@ const GRUPOS: readonly { formato: FormatoDeEdicion; rotulo: GrupoDeEdiciones['ro
  * por tienda en el orden de `ordenDeTiendas` (las claves de `TIENDAS`, en el orden en que Héctor
  * las declara) y, a igual tienda, en el orden de la ficha; un formato sin ediciones no da grupo.
  * Una clave que no está en el orden **lanza**: ordenarla al final en silencio pintaría una
- * edición de una tienda que nadie declaró.
+ * edición de una tienda que nadie declaró. Un formato sin grupo en `GRUPOS` también lanza: un
+ * formato nuevo de `FORMATOS_DE_EDICION` no puede desaparecer de la página sin que nadie lo vea.
  *
  * Pregunta abierta de la Épica 33: si el orden de las tiendas dentro de un formato es el de
  * `TIENDAS` o el de la ficha. Aquí rige el de `TIENDAS` `[ASSUMPTION]`, aceptado por delegación de
@@ -64,7 +65,15 @@ export function edicionesPorFormato(
     }
     return i;
   };
-  const indexadas = ediciones.map((edicion, i) => ({ edicion, i, tienda: posicion(edicion.claveDeTienda) }));
+  const indexadas = ediciones.map((edicion, i) => {
+    if (!GRUPOS.some((grupo) => grupo.formato === edicion.formato)) {
+      throw new Error(
+        `Una edición en venta es de formato «${edicion.formato}», que no tiene grupo en «Dónde leer ` +
+          'esta obra» (GRUPOS de src/lib/ediciones.ts): no hay dónde ponerla.',
+      );
+    }
+    return { edicion, i, tienda: posicion(edicion.claveDeTienda) };
+  });
   return GRUPOS.flatMap(({ formato, rotulo }) => {
     const delFormato = indexadas
       .filter(({ edicion }) => edicion.formato === formato)

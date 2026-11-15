@@ -44,8 +44,13 @@ interface Props {
 
 const { id, grupos } = Astro.props;
 
-/** Dónde empieza la numeración de cada grupo: los `id` siguen de un grupo al otro. */
-const inicios = grupos.map((_, g) => grupos.slice(0, g).reduce((n, grupo) => n + grupo.ediciones.length, 0));
+/** Cada grupo con el número de su primera edición: los `id` siguen de un grupo al otro. */
+let pintadas = 0;
+const numerados = grupos.map((grupo) => {
+  const inicio = pintadas;
+  pintadas += grupo.ediciones.length;
+  return { grupo, inicio };
+});
 
 const nombreDelFormato = (formato: EdicionEnVenta['formato']) =>
   formato === 'impresa' ? 'impresa' : 'electrónica';
@@ -102,14 +107,14 @@ const DECLARACION = 'Enlace de afiliado: si compras, el sitio recibe una comisi�
 
 <div data-ingreso={id} style={ENTRE_GRUPOS}>
   {
-    grupos.map((grupo, g) => (
+    numerados.map(({ grupo, inicio }, g) => (
       <div style={g > 0 ? ENTRE_GRUPOS : undefined}>
         <RotuloDeGrupo>{grupo.rotulo}</RotuloDeGrupo>
         <ul style={DE_LA_LISTA}>
           {grupo.ediciones.map((edicion, i) => (
             <li style={DE_LA_LINEA}>
               {/* En una sola línea: un salto entre el enlace y lo que sigue dejaría un espacio delante de los dos puntos. */}
-              <a href={edicion.href} rel="sponsored noopener" target="_blank" aria-describedby={idDeLaDeclaracion(inicios[g]! + i)} style={DEL_ENLACE}>Edición {nombreDelFormato(edicion.formato)} en {edicion.tienda}<span style={SOLO_PARA_LECTORES}>{AVISO_DE_PESTAÑA_NUEVA}</span></a>{trasElEnlace(edicion.descripcion)} <span id={idDeLaDeclaracion(inicios[g]! + i)}>{DECLARACION}</span>
+              <a href={edicion.href} rel="sponsored noopener" target="_blank" aria-describedby={idDeLaDeclaracion(inicio + i)} style={DEL_ENLACE}>Edición {nombreDelFormato(edicion.formato)} en {edicion.tienda}<span style={SOLO_PARA_LECTORES}>{AVISO_DE_PESTAÑA_NUEVA}</span></a>{trasElEnlace(edicion.descripcion)} <span id={idDeLaDeclaracion(inicio + i)}>{DECLARACION}</span>
             </li>
           ))}
         </ul>

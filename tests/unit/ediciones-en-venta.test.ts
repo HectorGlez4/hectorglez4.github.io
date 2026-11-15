@@ -1281,6 +1281,55 @@ describe('Historia 33.2 — congelada, ninguna Página de Obra pinta ediciones',
 });
 
 /*
+ * Historia 33.2 — el orden de las tiendas dentro de un formato es el de `TIENDAS`, también en la
+ * página construida: una copia encendida con las dos tiendas de prueba declaradas al revés de como
+ * las nombra la ficha (`TIENDAS` = [la segunda, la de prueba]; la ficha, primero la de prueba). La
+ * segunda es la de las ediciones «sin marca» del corpus `ambas`, aquí con una marca inventada:
+ * encendido, el Modelo no admite una tienda sin marca (33.1). Si la
+ * página ordenara por la ficha, por un `TIENDAS` invertido o con la misma clave para todas, las
+ * impresas saldrían en el orden de la ficha y esta prueba lo vería.
+ */
+describe('Historia 33.2 — encendida con dos tiendas, el orden de `TIENDAS` manda sobre el de la ficha', () => {
+  let proyecto = '';
+  const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
+  const SEGUNDA: Tienda = { ...SIN_MARCA, marca: 'segunda-21' };
+  /** Las ediciones de un grupo, como host y ruta de su dirección (sin la marca), en el orden en que se pintan. */
+  const edicionesDelGrupo = (bloque: string, rotulo: string): string[] => {
+    const desde = bloque.indexOf(`>${rotulo}</p>`);
+    expect(desde, rotulo).toBeGreaterThan(-1);
+    const hasta = bloque.indexOf('</ul>', desde);
+    return [...bloque.slice(desde, hasta).matchAll(/href="([^"]+)"/g)].map((m) => {
+      const url = new URL(m[1].replaceAll('&amp;', '&'));
+      return `${url.hostname}${url.pathname}`;
+    });
+  };
+
+  beforeAll(async () => {
+    const arbol = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
+    const ingreso = fuenteConModeloEncendido(fuenteConTiendaDePrueba(arbol, [SEGUNDA, TIENDA]), 'afiliacion-de-libros');
+    const resultado = await construirConCorpus(corpusConstruido('ambas'), { ficheros: { 'src/lib/ingreso.ts': ingreso } });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).toBe(0);
+    proyecto = resultado.proyecto;
+  }, 300_000);
+
+  it('en la Brevedad, «Impresa» pone la de la segunda tienda antes que la que la ficha nombra primero', async () => {
+    const bloque = bloqueDeEdiciones(await html(PAGINA_1));
+    expect(edicionesDelGrupo(bloque, 'Electrónica')).toEqual([`${DOMINIO}/e/B2`]);
+    expect(edicionesDelGrupo(bloque, 'Impresa')).toEqual([`www.${DOMINIO_SIN_MARCA}/dp/S1`, `www.${DOMINIO}/dp/B1`]);
+    // Los `id` siguen el orden en que se pintan, de un grupo al otro.
+    const descritos = [...bloque.matchAll(/aria-describedby="([^"]+)"/g)].map((m) => m[1]);
+    expect(descritos).toEqual([1, 2, 3].map((n) => `edicion-en-venta-${n}-afiliado`));
+  });
+
+  it('en Cartas a Lucilio, igual: un solo grupo, con la segunda tienda delante', async () => {
+    const bloque = bloqueDeEdiciones(await html(CARTAS_1));
+    expect(bloque).not.toContain('>Electrónica</p>');
+    expect(edicionesDelGrupo(bloque, 'Impresa')).toEqual([`www.${DOMINIO_SIN_MARCA}/dp/S1`, `www.${DOMINIO}/dp/C1`]);
+  });
+});
+
+/*
  * Historia 24.4 — la Tarjeta de Obra no aloja ningún Modelo y no depende de la afiliación ni de
  * las `ediciones` de la ficha: en toda Página de Cita sale igual byte a byte con la afiliación
  * encendida o apagada (FR-35), y promete «dónde leerla» solo si hay edición cotejada (FR-54).

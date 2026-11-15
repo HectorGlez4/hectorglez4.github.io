@@ -59,6 +59,11 @@ describe('Historia 33.2 — edicionesPorFormato', () => {
     expect(() => edicionesPorFormato([ed('impresa', 'a', '1'), ed('impresa', 'z', '2')], ['a'])).toThrow('«z»');
   });
 
+  it('un formato sin grupo lanza nombrándolo, en vez de dejar sus ediciones fuera en silencio', () => {
+    const ajena = { ...ed('impresa', 'a', '1'), formato: 'audiolibro' } as unknown as EdicionEnVenta;
+    expect(() => edicionesPorFormato([ed('impresa', 'a', '2'), ajena], ['a'])).toThrow('«audiolibro»');
+  });
+
   it('no muta la lista que recibe', () => {
     const lista = [ed('impresa', 'b', '1'), ed('impresa', 'a', '2')];
     const copia = [...lista];

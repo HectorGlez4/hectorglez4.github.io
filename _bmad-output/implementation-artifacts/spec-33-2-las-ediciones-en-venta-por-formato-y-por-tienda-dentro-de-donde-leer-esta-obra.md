@@ -5,11 +5,34 @@ created: '2026-11-15'
 status: 'done'
 baseline_revision: 'a38d79125d93bb46a895379670e31343dfe9504c'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-33-context.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      La decisión de UX de la 33.2 —el orden de las tiendas dentro de un formato por `TIENDAS` y
+      los 3 × `--unidad` entre «Gratis» y cada grupo de venta— vive solo en el código y en
+      AGENTS.md, no en DESIGN.md ni en EXPERIENCE.md, que mandan; pendiente de Héctor (bmad-ux).
+    evidence: |-
+      La [ASSUMPTION] de la Épica 33 (orden de TIENDAS frente al de la ficha) se aceptó por
+      delegación de Héctor (chat, 2026-11-14), y AGENTS.md la anota como «pendiente de bmad-ux».
+      Los artefactos de UX no se editan a mano (AGENTS.md): cuando bmad-ux la decida, la nota
+      transitoria de AGENTS.md y la cabecera de edicionesPorFormato se ponen al día con ella.
+    location: >-
+      src/lib/ediciones.ts (cabecera de edicionesPorFormato); AGENTS.md § Encender la afiliación de libros
+    severity: low
+  - summary: >-
+      Dos tiendas de TIENDAS con el mismo nombre darían dos enlaces con el mismo nombre accesible
+      («Edición impresa en X») hacia sitios distintos: revisarTiendas rechaza la clave repetida,
+      no el nombre repetido.
+    evidence: |-
+      revisarTiendas (src/lib/ingreso.ts) solo comprueba «se declara dos veces» por clave; el texto
+      del enlace de EdicionesEnVenta.astro sale de `tienda` (el nombre), como desde la 22.9. No lo
+      causa la 33.2, que añade claveDeTienda solo para ordenar; TIENDAS está vacío en el árbol.
+    location: >-
+      src/lib/ingreso.ts revisarTiendas; src/components/EdicionesEnVenta.astro
+    severity: low
 ---
 
 <intent-contract>
@@ -119,6 +142,20 @@ _Sin entradas: ninguna vuelta atrás por `bad_spec`._
 
 Las cinco capas de revisión son externas (orquestador v9-ralph) y esta pasada no recibió hallazgos.
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 4 (high 0, medium 1, low 3)
+- defer: 2 (high 0, medium 0, low 2)
+- reject: 17 (high 0, medium 2, low 15)
+- addressed_findings:
+  - `[medium]` `[patch]` El orden de `TIENDAS` dentro de un formato solo se probaba en la función pura: toda copia encendida declaraba una tienda (verification-gap, blind-hunter, intent-alignment, ac-auditor). Nuevo describe en `tests/unit/ediciones-en-venta.test.ts`: copia encendida con dos tiendas con marca, `TIENDAS` al revés que la ficha; en la Brevedad y en Cartas «Impresa» sale en el orden de `TIENDAS` y los `id` siguen 1–3. Comprobado que discrimina: con `TIENDAS` invertido en la página, las dos pruebas fallan.
+  - `[low]` `[patch]` `GRUPOS` no era exhaustivo: un formato nuevo de `FORMATOS_DE_EDICION` desaparecería en silencio (blind-hunter, edge-case-hunter). `edicionesPorFormato` lanza nombrando el formato sin grupo; caso nuevo en `tests/unit/ediciones.test.ts`.
+  - `[low]` `[patch]` La numeración de `id` entre grupos usaba `slice`/`reduce` cuadrático y aserciones no nulas (`inicios[g]!`). `EdicionesEnVenta.astro` lleva ahora un desplazamiento acumulado por grupo; el marcado no cambia.
+  - `[low]` `[patch]` El Auto Run Result decía que el barrido e2e no se había corrido; el ac-auditor lo corrió en local (12/12). Riesgos residuales y verificación puestos al día.
+
+Rechazados, con su motivo: la línea de `sprint-status.yaml` y el estado `review` de la 32.4 y la 33.1 los escribe el cierre del bucle (las épicas se funden enteras); el registro de triaje anterior lo sustituye esta pasada; los grupos de venta sin la clase `.grupo` y el rótulo con la hoja de `RotuloDeGrupo` son lo que pide el contrato (presentación en `style`, «el mismo elemento que Gratis»); el `p.rotulo-de-grupo` sin asociar a su lista es el mismo patrón que «Gratis»; `nombreDelFormato` (minúscula en la frase) y el rótulo son textos distintos; la clave repetida en `TIENDAS` ya la rechaza `revisarTiendas`; un aviso de build cuando la congelación oculta ediciones no lo pide la intención y AGENTS.md documenta el efecto; el parche de `umbrales.ts` por texto es el de `obra-pagina.test.ts` y `congelacionVigente` no lee `desde`; «levantar» se cubre con la misma copia sin el parche; las tres Obras del corpus de prueba y la página 2 se comparan todas; los asertos de marcado, `parentPath` (Node 24, ya usado en otras pruebas), el coste del paso 4, el tránsito de 2 × a 3 × (es UX-DR127, del contrato), la tipografía calculada y la congelada sin marca (la congelación corta antes de leer marcas).
+
 ## Auto Run Result
 
 Status: done
@@ -137,14 +174,20 @@ Status: done
 - `tests/e2e/tipografia-calculada.spec.ts` — comentario.
 - `AGENTS.md` — § Encender la afiliación de libros: grupos, orden, congelación que oculta y la prueba de los dos estados.
 
-**Revisión.** 0 parches, 0 diferidos, 0 rechazados (capas externas sin hallazgos). Recomendación de revisión de seguimiento: `false` (0 high, 0 medium, 0 low; puntuación 0).
+**Revisión (pasada 1 de triaje, 2026-11-15).** 4 parches (1 medium, 3 low), 2 diferidos (low; uno pendiente de Héctor con `bmad-ux`), 17 rechazados. Recomendación de revisión de seguimiento: `true` (0 high, 1 medium, 3 low; puntuación 3 × 1 + 3 = 6 ≥ 5).
+
+Ficheros de los parches:
+- `src/lib/ediciones.ts` — `edicionesPorFormato` lanza ante un formato sin grupo.
+- `src/components/EdicionesEnVenta.astro` — numeración de `id` con desplazamiento acumulado, sin `!`.
+- `tests/unit/ediciones.test.ts` — el caso del formato sin grupo.
+- `tests/unit/ediciones-en-venta.test.ts` — copia encendida con dos tiendas en orden distinto del de la ficha.
 
 **Verificación.**
-- `npx vitest run tests/unit/ediciones.test.ts` — 7/7 verde.
-- `npx vitest run tests/unit/ediciones-en-venta.test.ts` — verde (74 pruebas, con las cuatro variantes apagadas y las dos copias congeladas).
-- `npx vitest run tests/unit/ingreso-construido.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/fecha-de-cambio.test.ts tests/unit/medicion.test.ts tests/unit/obra-pagina.test.ts tests/unit/espinas-de-ux.test.ts` — verde tras corregir un comentario de la hoja de `DondeLeer.astro` que nombraba «venta» (lo vigila `obra-pagina.test.ts`).
+- `npx vitest run tests/unit/ediciones.test.ts` — 8/8 verde.
+- `npx vitest run tests/unit/ediciones-en-venta.test.ts` — 76/76 verde, con las cuatro variantes apagadas, las dos copias congeladas y la nueva de dos tiendas; con `TIENDAS` invertido en la página, las dos pruebas nuevas fallan (mutación revertida).
+- `npx vitest run tests/unit/ingreso-construido.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/fecha-de-cambio.test.ts tests/unit/medicion.test.ts tests/unit/obra-pagina.test.ts tests/unit/ediciones.test.ts` — 938/938 verde.
 - `npx astro check` — 0 errores, 0 avisos.
-- `astro build` con el Corpus real (`FECHA_JORNADA=2026-11-15`) en la base `a38d79125d` y en la rama: `diff -r` de los dos `dist/` sin diferencias.
-- Auditoría de la matriz: cada fila la cubre una prueba que corrió en verde (cinco en `ediciones.test.ts`, la congelada en `ediciones-en-venta.test.ts`).
+- `npm test` — 186 ficheros, 8.173 pruebas, verde (1.259 s).
+- Barrido e2e `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` — 12/12 verde en local en la revisión (ac-auditor, HEAD 5715810a74); los parches no cambian el marcado de una tienda.
 
-**Riesgos residuales.** El barrido e2e `tests/e2e/ingreso-accesible.spec.ts` no se corrió (lo corre Héctor en local; el CI no corre e2e). El orden por `TIENDAS` es una `[ASSUMPTION]` pendiente de `bmad-ux`.
+**Riesgos residuales.** El orden por `TIENDAS` es una `[ASSUMPTION]` aceptada por delegación y pendiente de `bmad-ux` (diferido). El CI no corre el barrido e2e: repetirlo el día de encender es de Héctor (AGENTS.md, paso 4).
