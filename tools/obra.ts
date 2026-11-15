@@ -44,6 +44,25 @@
  * `quitar-edicion` quita la de la posición `n` (desde 1, como las numera el parte de `edicion`);
  * código 1 si no existe esa posición. Las ediciones las decide Héctor: ningún agente declara una.
  *
+ * Historia 32.1 — Wikidata (AD-31):
+ *
+ *   npm run obra -- wikidata <ficha> corpus/wikidata/<Q>--r<N>.json
+ *   npm run obra -- wikidata-vigente <Q> <N>
+ *
+ * `wikidata` ata a la ficha la entidad y la revisión de un documento versionado, si su autor
+ * (P50) concuerda con el Autor de la ficha; es el único escritor del campo. `wikidata-vigente`
+ * cambia la revisión vigente de una entidad referida en `corpus/wikidata/vigentes.yml`, sin
+ * descargar nada, y dice cuántas Obras remiten a ella. Atar una entidad real es acto de Héctor.
+ *
+ * Historia 32.3 — el incipit (AD-30):
+ *
+ *   npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"
+ *
+ * Declara el comienzo de la Obra: el documento de Fuente —de la propia Obra, por el casado del
+ * cotejo— y el texto desde el que empieza, que tiene que aparecer literal en él. Es el único
+ * escritor del campo; la página lo corta en frase o verso y solo lo enseña con
+ * `MAX_CARACTERES_DEL_INCIPIT` con valor. Declarar un incipit real es acto de Héctor.
+ *
  * Historia 29.4 — los casi duplicados:
  *
  *   npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]
@@ -69,6 +88,9 @@ import {
   terminar,
 } from './lib/cli.ts';
 import {
+  atarEntidadDeWikidata,
+  declararIncipit,
+  cambiarVigenteDeWikidata,
   congelarObras,
   declararEdicion,
   quitarEdicion,
@@ -92,6 +114,9 @@ const USO = [
   '  npm run obra -- titular <ficha> "<grafía>" [--corpus corpus]',
   '  npm run obra -- edicion <ficha> <tienda> <impresa|electronica> <url> [--descripcion "<texto>"] [--corpus corpus]',
   '  npm run obra -- quitar-edicion <ficha> <n> [--corpus corpus]',
+  '  npm run obra -- wikidata <ficha> corpus/wikidata/<Q>--r<N>.json [--corpus corpus]',
+  '  npm run obra -- wikidata-vigente <Q> <N> [--corpus corpus]',
+  '  npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>" [--corpus corpus]',
   '  npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]',
   '  npm run obra -- congelar [--corpus corpus]',
   '  npm run obra -- levantar',
@@ -255,6 +280,29 @@ async function principal(): Promise<never> {
         usoMal([`«${n}» no es una posición: las ediciones se numeran desde 1, como las lista \`edicion\`.`]);
       }
       return terminar(await quitarEdicion(rutas, ficha, Number(n)));
+    }
+
+    case 'wikidata': {
+      const [ficha, documento] = exactamente(2, 'la ficha y el documento de Wikidata');
+      return terminar(await atarEntidadDeWikidata(rutas, ficha, documento));
+    }
+
+    case 'incipit': {
+      const [ficha, documento, desde] = exactamente(3, 'la ficha, el documento y el texto desde el que empieza');
+      if (desde.replace(/\s+/gu, ' ').trim() === '') usoMal(['El texto desde el que empieza la Obra está en blanco.']);
+      // Lo que el colapso de espacios no quita —un carácter de control— no cabe en una línea de la
+      // ficha: es la forma de la invocación (2), no lo que dice (1).
+      if (/[\p{Cc}\p{Zl}\p{Zp}]/u.test(desde.replace(/\s+/gu, ' '))) {
+        usoMal(['El texto desde el que empieza la Obra lleva caracteres de control: es una sola línea de texto.']);
+      }
+      return terminar(await declararIncipit(rutas, ficha, documento, desde));
+    }
+
+    case 'wikidata-vigente': {
+      const [entidad, revision] = exactamente(2, 'la entidad y la revisión');
+      if (!/^Q[1-9]\d*$/u.test(entidad)) usoMal([`«${entidad}» no es una entidad de Wikidata («Q…»).`]);
+      if (!/^[1-9]\d{0,15}$/u.test(revision) || !Number.isSafeInteger(Number(revision))) usoMal([`«${revision}» no es una revisión: un entero positivo.`]);
+      return terminar(await cambiarVigenteDeWikidata(rutas, entidad, Number(revision)));
     }
 
     case 'casi-duplicados': {

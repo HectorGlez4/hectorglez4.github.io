@@ -1,0 +1,61 @@
+---
+/**
+ * «Cómo empieza» — Historia 32.3, UX-DR124, UX-DR128, AD-30.
+ *
+ * El incipit de la Obra, plegado en `Desplegable.astro` (la primitiva única: ningún componente
+ * escribe su `<details>`), solo en la página 1 y entre la Cabecera y el listado. El texto llega ya
+ * cortado en frase o verso por `incipitDe` de `tools/lib/pasaje.ts`, a través de la colección
+ * `incipits`, con un `\n` solo en fin de verso o de párrafo: aquí no se interpreta ningún salto,
+ * solo se pintan (`white-space: pre-line`). En Inter `{typography.body-md}` y tinta, nunca en la
+ * serif: no es texto de Cita.
+ *
+ * Debajo, a 2 ×, la Fuente en `{typography.caption}` y tinta apagada: el nombre enlazado a la
+ * dirección del documento, en siena y subrayado, en la misma pestaña, y la licencia que compone
+ * `lineaDeLaFuenteDelIncipit` de `src/lib/atribucion.ts`. Sin `data-zona` ni `data-sin-zona`: es un
+ * enlace externo y la escucha de la medición no lo mira. Fuera de Pagefind lo pone quien lo usa.
+ *
+ * ── Sin bloque `<style>` ──
+ * Por lo mismo que `FichaTecnica.astro` y `Sostener.astro`: Astro emite los estilos de un
+ * componente por el grafo de importaciones aunque no se pinte, y con el Corpus real —ninguna ficha
+ * con incipit— la hoja de toda Página de Obra cambiaría. La presentación va en atributos `style`,
+ * con tokens.
+ */
+import Desplegable from './Desplegable.astro';
+import { ROTULO_COMO_EMPIEZA, lineaDeLaFuenteDelIncipit } from '../lib/atribucion.ts';
+import type { IncipitDeObra } from '../lib/obras.ts';
+
+interface Props {
+  incipit: IncipitDeObra;
+}
+
+const { incipit } = Astro.props;
+
+/** `{typography.body-md}` en Inter y tinta, con los saltos del verso. */
+const DEL_TEXTO = [
+  'margin: 0',
+  'font-family: var(--sans)',
+  'font-size: var(--cuerpo-md)',
+  'line-height: var(--interlineado-cuerpo-md)',
+  'color: var(--tinta)',
+  'white-space: pre-line',
+  'overflow-wrap: anywhere',
+].join('; ');
+
+/** `{typography.caption}` en tinta apagada, a 2 × `--unidad` del incipit. */
+const DE_LA_FUENTE = [
+  'margin: calc(var(--unidad) * 2) 0 0',
+  'font-family: var(--sans)',
+  'font-size: var(--pie)',
+  'line-height: var(--interlineado-pie)',
+  'color: var(--tinta-apagada)',
+  'overflow-wrap: anywhere',
+].join('; ');
+
+/** Siena (la regla global de `a`) y subrayado siempre, con el grosor del filete. */
+const DEL_ENLACE = ['text-decoration-line: underline', 'text-decoration-thickness: var(--grosor-filete)'].join('; ');
+---
+
+<Desplegable rotulo={ROTULO_COMO_EMPIEZA}>
+  <p class="incipit" style={DEL_TEXTO}>{incipit.texto}</p>
+  <p class="fuente-del-incipit" style={DE_LA_FUENTE}><a href={incipit.fuente.url} style={DEL_ENLACE}>{incipit.fuente.nombre}</a>{lineaDeLaFuenteDelIncipit(incipit.fuente)}</p>
+</Desplegable>

@@ -28,7 +28,7 @@ import {
   type TransicionFechada,
   type Version,
 } from '../../tools/lib/cambios.ts';
-import { familiaDeFichero, rutasAvisadasPor } from '../../tools/lib/avisar.ts';
+import { componerAviso, familiaDeFichero, rutasAvisadasPor } from '../../tools/lib/avisar.ts';
 import {
   autorAdmisible,
   citaAdmisible,
@@ -40,6 +40,8 @@ import {
   fechasDeLasSuperficies,
   historialDeLosFicheros,
 } from '../../integraciones/historial.ts';
+import { componerVigentes, nombreDeDocumentoDeWikidata } from '../../tools/lib/wikidata.ts';
+import { aEntidad, documento, entidad, sembrarWikidata } from './ayuda/wikidata.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -575,7 +577,8 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
   /*
    * Historia 30.3 — la revisión ya no es invisible: «Cómo citar» invierte el nombre del Autor
    * («Equis, J.») solo con la clave revisada y siendo palabra del nombre, y lo pinta la Página de
-   * Cita. Revisarla fecha y avisa sus Páginas de Cita; si además corrige la clave, también los
+   * Cita. Revisarla fecha y avisa sus Páginas de Cita y, desde la 32.5, sus Páginas de Obra, cuya
+   * página 1 lleva las Referencias de la Obra; si además corrige la clave, también los
    * Directorios, que ordenan por ella. Una revisión que no cambia ninguna Referencia —un nombre de
    * una palabra, o una clave que no es palabra del nombre— no mueve nada.
    */
@@ -585,26 +588,26 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     ...extra,
   });
 
-  it('solo la revisión de una clave que es palabra del nombre: cambian las Páginas de Cita del Autor', () => {
+  it('solo la revisión de una clave que es palabra del nombre: cambian las Páginas de Cita y de Obra del Autor', () => {
     const enT1 = {
       'corpus/autores/x.yml': {
         antes: conNombre('Juan Equis', { ordenAlfabetico: 'Equis' }),
         despues: conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' }),
       },
     };
-    const esperadas = ['/cita/x-a', '/cita/x-b', '/cita/x-c'];
+    const esperadas = ['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o'];
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
   });
 
-  it('revisar corrigiendo la clave: cambian sus Páginas de Cita y los Directorios', () => {
+  it('revisar corrigiendo la clave: cambian sus Páginas de Cita y de Obra y los Directorios', () => {
     const enT1 = {
       'corpus/autores/x.yml': {
         antes: conNombre('Juan Equis', { ordenAlfabetico: 'Juan' }),
         despues: conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' }),
       },
     };
-    const esperadas = ['/autores', '/cita/x-a', '/cita/x-b', '/cita/x-c', '/obras'];
+    const esperadas = ['/autores', '/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o', '/obras'];
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
   });
@@ -877,6 +880,139 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     // Y el índice de otra Obra no compone esta, ni ninguna de sus Páginas de Cita.
     const ajeno = 'corpus/fuentes/fuente--otra-cosa.indice.yml';
     expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial({ [ajeno]: { antes: null, despues: VERSION_OPACA } }))).toEqual([]);
+  });
+
+  describe('Historia 32.3 — el incipit fecha y avisa solo su Página de Obra', () => {
+    it('`incipit` de la ficha está en la tabla de la Página de Obra, y en ninguna otra', () => {
+      expect(CAMPOS_QUE_PINTA.obra.obra).toContain('incipit');
+      expect(CAMPOS_QUE_NO_FECHAN.obra).not.toContain('incipit');
+      for (const [columna, campos] of Object.entries(CAMPOS_QUE_PINTA.obra)) {
+        if (columna !== 'obra') expect(campos, columna).not.toContain('incipit');
+      }
+    });
+
+    it('declarar un incipit en una ficha fecha y avisa solo esa Obra: ni su Página de Cita, ni otra Obra, ni los listados', () => {
+      const ficha = 'corpus/obras/x--o.yml';
+      const enT1 = { [ficha]: editado(ficha, { incipit: { documento: 'fuente--obra-o', desde: 'Érase' } }) };
+      expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(['/obra/x/o']);
+      expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/obra/x/o']);
+      // La portada no tiene fecha (no es ninguna superficie de la relación).
+      expect(fechasPorSuperficie(corpusDeEjemplo(), historial(enT1)).has('/')).toBe(false);
+      // Cambiar el «desde» también; y quitarlo.
+      const cambiado = {
+        [ficha]: {
+          antes: { ...(VERSIONES[ficha] as object), incipit: { documento: 'fuente--obra-o', desde: 'Érase' } } as Version,
+          despues: { ...(VERSIONES[ficha] as object), incipit: { documento: 'fuente--obra-o', desde: 'Había' } } as Version,
+        },
+      };
+      expect(refechadas(corpusDeEjemplo(), historial(cambiado))).toEqual(['/obra/x/o']);
+      expect(avisadas(cambiado, corpusDeEjemplo())).toEqual(['/obra/x/o']);
+    });
+  });
+
+  it('Historia 32.3 — el documento del incipit compone su Página de Obra aunque no sea de ninguna de sus Citas', () => {
+    const ajeno = 'corpus/fuentes/fuente--otra-cosa.txt';
+    const conIncipit = (): CorpusParaFechar => {
+      const base = corpusDeEjemplo([], [DOCUMENTO, ajeno]);
+      return { ...base, obras: base.obras!.map((o) => (o.nombre === 'x--o' ? { ...o, incipit: 'fuente--otra-cosa' } : o)) };
+    };
+    const enT1 = { [ajeno]: { antes: VERSION_OPACA as Version, despues: VERSION_OPACA as Version } };
+    expect(refechadas(conIncipit(), historial(enT1))).toEqual(['/obra/x/o']);
+    expect(avisadas(enT1, conIncipit(), conIncipit())).toEqual(['/obra/x/o']);
+    // Sin el incipit, ese documento no compone nada.
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial(enT1))).toEqual([]);
+  });
+
+  describe('Historia 32.2 — la Ficha técnica fecha y avisa su Página de Obra', () => {
+    const DOC_X = 'corpus/wikidata/Q1--r10.json';
+    const DOC_Y = 'corpus/wikidata/Q2--r20.json';
+    const VIGENTES = 'corpus/wikidata/vigentes.yml';
+    /** x--o pinta Q5 (género) y Q6 (lengua); y--p, solo Q5. Q9 es el autor: se coteja y no se pinta. */
+    const VIGENTES_HOY = { Q1: 10, Q2: 20, Q5: 3, Q6: 4, Q9: 7 };
+    const atadas = (pintaX: readonly string[] | 'ilegible' = ['Q5', 'Q6']): CorpusParaFechar => {
+      const corpus = corpusDeEjemplo();
+      return {
+        ...corpus,
+        obras: (corpus.obras ?? []).map((o) =>
+          o.nombre === 'x--o'
+            ? { ...o, wikidata: { documento: DOC_X, ...(pintaX === 'ilegible' ? {} : { pinta: pintaX }) } }
+            : { ...o, wikidata: { documento: DOC_Y, pinta: ['Q5'] } },
+        ),
+        vigentesDeWikidata: VIGENTES,
+      };
+    };
+    const conVigente = (cambio: Record<string, number>) => ({
+      [VIGENTES]: { antes: VIGENTES_HOY as Version, despues: { ...VIGENTES_HOY, ...cambio } as Version },
+    });
+
+    it('`wikidata` de la ficha está en la tabla de la Página de Obra, y ya no entre lo que no fecha', () => {
+      expect(CAMPOS_QUE_PINTA.obra.obra).toContain('wikidata');
+      expect(CAMPOS_QUE_NO_FECHAN.obra).not.toContain('wikidata');
+      expect(CAMPOS_QUE_PINTA.wikidata).toEqual({ obra: CUALQUIER_CAMBIO });
+      expect(familiaDeFichero(DOC_X)).toBe('wikidata');
+      expect(familiaDeFichero(VIGENTES)).toBe('wikidata');
+    });
+
+    it('atar una entidad (ficha y documentos nuevos) fecha y avisa solo esa Obra, y no la portada si solo cambia `corpus/wikidata/`', () => {
+      const ficha = 'corpus/obras/x--o.yml';
+      const sinAtar = corpusDeEjemplo();
+      const despues: CorpusParaFechar = {
+        ...sinAtar,
+        obras: (sinAtar.obras ?? []).map((o) => (o.nombre === 'x--o' ? { ...o, wikidata: { documento: DOC_X, pinta: ['Q5', 'Q6'] } } : o)),
+        vigentesDeWikidata: VIGENTES,
+      };
+      const enT1 = {
+        [ficha]: editado(ficha, { wikidata: { entidad: 'Q1', revision: 10 } }),
+        [DOC_X]: { antes: null, despues: VERSION_OPACA as Version },
+        [VIGENTES]: { antes: { Q2: 20 } as Version, despues: { Q1: 10, Q2: 20, Q5: 3, Q6: 4, Q9: 7 } as Version },
+      };
+      expect(refechadas(despues, historial(enT1))).toEqual(['/obra/x/o']);
+      expect(avisadas(enT1, despues, sinAtar)).toEqual(['/obra/x/o']);
+
+      // Solo los ficheros de `corpus/wikidata/`: la portada no se avisa (no pinta nada de Wikidata).
+      const soloWikidata = [
+        { fichero: DOC_X, antes: null, despues: VERSION_OPACA as Version },
+        { fichero: VIGENTES, ...enT1[VIGENTES] },
+      ];
+      const relacion = relacionDeSuperficies(despues);
+      const indexables = { rutas: [...relacion.keys()].filter((r) => r.startsWith('/obra/')) };
+      const { rutas } = componerAviso({
+        cambios: soloWikidata,
+        relacionAntes: relacion,
+        relacionDespues: relacion,
+        indexablesAntes: indexables,
+        indexablesDespues: indexables,
+      });
+      expect(rutas.map(rutaNormalizada)).toEqual(['/obra/x/o']);
+    });
+
+    it('cambiar en `vigentes.yml` la revisión de un género fecha y avisa toda Obra que lo pinta y nada más', () => {
+      const corpus = atadas();
+      // Q5 lo pintan las dos Obras; ninguna Página de Cita, ningún listado, ningún Directorio.
+      expect(refechadas(corpus, historial(conVigente({ Q5: 8 })))).toEqual(['/obra/x/o', '/obra/y/p']);
+      expect(avisadas(conVigente({ Q5: 8 }), corpus)).toEqual(['/obra/x/o', '/obra/y/p']);
+      // Q6 (lengua) solo la pinta x--o.
+      expect(refechadas(corpus, historial(conVigente({ Q6: 9 })))).toEqual(['/obra/x/o']);
+      expect(avisadas(conVigente({ Q6: 9 }), corpus)).toEqual(['/obra/x/o']);
+    });
+
+    it('cambiar la vigente de su autor (P50), que no se pinta, no fecha ni avisa nada', () => {
+      const corpus = atadas();
+      expect(refechadas(corpus, historial(conVigente({ Q9: 11 })))).toEqual([]);
+      expect(avisadas(conVigente({ Q9: 11 }), corpus)).toEqual([]);
+    });
+
+    it('un documento ilegible compone `vigentes.yml` con cualquier cambio: fechar de más antes que de menos', () => {
+      const corpus = atadas('ilegible');
+      expect(refechadas(corpus, historial(conVigente({ Q9: 11 })))).toEqual(['/obra/x/o']);
+      expect(avisadas(conVigente({ Q9: 11 }), corpus)).toEqual(['/obra/x/o']);
+    });
+
+    it('un cambio del documento de su revisión fecha solo esa Obra', () => {
+      const enT1 = { [DOC_X]: { antes: VERSION_OPACA as Version, despues: VERSION_OPACA as Version } };
+      expect(refechadas(atadas(), historial(enT1))).toEqual(['/obra/x/o']);
+      expect(avisadas(enT1, atadas())).toEqual(['/obra/x/o']);
+    });
   });
 
   it('el documento que sale fecha la Obra cuyas Citas lo casaban', () => {
@@ -1400,6 +1536,173 @@ describe('Historia 18.4 — el cruce entre lo que git dice y lo que el Corpus ti
       expect(fechas.size).toBe(0);
       expect(avisos).toHaveLength(1);
       expect(avisos[0]).toMatch(/lastmod/);
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+});
+
+/**
+ * Historia 32.2, revisión — el cableado de la Ficha técnica, de punta a punta desde el disco y git.
+ *
+ * Las pruebas de arriba escriben `CorpusParaFechar` a mano, con `pinta` ya calculado. Aquí lo
+ * produce `corpusParaFechar` leyendo un Corpus de verdad —la ficha atada, sus documentos de
+ * `corpus/wikidata/` y `vigentes.yml`— y lo fecha `fechasDeLasSuperficies`, como el sitemap: si se
+ * perdiera el reparto de `wikidata` o de `vigentesDeWikidata` en `obras[]`, si `entidadesQuePinta`
+ * devolviera también el autor (P50) o si la ruta del documento no casara con la de git, esto se cae.
+ */
+describe('Historia 32.2 — la Ficha técnica fecha su Página de Obra desde el disco', () => {
+  const OBRA = entidad('Q480', 100, {
+    es: 'Sobre la brevedad de la vida',
+    claims: { P50: [aEntidad('Q2054')], P136: [aEntidad('Q8261')], P407: [aEntidad('Q1321')] },
+  });
+  const AUTOR = entidad('Q2054', 30, { es: 'Séneca' });
+  const GENERO = entidad('Q8261', 40, { es: 'ensayo' });
+  const LENGUA = entidad('Q1321', 41, { es: 'latín' });
+  const RUTA_DE_OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida';
+
+  async function escribirCorpus(base: string): Promise<void> {
+    const corpus = join(base, 'corpus');
+    for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras']) await mkdir(join(corpus, dir), { recursive: true });
+    await writeFile(
+      join(corpus, 'citas', 'seneca--el-tiempo.md'),
+      '---\nslug: seneca-el-tiempo\nautor: seneca\ntemas:\n  - el-tiempo\nprocedencia:\n  obra: Sobre la brevedad de la vida\n---\n\nTexto.\n',
+      'utf8',
+    );
+    await writeFile(join(corpus, 'autores', 'seneca.yml'), 'nombre: Séneca\n', 'utf8');
+    await writeFile(join(corpus, 'temas', 'el-tiempo.yml'), 'nombre: El tiempo\n', 'utf8');
+    await writeFile(
+      join(corpus, 'obras', 'seneca--sobre-la-brevedad-de-la-vida.yml'),
+      `autor: seneca\ntitulo: Sobre la brevedad de la vida\nformas:\n  - "${formaDeObra('Sobre la brevedad de la vida')}"\n` +
+        'wikidata:\n  entidad: Q480\n  revision: 100\n',
+      'utf8',
+    );
+    await sembrarWikidata(corpus, [OBRA, AUTOR, GENERO, LENGUA], { Q480: 100, Q2054: 30, Q8261: 40, Q1321: 41 });
+  }
+
+  it('la vigente de un género que pinta refecha la Obra; la de su autor (P50), no; ninguna refecha la Cita', async () => {
+    const raiz = await temporal('sabiduria-ficha-tecnica-');
+    const git = gitEn(raiz);
+    const vigentes = (mapa: Record<string, number>) =>
+      writeFile(join(raiz, 'corpus', 'wikidata', 'vigentes.yml'), componerVigentes(new Map(Object.entries(mapa))), 'utf8');
+    try {
+      await git(['init', '--initial-branch=principal']);
+      await escribirCorpus(raiz);
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'atada'], '2024-01-02T09:00:00+0000');
+
+      await vigentes({ Q480: 100, Q2054: 30, Q8261: 42, Q1321: 41 });
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el género'], '2024-03-04T09:00:00+0000');
+
+      await vigentes({ Q480: 100, Q2054: 31, Q8261: 42, Q1321: 41 });
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el autor'], '2024-05-06T09:00:00+0000');
+
+      const avisos: string[] = [];
+      const fechas = await fechasDeLasSuperficies(raiz, (mensaje) => avisos.push(mensaje));
+      expect(avisos).toEqual([]);
+      expect(fechas.get(RUTA_DE_OBRA)).toBe('2024-03-04T09:00:00.000Z');
+      expect(fechas.get('/cita/seneca-el-tiempo')).toBe('2024-01-02T09:00:00.000Z');
+      expect(fechas.get('/autor/seneca')).toBe('2024-01-02T09:00:00.000Z');
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+
+  it('con su documento ilegible, cualquier cambio de vigentes.yml refecha la Obra (también el de su autor)', async () => {
+    const raiz = await temporal('sabiduria-ficha-tecnica-ilegible-');
+    const git = gitEn(raiz);
+    try {
+      await git(['init', '--initial-branch=principal']);
+      await escribirCorpus(raiz);
+      await writeFile(join(raiz, 'corpus', 'wikidata', nombreDeDocumentoDeWikidata('Q480', 100)), '{ roto', 'utf8');
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'atada, con el documento roto'], '2024-01-02T09:00:00+0000');
+
+      // Solo cambia la vigente del autor (P50), que la línea no pinta: fechar de más antes que de menos.
+      await writeFile(
+        join(raiz, 'corpus', 'wikidata', 'vigentes.yml'),
+        componerVigentes(new Map(Object.entries({ Q480: 100, Q2054: 31, Q8261: 40, Q1321: 41 }))),
+        'utf8',
+      );
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el autor'], '2024-05-06T09:00:00+0000');
+
+      const fechas = await fechasDeLasSuperficies(raiz, () => {});
+      expect(fechas.get(RUTA_DE_OBRA)).toBe('2024-05-06T09:00:00.000Z');
+      expect(fechas.get('/cita/seneca-el-tiempo')).toBe('2024-01-02T09:00:00.000Z');
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+
+  it('un cambio del documento de su revisión refecha la Obra', async () => {
+    const raiz = await temporal('sabiduria-ficha-tecnica-doc-');
+    const git = gitEn(raiz);
+    try {
+      await git(['init', '--initial-branch=principal']);
+      await escribirCorpus(raiz);
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'atada'], '2024-01-02T09:00:00+0000');
+
+      const documentoDeLaObra = join(raiz, 'corpus', 'wikidata', nombreDeDocumentoDeWikidata('Q480', 100));
+      await writeFile(documentoDeLaObra, documento(OBRA, '2024-06-01'), 'utf8');
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el documento'], '2024-03-04T09:00:00+0000');
+
+      const fechas = await fechasDeLasSuperficies(raiz, () => {});
+      expect(fechas.get(RUTA_DE_OBRA)).toBe('2024-03-04T09:00:00.000Z');
+      expect(fechas.get('/cita/seneca-el-tiempo')).toBe('2024-01-02T09:00:00.000Z');
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+});
+
+/**
+ * Historia 32.3, revisión — el documento del incipit fecha su Página de Obra desde el disco y git.
+ *
+ * Las pruebas del incipit de arriba escriben `CorpusParaFechar` a mano; aquí lo produce
+ * `corpusParaFechar` desde una ficha que declara `incipit` sobre un documento que no es de ninguna
+ * de sus Citas: si se perdiera el reparto de `incipit` en `obras[]`, un cambio de ese documento no
+ * movería el `lastmod` de la Obra, y esto se cae.
+ */
+describe('Historia 32.3 — el documento del incipit fecha su Página de Obra desde el disco', () => {
+  const RUTA_DE_OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida';
+  const DOC = 'wikisource-es--otra-cosa';
+
+  it('un cambio solo en el documento del incipit refecha la Obra, y no la Cita', async () => {
+    const raiz = await temporal('sabiduria-incipit-fecha-');
+    const git = gitEn(raiz);
+    const corpus = join(raiz, 'corpus');
+    try {
+      await git(['init', '--initial-branch=principal']);
+      for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras', 'fuentes']) await mkdir(join(corpus, dir), { recursive: true });
+      await writeFile(
+        join(corpus, 'citas', 'seneca--el-tiempo.md'),
+        '---\nslug: seneca-el-tiempo\nautor: seneca\ntemas:\n  - el-tiempo\nprocedencia:\n  obra: Sobre la brevedad de la vida\n---\n\nTexto.\n',
+        'utf8',
+      );
+      await writeFile(join(corpus, 'autores', 'seneca.yml'), 'nombre: Séneca\n', 'utf8');
+      await writeFile(join(corpus, 'temas', 'el-tiempo.yml'), 'nombre: El tiempo\n', 'utf8');
+      await writeFile(
+        join(corpus, 'obras', 'seneca--sobre-la-brevedad-de-la-vida.yml'),
+        `autor: seneca\ntitulo: Sobre la brevedad de la vida\nformas:\n  - "${formaDeObra('Sobre la brevedad de la vida')}"\n` +
+          `incipit:\n  documento: "${DOC}"\n  desde: "La mayor parte"\n`,
+        'utf8',
+      );
+      await writeFile(join(corpus, 'fuentes', `${DOC}.txt`), 'La mayor parte de los mortales.\n', 'utf8');
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'declarada'], '2024-01-02T09:00:00+0000');
+
+      await writeFile(join(corpus, 'fuentes', `${DOC}.txt`), 'La mayor parte de los mortales se queja.\n', 'utf8');
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el documento'], '2024-03-04T09:00:00+0000');
+
+      const fechas = await fechasDeLasSuperficies(raiz, () => {});
+      expect(fechas.get(RUTA_DE_OBRA)).toBe('2024-03-04T09:00:00.000Z');
+      expect(fechas.get('/cita/seneca-el-tiempo')).toBe('2024-01-02T09:00:00.000Z');
     } finally {
       await rm(raiz, { recursive: true, force: true });
     }

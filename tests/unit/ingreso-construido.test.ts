@@ -369,7 +369,11 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     const sinComentarios = (texto: string) => texto.replace(/\/\*[\s\S]*?\*\//g, '');
     // Historia 22.9 — y el de las ediciones en venta, por lo mismo: la Página de Obra lo
     // importa con la afiliación apagada.
-    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro']) {
+    // Historia 32.2 — y el de la línea de Ficha técnica: toda Página de Obra lo importa, y con el
+    // Corpus real (ninguna ficha atada) no pinta nada.
+    // Historia 32.3 — y el de «Cómo empieza»: toda Página de Obra lo importa, y con el Corpus real
+    // (ninguna ficha con incipit) no pinta nada; su única hoja es la de `Desplegable.astro`.
+    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro', 'FichaTecnica.astro', 'ComoEmpieza.astro']) {
       const fuente = await readFile(resolve(RAIZ, 'src/components', componente), 'utf8');
       expect(
         sinComentarios(fuente).match(/<style[\s>]/g) ?? [],
@@ -932,6 +936,11 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     // Historia 27.2 — y `/buscar/`, con los Modelos encendidos, sigue pidiendo su búsqueda por la
     // entrada `busqueda` de la lista, no en línea.
     expect(guionesExternosDe(paginas['buscar/index.html']).map((e) => guionExternoDe(e)?.id)).toContain('busqueda');
+    // Historia 32.5 — y la página 1 de Obra, con la afiliación encendida, pide la isla de copiar la
+    // Referencia por su entrada de la lista, `copiar-referencia`, y no en línea.
+    const obra = paginas['obra/seneca/sobre-la-brevedad-de-la-vida/index.html'];
+    expect(obra).toBeDefined();
+    expect(guionesExternosDe(obra).map((e) => guionExternoDe(e)?.id)).toContain('copiar-referencia');
   });
 
   it('y el contador de guion cuenta bytes de guion, no el ld+json ni lo que se descarga', () => {

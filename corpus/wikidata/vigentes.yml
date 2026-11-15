@@ -1,0 +1,10 @@
+# Las revisiones vigentes de las entidades de Wikidata a las que remiten las Obras — Historia 32.1, AD-31.
+#
+# Por cada entidad referida (autor P50, género P136, lengua P407), la revisión de la que salen su
+# etiqueta en español y el cotejo del autor: `Q…: revisión`, ordenado por el número de la entidad.
+# Cada revisión tiene su documento en corpus/wikidata/{Q}--r{N}.json.
+#
+# No se escribe a mano. Lo amplía solo `npx tsx tools/recuperar.ts` con las referidas que falten,
+# y solo añade: nunca toca una entidad que ya es vigente. Cambiar la revisión vigente de una
+# entidad es `npm run obra -- wikidata-vigente <Q> <N>`, que dice cuántas Obras remiten a ella.
+{}

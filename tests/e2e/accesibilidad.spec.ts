@@ -1787,22 +1787,18 @@ test.describe('Historia 22.10 — subrayado y pestaña nueva', () => {
 });
 
 /**
- * Historia 24.7 — las Páginas de Obra con las que se mide el pie y la Cabecera, sacadas del
- * `dist/` como `OBRAS` y no escritas a mano: una página 1 con Paginación y Temas, otra sin
- * Paginación, con Temas y alguna línea de edición cotejada, y, si alguna Obra del `dist/` trae
- * nota, la primera. Y dos listas de páginas 1: todas (`primeras`), para la primera pantalla, que
- * depende del alto de la Cabecera y se mide en cada una —la más alta no es siempre la del título
- * más largo: parte en más líneas la que tiene palabras más largas—, y las Cabeceras de texto más
- * largo (`cabecerasLargas`: las cinco de título más largo y las cinco de «de {Autor} · {año}» más
- * largo), para las zonas del salto, que no dependen del alto: «de {Autor}» parta o no, su zona
- * acaba 10 px bajo `p.de` y la del salto empieza en el borde de `p.salto`.
+ * Historias 24.7 y 32.4 — las Páginas de Obra con las que se mide el pie y la Cabecera, sacadas
+ * del `dist/` como `OBRAS` y no escritas a mano: una página 1 con Paginación y Temas, otra sin
+ * Paginación, con Temas y alguna línea de «Gratis» en «Dónde leer esta obra», y, si alguna Obra del
+ * `dist/` trae nota, la primera. Y la lista de todas las páginas 1 (`primeras`), para la primera
+ * pantalla, que depende del alto de la Cabecera y se mide en cada una —la más alta no es siempre
+ * la del título más largo: parte en más líneas la que tiene palabras más largas—.
  */
 function obrasDelPie(): {
   conPaginacion: string;
   sinPaginacion: string;
   conNota: string | undefined;
   primeras: string[];
-  cabecerasLargas: string[];
 } {
   const obras = rutasConstruidas()
     .filter((ruta) => ruta.startsWith('/obra/'))
@@ -1810,12 +1806,6 @@ function obrasDelPie(): {
   const paginadas = new Set(
     obras.filter((ruta) => /^\/obra\/[^/]+\/[^/]+\/\d+\/$/.test(ruta)).map((ruta) => ruta.replace(/\d+\/$/, '')),
   );
-  const texto = (marcado: string) =>
-    marcado
-      .replace(/<span class="oculto"[^>]*>[^<]*<\/span>/g, '')
-      .replace(/<[^>]+>/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
   const primeras = obras
     .filter((ruta) => /^\/obra\/[^/]+\/[^/]+\/$/.test(ruta))
     .map((ruta) => {
@@ -1823,8 +1813,6 @@ function obrasDelPie(): {
       return {
         ruta,
         html,
-        titulo: texto(/<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html)?.[1] ?? '').length,
-        de: texto(/<p class="de"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1] ?? '').length,
       };
     });
   const conTemas = (html: string) => html.includes('<section class="temas"');
@@ -1832,24 +1820,18 @@ function obrasDelPie(): {
     if (ruta === undefined) throw new Error(`El dist/ no trae ninguna página 1 de Obra ${cara}.`);
     return ruta;
   };
-  const las5MasLargas = (campo: 'titulo' | 'de') =>
-    [...primeras]
-      .sort((a, b) => b[campo] - a[campo] || a.ruta.localeCompare(b.ruta, 'es'))
-      .slice(0, 5)
-      .map((o) => o.ruta);
   return {
     conPaginacion: exigir(
       primeras.find((o) => paginadas.has(o.ruta) && conTemas(o.html))?.ruta,
       'con Paginación y Temas',
     ),
     sinPaginacion: exigir(
-      primeras.find((o) => !paginadas.has(o.ruta) && conTemas(o.html) && o.html.includes('id="edicion-cotejada"'))
+      primeras.find((o) => !paginadas.has(o.ruta) && conTemas(o.html) && o.html.includes('class="rotulo-de-grupo"'))
         ?.ruta,
-      'sin Paginación, con Temas y edición cotejada',
+      'sin Paginación, con Temas y alguna edición en «Gratis»',
     ),
     conNota: primeras.find((o) => o.html.includes('class="nota-de-la-ficha"'))?.ruta,
     primeras: primeras.map((o) => o.ruta),
-    cabecerasLargas: [...new Set([...las5MasLargas('titulo'), ...las5MasLargas('de')])],
   };
 }
 
@@ -1862,226 +1844,80 @@ let pie: ReturnType<typeof obrasDelPie> | undefined;
 const PIE = () => (pie ??= obrasDelPie());
 
 /**
- * Historia 24.7 — el salto «Dónde leer esta obra ↓» de la Cabecera de Obra (UX-DR96, UX-DR100).
- *
- * Se tabula hasta él y se activa con Intro, sin guion de por medio: el foco tiene que acabar en
- * el `h2` de destino (`tabindex="-1"`) con el anillo global, porque el salto nativo del navegador
- * enfoca un destino enfocable y el último gesto fue de teclado; y el Tab siguiente sale de ahí
- * hacia delante, no vuelve a la Cabecera. Con el puntero el foco llega igual y el anillo es el que
- * decida la regla global, sin ninguna de la página que lo pinte o lo quite; y, se llegue con
- * Intro, con el puntero o abriendo la dirección con el fragmento, el `h2` queda a 2 × `--unidad`
- * del borde. Las medidas son las de `DESIGN.md`
- * § Página de Obra: el salto a 3 × de «de {Autor}», su zona de 44 px a 8 px como poco de la de
- * «de {Autor}» —sin tocar ninguna de las dos—, la primera Cita aún en la primera pantalla y el
- * ritmo del pie, que el salto no mueve. Medio píxel de holgura por el redondeo subpíxel, como en
- * las demás.
+ * Historia 32.4 — la página 1 de la Obra reordenada (UX-DR124, UX-DR125). El salto «Dónde leer esta
+ * obra ↓» de la 24.7 se retiró: «Dónde leer esta obra» es un desplegable cerrado, el primero del
+ * contenedor entre la Cabecera y el listado, y «Cómo citar» (32.5) va al pie por la decisión 1b,
+ * delegada por Héctor el 2026-11-14. Se tabula desde «de {Autor}»: el enlace de la Ficha técnica, si
+ * la hay, los `<summary>` del contenedor en orden y el listado; Intro sobre el de «Dónde leer» lo
+ * abre sin mover el foco. Las distancias, las de la decisión: el contenedor a 2 × `--unidad` de la
+ * Cabecera, el listado a 4 × de él, el pie a 5 × y la nota a 4 ×. Medio píxel de holgura por el
+ * redondeo subpíxel, como en las demás. El barrido axe de arriba ya pasa por estas páginas con los
+ * desplegables cerrados y abiertos.
  */
-test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => {
+test.describe('Historia 32.4 — la página 1 de la Obra, reordenada', () => {
   const ANCLA = 'donde-leer-esta-obra';
+  const DESPLEGABLES = 'header.cabecera-de-obra + div[data-pagefind-ignore="all"]';
+  const DONDE_LEER = `${DESPLEGABLES} > details.desplegable:first-child`;
+  const COMO_CITAR = 'div[data-pagefind-ignore="all"]:has(> details.desplegable [data-como-citar])';
+
+  test('ninguna Página de Obra lleva el salto ni su ancla', async ({ page }) => {
+    for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, OBRAS.segunda, OBRAS.tituloLargo]) {
+      await page.goto(ruta);
+      expect(await page.locator(`[href="#${ANCLA}"], #${ANCLA}, .salto`).count(), ruta).toBe(0);
+    }
+  });
 
   for (const cara of ['indexable', 'noIndexable'] as const) {
-    test(`${cara}: Intro sobre el salto deja el foco en el h2 de destino, con el anillo global`, async ({
+    test(`${cara}: Tab desde «de {Autor}» pasa por la Ficha técnica, los <summary> en orden y el listado; Intro abre «Dónde leer» sin mover el foco`, async ({
       page,
     }) => {
       const ruta = OBRAS[cara];
       await page.goto(ruta);
-      const salto = page.getByRole('link', { name: 'Dónde leer esta obra', exact: true });
-      await expect(salto, ruta).toHaveCount(1);
-      expect(await salto.getAttribute('href'), ruta).toBe(`#${ANCLA}`);
-      expect(await salto.getAttribute('target'), ruta).toBeNull();
-
-      let alcanzado = false;
-      for (let i = 0; i < 60 && !alcanzado; i += 1) {
+      const esperados = await page.locator(`${DESPLEGABLES} > details.desplegable > summary`).evaluateAll((ns) =>
+        ns.map((n) => `summary:${n.textContent?.replace(/\s*›\s*$/u, '').trim()}`),
+      );
+      expect(esperados[0], ruta).toBe('summary:Dónde leer esta obra');
+      expect(esperados, ruta).not.toContain('summary:Cómo citar');
+      await page.locator('.cabecera-de-obra p.de a').focus();
+      const enfocados: string[] = [];
+      for (let n = 0; n < 12; n++) {
         await page.keyboard.press('Tab');
-        alcanzado = await salto.evaluate((n) => n === document.activeElement);
+        const que = await page.evaluate(() => {
+          const e = document.activeElement as HTMLElement | null;
+          if (e === null) return '';
+          if (e.tagName === 'SUMMARY') return `summary:${e.textContent?.replace(/\s*›\s*$/u, '').trim()}`;
+          if (e.closest('ul.listado') !== null) return 'listado';
+          if (e.closest('.ficha-tecnica') !== null) return 'ficha-tecnica';
+          return e.tagName.toLowerCase();
+        });
+        enfocados.push(que);
+        if (que === 'listado') break;
       }
-      expect(alcanzado, `${ruta}: el salto no recibe el foco por teclado`).toBe(true);
+      expect(enfocados.filter((e) => e !== 'ficha-tecnica'), `${ruta}: ${enfocados.join(', ')}`).toEqual([...esperados, 'listado']);
+      // La Ficha técnica, si la hay, antes de todo desplegable.
+      const ficha = enfocados.lastIndexOf('ficha-tecnica');
+      expect(ficha, ruta).toBeLessThan(enfocados.indexOf(esperados[0]));
 
+      const resumen = page.locator(`${DONDE_LEER} > summary`);
+      await resumen.focus();
+      await expect(page.locator(DONDE_LEER), ruta).not.toHaveAttribute('open', /.*/u);
       await page.keyboard.press('Enter');
-      await expect.poll(() => page.evaluate(() => location.hash), { message: ruta }).toBe(`#${ANCLA}`);
-      await expect
-        .poll(() => page.evaluate(() => document.activeElement?.id), { message: `${ruta}: el foco no llega al h2` })
-        .toBe(ANCLA);
-
-      const foco = await page.evaluate(() => {
-        const n = document.activeElement as HTMLElement;
-        const s = getComputedStyle(n);
-        return {
-          etiqueta: n.tagName,
-          tabindex: n.getAttribute('tabindex'),
-          visible: n.matches(':focus-visible'),
-          estilo: s.outlineStyle,
-          ancho: s.outlineWidth,
-          separacion: s.outlineOffset,
-          color: s.outlineColor,
-          margen: s.scrollMarginTop,
-          siena: getComputedStyle(document.documentElement).getPropertyValue('--siena').trim(),
-        };
-      });
-      expect(foco.etiqueta, ruta).toBe('H2');
-      expect(foco.tabindex, ruta).toBe('-1');
-      expect(foco.visible, `${ruta}: el h2 enfocado no casa :focus-visible`).toBe(true);
-      expect(foco.estilo, ruta).toBe('solid');
-      expect(foco.ancho, ruta).toBe('2px');
-      expect(foco.separacion, ruta).toBe('2px');
-      expect(foco.margen, ruta).toBe('16px');
-      // El color, el del token: se compara resolviéndolo en el propio navegador.
-      const sienaResuelto = await page.evaluate((valor) => {
-        const prueba = document.createElement('span');
-        prueba.style.color = valor;
-        document.body.append(prueba);
-        const color = getComputedStyle(prueba).color;
-        prueba.remove();
-        return color;
-      }, foco.siena);
-      expect(foco.color, ruta).toBe(sienaResuelto);
-
-      // UX-DR100 — el destino mueve también el punto de partida de la tabulación: el Tab
-      // siguiente sigue desde «Dónde leer esta obra» hacia delante y no vuelve a la Cabecera.
-      await page.keyboard.press('Tab');
-      const siguiente = await page.evaluate((ancla) => {
-        const destino = document.getElementById(ancla)!;
-        const activo = document.activeElement;
-        if (activo === null || activo === document.body) return { despues: false, enCabecera: false };
-        return {
-          despues: Boolean(destino.compareDocumentPosition(activo) & Node.DOCUMENT_POSITION_FOLLOWING),
-          enCabecera: activo.closest('.cabecera-de-obra') !== null,
-        };
-      }, ANCLA);
-      expect(siguiente, `${ruta}: el Tab tras el salto`).toStrictEqual({ despues: true, enCabecera: false });
+      await expect(page.locator(DONDE_LEER), ruta).toHaveAttribute('open', '');
+      await expect(resumen, `${ruta}: Intro movió el foco`).toBeFocused();
     });
   }
 
-  /*
-   * Con el puntero, que el anillo salga o no lo decide `:focus-visible` —la regla global, que
-   * nunca se suprime (UX-DR100)—, no la página: se exige que el contorno sea exactamente el de esa
-   * regla según case o no, y no qué decide el navegador. Lo que esto atrapa es una regla de foco
-   * propia (`.rotulo:focus`, un `outline` local), que la 24.7 no puede añadir.
-   */
-  test('con el puntero, el salto lleva el foco al h2 con el anillo de la regla global, y un clic en el h2 también', async ({
-    page,
-    isMobile,
-  }) => {
-    for (const ruta of [OBRAS.indexable, OBRAS.noIndexable]) {
+  test('a 320 px no hay desplazamiento horizontal, con «Dónde leer esta obra» cerrado ni abierto', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const ruta of [OBRAS.indexable, OBRAS.tituloLargo]) {
       await page.goto(ruta);
-      const salto = page.getByRole('link', { name: 'Dónde leer esta obra', exact: true });
-      // En el proyecto móvil, un toque; en el de escritorio, un clic.
-      if (isMobile) await salto.tap();
-      else await salto.click();
-      await expect.poll(() => page.evaluate(() => location.hash), { message: ruta }).toBe(`#${ANCLA}`);
-      await expect
-        .poll(() => page.evaluate(() => document.activeElement?.id), { message: `${ruta}: el foco no llega al h2` })
-        .toBe(ANCLA);
-      // El contorno, el que da la regla global: 2 px `solid` si casa `:focus-visible`, ninguno si no.
-      const anillo = () =>
-        page.evaluate(() => {
-          const n = document.activeElement as HTMLElement;
-          const s = getComputedStyle(n);
-          const visible = n.matches(':focus-visible');
-          return {
-            id: n.id,
-            deLaRegla: visible ? s.outlineStyle === 'solid' && s.outlineWidth === '2px' : s.outlineStyle === 'none',
-          };
-        });
-      expect(await anillo(), `${ruta}, tras el salto`).toStrictEqual({ id: ANCLA, deLaRegla: true });
-
-      // `tabindex="-1"` hace enfocable el h2 también al pulsarlo, con el mismo anillo.
-      await page.goto(ruta);
-      await page.locator(`#${ANCLA}`).click();
-      expect(await anillo(), `${ruta}, clic en el h2`).toStrictEqual({ id: ANCLA, deLaRegla: true });
+      const ancho = () =>
+        page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(await ancho(), `${ruta}, cerrado`).toBeLessThanOrEqual(0);
+      await page.locator(`${DONDE_LEER} > summary`).click();
+      expect(await ancho(), `${ruta}, abierto`).toBeLessThanOrEqual(0);
     }
   });
-
-  test('al llegar, el h2 queda a 2 × --unidad del borde: con Intro, con el puntero y al abrir la dirección', async ({
-    page,
-    isMobile,
-  }) => {
-    /*
-     * Una ventana baja, para que lo que sigue al h2 dé para subirlo hasta arriba: con la alta, la
-     * página se acaba antes y el navegador se queda en el fondo, más abajo de los 16 px. El
-     * desplazamiento es de píxeles enteros, así que la holgura es de uno.
-     */
-    await page.setViewportSize({ width: page.viewportSize()!.width, height: 320 });
-    const llegada = (ruta: string, como: string) =>
-      expect
-        .poll(
-          () =>
-            page.evaluate(
-              (ancla) => Math.abs(document.getElementById(ancla)!.getBoundingClientRect().top - 16) <= 1,
-              ANCLA,
-            ),
-          { message: `${ruta}, ${como}: el h2 no queda a 16 px del borde` },
-        )
-        .toBe(true);
-    for (const ruta of [OBRAS.indexable, PIE().sinPaginacion]) {
-      const salto = page.getByRole('link', { name: 'Dónde leer esta obra', exact: true });
-      await page.goto(ruta);
-      // Antes de medir, que la página dé de sí: si lo que sigue al h2 no llena la ventana, el
-      // navegador se queda en el fondo y la llegada no dice nada del `scroll-margin-top`.
-      const daDeSi = await page.evaluate((ancla) => {
-        const arriba = document.getElementById(ancla)!.getBoundingClientRect().top + window.scrollY;
-        return document.scrollingElement!.scrollHeight - (arriba - 16) >= window.innerHeight;
-      }, ANCLA);
-      expect(daDeSi, `${ruta}: lo que sigue al h2 no llena la ventana; aquí no se puede medir la llegada`).toBe(true);
-      await salto.focus();
-      await page.keyboard.press('Enter');
-      await llegada(ruta, 'con Intro');
-
-      await page.goto(ruta);
-      if (isMobile) await salto.tap();
-      else await salto.click();
-      await llegada(ruta, 'con el puntero');
-
-      // Un enlace compartido con el fragmento, o volver atrás: la misma llegada.
-      await page.goto('about:blank');
-      await page.goto(`${ruta}#${ANCLA}`);
-      await llegada(ruta, 'al abrir la dirección con el fragmento');
-    }
-  });
-
-  test('el salto va en siena y subrayado siempre, también bajo el puntero', async ({ page }) => {
-    await page.goto(OBRAS.indexable);
-    const salto = page.locator('.cabecera-de-obra .salto a');
-    const pintado = () =>
-      salto.evaluate((n) => {
-        const s = getComputedStyle(n);
-        const prueba = document.createElement('span');
-        prueba.style.color = getComputedStyle(document.documentElement).getPropertyValue('--siena').trim();
-        document.body.append(prueba);
-        const siena = getComputedStyle(prueba).color;
-        prueba.remove();
-        return { color: s.color, siena, subrayado: s.textDecorationLine };
-      });
-    const quieto = await pintado();
-    expect(quieto.color, 'el color del salto').toBe(quieto.siena);
-    expect(quieto.subrayado, 'el subrayado del salto').toBe('underline');
-    await salto.hover();
-    expect(await pintado(), 'bajo el puntero').toStrictEqual(quieto);
-  });
-
-  for (const ancho of [360, 320]) {
-    test(`a ${ancho} px, el salto a 3 × de «de {Autor}», su zona de 44 px y a 8 px de la de «de {Autor}»`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width: ancho, height: 640 });
-      for (const ruta of new Set([OBRAS.indexable, OBRAS.noIndexable, OBRAS.tituloLargo, ...PIE().cabecerasLargas])) {
-        await page.goto(ruta);
-        await page.evaluate(async () => {
-          await document.fonts.ready;
-        });
-        const medida = await page.evaluate(() => {
-          const parrafoDe = document.querySelector('.cabecera-de-obra .de')!.getBoundingClientRect();
-          const parrafo = document.querySelector('.cabecera-de-obra .salto')!.getBoundingClientRect();
-          const salto = document.querySelector('.cabecera-de-obra .salto a')!.getBoundingClientRect();
-          const de = document.querySelector('.cabecera-de-obra .de a')!.getBoundingClientRect();
-          return { linea: parrafo.top - parrafoDe.bottom, alto: salto.height, hueco: salto.top - de.bottom };
-        });
-        expect(Math.abs(medida.linea - 24), `${ruta}: de «de» al salto, ${medida.linea}`).toBeLessThanOrEqual(0.5);
-        expect(Math.abs(medida.alto - 44), `${ruta}: la zona del salto mide ${medida.alto}`).toBeLessThanOrEqual(0.5);
-        expect(medida.hueco, `${ruta}: entre las dos zonas`).toBeGreaterThanOrEqual(7.5);
-      }
-    });
-  }
 
   test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla de toda página 1', async ({ page }) => {
     /*
@@ -2139,54 +1975,58 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
     expect(Math.abs(medido! - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
   };
 
-  /*
-   * Historia 27.8, UX v8.4 — «Buscar en esta obra» va bajo el listado (decisión de Héctor del
-   * 2026-10-30): entre el salto y el listado no hay nada, y el listado sigue a 4 × `--unidad`.
-   */
-  test('la Cabecera: el listado a 32 px del salto en la página 1, sin «Buscar en esta obra» en medio, y de «de {Autor}» en la 2', async ({
+  test('la Cabecera: el contenedor a 16 px de ella y el listado a 32 px de él en la página 1, sin «Buscar en esta obra» en medio, y de «de {Autor}» en la 2', async ({
     page,
   }) => {
     for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, PIE().conPaginacion]) {
       await page.goto(ruta);
-      cerca(await hueco(page, '.cabecera-de-obra .salto', 'ul.listado'), 32, `${ruta}, salto → listado`);
+      cerca(await hueco(page, 'header.cabecera-de-obra', DESPLEGABLES), 16, `${ruta}, Cabecera → desplegables`);
+      cerca(await hueco(page, DESPLEGABLES, 'ul.listado'), 32, `${ruta}, desplegables → listado`);
+      await expect(page.locator(`${DESPLEGABLES} > details.desplegable > summary`).first()).toHaveText(/^Dónde leer esta obra/u);
+      await expect(page.locator(`${DESPLEGABLES} [data-como-citar]`), ruta).toHaveCount(0);
       // El formulario está en la página 1, y por debajo del listado entero (sus distancias, en el pie).
       const bajoElListado = await hueco(page, 'ul.listado', 'form.buscar-en');
       expect(bajoElListado, `${ruta}: sin «Buscar en esta obra»`).not.toBeNull();
-      expect(bajoElListado!, `${ruta}: «Buscar en esta obra» entre el salto y el listado`).toBeGreaterThan(0);
+      expect(bajoElListado!, `${ruta}: «Buscar en esta obra» entre la Cabecera y el listado`).toBeGreaterThan(0);
     }
     await page.goto(OBRAS.segunda);
-    expect(await page.locator('.salto').count(), OBRAS.segunda).toBe(0);
-    expect(await page.locator(`[href="#${ANCLA}"], #${ANCLA}`).count(), OBRAS.segunda).toBe(0);
+    expect(await page.locator('details.desplegable').count(), OBRAS.segunda).toBe(0);
     expect(await page.locator('form.buscar-en').count(), OBRAS.segunda).toBe(0);
     cerca(await hueco(page, '.cabecera-de-obra .de', 'ul.listado'), 32, `${OBRAS.segunda}, «de» → listado`);
   });
 
   /*
    * Historia 27.8, UX-DR95 (UX v8.4) — «Buscar en esta obra» entra en el pie: 5 × `--unidad` de la
-   * paginación —o de la última tarjeta— al formulario, y 5 × del formulario a los Temas.
+   * paginación —o de la última tarjeta— al formulario, y 5 × del formulario a los Temas. Desde la
+   * decisión 1b (32.4), «Cómo citar» a 5 × de los Temas. Y, abierto, «Gratis» a 2 × del `<summary>`
+   * y su primera línea a 1 × del rótulo de grupo.
    *
    * Al fusionar la Épica 25, «Compartir en» (25.6) va entre el formulario y los Temas, a 5 × de cada
    * uno: «formulario → Temas 40» pasa a medirse como formulario → «Compartir en» 40 y «Compartir
    * en» → Temas 40, nunca a otra distancia (diferido en el spec de la 27.8).
    */
-  test('el pie: 5 × hasta «Buscar en esta obra», 5 × hasta los Temas, 4 × hasta «Dónde leer», 2 × y 1 ×', async ({ page }) => {
+  test('el pie: 5 × hasta «Buscar en esta obra», 5 × hasta los Temas, 5 × hasta «Cómo citar»; «Gratis» a 2 × y 1 ×', async ({ page }) => {
     const { conPaginacion, sinPaginacion } = PIE();
     await page.goto(conPaginacion);
     cerca(await hueco(page, 'nav.paginacion', 'form.buscar-en'), 40, `${conPaginacion}, Paginación → «Buscar en esta obra»`);
     cerca(await hueco(page, 'form.buscar-en', '.temas'), 40, `${conPaginacion}, «Buscar en esta obra» → Temas`);
-    cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${conPaginacion}, Temas → «Dónde leer»`);
-    cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${conPaginacion}, h2 → lo que sigue`);
+    cerca(await hueco(page, '.temas', COMO_CITAR), 40, `${conPaginacion}, Temas → «Cómo citar»`);
 
     await page.goto(sinPaginacion);
     expect(await page.locator('nav.paginacion').count(), sinPaginacion).toBe(0);
     cerca(await hueco(page, 'ul.listado', 'form.buscar-en'), 40, `${sinPaginacion}, listado → «Buscar en esta obra»`);
     cerca(await hueco(page, 'form.buscar-en', '.temas'), 40, `${sinPaginacion}, «Buscar en esta obra» → Temas`);
-    cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${sinPaginacion}, Temas → «Dónde leer»`);
-    cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${sinPaginacion}, h2 → lo que sigue`);
-    cerca(await hueco(page, '#edicion-cotejada', '#edicion-cotejada + .linea'), 8, `${sinPaginacion}, h3 → línea`);
+    cerca(await hueco(page, '.temas', COMO_CITAR), 40, `${sinPaginacion}, Temas → «Cómo citar»`);
+    await page.locator(`${DONDE_LEER} > summary`).click();
+    cerca(await hueco(page, `${DONDE_LEER} > summary`, `${DONDE_LEER} .grupo`), 16, `${sinPaginacion}, <summary> → «Gratis»`);
+    cerca(
+      await hueco(page, `${DONDE_LEER} .rotulo-de-grupo`, `${DONDE_LEER} .rotulo-de-grupo + .linea`),
+      8,
+      `${sinPaginacion}, «Gratis» → línea`,
+    );
   });
 
-  test('la Nota: 4 × sobre su filete y 3 × bajo él', async ({ page }) => {
+  test('la Nota: 4 × sobre su filete, tras «Cómo citar», y 3 × bajo él', async ({ page }) => {
     const { conNota, sinPaginacion } = PIE();
     const ruta = conNota ?? sinPaginacion;
     await page.goto(ruta);
@@ -2194,11 +2034,11 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
       /*
        * Ninguna Obra del Corpus trae nota todavía —la escribe Héctor, y ningún agente siembra
        * una—, así que se pone en la página servida con el marcado que emite la plantilla: un
-       * `p.nota-de-la-ficha` con `data-pagefind-ignore`, tras la sección y con el ámbito de la
+       * `p.nota-de-la-ficha` con `data-pagefind-ignore`, tras «Cómo citar» y con el ámbito de la
        * página, que es el de la Cabecera. Lo que se mide es la hoja que el sitio sirve; sin el
        * ámbito no se le aplicaría y el filete saldría de 0 px.
        */
-      await page.evaluate(() => {
+      await page.evaluate((selector) => {
         const cabecera = document.querySelector('.cabecera-de-obra')!;
         const nota = document.createElement('p');
         nota.className = 'nota-de-la-ficha';
@@ -2207,10 +2047,10 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
           if (name.startsWith('data-astro-cid-')) nota.setAttribute(name, value);
         }
         nota.textContent = 'Una nota de una línea, como las que escribe Héctor.';
-        document.querySelector('.donde-leer')!.after(nota);
-      });
+        document.querySelector(selector)!.after(nota);
+      }, COMO_CITAR);
     }
-    cerca(await hueco(page, '.donde-leer', '.nota-de-la-ficha'), 32, `${ruta}, «Dónde leer» → nota`);
+    cerca(await hueco(page, COMO_CITAR, '.nota-de-la-ficha'), 32, `${ruta}, «Cómo citar» → nota`);
     const nota = await page.locator('.nota-de-la-ficha').evaluate((n) => {
       const s = getComputedStyle(n);
       return { filete: s.borderTopWidth, estilo: s.borderTopStyle, relleno: parseFloat(s.paddingTop) };

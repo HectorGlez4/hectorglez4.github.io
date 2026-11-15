@@ -804,6 +804,92 @@ ajuste del título de `documentar`/`restituir-grafia`, `retirar`) las conservan;
 conserva las de la destino, no hereda las de la absorbida y lo dice. Cómo se encienden y qué
 exige cada edición: «Encender la afiliación de libros».
 
+**`wikidata`** (Historia 32.1, AD-31) es el tercer campo que decide Héctor, y tampoco se escribe
+a mano: `wikidata: {entidad, revision}` lo escribe solo `npm run obra -- wikidata <ficha>
+corpus/wikidata/<Q>--r<N>.json`, que se niega con 1 —nada escrito— si el autor (P50) de esa
+revisión no concuerda con el `nombre` del Autor de la ficha por `esElMismoAutor` o no se puede
+cotejar (falta el P50, la revisión vigente de la persona o su etiqueta en español), si otra ficha
+activa ya declara esa entidad —una entidad es una sola Obra— y si `vigentes.yml` trae una vigente
+sin su documento, que rompe el build aunque ninguna ficha esté atada. La revisión se versiona antes, por
+`oldid`, con `npx tsx tools/recuperar.ts "https://www.wikidata.org/w/index.php?title=<Q>&oldid=<N>"`:
+la entidad y la fecha las declara Wikidata por su API, se guarda el JSON entero de esa revisión
+en `corpus/wikidata/{Q}--r{N}.json` (CC0, nunca sobrescrito) y se recuperan las entidades a las
+que remite —autor, género P136, lengua P407— que falten en `corpus/wikidata/vigentes.yml`, que
+**solo se amplía**; cambiar una vigente es `npm run obra -- wikidata-vigente <Q> <N>`, que no
+descarga (si falta el documento, da la orden `recuperar` exacta), repite antes el cotejo del
+autor de cada ficha atada con la revisión nueva y se niega si alguna dejaría de concordar o si
+otra vigente no tiene su documento, y dice cuántas Obras remiten a ella. Wikidata no es una Fuente de `FUENTES`: el cotejo de Citas, las posiciones y `extraer` no
+leen `corpus/wikidata/`. El build repite las comprobaciones desde el cargador `fichasTecnicas` de
+`src/content.config.ts`, la **segunda excepción** a que `src/` no importe de `tools/lib/` (la
+primera es el de posiciones) —también que dos fichas activas no declaren la misma entidad—, y
+rompe nombrando la ficha o `vigentes.yml`.
+
+**La línea de Ficha técnica** (Historia 32.2, UX-DR126) es lo único que se pinta de Wikidata: en
+la página 1 de la Obra atada, dentro de la Cabecera tras «de {Autor} · {año}»,
+«Novela · 1605 · Escrita en español · Traducción de X · Datos: Wikidata, CC0» —solo las partes que
+constan; sin género, año ni lengua no hay línea ni hueco, y el traductor solo no basta—. El texto
+lo compone `partesDeFichaTecnica` de `src/lib/atribucion.ts`; la Ficha técnica llega del cargador
+a `colgarObras` por parámetro (`obra.fichaTecnica`, `getCollection('fichasTecnicas')` solo si
+alguna ficha declara `wikidata`); el traductor es el de `traductorDeLaEdicionQueEncabeza` de
+`src/lib/obras.ts` —la Fuente con más Citas, si **todas** las suyas declaran el mismo—, nunca de
+la entidad; y el enlace, el permanente de la revisión (`enlacePermanenteDeWikidata`), en la misma
+pestaña y sin zona. `src/components/FichaTecnica.astro` va con atributos `style` y sin `<style>`
+(como `Sostener.astro`), bajo `data-pagefind-ignore="all"` y fuera del JSON-LD. El build **avisa**
+«Ficha técnica con año discrepante» cuando el año de Wikidata no es el de la Obra, y no corrige
+ninguno. La Página de Obra se fecha y se avisa por su documento `corpus/wikidata/{Q}--r{N}.json`
+y, de `vigentes.yml`, solo por las claves de las entidades que pinta (género y lengua; el autor
+no), y `wikidata` está en `CAMPOS_QUE_PINTA`; `corpus/wikidata/` es la familia de fichero
+`wikidata`, que no avisa la portada. Las órdenes que reescriben una ficha lo conservan; `reunir` no hereda el de la
+absorbida y lo dice. **Ningún agente ata una entidad ni recupera de Wikidata sobre el Corpus
+real**, y la Pregunta 12 del PRD —si una antología de un compilador («Granos de oro») es Obra del
+Autor— sigue abierta: hasta que Héctor responda, nadie ata entidad a esas Obras.
+
+**`incipit`** (Historia 32.3, AD-30) es el cuarto campo que decide Héctor: cómo empieza la Obra,
+`incipit: {documento, desde}`, y **lo escribe solo su orden**, nunca a mano ni un agente:
+
+```
+npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"
+```
+
+Se niega con 1, sin escribir, si la ficha no existe; si el documento no es un `.txt` de
+`corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está en
+la unión de `documentosDeCita` de sus Citas publicadas); si su forma de líneas es `indeterminada`;
+si `desde` —colapsado— no se localiza; si la Fuente de su cabecera no es de `FUENTES`, no permite
+reutilizar o es mutable, o su `url:` no es `http(s)` (va tal cual al `href`); si el nombre del
+documento designa en `corpus/fuentes/` otro fichero que el tecleado (la ficha guarda solo el
+nombre); o si la ficha ya declara ese mismo incipit. Con 2, la forma (otra cantidad de argumentos,
+una bandera desconocida, `desde` en blanco o con caracteres de control). Si `desde` aparece más de
+una vez en el documento, declara y avisa: el incipit se ancla en la primera aparición, y quien
+declara elige un `desde` que no se repita. `desde` no se comprueba como comienzo de frase: empieza
+donde quien declara dice. Nunca se infiere del
+orden del libro ni del primer documento. El build lo repite desde el cargador `incipits` de
+`src/content.config.ts`, que solo cablea `tools/lib/posiciones.ts` (`leerIncipitsDelCorpus`): lee
+solo los documentos que las fichas declaran y **rompe** con «Regla incumplida» nombrando la ficha si
+el documento falta, no se deja analizar o es biografía, si su forma es `indeterminada`, si `desde`
+ya no se localiza o si la Fuente o el `url:` de su cabecera no valen (lo mismo que la orden); no repite el casado, para que retirar la última Cita de ese documento no rompa la
+construcción siguiente. El corte es de `incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de
+frase o de verso**: unidades enteras mientras quepan en `MAX_CARACTERES_DEL_INCIPIT`, parado antes
+del pie de licencia de Wikisource; si se ofrece lo decide solo `ofreceIncipit` (sin tope, no; si la
+primera frase o el primer verso no cabe, no). La página 1 de la Obra lo pinta en
+`src/components/ComoEmpieza.astro` —el `Desplegable.astro` «Cómo empieza», cerrado, entre la
+Cabecera y el listado, en Inter y con la Fuente enlazada debajo—, con atributos `style` y sin
+`<style>`, bajo `data-pagefind-ignore="all"` y fuera del JSON-LD; las 2+ no. Con el Corpus real
+(ninguna ficha con incipit) lo único que cambia en `dist/` es la hoja de la Página de Obra, que gana
+las reglas de `Desplegable.astro` porque Astro la emite por el grafo de importaciones. `incipit`
+está en `CAMPOS_QUE_PINTA` de la Página de Obra y nada más; las órdenes que reescriben una ficha lo
+conservan, y `reunir` no hereda el de la absorbida y lo dice. **`MAX_CARACTERES_DEL_INCIPIT`** (nace
+`undefined`: ninguna página lo enseña) y **`DESPLIEGUE_DEL_INCIPIT`** (la jornada del primer día en
+vivo con un incipit a la vista, con su corte de la serie `continuacion-de-obra` en
+`CORTES_DE_SERIE_DECLARADOS`) son de Héctor, en `src/lib/umbrales.ts`: ningún agente les da valor.
+El commit que dé valor a `MAX_CARACTERES_DEL_INCIPIT` corre antes, en local, el barrido del
+desplegable con el incipit puesto —`npx playwright test tests/e2e/incipit.spec.ts
+--project=escritorio`: axe cerrado y abierto, el teclado y los 320 px—, igual que el encendido de
+un Modelo corre `ingreso-accesible.spec.ts`: el CI no corre las pruebas de punta a punta, y con el
+tope en `undefined` ninguna otra prueba ve el desplegable en el sitio. Si sale en rojo, no se da el
+valor. Y como el corte en frase es por signo —`.`, `?`, `!` o `…` ante espacio—, ese día se mira el
+incipit que la orden enseña en su parte: una abreviatura («D. Ventura») o una raya tras el punto
+cortan o alargan la frase.
+
 ### Una obra, un nombre (Historia 22.2)
 
 ```
@@ -907,6 +993,25 @@ sans y «{n} citas de {Autor}, {año}», sin nota ni traductor. En `/buscar/`, e
 resultado de Obra sale del metadato `data-pagefind-meta="autor"` del enlace de la Cabecera:
 quitarlo o moverlo fuera de `data-pagefind-body` deja los resultados de Obra sin Autor.
 
+**La página 1, en su orden (Historia 32.4, UX-DR124).** Cabecera (`h1`, «de {Autor} · {año}» y la
+línea de Ficha técnica si la hay) → un solo contenedor `data-pagefind-ignore="all"` a
+2 × `--unidad`, con los desplegables cerrados como hermanos directos —«Dónde leer esta obra» y,
+si hay incipit, «Cómo empieza»— → `ul.listado` → Paginación → «Buscar en esta obra» → [sitio de
+«Compartir en», 25.6, sin hueco] → Temas → «Cómo citar» (32.5), plegado en su propio contenedor a
+5 × → la nota. «Cómo citar» va al pie y la distancia es de 2 × por la **decisión delegada por
+Héctor el 2026-11-14**: con tres desplegables arriba la primera Tarjeta salía de la primera
+pantalla de 360 × 640 (puerta de `tests/e2e/incipit.spec.ts`); asentarlo en `DESIGN.md` y
+`EXPERIENCE.md` queda para Héctor con `bmad-ux`. El salto «Dónde leer esta obra ↓» de la 24.7 y su
+ancla se retiraron: ningún enlace ni `id` es `donde-leer-esta-obra`. «Dónde leer esta obra»
+(`DondeLeer.astro`) agrupa las ediciones en «Gratis» (`RotuloDeGrupo.astro`, un `<p>`, nunca un
+encabezado: el `<summary>` no lo es) y tras cada línea dice lo tomado de ella con
+`textoDeLoTomado` de `src/lib/atribucion.ts` —«De esta edición se tomó su cita.», «…se tomaron sus
+{n} citas.», «…se tomaron {k} de sus {n} citas.»—, siempre en positivo: ninguna frase de las Citas
+sin documento. Sin ninguna Cita con Fuente, solo «Ninguna de sus citas tiene todavía documento
+cotejado.». SM-C4 —las salidas de la zona `listado` entre lecturas de la Página de Obra— se juzga
+por ventanas desde `DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO` (`src/lib/umbrales.ts`, `undefined`; le da
+valor Héctor el día que llega en vivo), con el corte del incipit partiendo su serie.
+
 **El orden del libro (Historia 24.1).** La Página de Obra lista sus Citas —en todas sus páginas
 y en su `ItemList`— en el orden en que aparecen en sus documentos, no por slug, y no lo dice en
 ninguna línea. Dónde cae cada Cita lo entrega la colección `posiciones` de `src/content.config.ts`,
@@ -993,14 +1098,18 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
   fechan la Página de Autor.
 - **Página de Obra** = su ficha (`autor`, `titulo`, `formas`, `nota`, `ediciones`), sus Citas, su
   Autor y **sus documentos**: la unión de `documentosDeCita` de sus Citas sobre los nombres de
-  `corpus/fuentes/`. `nota` y `ediciones` solo fechan la Página de Obra.
+  `corpus/fuentes/`, más el documento de su `incipit` si lo declara (32.3), sea o no de sus Citas.
+  `nota` y `ediciones` solo fechan la Página de Obra.
 - **Lo que la relación todavía no compone**, y no conviene dar por exhaustivo (diferido en el spec
   de la 24.8): la Página de Obra pinta el nombre de los Temas de sus Citas y no compone sus
   ficheros de Tema —renombrar un Tema no la fecha ni la avisa; decidirlo es de Héctor—; el título
   efectivo de una Obra cuyo `titulo` ya no declara ninguna Cita sale de las grafías de sus Citas
   (`grafiaPorOmision`), y esas hermanas no componen la Página de Cita; y el chip de un Tema
   aparece o desaparece en las demás Páginas de Cita cuando una Cita lo cruza por su umbral de
-  publicación, sin fecharlas. Las biografías de `corpus/biografias/` no son familia porque cada
+  publicación, sin fecharlas; y las claves de `corpus/wikidata/vigentes.yml` que pinta una Obra
+  atada (32.2) salen del documento de la revisión que su ficha declara **hoy**, así que los
+  cambios de `vigentes.yml` anteriores a un cambio de revisión se juzgan con las entidades de la
+  de hoy (el cambio de revisión, que reescribe `wikidata` de la ficha, sí fecha). Las biografías de `corpus/biografias/` no son familia porque cada
   documento es una revisión que no se reescribe: cambiar de biografía es cambiar el campo
   `biografia` del Autor.
 - **Bajas.** Un fichero cuya última transición es un borrado —mover una Cita a
@@ -1165,6 +1274,29 @@ de salida a la edición, en el pasaje: la canónica es texto— y fuera del JSON
 - Pendiente al fundir la Épica 29: el texto de la Referencia pasa por `enUnaLinea` de
   `src/lib/verso.ts` (« / » entre versos); hasta entonces va `cita.texto` tal cual (AD-29: nadie
   escribe su unión de versos).
+
+### Cómo citar la Obra (Historia 32.5)
+
+La página 1 de toda Obra —se indexe o no— lleva su «Cómo citar»: un desplegable **al pie**, tras
+los Temas (o «Buscar en esta obra», sin ellos) y antes de la nota, en su propio contenedor
+`data-pagefind-ignore="all"` a 5 × `--unidad` (decisión 1b, delegada por Héctor el 2026-11-14, en
+la 32.4: arriba echaba de la primera pantalla la primera Tarjeta). Las 2+ no lo llevan. Lo pregunta
+`obraTieneComoCitar` (`src/lib/obras.ts`; hoy `true`, la 35.9 añade las exclusiones).
+
+- Lo compone `referenciaDeObra`/`referenciasDeObra` de `src/lib/atribucion.ts`, hermanas de
+  `referenciaDeCita`: Autor (`nombreEnReferencia`), título de la ficha, año de la Obra, la edición
+  que encabeza y su traductor —solo de `edicionQueEncabeza` de `src/lib/obras.ts`, la misma regla
+  que el traductor de la Ficha técnica—, marca y canónica de la página 1. **Nunca de la Ficha
+  técnica** ni de otra Cita. Lo pinta `ComoCitar.astro` tal cual.
+- **La Página de Obra tiene isla de copiar**: `src/islands/CopiarReferencia.astro`, un `<script>`
+  empaquetado (no en línea) en la lista cerrada como `copiar-referencia`, con su tope medido
+  (`MAX_BYTES_GUION_DE_COPIAR_REFERENCIA`). Pone la fecha del visitante, enseña los botones, copia,
+  anuncia y pide `copiado-de-referencia`. **Importa solo hojas** —`src/lib/fechaDeConsulta.ts`
+  (que `atribucion.ts` reexporta) y `src/lib/anuncio.ts`— y el nombre del evento solo por su tipo:
+  importar de `atribucion.ts` o el valor de `EVENTOS` le metía el grafo de las Obras y la tabla
+  entera del vocabulario, compartida con la búsqueda (4.369 bytes en vez de 1.653).
+- Revisar la clave de un Autor fecha y avisa también sus Páginas de Obra
+  (`CAMPOS_QUE_PINTA.autor.obra` cuenta `NOMBRE_EN_REFERENCIA`).
 
 ### Lee el pasaje (Historia 31.2)
 
@@ -1653,8 +1785,8 @@ ficha.
 Todo el camino está construido y apagado: el conjunto cerrado de tiendas `TIENDAS` en
 `src/lib/ingreso.ts`, el campo `ediciones` de la Ficha de Obra juzgado por el esquema
 (`src/lib/admision.ts`), `urlDeEdicion`, que añade la marca a la dirección al construir, y el
-bloque «Ediciones en venta» (`src/components/EdicionesEnVenta.astro`) dentro de «Dónde leer
-esta obra», tras la edición cotejada. El repositorio versiona **`TIENDAS` vacío**, y mientras lo
+bloque «Ediciones en venta» (`src/components/EdicionesEnVenta.astro`) dentro del desplegable
+«Dónde leer esta obra», tras el grupo «Gratis». El repositorio versiona **`TIENDAS` vacío**, y mientras lo
 esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
 
 1. **La primera tienda, con su marca, la declara Héctor** en `TIENDAS`

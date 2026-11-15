@@ -26,7 +26,7 @@ import type {
   ObjetivoDeTradicion,
 } from '../../src/lib/objetivo.ts';
 import { BIOGRAFIA_MAL_COLOCADA, FICHERO_DEL_CENSO, type DocumentosDeFuente } from './cotejo.ts';
-import { analizarDocumento, CLASE_BIOGRAFIA, type CabeceraAnalizada } from './documento.ts';
+import { analizarDocumento, CLASE_BIOGRAFIA, type CabeceraAnalizada, type CabeceraDeDocumento } from './documento.ts';
 import {
   analizarIndice,
   documentosEnElOrdenDelIndice,
@@ -255,6 +255,17 @@ export interface Rutas {
    */
   biografias: string;
   /**
+   * Las revisiones fijas de Wikidata — Historia 32.1, AD-31: un documento JSON por (entidad,
+   * revisión), `{Q}--r{N}.json`, CC0. Lo escribe solo `tools/recuperar.ts`. No es una Fuente
+   * de texto: el cotejo de Citas, las posiciones y `extraer` no lo leen nunca.
+   */
+  wikidata: string;
+  /**
+   * Qué revisión de cada entidad referida (autor, género, lengua) es la vigente — 32.1.
+   * Solo se amplía (`recuperar`); cambiar una vigente es `npm run obra -- wikidata-vigente`.
+   */
+  vigentesDeWikidata: string;
+  /**
    * El censo de Citas anteriores a la v3 que todavía no tienen documento — Historia 11.2.
    *
    * Va junto a `corpus/portada.json`, que ya es metadato del Corpus y no colección.
@@ -362,6 +373,8 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
     biografias: join(raizCorpus, 'biografias'),
+    wikidata: join(raizCorpus, 'wikidata'),
+    vigentesDeWikidata: join(raizCorpus, 'wikidata', 'vigentes.yml'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
     serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
@@ -643,6 +656,14 @@ function yamlDeFicha(ficha: ObraAdmisible): string {
             ...(edicion.descripcion !== undefined ? { descripcion: edicion.descripcion } : {}),
           })),
         }
+      : {}),
+    // La entidad de Wikidata (32.1): la escribe solo `npm run obra -- wikidata`.
+    ...(ficha.wikidata !== undefined
+      ? { wikidata: { entidad: ficha.wikidata.entidad, revision: ficha.wikidata.revision } }
+      : {}),
+    // El incipit (32.3): lo escribe solo `npm run obra -- incipit`.
+    ...(ficha.incipit !== undefined
+      ? { incipit: { documento: ficha.incipit.documento, desde: ficha.incipit.desde } }
       : {}),
   });
 }
@@ -1117,6 +1138,41 @@ export async function leerDocumentosParaElCotejo(
     }
   }
   return { documentos, lineasDeclaradas };
+}
+
+/** Lo que hay en `corpus/fuentes/` con un nombre de documento — Historia 32.3. */
+export type DocumentoDeFuenteLeido =
+  | { estado: 'falta' }
+  | { estado: 'ambiguo' }
+  | { estado: 'ilegible' }
+  | { estado: 'biografia' }
+  | { estado: 'legible'; ruta: string; cabecera: CabeceraDeDocumento; cuerpo: string };
+
+/**
+ * **Un** documento de Fuente por su nombre sin extensión, con su cabecera — Historia 32.3. Lo
+ * leen el cargador del incipit y la orden que lo declara, para no abrir los demás documentos.
+ * Busca el `.txt` en el primer nivel de `corpus/fuentes/` y, si no está, en cualquier subcarpeta,
+ * como `ficherosDe` (el nombre es la identidad del documento); si dos subcarpetas tienen un
+ * documento con ese nombre, no elige ninguno (`ambiguo`). Da la ruta que leyó. No escribe nada.
+ */
+export async function leerDocumentoDeFuente(rutas: Rutas, nombre: string): Promise<DocumentoDeFuenteLeido> {
+  let ruta = join(rutas.fuentes, `${nombre}.txt`);
+  if (!existsSync(ruta)) {
+    const halladas = (await ficherosDe(rutas.fuentes, ['.txt'])).filter((r) => slugDeFichero(r) === nombre);
+    if (halladas.length === 0) return { estado: 'falta' };
+    if (halladas.length > 1) return { estado: 'ambiguo' };
+    ruta = halladas[0] as string;
+  }
+  let contenido: string;
+  try {
+    contenido = await readFile(ruta, 'utf8');
+  } catch {
+    return { estado: 'ilegible' };
+  }
+  const analizado = analizarDocumento(contenido);
+  if (analizado === undefined) return { estado: 'ilegible' };
+  if (analizado.cabecera.clase === CLASE_BIOGRAFIA) return { estado: 'biografia' };
+  return { estado: 'legible', ruta, cabecera: analizado.cabecera, cuerpo: analizado.cuerpo };
 }
 
 /**

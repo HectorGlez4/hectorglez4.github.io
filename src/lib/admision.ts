@@ -694,15 +694,86 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
           })
           .min(1, 'Regla incumplida: «ediciones» sin ninguna edición se omite; no se escribe vacía.')
           .optional(),
+        /*
+         * Historia 32.1 (AD-31): la entidad de Wikidata y la revisión fija de la que salen el
+         * género, la lengua y el año de la Ficha técnica. Solo la escribe `npm run obra --
+         * wikidata`, que coteja el Autor; el build lo repite desde el cargador de
+         * `src/content.config.ts`. Aquí solo se juzga la forma.
+         */
+        wikidata: z
+          .object(
+            {
+              entidad: z
+                .string({ message: 'Regla incumplida: la entidad de Wikidata es una cadena «Q…».' })
+                .regex(
+                  /^Q[1-9]\d*$/u,
+                  'Regla incumplida: la entidad de Wikidata de una Ficha de Obra es «Q» seguida ' +
+                    'de su número, sin ceros a la izquierda.',
+                ),
+              revision: z
+                .number({ message: 'Regla incumplida: la revisión de Wikidata es un número.' })
+                .int('Regla incumplida: la revisión de Wikidata es un entero.')
+                .positive('Regla incumplida: la revisión de Wikidata es un entero positivo.'),
+            },
+            {
+              error: (problema) =>
+                problema.code === 'unrecognized_keys'
+                  ? 'Regla incumplida: «wikidata» no reconoce ' +
+                    `«${problema.keys.join('», «')}». Sus campos son entidad y revision.`
+                  : 'Regla incumplida: «wikidata» es un objeto con entidad y revision.',
+            },
+          )
+          .strict()
+          .optional(),
+        /*
+         * Historia 32.3 (AD-30): el incipit, el comienzo de la Obra que declara una persona —un
+         * documento de `corpus/fuentes/` y el texto desde el que empieza—. Solo lo escribe
+         * `npm run obra -- incipit`, que comprueba el casado, la forma y que `desde` se localice;
+         * el build repite la forma y la localización desde el cargador `incipits`. Aquí solo se
+         * juzga la forma del campo.
+         */
+        incipit: z
+          .object(
+            {
+              documento: z
+                .string({ message: 'Regla incumplida: el documento del incipit es una cadena.' })
+                // El nombre de un documento de `corpus/fuentes/` tiene forma de slug: sin carpeta, sin
+                // extensión, sin espacios ni `..` ni barras de ningún tipo.
+                .refine((documento) => /^[a-z0-9][a-z0-9-]*$/u.test(documento), {
+                  message:
+                    'Regla incumplida: el documento del incipit es el nombre de un documento de ' +
+                    'corpus/fuentes/ sin carpeta ni extensión (minúsculas, cifras y guiones).',
+                }),
+              desde: z
+                .string({ message: 'Regla incumplida: el «desde» del incipit es una cadena.' })
+                .refine((desde) => !/[\p{Cc}\p{Zl}\p{Zp}]/u.test(desde), {
+                  message:
+                    'Regla incumplida: el «desde» del incipit es una sola línea: sin saltos de ' +
+                    'línea, tabuladores ni caracteres de control.',
+                })
+                .refine((desde) => /\S/u.test(desde), {
+                  message: 'Regla incumplida: el «desde» del incipit no puede estar vacío ni ser solo espacios.',
+                }),
+            },
+            {
+              error: (problema) =>
+                problema.code === 'unrecognized_keys'
+                  ? 'Regla incumplida: «incipit» no reconoce ' +
+                    `«${problema.keys.join('», «')}». Sus campos son documento y desde.`
+                  : 'Regla incumplida: «incipit» es un objeto con documento y desde.',
+            },
+          )
+          .strict()
+          .optional(),
       },
       {
         error: (problema) =>
           problema.code === 'unrecognized_keys'
             ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
               `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas, ` +
-              'distintaDe, nota y ediciones.'
+              'distintaDe, nota, ediciones, wikidata e incipit.'
             : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
-              'opcionalmente distintaDe, nota y ediciones.',
+              'opcionalmente distintaDe, nota, ediciones, wikidata e incipit.',
       },
     )
     .strict()

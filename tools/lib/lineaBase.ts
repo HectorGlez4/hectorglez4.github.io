@@ -40,6 +40,7 @@ import {
   CUOTA_DE_BYTES_POR_BASE_EN_D1,
   CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1,
   DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS,
+  DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO,
   DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO,
   DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
   MIN_LECTURAS_DE_LINEA_BASE,
@@ -349,6 +350,10 @@ export const UNIDAD_DE_LAS_BUSQUEDAS = 'las búsquedas';
 const paginaDeCitaEn = (superficies: readonly Superficie[]) =>
   superficies.find((superficie) => superficie.vista === EVENTOS.vistaDeCita);
 
+/** La Página de Obra, de la declaración: la superficie que emite la vista de Obra con su marca. */
+const paginaDeObraEn = (superficies: readonly Superficie[]) =>
+  superficies.find((superficie) => superficie.vistaConMarca === EVENTOS.vistaDeObra);
+
 /** La portada, de la declaración. */
 const portadaEn = (superficies: readonly Superficie[]) => superficieDeclaradaDe('/', superficies);
 
@@ -365,6 +370,10 @@ function unidadDeclarada(superficie: Superficie | undefined, que: string): strin
 export const unidadDeLaPaginaDeCita = (superficies: readonly Superficie[] = SUPERFICIES) =>
   unidadDeclarada(paginaDeCitaEn(superficies), 'la vista de Cita');
 
+/** La unidad de línea base de la Página de Obra, de su declaración: la que emite la vista de Obra (32.4). */
+export const unidadDeLaPaginaDeObra = (superficies: readonly Superficie[] = SUPERFICIES) =>
+  unidadDeclarada(paginaDeObraEn(superficies), 'la vista de Obra');
+
 /** La de la portada, de su declaración. */
 export const unidadDeLaPortada = (superficies: readonly Superficie[] = SUPERFICIES) =>
   unidadDeclarada(portadaEn(superficies), 'la portada');
@@ -372,8 +381,24 @@ export const unidadDeLaPortada = (superficies: readonly Superficie[] = SUPERFICI
 export const UNIDAD_DE_LA_PAGINA_DE_CITA = unidadDeLaPaginaDeCita();
 export const UNIDAD_DE_LA_PORTADA = unidadDeLaPortada();
 
-/** Una tasa que una ventana juzga: SM-5, SM-7, la continuación, la de cada zona, SM-6 o SM-13. */
-export type TasaDeJuicio = 'sm5' | 'sm7' | 'continuacion' | 'continuacion-por-zona' | 'sm6' | 'sm13';
+/**
+ * Una tasa que una ventana juzga: SM-5, SM-7, la continuación, la de cada zona, SM-6, SM-13 o la
+ * continuación desde el listado (SM-C4, Historia 32.4).
+ */
+export type TasaDeJuicio =
+  | 'sm5'
+  | 'sm7'
+  | 'continuacion'
+  | 'continuacion-por-zona'
+  | 'sm6'
+  | 'sm13'
+  | 'continuacion-desde-listado';
+
+/**
+ * La zona de la que sale la continuación de SM-C4: las Tarjetas del listado de la Página de Obra.
+ * Es del vocabulario (`ZONAS`); las salidas a las tiendas no son salidas internas y no se miden.
+ */
+const ZONA_DEL_LISTADO: Zona = 'listado';
 
 /** Una tasa que se juzga por ventanas «contra su propia serie», con la llegada que la mueve. */
 export interface JuicioPorVentanas {
@@ -450,6 +475,28 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
       ],
     },
     palanca: 'quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor',
+  },
+  {
+    // Historia 32.4, PRD §7 — la continuación de la Página de Obra hacia sus Citas: salidas internas
+    // desde el listado entre lecturas de la Página de Obra, leída con el Modelo apagado. Su llegada
+    // es la de la página 1 reordenada, y «Cómo empieza» (32.3) parte la serie que juzga.
+    nombre: 'SM-C4',
+    unidad: unidadDeLaPaginaDeObra(superficies),
+    llegada: DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO,
+    deDondeLlega: 'DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO',
+    tasas: ['continuacion-desde-listado'],
+    corte: {
+      serie: 'continuacion-de-obra',
+      llegadas: [
+        {
+          deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT',
+          marca: 'el primer despliegue con valor en MAX_CARACTERES_DEL_INCIPIT y una ficha con incipit, no el merge',
+        },
+      ],
+    },
+    // PRD §7, SM-C4 (v9): «si baja, se juzga lo que se movió». Qué se mueve lo decide Héctor.
+    palanca:
+      'juzgar lo que se movió sobre el listado de la página 1 de la Obra —«Dónde leer esta obra», la Ficha técnica y el incipit—; lo decide Héctor',
   },
   {
     nombre: 'la continuación de los Directorios',
@@ -984,6 +1031,9 @@ export function componerLecturaDeMedicion(
     lectura: partirSerie('lectura', cortes, hoy),
     busqueda: partirSerie('busqueda', cortes, hoy),
     'continuacion-de-cita': partirSerie('continuacion-de-cita', cortes, hoy),
+    // Historia 32.3 — la continuación de la Página de Obra: la parte «Cómo empieza». La lee el
+    // juicio de SM-C4 (Historia 32.4) por su `corte`; el informe dice sus cortes.
+    'continuacion-de-obra': partirSerie('continuacion-de-obra', cortes, hoy),
   } as const;
   const enLectura = enTramo(series.lectura.vigente);
   // Historia 30.1 — la continuación de la Página de Cita y SM-C5: la intersección de los dos tramos.
@@ -1425,6 +1475,8 @@ export function componerLecturaDeMedicion(
         faltan('salidas', 'vistasYLecturas'),
       );
     }
+    // Historia 32.4 — SM-C4 es la rama de zona, con la del listado.
+    if (tasa === 'continuacion-desde-listado') return tasaEn({ zona: ZONA_DEL_LISTADO }, unidad, jornadas);
     if (tasa === 'sm6') return sm6En(enPeriodo);
     if (tasa === 'sm13') return sm13En(enPeriodo);
     const deAccion = tasasDeAccion(deUnidad(unidad), enPeriodo);
@@ -1435,7 +1487,15 @@ export function componerLecturaDeMedicion(
   const nombreDeTasa = (tasa: TasaDeJuicio | { zona: string }) =>
     typeof tasa === 'object'
       ? `continuación desde ${tasa.zona}`
-      : { sm5: 'SM-5', sm7: 'SM-7', continuacion: 'continuación', 'continuacion-por-zona': 'continuación', sm6: 'SM-6', sm13: 'SM-13' }[tasa];
+      : {
+          sm5: 'SM-5',
+          sm7: 'SM-7',
+          continuacion: 'continuación',
+          'continuacion-por-zona': 'continuación',
+          sm6: 'SM-6',
+          sm13: 'SM-13',
+          'continuacion-desde-listado': 'continuación desde listado',
+        }[tasa];
   const juiciosLeidos: JuicioLeido[] = juicios.map((juicio) => {
     // Historia 30.1 — el corte que parte lo que juzga, si lo declara: el último que llegó de su serie.
     const partidaDelCorte = juicio.corte === undefined ? undefined : series[juicio.corte.serie];
@@ -1717,6 +1777,7 @@ const NOMBRE_DE_SERIE: { readonly [S in SerieDeMedicion]: string } = {
   lectura: 'la lectura',
   busqueda: 'la búsqueda',
   'continuacion-de-cita': 'la continuación de la Página de Cita (SM-4, SM-3 y SM-C5)',
+  'continuacion-de-obra': 'la continuación de la Página de Obra',
 };
 
 /**
@@ -1804,7 +1865,7 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
 
   // Los cortes.
   lineas.push('', 'Cortes de serie (CORTES_DE_SERIE de src/lib/umbrales.ts)');
-  for (const serie of ['sm8', 'lectura', 'busqueda', 'continuacion-de-cita'] as const) {
+  for (const serie of ['sm8', 'lectura', 'busqueda', 'continuacion-de-cita', 'continuacion-de-obra'] as const) {
     const partida = lectura.series[serie];
     const cabeza = `  ${NOMBRE_DE_SERIE[serie]}: `;
     if (partida.cortes.length === 0) {

@@ -182,7 +182,7 @@ describe('Historia 22.9 — el esquema de las ediciones', () => {
   it('una lista vacía no se escribe, y una clave de más se nombra', () => {
     expect(juzgar([]).success).toBe(false);
     expect(mensajes(juzgar([edicion({ precio: 3 })]))).toContain('precio');
-    expect(mensajes(esquema.safeParse({ ...fichaBase, otra: 1 }))).toContain('nota y ediciones');
+    expect(mensajes(esquema.safeParse({ ...fichaBase, otra: 1 }))).toContain('ediciones, wikidata e incipit');
   });
 });
 
@@ -593,18 +593,20 @@ afterAll(async () => {
 });
 
 /**
- * La sección «Dónde leer esta obra» entera, con su `</section>` de cierre contando la anidada
- * (la parte de la edición cotejada); el mismo recorte que `obra-pagina.test.ts`.
+ * «Dónde leer esta obra» entero: desde la 32.4, el `<details>` del desplegable, del `<details>` a
+ * su cierre contando los anidados; el mismo recorte que `obra-pagina.test.ts`.
  */
 function seccionDondeLeer(pagina: string): string {
-  const inicio = pagina.indexOf('<section class="donde-leer"');
-  if (inicio === -1) return '';
-  const etiquetas = /<section\b|<\/section>/g;
-  etiquetas.lastIndex = inicio;
-  let profundidad = 0;
-  for (let m = etiquetas.exec(pagina); m !== null; m = etiquetas.exec(pagina)) {
-    profundidad += m[0] === '</section>' ? -1 : 1;
-    if (profundidad === 0) return pagina.slice(inicio, m.index + m[0].length);
+  for (const m of pagina.matchAll(/<details class="desplegable"/g)) {
+    const resto = pagina.slice(m.index);
+    const texto = /^<details[^>]*>\s*<summary[^>]*>\s*<span[^>]*>([^<]*)/.exec(resto)?.[1];
+    if (texto?.trim() !== 'Dónde leer esta obra') continue;
+    const etiquetas = /<details\b|<\/details>/g;
+    let profundidad = 0;
+    for (let e = etiquetas.exec(resto); e !== null; e = etiquetas.exec(resto)) {
+      profundidad += e[0] === '</details>' ? -1 : 1;
+      if (profundidad === 0) return resto.slice(0, e.index + e[0].length);
+    }
   }
   return '';
 }
@@ -676,11 +678,14 @@ describe('Historia 22.9 — encendida, construida', () => {
     expect(bloque).toMatch(/<h3[^>]*>Ediciones en venta<\/h3>/);
     expect(bloque.match(/<li\b/g)).toHaveLength(2);
 
-    // Contenido en la `section.donde-leer` exterior —con su cierre, contando la anidada— y
-    // después de la parte cotejada.
+    // Contenido en el `<details>` de «Dónde leer esta obra» (32.4) y después del grupo «Gratis».
     const seccion = seccionDondeLeer(pagina);
     expect(seccion).toContain(bloque);
-    expect(seccion.indexOf(bloque)).toBeGreaterThan(seccion.indexOf('Edición cotejada, gratuita'));
+    // El rótulo de grupo, no la palabra suelta: «Gratis» es el `p.rotulo-de-grupo`, antes del bloque.
+    const rotulo = seccion.search(/<p class="rotulo-de-grupo"[^>]*>Gratis<\/p>/);
+    expect(rotulo).toBeGreaterThan(-1);
+    expect(seccion.indexOf(bloque)).toBeGreaterThan(rotulo);
+    expect(seccion.indexOf(bloque)).toBeGreaterThan(seccion.lastIndexOf('class="linea tomado"'));
     expect(pagina.split(bloque)).toHaveLength(2);
     // Una descripción que ya cierra con punto no lleva otro.
     expect(bloque).toContain('Cátedra, 2015. <span');
@@ -789,18 +794,20 @@ describe('Historia 22.9 — apagada, `dist/` igual con y sin ediciones', () => {
 });
 
 /*
- * Historia 24.7 — el salto «Dónde leer esta obra ↓» y su `h2` de destino no alojan ningún Modelo:
- * salen idénticos con la afiliación encendida o apagada (FR-35, UX-DR96), y lo único que separa
- * las dos páginas es el `div[data-ingreso]` de «Ediciones en venta». Las dos construcciones son
- * las de arriba, sin construir otra.
+ * Historias 24.7 y 32.4 — «Dónde leer esta obra» no aloja ningún Modelo fuera de su
+ * `div[data-ingreso]`: el `<summary>`, el grupo «Gratis» y todo lo demás salen idénticos con la
+ * afiliación encendida o apagada (FR-35), y lo único que separa las dos páginas es el bloque de
+ * «Ediciones en venta», dentro del `<details>` tras «Gratis». Ya no hay salto (32.4). Las dos
+ * construcciones son las de arriba, sin construir otra.
  */
-describe('Historia 24.7 — el salto, igual con la afiliación encendida o apagada', () => {
+describe('Historia 32.4 — «Dónde leer», igual con la afiliación encendida o apagada', () => {
   let encendida = '';
   let apagada = '';
   const html = (proyecto: string, ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
-  const salto = (pagina: string) => /<p class="salto"[\s\S]*?<\/p>/.exec(pagina)?.[0] ?? '';
-  const destino = (pagina: string) =>
-    /<h2 class="rotulo" id="donde-leer-esta-obra"[^>]*>[\s\S]*?<\/h2>/.exec(pagina)?.[0] ?? '';
+  const sinBloque = (pagina: string) => {
+    const bloque = bloqueDeEdiciones(pagina);
+    return bloque === '' ? pagina : pagina.replace(bloque, '');
+  };
 
   beforeAll(async () => {
     // Una tras otra: si esta `describe` corre sola, las construye ella, y nunca a la vez.
@@ -816,12 +823,15 @@ describe('Historia 24.7 — el salto, igual con la afiliación encendida o apaga
     ['con ediciones', PAGINA_1],
     ['noindex', CARTAS_1],
     ['sin cotejo', IRA_1],
-  ])('%s: el salto y su `h2` son los mismos, byte a byte', async (_caso, ruta) => {
+  ])('%s: sin salto, y el desplegable —fuera del bloque— es el mismo, byte a byte', async (_caso, ruta) => {
     const [con, sin] = [await html(encendida, ruta), await html(apagada, ruta)];
-    expect(salto(con), ruta).toContain('href="#donde-leer-esta-obra"');
-    expect(destino(con), ruta).toContain('tabindex="-1"');
-    expect(salto(con), ruta).toBe(salto(sin));
-    expect(destino(con), ruta).toBe(destino(sin));
+    for (const pagina of [con, sin]) {
+      expect(pagina, ruta).not.toContain('class="salto"');
+      expect(pagina, ruta).not.toContain('donde-leer-esta-obra');
+    }
+    const donde = seccionDondeLeer(con);
+    expect(donde, ruta).toMatch(/<summary[^>]*>\s*<span[^>]*>Dónde leer esta obra<span/);
+    expect(sinBloque(donde), ruta).toBe(seccionDondeLeer(sin));
   });
 
   it.each([PAGINA_1, CARTAS_1])('%s: encendida es la apagada más el bloque de «Ediciones en venta»', async (ruta) => {

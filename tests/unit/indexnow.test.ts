@@ -153,6 +153,8 @@ describe('las familias del Corpus', () => {
       ['corpus/colecciones', 'coleccion'],
       ['corpus/obras', 'obra'],
       ['corpus/fuentes', 'documento'],
+      // Historia 32.2 — y los de Wikidata, que componen la línea de Ficha técnica de la Obra.
+      ['corpus/wikidata', 'wikidata'],
     ]);
     for (const [directorio, familia] of FAMILIAS_DE_FICHERO) {
       expect(familiaDeFichero(`${directorio}/ejemplo.md`)).toBe(familia);
@@ -170,9 +172,9 @@ describe('las familias del Corpus', () => {
     // Historia 26.7 — no las declara el aviso: son las de `src/lib/superficies.ts`, su único dueño.
     expect(FAMILIAS_DE_RUTA).toBe(FAMILIAS);
     // Las de fichero son las cinco con directorio en el Corpus —el Directorio no tiene fichero—
-    // más `documento`, que no es familia de ruta.
+    // más `documento` y `wikidata` (32.2), que no son familias de ruta.
     const deFichero = FAMILIAS_DE_FICHERO.map(([, familia]) => familia);
-    expect(deFichero.filter((f) => f !== 'documento')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
+    expect(deFichero.filter((f) => f !== 'documento' && f !== 'wikidata')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
     const familias = new Set([...relacionDeSuperficies(corpusDeEjemplo()).values()].map((s) => s.familia));
     expect([...familias].sort()).toEqual([...FAMILIAS_DE_RUTA].sort());
   });

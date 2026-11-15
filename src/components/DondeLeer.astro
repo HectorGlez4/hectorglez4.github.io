@@ -1,36 +1,40 @@
 ---
 /**
- * «Dónde leer esta obra» — Historia 22.6, UX-DR42 y UX-DR50 (c, d).
+ * «Dónde leer esta obra» — Historias 22.6 y 32.4, UX-DR124, UX-DR125, UX-DR127, FR-54.
  *
- * El pie de la página 1 de la Página de Obra: de qué edición se tomó el texto de sus Citas,
- * bajo qué licencia y dónde leer la obra entera. Recibe el resumen ya calculado por
- * `dondeLeer` (`src/lib/obras.ts`) en `getStaticPaths`; aquí no se compone más prosa que la
- * plantilla fija de la línea.
+ * De qué edición se tomó el texto de las Citas de la Obra, bajo qué licencia y dónde leerla
+ * entera, **plegado** en `Desplegable.astro` (la primitiva única: este componente nunca escribe su
+ * `<details>`) y primero de los desplegables entre la Cabecera y el listado de la página 1. El
+ * rótulo del `<summary>` es `ROTULO_DE_DONDE_LEER`. Recibe el resumen ya calculado por `dondeLeer`
+ * (`src/lib/obras.ts`) en `getStaticPaths`; aquí no se compone más prosa que la plantilla fija de
+ * la línea, y la frase de lo tomado la redacta `textoDeLoTomado` (`src/lib/atribucion.ts`).
  *
- * Tres formas, y ninguna afirma un cotejo que no ocurrió (FR-54):
+ * Dos formas, y ninguna afirma un cotejo que no ocurrió (FR-54):
  *
- *   · con Fuentes: la parte «Edición cotejada, gratuita», con una línea por Fuente y traducción;
- *   · (d) además, Citas sin documento: cuántas, **después** de esa parte y fuera de ella, a nivel
- *     de la sección, porque no son de ninguna edición cotejada;
- *   · (c) ninguna Cita con Fuente: solo la frase que lo dice, sin rótulo ni enlace, porque un
- *     rótulo que nombra una edición cotejada encima de su ausencia la afirmaría.
+ *   · con Fuentes: el grupo «Gratis» (`RotuloDeGrupo.astro`), con una línea por Fuente y
+ *     traducción, cada una seguida de cuántas Citas de la Obra se tomaron de ella. Siempre en
+ *     positivo: nunca se dice cuántas no tienen documento;
+ *   · ninguna Cita con Fuente: solo la frase que lo dice, sin grupo ni enlace, porque un rótulo
+ *     que nombra una edición encima de su ausencia la afirmaría.
  *
  * Historia 22.9 — con la afiliación encendida y admitida en la ruta (lo pregunta la página, que
  * es quien puede importar `src/lib/ingreso.ts`), llega `enVenta` y, **solo si hay alguna línea
- * cotejada**, se pintan las «Ediciones en venta» al final de la sección: nunca van solas ni en
- * lugar de la cotejada (FR-54). Sin `enVenta`, el marcado es byte a byte el de antes.
+ * cotejada**, se pintan las «Ediciones en venta» tras «Gratis», dentro del desplegable: nunca van
+ * solas ni en lugar de la cotejada (FR-54). Sin `enVenta`, todo lo de fuera de su `data-ingreso`
+ * es byte a byte igual. El reparto en «Electrónica» e «Impresa» es de la 33.2.
  *
- * Va fuera del índice de Pagefind (`data-pagefind-ignore`): «Licencia CC BY-SA» no puede ser un
- * resultado de búsqueda en cada Obra.
+ * Fuera del índice de Pagefind lo pone quien lo usa (el contenedor de los desplegables, con
+ * `data-pagefind-ignore="all"`): «Licencia CC BY-SA» no puede ser un resultado de búsqueda en
+ * cada Obra. Los enlaces sacan del sitio: sin `data-zona` ni `data-sin-zona`.
  *
- * Historia 24.7 — su rótulo es el destino del salto «Dónde leer esta obra ↓» de la Cabecera:
- * lleva `destino` (`tabindex="-1"`, UX-DR100), su `id` es `ANCLA_DE_DONDE_LEER`, el mismo valor
- * que el `href` del salto, y su texto es `ROTULO_DE_DONDE_LEER`, el mismo que dice el salto. La
- * sección no se mueve: sigue al pie.
+ * La hoja de estilo se queda: este componente se pinta en toda página 1 de Obra, así que su hoja no deja
+ * hueco en ninguna página que no lo use.
  */
-import Rotulo from './Rotulo.astro';
+import Desplegable from './Desplegable.astro';
 import EdicionesEnVenta from './EdicionesEnVenta.astro';
-import { ANCLA_DE_DONDE_LEER, ROTULO_DE_DONDE_LEER } from '../lib/obras.ts';
+import RotuloDeGrupo from './RotuloDeGrupo.astro';
+import { ROTULO_DE_DONDE_LEER } from '../lib/obras.ts';
+import { textoDeLoTomado } from '../lib/atribucion.ts';
 import type { LineaDondeLeer, ResumenDondeLeer } from '../lib/obras.ts';
 import type { EdicionEnVenta } from '../lib/ediciones.ts';
 
@@ -43,7 +47,7 @@ interface Props {
   };
 }
 
-const { lineas, citasSinDocumento, total } = Astro.props.resumen;
+const { lineas, total } = Astro.props.resumen;
 const { enVenta } = Astro.props;
 
 /** Lo que sigue al nombre de la Fuente, con la puntuación de la plantilla. */
@@ -57,77 +61,62 @@ function resto(linea: LineaDondeLeer): string {
   const licencia = linea.licencia !== undefined ? ` Licencia ${linea.licencia}.` : '';
   return `${repartida}${traduccion}.${licencia}`;
 }
-
-const sinDocumento =
-  citasSinDocumento === 1
-    ? `Una de sus ${total} citas no tiene documento cotejado.`
-    : `${citasSinDocumento} de sus ${total} citas no tienen documento cotejado.`;
 ---
 
-<section class="donde-leer" aria-labelledby={ANCLA_DE_DONDE_LEER} data-pagefind-ignore>
-  <Rotulo id={ANCLA_DE_DONDE_LEER} destino>{ROTULO_DE_DONDE_LEER}</Rotulo>
+<Desplegable rotulo={ROTULO_DE_DONDE_LEER}>
   {
     lineas.length === 0 ? (
-      <p class="linea tras-el-rotulo">Ninguna de sus citas tiene todavía documento cotejado.</p>
+      <p class="sin-cotejo">Ninguna de sus citas tiene todavía documento cotejado.</p>
     ) : (
       <>
-        <section class="parte tras-el-rotulo" aria-labelledby="edicion-cotejada">
-          <h3 id="edicion-cotejada">Edición cotejada, gratuita</h3>
+        <div class="grupo">
+          <RotuloDeGrupo>Gratis</RotuloDeGrupo>
           {lineas.map((linea) => (
-            <p class="linea">
-              {linea.enlace !== undefined ? (
-                <a href={linea.enlace} rel="noopener nofollow">{linea.nombre}</a>
-              ) : (
-                linea.nombre
-              )}{resto(linea)}
-            </p>
+            <>
+              <p class="linea">
+                {linea.enlace !== undefined ? (
+                  <a href={linea.enlace} rel="noopener nofollow">{linea.nombre}</a>
+                ) : (
+                  linea.nombre
+                )}{resto(linea)}
+              </p>
+              <p class="linea tomado">{textoDeLoTomado(linea.citas, total)}</p>
+            </>
           ))}
-        </section>
-        {citasSinDocumento > 0 && <p class="linea sin-documento">{sinDocumento}</p>}
+        </div>
         {enVenta !== undefined && enVenta.ediciones.length > 0 && (
           <EdicionesEnVenta id={enVenta.id} ediciones={enVenta.ediciones} />
         )}
       </>
     )
   }
-</section>
+</Desplegable>
 
 <style>
   /*
-   * El ritmo de UX-DR42 (DESIGN.md § Pie de la Página de Obra): 4 × `--unidad` hasta la
-   * sección, 2 × del `h2` a lo que lo sigue y 1 × del rótulo de la parte a sus líneas y entre
-   * líneas. El peso y el interlineado son los del rótulo (`Rotulo.astro`) y la Línea de la
-   * Fuente: `tokens.css` no declara tokens para ellos.
+   * UX-DR125, UX-DR127 — el primer grupo va a 2 × `--unidad` del `<summary>`, que lo da el
+   * relleno del contenido del desplegable (el grupo no añade margen arriba); 3 × entre grupos
+   * (para la 33.2) y 1 × del rótulo de grupo a cada línea y entre líneas y frases. Peso e
+   * interlineado son los de la Línea de la Fuente.
    */
-  .donde-leer {
-    margin-top: calc(var(--unidad) * 4);
-    max-width: var(--medida-prosa);
+  .grupo + .grupo {
+    margin-top: calc(var(--unidad) * 3);
   }
 
-  .tras-el-rotulo {
-    margin-top: calc(var(--unidad) * 2);
-  }
-
-  /* El rótulo de la parte: `caption` con el peso de `author`, en tinta. */
-  h3 {
-    margin: 0;
-    font-family: var(--sans);
-    font-size: var(--pie);
-    font-weight: var(--peso-fuerte);
-    line-height: var(--interlineado-pie);
-    color: var(--tinta);
-  }
-
-  .linea {
-    margin: var(--unidad) 0 0;
+  .linea,
+  .sin-cotejo {
     font-family: var(--sans);
     font-size: var(--pie);
     line-height: var(--interlineado-pie);
     color: var(--tinta-apagada);
   }
 
-  p.tras-el-rotulo {
-    margin-top: calc(var(--unidad) * 2);
+  .linea {
+    margin: var(--unidad) 0 0;
+  }
+
+  .sin-cotejo {
+    margin: 0;
   }
 
   /*
