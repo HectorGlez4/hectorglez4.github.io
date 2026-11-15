@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { autorConBiografia, autorDe, citaConLosDosBloques } from './ayuda/corpus.ts';
+import { autorConBiografia, autorDe, citaConLosDosBloques, obraConLosPanelesDelPie } from './ayuda/corpus.ts';
 
 /**
  * Historia 36.1 — los paneles de la Página de Cita y de la de Autor, en el navegador.
@@ -18,6 +18,8 @@ import { autorConBiografia, autorDe, citaConLosDosBloques } from './ayuda/corpus
 const CITA = citaConLosDosBloques();
 const AUTOR = CITA === undefined ? undefined : autorDe(CITA);
 const BIOGRAFIA = autorConBiografia();
+/** Historia 36.2 — una página 1 de Obra con Temas y «Cómo citar». */
+const OBRA = obraConLosPanelesDelPie();
 
 /** La razón de contraste WCAG entre dos colores calculados (`rgb(…)`, sin transparencia). */
 async function contraste(page: Page, delante: string, detras: string): Promise<number> {
@@ -256,5 +258,54 @@ test.describe('Historia 36.1 — la Página de Autor en paneles', () => {
     const enlace = panel.locator('[data-pagefind-ignore] p a').first();
     await expect(enlace).toBeVisible();
     expect(await contraste(page, await estilo(enlace, 'color'), await estilo(panel, 'background-color'))).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+test.describe('Historia 36.2 — la Página de Obra con los paneles al pie', () => {
+  test.skip(OBRA === undefined, 'El Corpus no tiene ninguna Obra con Temas y «Cómo citar».');
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto(OBRA!);
+  });
+
+  test('ningún panel antes del listado; AA de tinta, apagada y siena sobre el de Tema y el de las herramientas', async ({ page }) => {
+    const [tinta, apagada, siena] = await Promise.all(['--tinta', '--tinta-apagada', '--siena'].map((n) => token(page, n)));
+    // Decisión 3: nada en panel por encima del listado.
+    const antes = await page.evaluate(() => {
+      const listado = document.querySelector('ul.listado')!;
+      return [...document.querySelectorAll('.panel')].filter(
+        (p) => p.compareDocumentPosition(listado) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).length;
+    });
+    expect(antes).toBe(0);
+    const tema = page.locator('.panel-tema');
+    const herramientas = page.locator('.panel-herramientas');
+    await expect(tema).toHaveCount(1);
+    await expect(herramientas).toHaveCount(1);
+    for (const panel of [tema, herramientas]) {
+      const fondo = await estilo(panel, 'background-color');
+      for (const color of [tinta, apagada, siena]) {
+        expect(await contraste(page, color, fondo), `${color} sobre ${fondo}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+    expect(await estilo(tema.locator('h2.rotulo'), 'color')).toBe(await token(page, '--sobre-contenedor-tema'));
+    const chip = tema.locator('.chip').first();
+    expect(await contraste(page, await estilo(chip, 'border-top-color'), await estilo(tema, 'background-color'))).toBeGreaterThanOrEqual(3);
+    // La nota, si la hay, fuera de todo panel.
+    expect(await page.locator('.panel .nota-de-la-ficha').count()).toBe(0);
+  });
+
+  test('el `<summary>` de «Cómo citar» con 44 px y anillo en siena; el chip de Tema con foco visible', async ({ page }) => {
+    const siena = await token(page, '--siena');
+    const resumen = page.locator('.panel-herramientas summary', { hasText: 'Cómo citar' });
+    await expect(resumen).toHaveCount(1);
+    expect((await resumen.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect(await estilo(resumen, 'text-transform')).toBe('none');
+    expect(await anillo(page, resumen)).toEqual({ estilo: 'solid', color: siena, visible: true });
+    const chip = page.locator('.panel-tema .chip').first();
+    const a = await anillo(page, chip);
+    expect(a.visible).toBe(true);
+    expect(a.estilo).toBe('solid');
+    expect(a.color).toBe(siena);
   });
 });

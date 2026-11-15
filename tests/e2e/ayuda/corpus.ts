@@ -184,6 +184,10 @@ interface CitaResuelta {
   recuento?: number;
   /** Historia 24.4 — si alguna Cita de su Obra está cotejada: la Tarjeta promete «dónde leerla». */
   edicionCotejada?: boolean;
+  /** Historia 36.2 — los Temas que declara la Cita, por slug. */
+  temas: readonly string[];
+  /** Historia 36.2 — si su Obra es de un Autor (no de un Personaje) sin derechos vigentes: lleva «Cómo citar». */
+  obraConComoCitar?: boolean;
 }
 
 /**
@@ -206,12 +210,14 @@ function citasResueltas(): CitaResuelta[] {
         procedencia?: { obra?: string } | null;
         fuente?: { id: string } | null;
         clase?: string;
+        temas?: string[] | null;
       };
       // La Fuente también: de ella sale si la Obra tiene edición cotejada (Historia 24.4).
       return {
         slug: datos.slug,
         autor: datos.autor,
         texto: datos.texto,
+        temas: Array.isArray(datos.temas) ? datos.temas : [],
         procedencia: datos.procedencia,
         ...(datos.fuente != null ? { fuente: datos.fuente } : {}),
         // Historia 35.9 — lo cotejado es de la clase de siempre: la Fuente de una atribuida no cuenta.
@@ -239,8 +245,15 @@ function citasResueltas(): CitaResuelta[] {
     autor: c.autor,
     texto: c.texto,
     conFuente: typeof c.fuente?.id === 'string' && c.fuente.id !== '',
+    temas: c.temas,
     ...(c.obra !== undefined
-      ? { obra: c.obra.titulo, ficha: c.obra.nombre, recuento: c.obra.recuento, edicionCotejada: c.obra.edicionCotejada }
+      ? {
+          obra: c.obra.titulo,
+          ficha: c.obra.nombre,
+          recuento: c.obra.recuento,
+          edicionCotejada: c.obra.edicionCotejada,
+          obraConComoCitar: c.obra.dueño.tipo === 'autor' && !c.obra.derechosVigentes,
+        }
       : {}),
   }));
 }
@@ -326,6 +339,24 @@ export function citaSinMismaObra(): string | undefined {
 /** Una Cita con «De la misma obra» y sin «Más de {Autor}»: todas las de su Autor en una Obra de 4 o más. */
 export function citaSinMasDelAutor(): string | undefined {
   return primeraQue((c, delAutor) => c.ficha !== undefined && (c.recuento ?? 0) >= 4 && !fueraDeSuObra(c, delAutor));
+}
+
+/**
+ * Historia 36.2 — la página 1 de una Obra con los dos paneles del pie: alguna de sus Citas declara
+ * un Tema publicado (los Temas, en el panel del Tema) y la Obra lleva «Cómo citar» (de un Autor y
+ * sin derechos vigentes: el panel de las herramientas). La ruta de la primera por nombre de ficha,
+ * o `undefined` si el Corpus de hoy no la tiene.
+ */
+export function obraConLosPanelesDelPie(): string | undefined {
+  const publicados = new Set([...citasPorTema()].filter(([, n]) => n >= MIN_CITAS_POR_TEMA).map(([slug]) => slug));
+  const fichas = citasResueltas()
+    .filter((c) => c.ficha !== undefined && c.obraConComoCitar === true && c.temas.some((t) => publicados.has(t)))
+    .map((c) => c.ficha!)
+    .sort();
+  const ficha = fichas[0];
+  if (ficha === undefined) return undefined;
+  const corte = ficha.indexOf('--');
+  return `/obra/${ficha.slice(0, corte)}/${ficha.slice(corte + 2)}/`;
 }
 
 /** Por qué falla una prueba de la 24.4 cuando el Corpus no tiene la cara que pide. */

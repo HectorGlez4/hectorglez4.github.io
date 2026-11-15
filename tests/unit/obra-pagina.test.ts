@@ -1187,14 +1187,19 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
     expect(segundas).toEqual([]);
   });
 
-  it('la hoja emitida del pie, con nota: Temas a 5 ×, la línea a 1 × y la nota 4 × / 3 ×', async () => {
+  it('la hoja emitida del pie, con nota: el primer panel del pie a 5 ×, la línea a 1 × y la nota 4 × / 3 ×', async () => {
     const todas = await reglasDe(proyecto, '/obra/seneca/sobre-la-brevedad-de-la-vida/');
+    // El minificador puede fundir reglas iguales en una lista de selectores: sin una regla propia, se busca en la lista.
     const de = (selector: string) => {
-      const regla = todas.find((r) => r.selector === selector);
+      const regla =
+        todas.find((r) => r.selector === selector) ??
+        todas.find((r) => r.selector.split(',').map((s) => s.replace(/\s+/g, '')).includes(selector));
       expect(regla, selector).toBeDefined();
       return declaraciones(regla!.cuerpo);
     };
-    expect(de('.temas').get('margin-top')).toBe('calc(var(--unidad) * 5)');
+    // Historia 36.2 — los Temas van en su panel, sin margen propio; el panel, a 5 × de «Buscar en esta obra».
+    expect(todas.some((r) => r.selector === '.temas')).toBe(false);
+    expect(de('.pagina>.buscar-en+.panel').get('margin-top')).toBe('calc(var(--unidad) * 5)');
     expect(de('.linea').get('margin')).toBe('var(--unidad) 0 0');
     expect(todas.some((r) => r.selector === '.donde-leer')).toBe(false);
     const nota = de('.nota-de-la-ficha');

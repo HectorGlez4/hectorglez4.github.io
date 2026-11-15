@@ -29,6 +29,12 @@ import { CITAS_POR_PAGINA, MAX_OBRAS_ANTES_DE_LAS_CITAS, MIN_CITAS_POR_TEMA } fr
  *     con Lista de Obras plegada y Citas sin obra. De `dist/` se lee qué bloque cae en qué
  *     `div.panel.{familia}`, en qué orden, que ningún panel es región ni lleva zona, y que fuera
  *     de la Página de Cita y de la de Autor no hay ninguno.
+ *
+ * Historia 36.2 — el mismo patrón en Obra y Personaje, sobre la misma construcción: la página 1 de
+ * Obra sin ningún panel por encima del listado (decisión 3, delegada por Héctor el 2026-11-14) y, al
+ * pie, los Temas en el del Tema y «Cómo citar» en el de las herramientas, con la nota sobre el papel;
+ * la de Personaje calca la de Autor; las 2+ de las dos, sin panel; Tema, Colección, portada, 404,
+ * Directorios y `/buscar/`, sin panel.
  */
 
 const DESIGN = '_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md';
@@ -76,6 +82,9 @@ describe('Historia 36.1 — los tokens de la v9.3 en `tokens.css`', () => {
       'src/components/RutasDeSalida.astro',
       'src/pages/cita/[slug].astro',
       'src/pages/autor/[slug]/[...page].astro',
+      // Historia 36.2.
+      'src/pages/obra/[autor]/[slug]/[...page].astro',
+      'src/pages/personaje/[slug]/[...page].astro',
     ]) {
       const fuente = await readFile(join(RAIZ, fichero), 'utf8');
       expect(fuente, fichero).not.toMatch(/secondary|#[0-9a-f]{3,8}\b|box-shadow/i);
@@ -90,6 +99,10 @@ const BREVEDAD = 'Sobre la brevedad de la vida';
 const OTRAS_OBRAS = ['Cartas a Lucilio', 'Sobre la vida feliz', 'De la ira', 'De la clemencia'];
 const SIN_OBRA = 'seneca-mientras-esperamos-vivir-la-vida-pasa';
 const COMPLETA = 'seneca-brevedad-0';
+/** Historia 36.2 — la Obra con Temas, «Cómo citar» y nota, y una Obra de más de una página. */
+const OBRA_COMPLETA = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
+const OBRA_PAGINADA = '/obra/seneca/cartas-a-lucilio/';
+const NOTA_DE_LA_OBRA = 'Una nota de la ficha que solo escribe Héctor.';
 
 const AUTOR_VIVO = `nombre: "Autora Viva"
 vivo: true
@@ -114,6 +127,15 @@ function corpus(): Record<string, string> {
     'personajes/uno.yml': PERSONAJE,
     'temas/el-tiempo.yml': TEMA_VALIDO,
     'pendientes-de-cotejo.yml': `citas:\n  - ${SIN_OBRA}\n`,
+    // Historia 36.2 — una ficha con nota: la nota va al pie de su página 1, sobre el papel.
+    'obras/seneca--sobre-la-brevedad-de-la-vida.yml': [
+      'autor: "seneca"',
+      `titulo: "${BREVEDAD}"`,
+      'formas:',
+      '  - "sobre la brevedad de la vida"',
+      `nota: "${NOTA_DE_LA_OBRA}"`,
+      '',
+    ].join('\n'),
   };
   /** `n` Citas cotejadas de una Obra de Séneca, cada una en un párrafo con algo antes y después: tienen pasaje. */
   const sembrar = (clave: string, titulo: string, n: number) => {
@@ -137,11 +159,11 @@ function corpus(): Record<string, string> {
     );
   };
   sembrar('brevedad', BREVEDAD, 8);
-  // Más de una página de Autor, y más Obras de las que caben antes del pliegue.
-  const resto = CITAS_POR_PAGINA + 1 - 8;
+  // Más de una página de Autor, y más Obras de las que caben antes del pliegue; «Cartas a
+  // Lucilio», de más de una página de Obra (Historia 36.2).
   OTRAS_OBRAS.forEach((titulo, i) => {
     const clave = ['cartas', 'feliz', 'ira', 'clemencia'][i];
-    sembrar(clave, titulo, i === 0 ? resto - (OTRAS_OBRAS.length - 1) : 1);
+    sembrar(clave, titulo, i === 0 ? CITAS_POR_PAGINA + 1 : 1);
   });
   c['citas/seneca--sin-obra.md'] = citaValida({
     slug: SIN_OBRA,
@@ -233,6 +255,8 @@ function leer(html: string): { bloques: Bloque[]; paneles: { atributos: Readonly
     if (elemento.etiqueta === 'details') que = `desplegable:${rotulos[detalles++]}`;
     else if (elemento.etiqueta === 'figure' && c.includes('bloque')) que = 'cita';
     else if (elemento.etiqueta === 'header' && c.includes('ficha')) que = 'ficha-de-autor';
+    else if (elemento.etiqueta === 'header' && c.includes('cabecera-de-obra')) que = 'cabecera-de-obra';
+    else if (elemento.etiqueta === 'p' && c.includes('nota-de-la-ficha')) que = 'nota-de-la-ficha';
     else if (elemento.etiqueta === 'section') que = c.find((x) => !x.startsWith('astro-')) ?? 'section';
     else if (elemento.etiqueta === 'ul' && c.includes('listado')) que = 'listado';
     else if (elemento.etiqueta === 'nav' && c.includes('salidas')) que = 'salidas';
@@ -358,7 +382,76 @@ describe('Historia 36.1 — qué bloque cae en qué panel, en `dist/`', () => {
     expect(pagina).not.toContain('class="panel ');
   });
 
-  it('ninguna otra superficie toma paneles en esta historia: portada, 404, Directorios, Obra, Tema, Personaje…', async () => {
+  it('Historia 36.2 — la Página de Obra, página 1: nada en panel por encima del listado; al pie, los Temas en el del Tema y «Cómo citar» en el de las herramientas; la nota, sobre el papel', async () => {
+    const pagina = await html(OBRA_COMPLETA);
+    const { bloques } = leer(pagina);
+    expect(orden(bloques)).toEqual([
+      'cabecera-de-obra@papel',
+      'desplegable:Dónde leer esta obra@papel',
+      'listado@papel',
+      'temas@tema',
+      'desplegable:Cómo citar@herramientas',
+      'nota-de-la-ficha@papel',
+    ]);
+    expect(bloques.filter((b) => b.que === 'ficha-de-cita').every((b) => b.panel === undefined)).toBe(true);
+    // Ningún panel antes del listado; «Buscar en esta obra» y la paginación, sobre el papel, antes del primero.
+    const primerPanel = pagina.indexOf('class="panel ');
+    expect(primerPanel).toBeGreaterThan(pagina.indexOf('<ul class="listado"'));
+    expect(primerPanel).toBeGreaterThan(pagina.indexOf('<form class="buscar-en"'));
+    expect(pagina).toMatch(/<div class="panel panel-tema cierre-texto"/);
+    expect(pagina).toMatch(/<div class="panel panel-herramientas cierre-fila"/);
+    // Los mismos atributos de siempre: la sección de Temas, la zona de los chips y Pagefind.
+    expect(pagina).toContain('<section class="temas" aria-labelledby="temas-de-la-obra"');
+    expect(pagina).toMatch(/<ul class="chips"[^>]*data-zona="chip-de-tema"/);
+    expect(pagina).toMatch(/<div class="panel panel-herramientas cierre-fila"[^>]*><div data-pagefind-ignore="all"[^>]*><details class="desplegable"/);
+    expect(pagina).toContain(NOTA_DE_LA_OBRA);
+    panelesSanos(pagina, OBRA_COMPLETA);
+  });
+
+  it('Historia 36.2 — la Página de Personaje, página 1: calca la de Autor', async () => {
+    const pagina = await html('/personaje/uno/');
+    const { bloques } = leer(pagina);
+    expect(orden(bloques)).toEqual(['ficha-de-autor@autor', 'obras-del-personaje@obra', 'listado@papel']);
+    expect(bloques.filter((b) => b.que === 'ficha-de-cita').every((b) => b.panel === undefined)).toBe(true);
+    // El nombre, el universo, dentro del panel del Autor.
+    expect(pagina).toMatch(/<div class="panel panel-autor cierre-texto"[^>]*><header class="ficha"[^>]*><h1[^>]*>Personaje Uno<\/h1><p class="universo"/);
+    expect(pagina).toMatch(/<div class="panel panel-obra cierre-(?:fila|texto)"[^>]*><section class="obras-del-personaje"/);
+    panelesSanos(pagina, '/personaje/uno/');
+  });
+
+  it('Historia 36.2 — «Más de {Personaje}» sigue en el panel del Autor', async () => {
+    const bloques = orden(leer(await html(`/cita/${ATRIBUIDA}/`)).bloques);
+    expect(bloques).toContain('mas-del-autor@autor');
+  });
+
+  it('Historia 36.2 — las páginas 2+ de Obra y de Personaje, sin ningún panel', async () => {
+    const dist = join(proyecto, 'dist');
+    const segundas: string[] = [];
+    const recorrer = async (dir: string) => {
+      for (const e of await readdir(dir, { withFileTypes: true })) {
+        const ruta = join(dir, e.name);
+        if (e.isDirectory()) await recorrer(ruta);
+        else if (e.name === 'index.html') segundas.push(relative(dist, ruta));
+      }
+    };
+    for (const familia of ['obra', 'personaje']) {
+      try {
+        await recorrer(join(dist, familia));
+      } catch {
+        // Sin páginas de esa familia en el fixture.
+      }
+    }
+    const de2 = segundas.filter((p) => /\/\d+\/index\.html$/u.test(p));
+    // El fixture trae al menos una: «Cartas a Lucilio», de más de una página.
+    expect(de2).toContain(`${OBRA_PAGINADA.slice(1)}2/index.html`);
+    for (const p of de2) {
+      const pagina = await readFile(join(dist, p), 'utf8');
+      expect(pagina, p).not.toContain('class="panel ');
+      expect(pagina, p).not.toContain('class="temas"');
+    }
+  });
+
+  it('ninguna otra superficie toma paneles: portada, 404, Directorios, Tema, Colección, `/buscar/`…', async () => {
     const dist = join(proyecto, 'dist');
     const paginas: string[] = [];
     const recorrer = async (dir: string) => {
@@ -369,12 +462,10 @@ describe('Historia 36.1 — qué bloque cae en qué panel, en `dist/`', () => {
       }
     };
     await recorrer(dist);
-    const ajenas = paginas.filter((p) => !p.startsWith('cita/') && !p.startsWith('autor/'));
-    for (const necesaria of ['index.html', '404.html', 'autores/index.html', 'obras/index.html', 'tema/el-tiempo/index.html']) {
+    const ajenas = paginas.filter((p) => !/^(?:cita|autor|obra|personaje)\//u.test(p));
+    for (const necesaria of ['index.html', '404.html', 'autores/index.html', 'obras/index.html', 'tema/el-tiempo/index.html', 'buscar/index.html']) {
       expect(ajenas, necesaria).toContain(necesaria);
     }
-    expect(ajenas.some((p) => p.startsWith('obra/'))).toBe(true);
-    expect(ajenas.some((p) => p.startsWith('personaje/'))).toBe(true);
     for (const p of ajenas) {
       expect(await readFile(join(dist, p), 'utf8'), p).not.toContain('class="panel ');
     }

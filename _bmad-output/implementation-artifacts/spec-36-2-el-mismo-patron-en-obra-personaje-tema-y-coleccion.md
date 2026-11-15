@@ -2,7 +2,8 @@
 title: 'Historia 36.2 — El mismo patrón en Obra, Personaje, Tema y Colección'
 type: 'feature'
 created: '2026-11-15'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '4eb36621d99466e35da8b7d2282e8ae13f17f6c6'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -71,6 +72,17 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+(Las cinco capas son externas y la invocación no trajo hallazgos suyos: esta pasada no tiene ninguno.)
+
 ## Design Notes
 
 Por qué la decisión 3 no mueve la primera pantalla: todo lo que se envuelve queda **bajo** el listado (Temas y «Cómo citar» van tras «Buscar en esta obra», que ya va tras la paginación desde la 27.8). El aire al pie: el ritmo de bloques del pie era 5u; al pasar a paneles se conserva el 5u hacia el primer panel y entre los dos paneles manda el 2u de la primitiva, como entre los paneles del pie de la Página de Cita. La nota (4u + filete + 3u) sigue igual, ahora medida desde el borde del último panel.
@@ -110,5 +122,30 @@ Además: si «Cómo citar» al pie va en un panel de herramientas propio o sobre
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Plan rehecho con la decisión 3, delegada por Héctor (chat, 2026-11-14): en la página 1 de Obra ningún panel por encima del listado; Temas en panel Tema y «Cómo citar» en panel de herramientas, al pie. Personaje calca Autor. Tema y Colección sin cambio. Detenido tras planificar.
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** Decisión 3 aplicada: en la página 1 de Obra nada cambia por encima del listado (Cabecera, Ficha técnica, «Dónde leer» y «Cómo empieza» sobre el papel, como en la 32.4); al pie, los Temas en `PanelDeBloque familia="tema" cierre="texto"` y «Cómo citar» en `familia="herramientas" cierre="fila"`, con su `data-pagefind-ignore="all"` en el contenedor de dentro (el panel solo lleva `class`); `CopiarReferencia` y la nota, fuera de todo panel. El primer panel del pie a 5 × `--unidad` de «Buscar en esta obra» (`.pagina > .buscar-en + .panel`), el segundo a 2 × por la regla de la primitiva; `.temas` pierde su margen propio. La Página de Personaje calca la de Autor: en la página 1 la Ficha (nombre en `--sobre-contenedor-autor`, universo, semblanza y su atribución) en el panel del Autor y la Lista de Obras en el de la Obra (lista a 1 × del rótulo, sin margen propio); las 2+, solo el `h1` sobre el papel. Tema, Colección, portada, 404, Directorios y `/buscar/` no cambian; `PanelDeBloque.astro` no se toca. Ni textos, ni orden, ni `data-zona`, ni rutas, metas, JSON-LD ni `data-pagefind-*`.
+
+**Ficheros.**
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — Temas y «Cómo citar» en sus paneles al pie; aire del primer panel; comentarios con la decisión 3.
+- `src/pages/personaje/[slug]/[...page].astro` — Ficha en panel Autor (p. 1), Lista de Obras en panel Obra; 2+ sin panel.
+- `tests/unit/paneles.test.ts` — casos de la 36.2 sobre `dist/` (orden y panel de cada bloque de Obra p. 1 con nota, Personaje p. 1, «Más de {Personaje}», toda página 2+ de Obra y Personaje sin panel; el caso «ninguna otra superficie» acotado a lo que no es Cita, Autor, Obra ni Personaje e incluye `/buscar/`); el fixture gana una ficha con `nota` y una Obra de más de una página; la guardia de hexadecimales/sombra alcanza las dos páginas.
+- `tests/unit/como-citar-obra-build.test.ts`, `tests/unit/buscar-en.test.ts`, `tests/unit/obra-pagina.test.ts` — al día con «Cómo citar» y los Temas dentro de sus paneles y con el margen del primer panel.
+- `tests/e2e/paneles.spec.ts`, `tests/e2e/ayuda/corpus.ts` — `describe` de la 36.2 sobre una Obra real con Temas y «Cómo citar» (`obraConLosPanelesDelPie`): ningún panel antes del listado, AA de tinta/apagada/siena sobre los dos tintes, rótulo en `--sobre-contenedor-tema`, 3:1 del contorno del chip, `<summary>` de 44 px con anillo siena, chip con foco visible, nota fuera de panel.
+- `tests/e2e/accesibilidad.spec.ts` — el pie de la 32.4 medido entre paneles: formulario → panel de Temas 40 px, panel de Temas → panel de «Cómo citar» 16 px, panel → nota 32 px y la nota fuera de todo panel.
+- `tests/e2e/tipografia-calculada.spec.ts-snapshots/tipografia-obra-{escritorio,movil}.json` — regrabadas (solo la Obra cambia): comprobado que, quitando el segmento `div.panel…` de las rutas, los recuentos por «peso | interlineado» son idénticos a los de la base.
+
+**Revisión.** Pasada sin hallazgos externos: 0 patch, 0 defer, 0 reject. `followup_review_recommended: false` (puntuación 0).
+
+**Verificación.**
+- `npx vitest run` por fichero: `paneles` (13), `como-citar-obra-build` (6), `buscar-en` (10), `obra-pagina` (69), `pagina-de-personaje` (20), `personajes-build` (5), `tipografia-en-tokens` (6), `superficies` (120), `espinas-de-ux` (14), `obras` (158), `medicion` (755): verde.
+- `npx astro check`: 0 errores.
+- `npm run build`: termina con EXIT 0; el paso del peso no se para (543,9 MiB juzgados, por debajo del aviso).
+- `npx playwright test tests/e2e/{paneles,incipit,ficha-tecnica,accesibilidad,desplegable}.spec.ts`: 358 verdes y 2 rojos del pie de la 32.4, que medían los márgenes de antes; puestos al día y verdes en la repetición (bloque «Historia 32.4» entero, móvil y escritorio). Las puertas de primera pantalla `incipit.spec.ts:232` y `ficha-tecnica.spec.ts:167` (proyecto de escritorio a 360 × 640, por diseño) en verde; la de `accesibilidad.spec.ts` da la peor página 1 de Obra del Corpus a 548,15 px (< 640).
+- `tests/e2e/tipografia-calculada.spec.ts`: verde salvo `buscar-con-resultados` (escritorio), la inestabilidad de `p.estado` ya diferida en la 36.1; `/buscar/` no cambia con esta historia y su instantánea no se regrabó.
+- `npm test` completo (desacoplado): 209 ficheros, 9.056 pruebas, verde.
+
+**NFR-7.** Queda para la puerta de la Épica 36. Delta de CSS: la Página de Obra carga ahora la hoja de `PanelDeBloque` — las reglas con `.panel` suman 2.367 bytes sin comprimir en una hoja en línea de 19.080 (p. ej. `/obra/agustin-alvarez/la-transformacion-de-las-razas-en-america/`), menos la regla retirada de `.temas`; ningún guion nuevo. La Página de Personaje gana lo mismo, pero el Corpus de hoy no construye ninguna.
+
+**Riesgos residuales.** La Página de Personaje solo se prueba en la unitaria (el Corpus real no tiene Personajes): el contraste y el foco sobre su panel los cubren los de la Página de Autor, que usa los mismos tokens y la misma primitiva. Asentar la decisión 3 en DESIGN.md sigue pendiente de Héctor (`bmad-ux`, en `deferred`).
