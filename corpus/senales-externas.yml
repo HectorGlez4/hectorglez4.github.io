@@ -68,3 +68,14 @@
 # (AD-24): quién enlaza al sitio desde fuera no es contenido del sitio.
 
 senales:
+  - fecha: "2026-11-15"
+    tipo: "propia"
+    origen: "https://www.facebook.com/100618132774413"
+    destino: "/"
+    marcado: true
+    nota: "campo Enlaces de la página"
+  - fecha: "2026-11-15"
+    tipo: "propia"
+    origen: "https://www.youtube.com/@sabiduriadebolsillo"
+    destino: "/"
+    nota: "enlaces del canal (Personalización)"
