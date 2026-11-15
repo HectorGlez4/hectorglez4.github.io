@@ -5,7 +5,7 @@ created: '2026-11-15'
 status: 'done'
 baseline_revision: '9502445ffbb9f4e15dbe0824b8671e1a0366233a'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-36-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
@@ -157,6 +157,19 @@ deferred:
 
 Rechazados, con su motivo: el cierre del panel con un Desplegable abierto (su `.contenido` ya trae 3 × unidad abajo); `cierre` sin cotejo (decisión de la primitiva; el de la Lista de Obras es correcto); `:last-child` con `li[hidden]` (dentro de un panel no hay filas ocultas: el filtro es de `/obras/`); tokens oscuros (el sitio no tiene tema oscuro); la Ficha global en los listados (AD-19, la lectura del contrato) y sus instantáneas regrabadas (revisadas en la pasada de implementación); los filetes de «Lee el pasaje» sobre el papel (por diseño: queda fuera del panel); `max-width` y relleno (`box-sizing: border-box` global); CAP-1 en su forma débil (lo refuerza la prueba 29.3 del `h1` en primera pantalla); `anillo()` (Playwright, tras una tecla, da `:focus-visible`); la anotación de la primera pasada y el NFR-7 con sus cifras (ya en el Auto Run Result); la instantánea inestable de `/buscar/` (ya diferida); `.sin-obra` a 1 × unidad del rótulo (es la regla del panel); las lecturas A2/B2/C2/D2/E2/F2 del contrato (aceptadas por la delegación de Héctor); la semblanza con biografía que el Corpus de hoy no tiene; el contorno del campo dentro del panel (3,33:1 sobre `--contenedor`).
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 3: (high 0, medium 0, low 3)
+- defer: 0
+- reject: 30
+- addressed_findings:
+  - `[low]` `[patch]` Nada medía el hueco de una `--unidad` que sustituye al filete entre Fichas apiladas y entre la última y su cierre (la exención de `medirZonasDeToque` solo exige que no se solapen): prueba nueva en `tests/e2e/paneles.spec.ts` sobre cada `ul.tarjetas` de las Rutas de salida, y el comentario de `accesibilidad.spec.ts` que hablaba del margen negativo retirado y del filete como único separador, al día.
+  - `[low]` `[patch]` La luminancia de `contraste()` en `paneles.spec.ts` leía un fondo con transparencia como negro: ahora lanza ante un canal alfa menor que 1.
+  - `[low]` `[patch]` El e2e fijaba `'17px'` y `'12px'` en vez de leer `--cita-xs` y `--radio-ficha`: los lee calculados (`medida()`), y la Cita principal se compara con el cuerpo de la Ficha leído.
+
+Rechazados, con su motivo: `transparent` en el contorno de colores forzados (es la técnica del modo forzado, no un color pintado) y `letter-spacing: 0.06em` (el valor de DESIGN.md § Rótulo de panel; la guardia de tipografía no lo exige en token y `Rotulo.astro` ya lleva el suyo literal); el `<summary>` del pliegue «Y N obras más» con el trato del panel (DESIGN.md § Desplegable: dentro de un panel, el del Rótulo de panel en tinta, y § Página de Autor, «su desplegable dentro»); «Lee el pasaje» sobre el papel con otro trato (DESIGN.md § Desplegables de la Página de Cita, «En dos sitios»); paneles sin rótulo propio (herramientas: sus `<summary>`, por DESIGN.md; Autor: su `h1`); quién envuelve la Tarjeta de Obra (la portada compone la suya y no la usa); `.pagina > .panel` y otros paneles futuros, `panelesSanos` con un `section` vacío, el `throw` de `PanelDeBloque` sin prueba de construcción, `cierre="fila"` sin ejercitar en la Página de Autor, divisorias de Fila en Tema y herramientas, el `class="panel "` literal y el regex de `leer()` (especulativos: ningún uso de hoy los alcanza); el corte sin la Página de Autor ni los listados (ninguna serie juzga su continuación; SM-C4 ya parte por la Obra); el `h1` en dos ramas y su tinta distinta en las 2+ (la ASSUMPTION diferida de las páginas 2+); el desplazamiento del texto de las Fichas en los listados (es la Ficha de DESIGN.md, AD-19); el contraste por token y no por nodo, la semblanza con biografía, CAP-1 débil y NFR-7 (ya cubiertos o diferidos en las pasadas anteriores); la contradicción aparente del Auto Run Result (cada pasada anota la suya, y la de la primera era cero) y la forma de la entrada diferida (la que pide la plantilla de la revisión); el relleno en tres valores (estilo).
+
 ## Design Notes
 
 El panel envuelve y no sustituye: las `section` de hoy (`tarjeta-de-obra`, `obras-del-autor`, con `aria-labelledby`) siguen siendo lo que eran, así que no se añade ni se quita ninguna región, y las pruebas que buscan `<section class="…"` siguen valiendo. Todo el trato de dentro vive en `PanelDeBloque.astro` con `:global` acotado bajo `.panel`, para que `Rotulo`, `Desplegable`, `FilaDeBloque`, `Chips` y `ListaDeObras` —compartidos con la portada, los Directorios y `/obras/`— salgan idénticos fuera de un panel. Comprobar especificidad: `.panel[data-astro-cid-…] .desplegable` gana a `.desplegable[data-astro-cid-…]`.
@@ -236,3 +249,21 @@ Blocking condition: ninguna.
 - `npm test` completo, desacoplado: 209 ficheros, 9.052 pruebas, verde.
 
 **Riesgos.** La prueba de las etiquetas de «Cómo citar» es condicional a que la Cita del Corpus elegida lo lleve; la de la semblanza con biografía sigue saltándose con el Corpus de hoy. NFR-7, en la puerta de la Épica 36.
+
+### Revisión externa, pasada 2 (2026-11-15)
+
+**Resumen.** Tres parches de prueba sobre los hallazgos de las cinco capas externas, sin cambio en `src/`: el hueco de una `--unidad` entre Fichas apiladas y hasta su cierre, medido; la luminancia del contraste, que se niega ante un fondo con transparencia; y el cuerpo de la Ficha y su radio leídos de los tokens en vez de escritos.
+
+**Ficheros.**
+- `tests/e2e/paneles.spec.ts` — prueba nueva del hueco entre Fichas y cierre; `medida()` para `--cita-xs`, `--radio-ficha` y `--unidad`; guarda de transparencia en `contraste()`.
+- `tests/e2e/accesibilidad.spec.ts` — solo el comentario de la holgura y de la exención de las filas de un listado, al día con la Ficha.
+
+**Revisión.** 3 parches (0 altos, 0 medios, 3 bajos), 0 diferidos, 30 rechazados. Puntuación 3 × 0 + 3 = 3 < 5: `followup_review_recommended: false`.
+
+**Verificación.**
+- `npx playwright test tests/e2e/paneles.spec.ts tests/e2e/accesibilidad.spec.ts` en los dos perfiles: 343 pasan, 11 se saltan, 0 fallan. Puertos libres antes y después.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test` completo, desacoplado: 209 ficheros, 9.052 pruebas, verde.
+
+**Riesgos.** Los de la pasada 1; NFR-7, en la puerta de la Épica 36.
+

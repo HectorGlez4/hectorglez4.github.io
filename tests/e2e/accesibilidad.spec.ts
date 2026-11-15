@@ -1334,9 +1334,10 @@ test.describe('Historia 2.8 — responsive', () => {
           conTarjetas: lista !== null && lista.querySelector(':scope > li.tarjeta') !== null,
         })),
     );
-    // El margen negativo de la tarjeta (`margin-inline: -1 × --unidad`) la saca un `--unidad` por
-    // cada lado de la fila que la cierra: dentro de una lista con tarjetas, eso no es otra columna.
-    // Una lista solo de Filas de bloque (la Tarjeta de Obra) sigue con el píxel de siempre.
+    // Dentro de una lista con tarjetas, la tolerancia horizontal es de un `--unidad`: la nació el
+    // margen negativo que la Tarjeta de Cita llevaba hasta la 36.1 y se conserva como holgura; una
+    // diferencia así entre la Ficha y la fila que la cierra no es otra columna. Una lista solo de
+    // Filas de bloque (la Tarjeta de Obra) sigue con el píxel de siempre.
     const unidad = await page.evaluate(() => {
       const sonda = document.createElement('div');
       sonda.style.width = 'var(--unidad)';
@@ -1354,9 +1355,9 @@ test.describe('Historia 2.8 — responsive', () => {
      * cajas quedan separadas por el eje en el que no se cruzan.
      *
      * Las filas de un mismo `ul` de Tarjetas de Cita o de Filas de bloque —con el ancho entero
-     * de la columna y el filete entre una y otra, el único separador del sistema— no se miden
-     * entre sí: son enlaces de bloque de `EXPERIENCE.md` y su separación es el filete, no un
-     * hueco. Basta con que no se solapen (Historia 24.5: «Siguiente…» sobre «Ver la obra»; 24.6:
+     * de la columna— no se miden entre sí: son enlaces de bloque de `EXPERIENCE.md`, y su
+     * separación es el filete entre Filas o, desde la 36.1, el hueco de una `--unidad` entre
+     * Fichas de Cita, que mide `tests/e2e/paneles.spec.ts`. Basta con que no se solapen (Historia 24.5: «Siguiente…» sobre «Ver la obra»; 24.6:
      * las tarjetas y el cierre de cada grupo del pie, que sustituyen a las Citas hermanas). La
      * exención se nombra por componente, no por «cualquier lista», para que una botonera en `ul`
      * no se cuele por ella.

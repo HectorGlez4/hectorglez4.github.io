@@ -24,7 +24,10 @@ async function contraste(page: Page, delante: string, detras: string): Promise<n
   return page.evaluate(
     ([a, b]) => {
       const lum = (color: string) => {
-        const [r, g, bl] = color.match(/[\d.]+/g)!.slice(0, 3).map(Number).map((v) => {
+        const canales = color.match(/[\d.]+/g)!;
+        // Un fondo con transparencia se leería como negro: la medida no valdría.
+        if (canales.length > 3 && Number(canales[3]) < 1) throw new Error(`color con transparencia: ${color}`);
+        const [r, g, bl] = canales.slice(0, 3).map(Number).map((v) => {
           const c = v / 255;
           return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
         });
@@ -47,6 +50,20 @@ const token = (page: Page, nombre: string) =>
     muestra.remove();
     return color;
   }, nombre);
+
+/** El valor calculado de una propiedad personalizada de `tokens.css` puesta en `propiedad`. */
+const medida = (page: Page, nombre: string, propiedad: 'fontSize' | 'borderTopLeftRadius' | 'width') =>
+  page.evaluate(
+    ([n, p]) => {
+      const muestra = document.createElement('div');
+      muestra.style[p] = `var(${n})`;
+      document.body.append(muestra);
+      const valor = getComputedStyle(muestra)[p];
+      muestra.remove();
+      return valor;
+    },
+    [nombre, propiedad] as const,
+  );
 
 const estilo = (l: Locator, propiedad: string) =>
   l.evaluate((e, p) => getComputedStyle(e).getPropertyValue(p), propiedad);
@@ -109,16 +126,35 @@ test.describe('Historia 36.1 — la Página de Cita en paneles', () => {
     for (const ficha of await fichas.all()) {
       const caja = await ficha.boundingBox();
       expect(caja!.height).toBeGreaterThanOrEqual(44);
-      expect(await estilo(ficha, 'border-top-left-radius')).toBe('12px');
+      expect(await estilo(ficha, 'border-top-left-radius')).toBe(await medida(page, '--radio-ficha', 'borderTopLeftRadius'));
       expect(await estilo(ficha, 'box-shadow')).toBe('none');
     }
     const fragmento = page.locator('.salidas .tarjeta .fragmento').first();
-    expect(await estilo(fragmento, 'font-size')).toBe('17px');
+    const citaXs = await medida(page, '--cita-xs', 'fontSize');
+    expect(await estilo(fragmento, 'font-size')).toBe(citaXs);
     expect(await estilo(fragmento, 'font-weight')).toBe('400');
     // La Cita principal conserva su tramo: ni caja ni el cuerpo de las fichas.
     const principal = page.locator('figure.bloque .texto').first();
-    expect(Number.parseFloat(await estilo(principal, 'font-size'))).toBeGreaterThan(17);
+    expect(Number.parseFloat(await estilo(principal, 'font-size'))).toBeGreaterThan(Number.parseFloat(citaXs));
     expect(await page.locator('.panel figure.bloque').count()).toBe(0);
+  });
+
+  test('las Fichas apiladas, a una `--unidad` una de otra y del cierre: sin filete, el hueco es lo único que las separa', async ({ page }) => {
+    const unidad = Number.parseFloat(await medida(page, '--unidad', 'width'));
+    const listas = page.locator('.salidas ul.tarjetas');
+    expect(await listas.count()).toBeGreaterThan(0);
+    for (const lista of await listas.all()) {
+      const cajas = await lista.locator(':scope > li.tarjeta > a, :scope > li.fila-de-bloque').evaluateAll((es) =>
+        es.map((e) => {
+          const r = e.getBoundingClientRect();
+          return { top: r.top, bottom: r.bottom };
+        }),
+      );
+      expect(cajas.length).toBeGreaterThan(1);
+      for (let i = 1; i < cajas.length; i += 1) {
+        expect(cajas[i].top - cajas[i - 1].bottom, `hueco ${i} de la lista`).toBeCloseTo(unidad, 0);
+      }
+    }
   });
 
   test('el foco, visible y en siena, sobre una Ficha y una Fila dentro de cada panel', async ({ page }) => {
@@ -140,7 +176,7 @@ test.describe('Historia 36.1 — la Página de Cita en paneles', () => {
     // La Ficha conserva su radio con el foco puesto: el anillo global no lo pisa.
     const ficha = page.locator('.panel .tarjeta a').first();
     await anillo(page, ficha);
-    expect(await estilo(ficha, 'border-top-left-radius')).toBe('12px');
+    expect(await estilo(ficha, 'border-top-left-radius')).toBe(await medida(page, '--radio-ficha', 'borderTopLeftRadius'));
   });
 
   test('dentro del panel de las herramientas, el `<summary>` lleva el trato del Rótulo de panel, en tinta', async ({ page }) => {
@@ -208,7 +244,7 @@ test.describe('Historia 36.1 — la Página de Autor en paneles', () => {
     // El listado, sobre el papel y en Fichas.
     expect(await page.locator('.panel .listado').count()).toBe(0);
     const ficha = page.locator('.listado .tarjeta a').first();
-    expect(await estilo(ficha, 'border-top-left-radius')).toBe('12px');
+    expect(await estilo(ficha, 'border-top-left-radius')).toBe(await medida(page, '--radio-ficha', 'borderTopLeftRadius'));
     expect((await ficha.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   });
 
