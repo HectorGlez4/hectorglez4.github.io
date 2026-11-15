@@ -54,7 +54,7 @@ const USO = [
   '  npm run atribuida -- variante <slug> "<texto>" --region <región> --origen <origen>',
   '  npm run atribuida -- texto <slug> "<texto>" [--propone <agente> --aprueba <agente>]',
   '  npm run atribuida -- texto <slug> "<versión>" --origen <origen> --atestiguacion <url> [--atestiguacion <url>...]',
-  '  npm run atribuida -- semilla <slug> [--salida semillas/<slug>.json]',
+  '  npm run atribuida -- semilla <slug> [--salida semillas/<slug>.json] [--html <página guardada>]',
   '  npm run atribuida -- proponer <lote.yaml> [--corpus corpus]',
   '',
 ].join('\n');
@@ -73,7 +73,7 @@ const FORMA: Record<string, { sueltos: number; conValor: readonly string[]; repe
     conValor: ['--corpus', '--origen', '--atestiguacion', '--propone', '--aprueba'],
     repetibles: ['--atestiguacion'],
   },
-  semilla: { sueltos: 1, conValor: ['--salida'] },
+  semilla: { sueltos: 1, conValor: ['--salida', '--html'] },
   proponer: { sueltos: 1, conValor: ['--corpus'] },
 };
 
@@ -225,7 +225,21 @@ async function semilla(slug: string): Promise<never> {
   }
 
   let html: string;
-  try {
+  /*
+   * `--html`: la página ya abierta en un navegador y guardada. BrainyQuote responde 403 a una petición
+   * que no viene de un navegador, y la orden no se disfraza de uno: lee lo que una persona abrió.
+   */
+  const guardada = opcion(argumentos, '--html');
+  if (guardada !== undefined) {
+    try {
+      html = await readFile(resolve(guardada), 'utf8');
+    } catch (fallo) {
+      terminar({
+        ok: false,
+        motivos: [`No se pudo leer «${guardada}»: ${fallo instanceof Error ? fallo.message : String(fallo)}. No se ha escrito nada.`],
+      });
+    }
+  } else try {
     const respuesta = await fetch(entrada.pagina, {
       redirect: 'manual',
       // Treinta segundos: una página, una vez.
