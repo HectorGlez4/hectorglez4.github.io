@@ -175,6 +175,10 @@ describe('Historia 34.0 — el contrato del componente, sin construir', () => {
     expect(selectoresAjenos('@media (min-width: 1px) { h2 { x: y; } }')).toEqual(['h2']);
   });
 
+  /*
+   * La prueba temporal «ninguna página ni componente del sitio lo importa todavía» la quitó el
+   * primer consumidor, `ComoEmpieza.astro` (Historia 32.3). La de abajo es permanente.
+   */
   it('ningún fichero del sitio, ni una isla, escribe su propio `<details>`', async () => {
     const ficheros = await ficherosDelSitio();
     expect(ficheros).toContain(join(RAIZ, 'public', 'islas', 'imagen.js'));

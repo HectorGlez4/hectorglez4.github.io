@@ -158,6 +158,8 @@ describe('las familias del Corpus', () => {
       ['corpus/fuentes', 'documento'],
       // Historia 35.2 — los Personajes; desde la 35.3, también familia de ruta (su página).
       ['corpus/personajes', 'personaje'],
+      // Historia 32.2 — y los de Wikidata, que componen la línea de Ficha técnica de la Obra.
+      ['corpus/wikidata', 'wikidata'],
     ]);
     for (const [directorio, familia] of FAMILIAS_DE_FICHERO) {
       expect(familiaDeFichero(`${directorio}/ejemplo.md`)).toBe(familia);
@@ -176,9 +178,9 @@ describe('las familias del Corpus', () => {
     // Historia 26.7 — no las declara el aviso: son las de `src/lib/superficies.ts`, su único dueño.
     expect(FAMILIAS_DE_RUTA).toBe(FAMILIAS);
     // Las de fichero son las seis con directorio en el Corpus —el Directorio no tiene fichero—
-    // más `documento`, que no es familia de ruta.
+    // más `documento` y `wikidata` (32.2), que no son familias de ruta.
     const deFichero = FAMILIAS_DE_FICHERO.map(([, familia]) => familia);
-    expect(deFichero.filter((f) => f !== 'documento')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
+    expect(deFichero.filter((f) => f !== 'documento' && f !== 'wikidata')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
     // Con un Personaje que dice una Cita, para que la relación declare su página.
     const ejemplo = corpusDeEjemplo();
     const conPersonaje: CorpusParaFechar = {

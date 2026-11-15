@@ -1,41 +1,56 @@
 ---
 /**
- * «Ediciones en venta» — Historia 22.9, UX-DR43, FR-35.
+ * Las ediciones en venta, por formato — Historias 22.9 y 33.2, UX-DR43, UX-DR127, FR-35.
  *
  * El único marcado del Modelo de afiliación: un `<div data-ingreso>` —**nunca** un `aside`, que
- * haría de las ediciones una región aparte dentro de «Dónde leer esta obra»— con su `h3` y una
- * lista, una edición por elemento y en el orden de la ficha. Va dentro de la sección, después
- * de la edición cotejada: la edición en venta nunca va sola ni en lugar de la cotejada (FR-54),
- * y quien decide si se pinta es la página (`modelosEnRuta`) y `DondeLeer.astro` (solo con
- * alguna línea cotejada). Este componente no decide nada; si se le llama, se dibuja.
+ * haría de las ediciones una región aparte dentro de «Dónde leer esta obra»— con, como mucho, dos
+ * grupos: «Electrónica» y luego «Impresa», cada uno con el mismo Rótulo de grupo que «Gratis»
+ * (`RotuloDeGrupo.astro`) y su lista, por tienda en el orden de `TIENDAS`. Un formato sin
+ * ediciones no llega (`edicionesPorFormato` no da el grupo), así que no deja rótulo ni hueco; sin
+ * rótulo de tienda: cada línea la nombra. Va dentro del desplegable, tras «Gratis»: la edición en
+ * venta nunca va sola ni en lugar de la cotejada (FR-54), y quien decide si se pinta es la página
+ * (`modelosEnRuta`, la congelación) y `DondeLeer.astro` (solo con alguna línea cotejada). Este
+ * componente no decide nada; si se le llama, se dibuja.
  *
- * **Recibe primitivas y no importa `src/lib/ingreso.ts`**, por lo mismo que `Sostener.astro`:
- * ningún componente puede importarlo (`tests/unit/ingreso-construido.test.ts`). Las direcciones
- * llegan ya compuestas con la marca de su tienda (`edicionesEnVenta`), y el identificador del
- * Modelo, como cadena.
+ * **Recibe los grupos hechos y no importa `src/lib/ingreso.ts`**, por lo mismo que
+ * `Sostener.astro`: ningún componente puede importarlo (`tests/unit/ingreso-construido.test.ts`).
+ * Las direcciones llegan ya compuestas con la marca de su tienda (`edicionesEnVenta`), y el
+ * identificador del Modelo, como cadena.
  *
  * **La presentación va en atributos `style`, con los tokens del sistema, y aquí no hay ningún
  * bloque de estilos**: Astro emite el bloque de un componente en toda página que lo importe, se
  * pinte o no, y con la afiliación apagada eso sería una regla reservada en cada Página de Obra
- * (UX-DR35). Lo que el Modelo aporta a la página empieza y acaba dentro del elemento marcado.
+ * (UX-DR35). Lo que el Modelo aporta a la página empieza y acaba dentro del elemento marcado. La
+ * hoja del Rótulo de grupo no cuenta: `DondeLeer.astro` ya la trae a toda página 1 de Obra.
  *
  * Cada enlace dice el formato y la tienda —«Edición impresa en {tienda}»—, no la tienda sola:
  * con dos ediciones en la misma tienda serían dos enlaces iguales a sitios distintos. Lleva
  * `rel="sponsored noopener"`, abre pestaña nueva y lo avisa dentro de su nombre accesible, y la
  * declaración de afiliado va en la misma línea y se le asocia con `aria-describedby`, para que
- * llegue también a quien recorre los enlaces.
+ * llegue también a quien recorre los enlaces. Los `id` se numeran en el orden en que se pintan,
+ * seguidos de un grupo al otro.
  */
 
 import { AVISO_DE_PESTAÑA_NUEVA } from '../lib/accesibilidad.ts';
-import type { EdicionEnVenta } from '../lib/ediciones.ts';
+import RotuloDeGrupo from './RotuloDeGrupo.astro';
+import type { EdicionEnVenta, GrupoDeEdiciones } from '../lib/ediciones.ts';
 
 interface Props {
   /** El identificador del Modelo, tal cual lo declara `src/lib/ingreso.ts`. */
   id: string;
-  ediciones: readonly EdicionEnVenta[];
+  /** Los grupos ya repartidos por formato y por tienda (`edicionesPorFormato`). */
+  grupos: readonly GrupoDeEdiciones[];
 }
 
-const { id, ediciones } = Astro.props;
+const { id, grupos } = Astro.props;
+
+/** Cada grupo con el número de su primera edición: los `id` siguen de un grupo al otro. */
+let pintadas = 0;
+const numerados = grupos.map((grupo) => {
+  const inicio = pintadas;
+  pintadas += grupo.ediciones.length;
+  return { grupo, inicio };
+});
 
 const nombreDelFormato = (formato: EdicionEnVenta['formato']) =>
   formato === 'impresa' ? 'impresa' : 'electrónica';
@@ -53,18 +68,8 @@ const trasElEnlace = (descripcion: string | undefined) =>
  */
 const idDeLaDeclaracion = (i: number) => `edicion-en-venta-${i + 1}-afiliado`;
 
-/** 16 px (2 × `--unidad`) entre la edición cotejada y el bloque — UX-DR42. */
-const DEL_BLOQUE = 'margin-top: calc(var(--unidad) * 2)';
-
-/** El rótulo de la parte, igual que «Edición cotejada, gratuita»: `caption` con peso, en tinta. */
-const DEL_ROTULO = [
-  'margin: 0',
-  'font-family: var(--sans)',
-  'font-size: var(--pie)',
-  'font-weight: var(--peso-fuerte)',
-  'line-height: var(--interlineado-pie)',
-  'color: var(--tinta)',
-].join('; ');
+/** 3 × `--unidad` del grupo anterior a cada grupo de venta — UX-DR127. */
+const ENTRE_GRUPOS = 'margin-top: calc(var(--unidad) * 3)';
 
 const DE_LA_LISTA = ['list-style: none', 'margin: 0', 'padding: 0'].join('; ');
 
@@ -100,16 +105,20 @@ const SOLO_PARA_LECTORES = [
 const DECLARACION = 'Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.';
 ---
 
-<div data-ingreso={id} style={DEL_BLOQUE}>
-  <h3 style={DEL_ROTULO}>Ediciones en venta</h3>
-  <ul style={DE_LA_LISTA}>
-    {
-      ediciones.map((edicion, i) => (
-        <li style={DE_LA_LINEA}>
-          {/* En una sola línea: un salto entre el enlace y lo que sigue dejaría un espacio delante de los dos puntos. */}
-          <a href={edicion.href} rel="sponsored noopener" target="_blank" aria-describedby={idDeLaDeclaracion(i)} style={DEL_ENLACE}>Edición {nombreDelFormato(edicion.formato)} en {edicion.tienda}<span style={SOLO_PARA_LECTORES}>{AVISO_DE_PESTAÑA_NUEVA}</span></a>{trasElEnlace(edicion.descripcion)} <span id={idDeLaDeclaracion(i)}>{DECLARACION}</span>
-        </li>
-      ))
-    }
-  </ul>
+<div data-ingreso={id} style={ENTRE_GRUPOS}>
+  {
+    numerados.map(({ grupo, inicio }, g) => (
+      <div style={g > 0 ? ENTRE_GRUPOS : undefined}>
+        <RotuloDeGrupo>{grupo.rotulo}</RotuloDeGrupo>
+        <ul style={DE_LA_LISTA}>
+          {grupo.ediciones.map((edicion, i) => (
+            <li style={DE_LA_LINEA}>
+              {/* En una sola línea: un salto entre el enlace y lo que sigue dejaría un espacio delante de los dos puntos. */}
+              <a href={edicion.href} rel="sponsored noopener" target="_blank" aria-describedby={idDeLaDeclaracion(inicio + i)} style={DEL_ENLACE}>Edición {nombreDelFormato(edicion.formato)} en {edicion.tienda}<span style={SOLO_PARA_LECTORES}>{AVISO_DE_PESTAÑA_NUEVA}</span></a>{trasElEnlace(edicion.descripcion)} <span id={idDeLaDeclaracion(inicio + i)}>{DECLARACION}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
 </div>

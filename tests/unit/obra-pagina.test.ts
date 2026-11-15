@@ -14,7 +14,7 @@ import {
 } from './ayuda/construir.js';
 import { obrasDelCorpusEnDisco } from '../../integraciones/indexables.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
-import { ANCLA_DE_DONDE_LEER, rutaDeLaObra } from '../../src/lib/obras.ts';
+import { ROTULO_DE_DONDE_LEER, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { enlacesDe } from './ayuda/enlaces.js';
 import { obraDeLaTarjeta, tarjetasDelListado } from './ayuda/listado.js';
 import { tarjetaDeObraDe } from './ayuda/tarjeta-de-obra.js';
@@ -142,6 +142,14 @@ async function anunciadas(proyecto: string): Promise<string[]> {
 }
 
 /**
+ * Historia 32.4 — de la Cabecera al listado no hay nada más que, en la página 1, el contenedor de
+ * los desplegables con «Dónde leer esta obra» (el único en estos fixtures, sin incipit; «Cómo
+ * citar» va al pie desde la decisión 1b): ninguna línea que nombre el orden.
+ */
+const CABECERA_Y_LISTADO_1 =
+  /<\/header>\s*<div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Dónde leer esta obra<(?:(?!<\/details>)[\s\S])*<\/details><\/div>\s*<ul class="listado"/;
+
+/**
  * Sonda: las Obras que el empaquetado de las páginas da por publicadas e indexables, con la
  * misma llamada que hace el armazón. Se compara con lo que calcula la integración de disco.
  */
@@ -180,25 +188,30 @@ const [INDEXABLE, NO_INDEXABLE] = MARCAS_DE_OBRA;
 const COINCIDEN = /El sitemap, los `noindex`, Pagefind y la marca de Obra coinciden/;
 
 /**
- * La sección «Dónde leer esta obra» entera, con su `</section>` de cierre: lleva otra `section`
- * dentro —la parte de la edición cotejada—, así que no basta con el primer cierre.
+ * Un desplegable de la página por el texto de su `<summary>`, entero —del `<details>` a su cierre—,
+ * o '' si no lo hay. Cuenta los `<details>` anidados para no cortar en el primer cierre.
  */
-function seccionDondeLeer(pagina: string): string {
-  const inicio = pagina.indexOf('<section class="donde-leer"');
-  if (inicio === -1) return '';
-  const etiquetas = /<section\b|<\/section>/g;
-  etiquetas.lastIndex = inicio;
-  let profundidad = 0;
-  for (let m = etiquetas.exec(pagina); m !== null; m = etiquetas.exec(pagina)) {
-    profundidad += m[0] === '</section>' ? -1 : 1;
-    if (profundidad === 0) return pagina.slice(inicio, m.index + m[0].length);
+function desplegableDe(pagina: string, rotulo: string): string {
+  for (const m of pagina.matchAll(/<details class="desplegable"/g)) {
+    const resto = pagina.slice(m.index);
+    const texto = /^<details[^>]*>\s*<summary[^>]*>\s*<span[^>]*>([^<]*)/.exec(resto)?.[1];
+    if (texto?.trim() !== rotulo) continue;
+    const etiquetas = /<details\b|<\/details>/g;
+    let profundidad = 0;
+    for (let e = etiquetas.exec(resto); e !== null; e = etiquetas.exec(resto)) {
+      profundidad += e[0] === '</details>' ? -1 : 1;
+      if (profundidad === 0) return resto.slice(0, e.index + e[0].length);
+    }
   }
   return '';
 }
 
-/** Las líneas de la sección, sin el enlace ni los espacios del marcado. */
+/** Historia 32.4 — «Dónde leer esta obra», el desplegable entero (antes, una `section` al pie). */
+const seccionDondeLeer = (pagina: string) => desplegableDe(pagina, ROTULO_DE_DONDE_LEER);
+
+/** Las líneas del desplegable —las de «Gratis», sus frases y la de sin cotejo—, en texto. */
 const lineasDe = (donde: string) =>
-  [...donde.matchAll(/<p class="linea[^"]*"[^>]*>([\s\S]*?)<\/p>/g)].map((m) =>
+  [...donde.matchAll(/<p class="(?:linea|sin-cotejo)[^"]*"[^>]*>([\s\S]*?)<\/p>/g)].map((m) =>
     m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(),
   );
 const EN_PAGEFIND = /<main[^>]*data-pagefind-body/;
@@ -228,8 +241,8 @@ const declaraciones = (cuerpo: string) =>
       .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()] as const),
   );
 
-/** Historia 24.7 — el `href` del salto: el fragmento de «Dónde leer esta obra». */
-const SALTO = `#${ANCLA_DE_DONDE_LEER}`;
+/** Historia 24.7 — el fragmento al que iba el salto retirado con la 32.4. */
+const ANCLA_RETIRADA = 'donde-leer-esta-obra';
 
 /** Historia 24.7 — todas las Páginas de Obra que la construcción escribió, con su número. */
 async function paginasDeObra(proyecto: string): Promise<{ ruta: string; numero: number; pagina: string }[]> {
@@ -245,38 +258,27 @@ async function paginasDeObra(proyecto: string): Promise<{ ruta: string; numero: 
 }
 
 /**
- * Historia 24.7 — el salto en cada Página de Obra de una construcción. Toda página 1 lleva
- * exactamente un ancla de la propia página además del enlace de salto del armazón, y es el salto:
- * a `#donde-leer-esta-obra`, sin `target`, dentro de `main` y sin zona —el ancla ya está exenta
- * (AD-13)—; su destino es un `id` que la página lleva una sola vez, en el `h2` enfocable. Ninguna
- * 2+ lleva ni el salto, ni su párrafo, ni el `id`. Devuelve las rutas que miró, para que cada
- * prueba diga qué caras cubrió.
+ * Historias 24.7 y 32.4 — ninguna Página de Obra lleva el salto ni su ancla: ningún enlace a un
+ * fragmento de la propia página salvo el de salto del armazón, ni `id="donde-leer-esta-obra"`, ni
+ * `p.salto`. Toda página 1 lleva «Dónde leer esta obra» como desplegable cerrado (sin `open`), con
+ * su rótulo en el `<summary>`; ninguna 2+ lleva desplegables. Devuelve las rutas que miró, para
+ * que cada prueba diga qué caras cubrió.
  */
-async function comprobarSaltos(proyecto: string): Promise<{ primeras: string[]; segundas: string[] }> {
+async function comprobarSinSalto(proyecto: string): Promise<{ primeras: string[]; segundas: string[] }> {
   const vistas = { primeras: [] as string[], segundas: [] as string[] };
   for (const { ruta, numero, pagina } of await paginasDeObra(proyecto)) {
     const anclas = enlacesDe(pagina).filter((e) => e.href?.startsWith('#') && e.href !== '#contenido');
+    expect(anclas, ruta).toEqual([]);
+    expect(pagina, ruta).not.toContain(ANCLA_RETIRADA);
+    expect(pagina, ruta).not.toContain('class="salto"');
     if (numero === 1) {
-      expect(anclas, ruta).toStrictEqual([{ href: SALTO, enMain: true, declaracion: null }]);
-      expect(pagina.split(`id="${ANCLA_DE_DONDE_LEER}"`), ruta).toHaveLength(2);
-      expect(pagina, ruta).toContain(`<h2 class="rotulo" id="${ANCLA_DE_DONDE_LEER}" tabindex="-1"`);
-      // El salto se llama como el encabezado al que lleva: lo que oye el lector en el enlace —sin
-      // la flecha oculta— es el texto del `h2` de destino. El `span` lleva el ámbito de Astro.
-      const texto = (marcado: string) =>
-        marcado
-          .replace(/<span aria-hidden="true"[^>]*>[\s\S]*?<\/span>/g, '')
-          .replace(/<[^>]+>/g, '')
-          .trim();
-      const enlace = /<p class="salto"[^>]*>\s*<a\b[^>]*>([\s\S]*?)<\/a>/.exec(pagina)?.[1];
-      const rotulo = new RegExp(`<h2 class="rotulo" id="${ANCLA_DE_DONDE_LEER}"[^>]*>([\\s\\S]*?)</h2>`).exec(pagina)?.[1];
-      expect(enlace, ruta).toBeDefined();
-      expect(rotulo, ruta).toBeDefined();
-      expect(texto(enlace!), ruta).toBe(texto(rotulo!));
+      const donde = seccionDondeLeer(pagina);
+      expect(donde, ruta).not.toBe('');
+      expect(donde, ruta).toMatch(/^<details class="desplegable"[^>]*>/);
+      expect(/^<details[^>]*>/.exec(donde)?.[0], ruta).not.toContain('open');
       vistas.primeras.push(ruta);
     } else {
-      expect(anclas, ruta).toEqual([]);
-      expect(pagina, ruta).not.toContain('class="salto"');
-      expect(pagina, ruta).not.toContain(ANCLA_DE_DONDE_LEER);
+      expect(pagina, ruta).not.toContain('<details');
       vistas.segundas.push(ruta);
     }
   }
@@ -456,7 +458,7 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     expect(enlaces).toEqual(['/cita/seneca-cartas-2/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-0/']);
     expect(listado).not.toContain('class="autor"');
     // Indexable también: ninguna línea nombra el orden, y las Tarjetas no llevan el título de la Obra.
-    expect(pagina).toMatch(/<\/header>\s*<ul class="listado"/);
+    expect(pagina).toMatch(CABECERA_Y_LISTADO_1);
     expect(listado).not.toContain('Cartas a Lucilio');
     // Y los datos estructurados enumeran las Citas en ese mismo orden.
     const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
@@ -512,8 +514,8 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       expect([...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ruta).toEqual(citas);
       expect(listado, ruta).not.toContain('class="autor"');
       expect(listado, ruta).not.toContain('Sobre la brevedad de la vida');
-      // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada.
-      expect(pagina, ruta).toMatch(/<\/header>\s*<ul class="listado"/);
+      // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada (en la 1, «Dónde leer esta obra», 32.4).
+      expect(pagina, ruta).toMatch(ruta.endsWith('/2/') ? /<\/header>\s*<ul class="listado"/ : CABECERA_Y_LISTADO_1);
       const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
         itemListElement: { position: number; url: string }[];
       };
@@ -699,30 +701,38 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
   });
 
   /*
-   * Historia 22.6 — «Dónde leer esta obra» en el corpus de arriba: todas las Citas con Fuente,
-   * sin nombre ni licencia —el andamio no los declara—, así que la línea lleva el anfitrión.
+   * Historias 22.6 y 32.4 — «Dónde leer esta obra» en el corpus de arriba: todas las Citas con
+   * Fuente, sin nombre ni licencia —el andamio no los declara—, así que la línea lleva el anfitrión.
    */
-  describe('22.6 — «Dónde leer esta obra»', () => {
+  describe('22.6 y 32.4 — «Dónde leer esta obra», plegado', () => {
     const seccion = seccionDondeLeer;
     const lineas = (pagina: string) =>
       [...seccion(pagina).matchAll(/<p class="linea[^"]*"[^>]*>([\s\S]*?)<\/p>/g)].map((m) => m[1].trim());
 
-    it('un documento: el h2, el rótulo y una línea con el nombre de la Fuente enlazado', async () => {
+    it('un documento: el `<summary>`, «Gratis» y una línea con el nombre de la Fuente enlazado y su frase', async () => {
       const pagina = await html(proyecto, CARTAS);
       const donde = seccion(pagina);
-      expect(donde).toMatch(/<section class="donde-leer"[^>]*aria-labelledby="donde-leer-esta-obra"/);
-      expect(donde).toMatch(/<h2 class="rotulo" id="donde-leer-esta-obra"[^>]*>Dónde leer esta obra<\/h2>/);
-      expect(donde).toMatch(/<section class="donde-leer"[^>]*data-pagefind-ignore/);
-      expect(donde).toMatch(/<section class="parte[^"]*"[^>]*aria-labelledby="edicion-cotejada"/);
-      expect(donde).toMatch(/<h3 id="edicion-cotejada"[^>]*>Edición cotejada, gratuita<\/h3>/);
+      expect(donde).toMatch(/<summary[^>]*>\s*<span[^>]*>Dónde leer esta obra<span class="glifo"/);
+      // Ningún encabezado: el rótulo de grupo es un párrafo (el `<summary>` no es encabezado).
+      expect(donde).not.toMatch(/<h[1-6]\b/);
+      expect(donde).toMatch(/<div class="grupo"[^>]*>\s*<p class="rotulo-de-grupo"[^>]*>Gratis<\/p>/);
       const todas = lineas(pagina);
-      expect(todas).toHaveLength(1);
+      expect(todas).toHaveLength(2);
       expect(todas[0]).toMatch(
         /^<a href="https:\/\/es\.wikisource\.org\/wiki\/Cartas_a_Lucilio" rel="noopener nofollow"[^>]*>es\.wikisource\.org<\/a>\.$/,
       );
+      expect(todas[1]).toBe('De esta edición se tomaron sus 3 citas.');
       // Sin licencia declarada no hay «Licencia», ni recuento de Citas sin documento.
       expect(donde).not.toContain('Licencia');
       expect(donde).not.toContain('documento cotejado');
+      expect(donde).not.toContain('Edición cotejada, gratuita');
+    });
+
+    it('una sola Cita: «De esta edición se tomó su cita.»', async () => {
+      expect(lineasDe(seccion(await html(proyecto, IRA)))).toEqual([
+        'es.wikisource.org.',
+        'De esta edición se tomó su cita.',
+      ]);
     });
 
     it('traducción: «…, en la traducción de {traductor} ({año}).»', async () => {
@@ -730,21 +740,33 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       expect(linea.replace(/<[^>]+>/g, '')).toBe('es.wikisource.org, en la traducción de Pablo de Prado (1888).');
     });
 
-    it('va después del Listado, la Paginación y los Temas, nunca entre las Citas', async () => {
+    it('va entre la Cabecera y el listado, primero del contenedor, y «Cómo citar» al pie, tras los Temas', async () => {
       const pagina = await html(proyecto, BREVEDAD);
       const posicion = (marca: string) => pagina.indexOf(marca);
-      expect(posicion('class="listado"')).toBeGreaterThan(-1);
+      const donde = posicion(seccionDondeLeer(pagina));
+      const comoCitar = posicion(desplegableDe(pagina, 'Cómo citar'));
+      const cabecera = pagina.indexOf('</header>', posicion('class="cabecera-de-obra"'));
+      expect(donde).toBeGreaterThan(cabecera);
+      // El contenedor de arriba: a 2 × de la Cabecera, fuera de Pagefind, y «Dónde leer» su primer hijo.
+      expect(pagina.slice(cabecera, donde)).toMatch(
+        /^<\/header>\s*<div data-pagefind-ignore="all" style="margin-top: calc\(var\(--unidad\) \* 2\)"[^>]*>\s*$/,
+      );
+      expect(posicion('class="listado"')).toBeGreaterThan(donde);
       expect(posicion('class="paginacion"')).toBeGreaterThan(posicion('class="listado"'));
       // Historia 27.8, UX-DR95 (UX v8.4) — «Buscar en esta obra», tras la paginación y antes de Temas.
       expect(posicion('class="buscar-en"')).toBeGreaterThan(posicion('class="paginacion"'));
       expect(posicion('class="temas"')).toBeGreaterThan(posicion('class="buscar-en"'));
-      expect(posicion('class="donde-leer"')).toBeGreaterThan(posicion('class="temas"'));
+      // Decisión 1b (delegada por Héctor, 2026-11-14) — «Cómo citar», al pie, tras los Temas.
+      expect(comoCitar).toBeGreaterThan(posicion('class="temas"'));
+      // Ni el desplegable de arriba entre las Citas ni el pie partido: arriba solo «Dónde leer».
+      const arriba = pagina.slice(cabecera, posicion('class="listado"'));
+      expect([...arriba.matchAll(/<details class="desplegable"/g)]).toHaveLength(1);
     });
 
-    it('página 2: ni la sección ni la nota', async () => {
+    it('página 2: ni desplegables ni la nota', async () => {
       const segunda = await html(proyecto, `${BREVEDAD}2/`);
       // Marcado, no estilos: Astro emite la hoja de un componente importado aunque no se pinte.
-      expect(segunda).not.toContain('<section class="donde-leer"');
+      expect(segunda).not.toContain('<details');
       expect(segunda).not.toContain('Dónde leer esta obra');
       expect(segunda).not.toContain('class="nota-de-la-ficha"');
     });
@@ -760,10 +782,13 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       for (const familia of estilo.matchAll(/font-family:\s*([^;]+);/gu)) {
         expect(familia[1].trim()).toMatch(/^var\(--[a-z-]+\)$/u);
       }
-      expect(estilo).toContain('margin-top: calc(var(--unidad) * 4)');
-      expect(estilo).toContain('margin-top: calc(var(--unidad) * 2)');
-      // Un solo `.rotulo` para «Temas» y «Dónde leer»: el de `Rotulo.astro`.
+      // 3 × entre grupos (para la 33.2) y 1 × a cada línea; el primer grupo no añade margen arriba.
+      expect(estilo).toContain('margin-top: calc(var(--unidad) * 3)');
+      expect(estilo).toContain('margin: var(--unidad) 0 0');
+      expect(estilo).not.toMatch(/^\s*\.grupo\s*\{/mu);
+      // Ningún encabezado propio: el rótulo de grupo es el de `RotuloDeGrupo.astro`.
       expect(estilo).not.toContain('.rotulo');
+      expect(estilo).not.toMatch(/\bh[1-6]\b/);
       // Las ediciones en venta (22.9) no dejan regla en la hoja de la sección: su presentación
       // va en atributos `style` dentro de `EdicionesEnVenta.astro`, que no trae bloque `<style>`.
       expect(estilo).not.toMatch(/venta|ediciones|data-ingreso/iu);
@@ -773,41 +798,35 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       expect(pagina).toContain('margin-top: calc(var(--unidad) * 5)');
       expect(pagina).not.toMatch(/\.rotulo\s*\{/);
       expect(pagina).toContain('<Rotulo id="temas-de-la-obra">Temas</Rotulo>');
+      // El rótulo de grupo: `--pie` con `--peso-fuerte`, en tinta y sin margen.
+      const grupo = await readFile(join(RAIZ, 'src/components/RotuloDeGrupo.astro'), 'utf8');
+      const hoja = /<style>([\s\S]*?)<\/style>/.exec(grupo)?.[1] ?? '';
+      for (const d of ['margin: 0', 'font-size: var(--pie)', 'font-weight: var(--peso-fuerte)', 'line-height: var(--interlineado-pie)', 'color: var(--tinta)']) {
+        expect(hoja).toContain(d);
+      }
     });
   });
 
   /*
-   * Historia 24.7 — el salto «Dónde leer esta obra ↓» en la Cabecera de la página 1. El bloque no
-   * se mueve: las pruebas de la 22.6 de arriba («va después del Listado, la Paginación y los
-   * Temas», «página 2: ni la sección ni la nota») y la de la 24.1 (`</header>` seguido del
-   * listado) siguen pasando sin tocarlas.
+   * Historias 24.7 y 32.4 — el salto «Dónde leer esta obra ↓» se retiró: el desplegable está
+   * antes del listado y no hay ancla que vaya a él.
    */
-  describe('24.7 — el salto «Dónde leer esta obra ↓»', () => {
-    it('toda página 1 lleva un salto a su `h2` enfocable, y ninguna 2+', async () => {
-      const { primeras, segundas } = await comprobarSaltos(proyecto);
+  describe('32.4 — sin el salto de la 24.7', () => {
+    it('ninguna Página de Obra lleva el salto ni su ancla; toda página 1, el desplegable cerrado', async () => {
+      const { primeras, segundas } = await comprobarSinSalto(proyecto);
       // La indexable, las `noindex` —una Cita, el 93 %, el 90 % exacto, traducida— y la 2 paginada.
       expect(primeras.sort()).toEqual([BREVEDAD, CARTAS, DISERTACIONES, ENQUIRIDION, IRA].sort());
       expect(segundas).toEqual([`${BREVEDAD}2/`]);
     });
 
-    it('su marcado exacto, en su propia línea dentro de la Cabecera y tras «de {Autor}»', async () => {
+    it('la Cabecera acaba en «de {Autor}» (o la Ficha técnica): nada del salto dentro', async () => {
       for (const ruta of [CARTAS, IRA, BREVEDAD]) {
         const pagina = await html(proyecto, ruta);
         const cabecera = /<header class="cabecera-de-obra"[^>]*>([\s\S]*?)<\/header>/.exec(pagina)?.[1] ?? '';
-        // Sin el atributo de ámbito de Astro, que lleva todo elemento de la plantilla.
-        const marcado = cabecera.replace(/\s+data-astro-cid-[\w-]+(?:="[^"]*")?/g, '');
-        expect(marcado, ruta).toMatch(
-          /<\/p>\s*<p class="salto" data-pagefind-ignore><a href="#donde-leer-esta-obra">Dónde leer esta obra<span aria-hidden="true">(?:&nbsp;|\u00a0)↓<\/span><\/a><\/p>\s*$/u,
-        );
-        // Detrás de `p.de` y nunca dentro de él, que declara la zona de la Atribución.
-        const de = /<p class="de"[^>]*>([\s\S]*?)<\/p>/.exec(marcado)?.[1] ?? '';
+        expect(cabecera, ruta).not.toContain('Dónde leer');
+        expect(cabecera, ruta).not.toContain('↓');
+        const de = /<p class="de"[^>]*>([\s\S]*?)<\/p>/.exec(cabecera)?.[1] ?? '';
         expect(de, ruta).toMatch(/^de <a /);
-        expect(de, ruta).not.toContain(SALTO);
-        expect(marcado.indexOf('<p class="de"'), ruta).toBeLessThan(marcado.indexOf('<p class="salto"'));
-        // Lo que oye el lector: el texto del enlace sin la flecha oculta.
-        const enlace = /<p class="salto"[^>]*><a\b[^>]*>([\s\S]*?)<\/a>/.exec(marcado)?.[1] ?? '';
-        const nombre = enlace.replace(/<span aria-hidden="true">[\s\S]*?<\/span>/g, '').replace(/<[^>]+>/g, '');
-        expect(nombre, ruta).toBe('Dónde leer esta obra');
       }
     });
 
@@ -822,40 +841,12 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       for (const rotulo of rotulosDeAutor) expect(rotulo).not.toContain('tabindex');
     });
 
-    it('la hoja emitida: el salto a 3 × `--unidad`, en `--cuerpo-md`, siena y subrayado; el destino a 2 ×', async () => {
+    it('la hoja emitida: ninguna regla del salto, y el listado a 4 × de lo que lo precede', async () => {
       const todas = await reglasDe(proyecto, CARTAS);
-      const de = (selector: string) => {
-        const regla = todas.find((r) => r.selector === selector);
-        expect(regla, selector).toBeDefined();
-        return declaraciones(regla!.cuerpo);
-      };
-      const salto = de('.salto');
-      expect(salto.get('margin')).toBe('calc(var(--unidad) * 3) 0 0');
-      expect(salto.get('font-family')).toBe('var(--sans)');
-      expect(salto.get('font-size')).toBe('var(--cuerpo-md)');
-      expect(salto.get('line-height')).toBe('var(--interlineado-cuerpo-md)');
-      const enlace = de('.salto a');
-      expect(enlace.get('display')).toBe('inline-flex');
-      expect(enlace.get('align-items')).toBe('center');
-      expect(enlace.get('min-height')).toBe('var(--zona-de-toque)');
-      expect(enlace.get('color')).toBe('var(--siena)');
-      expect(enlace.get('text-decoration-line')).toBe('underline');
-      expect(enlace.get('text-decoration-thickness')).toBe('var(--grosor-filete)');
-      // Subrayado siempre: en la hoja de la página, ninguna otra regla nombra el salto —ni de
-      // cursor o foco, ni una que `reglasDe` haya sacado de un `@media`, que leería como
-      // incondicional—. Solo estas dos. Lo que esta guardia no ve —una regla global de `a` en
-      // `tokens.css`, o una de un antepasado como `.cabecera-de-obra a`— lo mide la prueba de
-      // punta a punta de la 24.7 en el estilo calculado, también bajo el puntero.
-      expect(todas.map((r) => r.selector).filter((selector) => /\.salto(?![\w-])/.test(selector))).toEqual([
-        '.salto',
-        '.salto a',
-      ]);
-      // El destino: `scroll-margin-top` de 2 × `--unidad`, solo en el rótulo enfocable.
-      const destino = todas.filter((r) => /^\.rotulo\[tabindex=(['"]?)-1\1\]$/.test(r.selector));
-      expect(destino).toHaveLength(1);
-      expect(declaraciones(destino[0].cuerpo).get('scroll-margin-top')).toBe('calc(var(--unidad) * 2)');
-      // El listado sigue a 4 × de la Cabecera: sin hueco reservado para nada más.
-      expect(de('.listado').get('margin')).toBe('calc(var(--unidad) * 4) 0 0');
+      expect(todas.map((r) => r.selector).filter((selector) => /\.salto(?![\w-])/.test(selector))).toEqual([]);
+      const listado = todas.find((r) => r.selector === '.listado');
+      expect(listado).toBeDefined();
+      expect(declaraciones(listado!.cuerpo).get('margin')).toBe('calc(var(--unidad) * 4) 0 0');
     });
   });
 
@@ -1120,47 +1111,54 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
   const seccion = async (ruta: string) => seccionDondeLeer(await html(proyecto, ruta));
   const lineas = lineasDe;
 
-  it('parcial (d), en singular: la línea con su licencia y «Una de sus 3 citas…»', async () => {
+  it('parcial: la línea con su licencia y «De esta edición se tomaron 2 de sus 3 citas.»', async () => {
     const donde = await seccion('/obra/seneca/sobre-la-brevedad-de-la-vida/');
     expect(lineas(donde)).toEqual([
       'Wikisource en español. Licencia CC BY-SA 4.0.',
-      'Una de sus 3 citas no tiene documento cotejado.',
+      'De esta edición se tomaron 2 de sus 3 citas.',
     ]);
     expect(donde).toMatch(new RegExp(`<a href="${escapar(URL_BREVEDAD)}" rel="noopener nofollow"[^>]*>Wikisource en español</a>`));
-    // La frase de las Citas sin documento va después de la parte de la edición cotejada, fuera
-    // de ella y a nivel de la sección.
-    const parte = /<section class="parte[\s\S]*?<\/section>/.exec(donde)?.[0] ?? '';
-    expect(parte).toContain('<h3');
-    expect(parte).not.toContain('documento cotejado');
-    const tras = donde.slice(donde.indexOf(parte) + parte.length);
-    expect(tras).toMatch(/^\s*<p class="linea sin-documento"[^>]*>Una de sus 3 citas no tiene documento cotejado\.<\/p>\s*<\/section>$/);
+    // Siempre en positivo (FR-54): ninguna frase de las Citas sin documento, dentro ni fuera.
+    expect(donde).not.toContain('documento cotejado');
+    expect(await html(proyecto, '/obra/seneca/sobre-la-brevedad-de-la-vida/')).not.toContain('no tiene documento cotejado');
+    // La frase sigue a su línea, dentro del grupo «Gratis».
+    const grupo = /<div class="grupo"[\s\S]*?<\/div>/.exec(donde)?.[0] ?? '';
+    expect(grupo).toMatch(/<p class="rotulo-de-grupo"[^>]*>Gratis<\/p>\s*<p class="linea"[\s\S]*?<\/p>\s*<p class="linea tomado"[^>]*>De esta edición se tomaron 2 de sus 3 citas\.<\/p>\s*<\/div>$/);
   });
 
   it('repartida en subpáginas de Wikisource: la entrada de la obra, y la línea exacta', async () => {
     const donde = await seccion('/obra/seneca/epistolas-morales/');
-    expect(lineasDe(donde)).toEqual(['Wikisource en español, repartida en 2 páginas. Licencia CC BY-SA 4.0.']);
+    expect(lineasDe(donde)).toEqual([
+      'Wikisource en español, repartida en 2 páginas. Licencia CC BY-SA 4.0.',
+      'De esta edición se tomaron sus 2 citas.',
+    ]);
     expect(donde).toMatch(/<a href="https:\/\/es\.wikisource\.org\/wiki\/Epistolas_morales" rel="noopener nofollow"/);
   });
 
   it('sin entrada derivable: la línea va sin enlace', async () => {
     const donde = await seccion('/obra/seneca/dialogos/');
-    expect(lineasDe(donde)).toEqual(['Wikisource en español, repartida en 2 páginas. Licencia CC BY-SA 4.0.']);
+    expect(lineasDe(donde)).toEqual([
+      'Wikisource en español, repartida en 2 páginas. Licencia CC BY-SA 4.0.',
+      'De esta edición se tomaron sus 2 citas.',
+    ]);
     expect(donde).not.toContain('<a');
   });
 
-  it('parcial (d), en plural: «2 de sus 3 citas no tienen documento cotejado.»', async () => {
+  it('parcial, una de tres: «De esta edición se tomó 1 de sus 3 citas.»', async () => {
     const donde = await seccion('/obra/seneca/cartas-a-lucilio/');
     expect(lineas(donde)).toEqual([
       'Wikisource en español. Licencia CC BY-SA 4.0.',
-      '2 de sus 3 citas no tienen documento cotejado.',
+      'De esta edición se tomó 1 de sus 3 citas.',
     ]);
   });
 
-  it('sin cotejo (c): bajo el h2, solo la frase; sin rótulo ni enlace', async () => {
+  it('sin cotejo: dentro del desplegable, solo la frase; sin grupo, rótulo ni enlace', async () => {
     const donde = await seccion('/obra/seneca/de-la-ira/');
-    expect(donde).toMatch(/<h2[^>]*>Dónde leer esta obra<\/h2>/);
+    expect(donde).toMatch(/<summary[^>]*>\s*<span[^>]*>Dónde leer esta obra<span/);
     expect(lineas(donde)).toEqual(['Ninguna de sus citas tiene todavía documento cotejado.']);
-    expect(donde).not.toContain('<h3');
+    expect(donde).not.toContain('class="grupo"');
+    expect(donde).not.toContain('Gratis');
+    expect(donde).not.toMatch(/<h[1-6]\b/);
     expect(donde).not.toContain('<a ');
   });
 
@@ -1181,19 +1179,15 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
     expect(await listado('/obra/seneca/cartas-a-lucilio/')).toEqual([CARTAS_COTEJADA, CARTAS_SIN_1, CARTAS_SIN_2]);
   });
 
-  it('24.7 — el salto en toda página 1, también la de una Obra sin cotejo (c)', async () => {
-    const { primeras, segundas } = await comprobarSaltos(proyecto);
+  it('32.4 — sin salto en ninguna página, y el desplegable en toda página 1, también la de una Obra sin cotejo', async () => {
+    const { primeras, segundas } = await comprobarSinSalto(proyecto);
     expect(primeras).toContain('/obra/seneca/de-la-ira/');
     expect(primeras).toContain('/obra/seneca/sobre-la-brevedad-de-la-vida/');
     expect(primeras).toHaveLength(5);
     expect(segundas).toEqual([]);
-    // Sin cotejo: bajo el `h2` de destino, solo la frase de la 22.6.
-    const donde = await seccion('/obra/seneca/de-la-ira/');
-    expect(donde).toMatch(/<h2 class="rotulo" id="donde-leer-esta-obra" tabindex="-1"[^>]*>Dónde leer esta obra<\/h2>/);
-    expect(lineas(donde)).toEqual(['Ninguna de sus citas tiene todavía documento cotejado.']);
   });
 
-  it('24.7 — la hoja emitida del pie, con nota: 5 ×, 4 ×, 2 ×, 1 × y la nota 4 × / 3 ×', async () => {
+  it('la hoja emitida del pie, con nota: Temas a 5 ×, la línea a 1 × y la nota 4 × / 3 ×', async () => {
     const todas = await reglasDe(proyecto, '/obra/seneca/sobre-la-brevedad-de-la-vida/');
     const de = (selector: string) => {
       const regla = todas.find((r) => r.selector === selector);
@@ -1201,21 +1195,22 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
       return declaraciones(regla!.cuerpo);
     };
     expect(de('.temas').get('margin-top')).toBe('calc(var(--unidad) * 5)');
-    expect(de('.donde-leer').get('margin-top')).toBe('calc(var(--unidad) * 4)');
-    expect(de('.tras-el-rotulo').get('margin-top')).toBe('calc(var(--unidad) * 2)');
     expect(de('.linea').get('margin')).toBe('var(--unidad) 0 0');
+    expect(todas.some((r) => r.selector === '.donde-leer')).toBe(false);
     const nota = de('.nota-de-la-ficha');
     expect(nota.get('margin')).toBe('calc(var(--unidad) * 4) 0 0');
     expect(nota.get('padding-top')).toBe('calc(var(--unidad) * 3)');
     expect(nota.get('border-top')).toBe('var(--grosor-filete) solid var(--filete)');
   });
 
-  it('la nota: tras la sección, fuera de ella, sin encabezado; nunca en la meta', async () => {
+  it('la nota: la última, tras «Cómo citar» (decisión 1b) y fuera de todo desplegable; nunca en la meta', async () => {
     const pagina = await html(proyecto, '/obra/seneca/sobre-la-brevedad-de-la-vida/');
-    const fin = pagina.indexOf('</section>', pagina.indexOf('class="donde-leer"'));
+    const comoCitar = desplegableDe(pagina, 'Cómo citar');
+    expect(comoCitar).not.toBe('');
+    const fin = pagina.indexOf(comoCitar) + comoCitar.length;
     const nota = pagina.indexOf('class="nota-de-la-ficha"');
-    expect(fin).toBeGreaterThan(-1);
     expect(nota).toBeGreaterThan(fin);
+    expect(nota).toBeGreaterThan(pagina.indexOf(seccionDondeLeer(pagina)));
     expect(pagina).toMatch(new RegExp(`<p class="nota-de-la-ficha"[^>]*>${escapar(NOTA)}</p>`));
     // Una sola vez: ni en la descripción, ni en `og:`, ni en los datos estructurados.
     expect(pagina.split(NOTA)).toHaveLength(2);
@@ -1352,8 +1347,8 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     expect(enlaces[1]).toEqual({ href: CARTAS, declaracion: { zona: 'tarjeta-de-obra' } });
   }, 300_000);
 
-  it('24.7 — congelada, toda página 1 sigue llevando el salto, y la 2 no', async () => {
-    const { primeras, segundas } = await comprobarSaltos(proyecto);
+  it('32.4 — congelada, toda página 1 lleva el desplegable sin salto, y la 2 ninguno', async () => {
+    const { primeras, segundas } = await comprobarSinSalto(proyecto);
     expect(primeras.sort()).toEqual([BREVEDAD, CARTAS, DISERTACIONES, ENQUIRIDION, IRA].sort());
     expect(segundas).toEqual([`${BREVEDAD}2/`]);
   });

@@ -48,6 +48,8 @@ import {
   type CitaParaObra,
   type Dueño,
   type FichaDeObra,
+  type FichaTecnicaDeObra,
+  type IncipitDeObra,
   type ObraResuelta,
   type IndicesDeObras,
   type PasajeDeAparicion,
@@ -1865,6 +1867,8 @@ export function aplanarFichaDeObra(entrada: EntradaObra): FichaDeObra {
     ...(entrada.data.ediciones !== undefined
       ? { ediciones: entrada.data.ediciones.map((edicion) => ({ ...edicion })) }
       : {}),
+    ...(entrada.data.wikidata !== undefined ? { wikidata: { ...entrada.data.wikidata } } : {}),
+    ...(entrada.data.incipit !== undefined ? { incipit: { ...entrada.data.incipit } } : {}),
   };
 }
 
@@ -1995,6 +1999,30 @@ export function pasajesDeLasCitas(conjunto: ConjuntoPublicable): Promise<Readonl
   });
 }
 
+let incipitsMemorizados: Promise<ReadonlyMap<string, IncipitDeObra>> | undefined;
+
+/**
+ * El incipit de cada Obra que lo ofrece, por nombre de ficha — Historia 32.3, AD-30. Lo lee de
+ * la colección `incipits` (su cargador solo cablea `tools/lib/posiciones.ts`), que guarda una sola
+ * entrada `porFicha`, siempre presente: se consulta sin guarda. Una ficha sin incipit, o cuyo
+ * incipit no se ofrece (`ofreceIncipit`: sin tope, la primera unidad no cabe), no está.
+ */
+export function incipitsDeLasObras(): Promise<ReadonlyMap<string, IncipitDeObra>> {
+  if (incipitsMemorizados !== undefined) return incipitsMemorizados;
+  const leidos = (async () => {
+    const { getCollection } = await import('astro:content');
+    return new Map<string, IncipitDeObra>(
+      (await getCollection('incipits')).flatMap((entrada) => Object.entries(entrada.data.porFicha)),
+    );
+  })();
+  // Un fallo no se memoriza: la siguiente página vuelve a intentarlo.
+  incipitsMemorizados = leidos.catch((fallo: unknown) => {
+    incipitsMemorizados = undefined;
+    throw fallo;
+  });
+  return incipitsMemorizados;
+}
+
 let memoria: ConjuntoPublicable | undefined;
 
 /**
@@ -2014,7 +2042,18 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
    * antes de que se construya ninguna página.
    */
   const fichas = (await getCollection('obras')).map(aplanarFichaDeObra);
-  const citas: Cita[] = colgarObras((await getCollection('citas')).map(aplanarCita), fichas);
+  /*
+   * Historia 32.2 — la Ficha técnica de las Obras atadas a Wikidata, por nombre de ficha. La
+   * colección solo se consulta si alguna ficha declara `wikidata`: vacía, `getCollection`
+   * avisaría de una colección vacía en cada construcción.
+   */
+  const fichasTecnicas = new Map<string, FichaTecnicaDeObra>();
+  if (fichas.some((f) => f.wikidata !== undefined)) {
+    for (const entrada of await getCollection('fichasTecnicas')) {
+      fichasTecnicas.set(entrada.id, entrada.data);
+    }
+  }
+  const citas: Cita[] = colgarObras((await getCollection('citas')).map(aplanarCita), fichas, fichasTecnicas);
   /*
    * Las Colecciones **declaradas** viven en esta variable local y no salen de aquí.
    *

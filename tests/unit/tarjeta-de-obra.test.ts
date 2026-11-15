@@ -1081,7 +1081,8 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       const href = filaDeLaObra(tarjetaDeObraDe(await html(`/cita/${slug}/`))!).href!;
       const obra = await html(href);
       expect(obra, `${slug} → ${href}`).toContain('Dónde leer esta obra');
-      const cotejada = obra.includes('id="edicion-cotejada"');
+      // Historia 32.4 — con edición cotejada, «Dónde leer» lleva el grupo «Gratis».
+      const cotejada = obra.includes('class="rotulo-de-grupo"');
       expect(cotejada, `${slug} → ${href}`).toBe(esperada.fila === FILA_VER_LA_OBRA_Y_DONDE_LEERLA);
       if (!cotejada) expect(obra, `${slug} → ${href}`).toContain('Ninguna de sus citas tiene todavía documento cotejado.');
     }

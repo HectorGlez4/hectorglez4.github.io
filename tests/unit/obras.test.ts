@@ -5,8 +5,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { esquemaDeObra, obraAdmisible } from '../../src/lib/admision.ts';
 import { TIENDA_DE_PRUEBA } from './ayuda/construir.js';
-import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
+import { procedenciaCompuesta, textoDeLoTomado, textoParaCopiar } from '../../src/lib/atribucion.ts';
 import { obrasIndexables, type Autor, type Cita } from '../../src/lib/publicado.ts';
+import {
+  edicionQueEncabeza,
+  obraTieneComoCitar,
+  traductorDeLaEdicionQueEncabeza,
+} from '../../src/lib/obras.ts';
 import {
   avisosDeAñosDeObras,
   avisosDeDistintaRancia,
@@ -122,6 +127,15 @@ describe('el esquema de la Ficha de Obra', () => {
     ['distintaDe vacío', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: [] }],
     ['distintaDe no canónico', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['Y'] }],
     ['distintaDe de su propia forma', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['x'] }],
+    ['wikidata con una entidad Q0', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q0', revision: 1 } }],
+    ['wikidata con ceros a la izquierda', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q0480', revision: 1 } }],
+    ['wikidata con una propiedad', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'P31', revision: 1 } }],
+    ['wikidata con revisión negativa', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: -1 } }],
+    ['wikidata con revisión cero', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: 0 } }],
+    ['wikidata con revisión decimal', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: 1.5 } }],
+    ['wikidata con revisión en cadena', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: '1' } }],
+    ['wikidata sin revisión', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480' } }],
+    ['wikidata que no es objeto', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: 'Q480' }],
   ])('rechaza %s', (_caso, datos) => {
     expect(obraAdmisible.safeParse(datos).success).toBe(false);
   });
@@ -130,7 +144,25 @@ describe('el esquema de la Ficha de Obra', () => {
     const r = obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], sinopsis: 'Y' });
     expect(r.success).toBe(false);
     expect(r.error?.issues.map((i) => i.message).join()).toContain(
-      'no reconoce «sinopsis». Sus campos son autor, personaje, personajes, titulo, formas, distintaDe, nota y ediciones.',
+      'no reconoce «sinopsis». Sus campos son autor, personaje, personajes, titulo, formas, distintaDe, nota, ediciones, wikidata e incipit.',
+    );
+  });
+});
+
+describe('wikidata en la Ficha de Obra (Historia 32.1)', () => {
+  it('admite {entidad, revision} y rechaza una clave de más nombrando los campos', () => {
+    expect(
+      obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: 7 } }).success,
+    ).toBe(true);
+    const r = obraAdmisible.safeParse({
+      autor: 'seneca',
+      titulo: 'X',
+      formas: ['x'],
+      wikidata: { entidad: 'Q480', revision: 7, etiqueta: 'Y' },
+    });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues.map((i) => i.message).join()).toContain(
+      '«wikidata» no reconoce «etiqueta». Sus campos son entidad y revision.',
     );
   });
 });
@@ -1240,6 +1272,24 @@ describe('22.6 — dondeLeer, puro', () => {
     });
   });
 
+  it('32.4 — dos Fuentes y Citas sin documento: la de más Citas primero, cada una con su frase de lo tomado y ninguna de las que faltan', () => {
+    const citas: CitaParaDondeLeer[] = [
+      ...Array.from({ length: 5 }, () => ws('Cartas')),
+      ...Array.from({ length: 12 }, () => ({ fuente: { ...GB, url: 'https://www.gutenberg.org/cache/epub/1/pg1.txt' } })),
+      ...Array.from({ length: 10 }, () => ({})),
+    ];
+    const r = dondeLeer(citas);
+    expect(r.total).toBe(27);
+    expect(r.lineas.map((l) => [l.nombre, l.citas])).toEqual([
+      ['Project Gutenberg', 12],
+      ['Wikisource en español', 5],
+    ]);
+    expect(r.lineas.map((l) => textoDeLoTomado(l.citas, r.total))).toEqual([
+      'De esta edición se tomaron 12 de sus 27 citas.',
+      'De esta edición se tomaron 5 de sus 27 citas.',
+    ]);
+  });
+
   it('repartida: cuenta las páginas y enlaza a la entrada de la obra', () => {
     const citas = Array.from({ length: 12 }, (_, i) => ws(`Or%C3%A1culo_manual_y_arte_de_prudencia/${i + 1}`));
     const [linea] = dondeLeer(citas).lineas;
@@ -1764,5 +1814,45 @@ describe('35.2 — el esquema del dueño de la ficha', () => {
     expect(deAutor.error?.issues.map((i) => i.message).join()).toMatch(/ficha de un Autor no lleva «personajes»/);
     const nadie = obraAdmisible.safeParse({ titulo: 'X', formas: ['x'] });
     expect(nadie.error?.issues.map((i) => i.message).join()).toMatch(/falta el Autor de la Ficha de Obra/);
+  });
+});
+
+/*
+ * Historia 32.5 — la edición que encabeza, una sola regla: la de `traductorDeLaEdicionQueEncabeza`
+ * (32.2), que ahora delega aquí. De ella toma la Referencia de Obra su rótulo y su traductor.
+ */
+describe('edicionQueEncabeza — Historia 32.5, FR-48', () => {
+  const de = (id: string, traductor?: string, nombre?: string): CitaParaDondeLeer => ({
+    fuente: { id, url: `https://${id}.example.org/obra`, ...(nombre === undefined ? {} : { nombre }) },
+    ...(traductor === undefined ? {} : { procedencia: { traduccion: { traductor } } }),
+  });
+
+  it('la Fuente de más Citas, con su rótulo y su traductor común', () => {
+    const citas = [de('a', 'Juan Pérez', 'Biblioteca Alfa'), de('a', 'Juan Pérez', 'Biblioteca Alfa'), de('b', undefined, 'Beta')];
+    expect(edicionQueEncabeza(citas)).toEqual({ nombre: 'Biblioteca Alfa', traductor: 'Juan Pérez' });
+    expect(traductorDeLaEdicionQueEncabeza(citas)).toBe('Juan Pérez');
+  });
+
+  it('a igualdad de Citas, el rótulo menor en español y luego el identificador menor', () => {
+    const porRotulo = [de('z', undefined, 'Biblioteca Zeta'), de('y', undefined, 'Ábaco')];
+    expect(edicionQueEncabeza(porRotulo)).toEqual({ nombre: 'Ábaco' });
+    expect(edicionQueEncabeza([...porRotulo].reverse())).toEqual({ nombre: 'Ábaco' });
+    const porId = [de('q', 'De Q', 'Misma'), de('p', 'De P', 'Misma')];
+    expect(edicionQueEncabeza(porId)).toEqual({ nombre: 'Misma', traductor: 'De P' });
+    expect(edicionQueEncabeza([...porId].reverse())).toEqual({ nombre: 'Misma', traductor: 'De P' });
+  });
+
+  it('traductores distintos, o alguna Cita sin traductor: la edición, sin traductor', () => {
+    expect(edicionQueEncabeza([de('a', 'Juan Pérez', 'Alfa'), de('a', 'Ana Ruiz', 'Alfa')])).toEqual({ nombre: 'Alfa' });
+    expect(edicionQueEncabeza([de('a', 'Juan Pérez', 'Alfa'), de('a', undefined, 'Alfa')])).toEqual({ nombre: 'Alfa' });
+  });
+
+  it('sin ninguna Cita con Fuente: `undefined`', () => {
+    expect(edicionQueEncabeza([{}, { fuente: null }])).toBeUndefined();
+    expect(edicionQueEncabeza([])).toBeUndefined();
+  });
+
+  it('toda Obra lleva «Cómo citar» (la 35.9 añadirá las exclusiones)', () => {
+    expect(obraTieneComoCitar({ nombre: 'seneca--cartas-a-lucilio' })).toBe(true);
   });
 });

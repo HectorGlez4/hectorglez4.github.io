@@ -19,6 +19,16 @@ import { REGIONES_DE_VARIANTE } from './variante.ts';
 import { milesEnEspañol } from './formato.ts';
 import { escapar } from './lienzo.ts';
 import { enUnaLinea, versosDe } from './verso.ts';
+import { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta } from './fechaDeConsulta.ts';
+
+/*
+ * La fecha de consulta —su marcador y su frase— vive en una hoja sin importaciones,
+ * `src/lib/fechaDeConsulta.ts` (Historia 32.5), y este módulo la reexporta: es una sola
+ * composición, la que usan la Referencia en texto, la isla de Copiar de la Página de Cita (por su
+ * texto) y la isla empaquetada de la Página de Obra, que la importa de la hoja para no arrastrar
+ * a su guion el grafo de este módulo.
+ */
+export { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta };
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
@@ -442,6 +452,74 @@ export function añoLegible(año: number, era: '' | ' d. C.' = ''): string {
 }
 
 /**
+ * Una enumeración en español: «A», «A y B», «A, B y C». Solo la usa la línea de Ficha técnica.
+ */
+function enumeracion(partes: readonly string[]): string {
+  if (partes.length <= 1) return partes.join('');
+  return `${partes.slice(0, -1).join(', ')} y ${partes[partes.length - 1]}`;
+}
+
+/** La primera letra en mayúscula; el resto, tal cual. */
+function conInicialMayuscula(texto: string): string {
+  const [primera, ...resto] = [...texto];
+  return primera === undefined ? texto : `${primera.toLocaleUpperCase('es')}${resto.join('')}`;
+}
+
+/** El rótulo del desplegable del incipit en la página 1 de Obra — Historia 32.3, UX-DR128. */
+export const ROTULO_COMO_EMPIEZA = 'Cómo empieza';
+
+/**
+ * Lo que sigue al nombre enlazado de la Fuente bajo el incipit — Historia 32.3, UX-DR128:
+ * «. Licencia {licencia}.» con la licencia de la Fuente, o «.» sin ella. El nombre lo pinta el
+ * componente como enlace a la dirección del documento.
+ */
+export function lineaDeLaFuenteDelIncipit(fuente: { licencia?: string }): string {
+  return fuente.licencia !== undefined ? `. Licencia ${fuente.licencia}.` : '.';
+}
+
+/** El texto del enlace con que cierra la línea de Ficha técnica (UX-DR126). */
+export const TEXTO_DATOS_DE_WIKIDATA = 'Datos: Wikidata, CC0';
+
+/** Las etiquetas sin repetir, en el orden de la revisión; repetida es igual en `es` sin mayúsculas. */
+function sinEtiquetasRepetidas(etiquetas: readonly string[]): string[] {
+  const vistas = new Set<string>();
+  return etiquetas.filter((etiqueta) => {
+    const clave = etiqueta.toLocaleLowerCase('es');
+    if (vistas.has(clave)) return false;
+    vistas.add(clave);
+    return true;
+  });
+}
+
+/**
+ * Las partes de texto de la línea de Ficha técnica — Historia 32.2, UX-DR126.
+ *
+ * En orden fijo y solo las que constan: los géneros unidos por «, », con mayúscula solo en el
+ * primer carácter de la parte; el año de publicación de Wikidata (`añoLegible`); «Escrita en
+ * {lenguas}», enumeradas; y, si lo hay, «Traducción de {traductor}» (el de
+ * `traductorDeLaEdicionQueEncabeza`, nunca de la entidad). El enlace «Datos: Wikidata, CC0» no es
+ * una de las partes: lo pone el componente al final.
+ *
+ * `undefined` si no consta ni género, ni año, ni lengua: el traductor solo no hace línea. Así la
+ * Obra sin datos no pinta rótulo ni hueco.
+ */
+export function partesDeFichaTecnica(
+  ficha: { generos: readonly string[]; lenguas: readonly string[]; año?: number },
+  traductor?: string,
+): string[] | undefined {
+  // Dos entidades distintas pueden compartir etiqueta en español: la línea no dice «Novela, novela».
+  const generos = sinEtiquetasRepetidas(ficha.generos);
+  const lenguas = sinEtiquetasRepetidas(ficha.lenguas);
+  const partes: string[] = [];
+  if (generos.length > 0) partes.push(conInicialMayuscula(generos.join(', ')));
+  if (ficha.año !== undefined) partes.push(añoLegible(ficha.año));
+  if (lenguas.length > 0) partes.push(`Escrita en ${enumeracion(lenguas)}`);
+  if (partes.length === 0) return undefined;
+  if (traductor !== undefined) partes.push(`Traducción de ${traductor}`);
+  return partes;
+}
+
+/**
  * Los años de un Autor tal y como se escriben — en la ficha, la descripción, el JSON-LD y la
  * Tarjeta Social, que es por lo que tienen un solo dueño.
  *
@@ -570,6 +648,33 @@ export function descripcionDeObra(
   // Las páginas 2+ dicen cuál son, como su título: si no, las descripciones serían idénticas.
   const tramo = pagina > 1 ? ` Página ${pagina}.` : '';
   return `${cuantas} de ${autor.nombre} en ${obra.titulo}${año}, con su procedencia documentada.${tramo}`;
+}
+
+/**
+ * La frase de lo tomado de una edición — Historia 32.4, UX-DR127, FR-54.
+ *
+ * Sigue a cada línea de «Gratis» en «Dónde leer esta obra»: cuántas de las `n` Citas de la Obra
+ * se tomaron de esa edición (`k`). Siempre en positivo: nunca dice cuántas no tienen documento.
+ * Dueño único de la frase (AD-28): ningún componente la redacta.
+ *
+ *   · n = 1 → «De esta edición se tomó su cita.»
+ *   · k = n → «De esta edición se tomaron sus {n} citas.»
+ *   · k = 1 → «De esta edición se tomó 1 de sus {n} citas.» (el verbo concuerda con la una;
+ *     decisión delegada por Héctor, chat, 2026-11-14, pendiente de asentar en UX-DR127)
+ *   · si no → «De esta edición se tomaron {k} de sus {n} citas.»
+ *
+ * Lanza si `k` o `n` no son enteros, si `k` < 1 o si `k` > `n`: una edición de la que no se tomó
+ * ninguna Cita no tiene línea, y una que da más Citas de las que tiene la Obra es un error de quien
+ * la llama.
+ */
+export function textoDeLoTomado(k: number, n: number): string {
+  if (!Number.isInteger(k) || !Number.isInteger(n) || k < 1 || k > n) {
+    throw new Error(`textoDeLoTomado: k = ${k} y n = ${n} no describen lo tomado de una edición (1 ≤ k ≤ n, enteros)`);
+  }
+  if (n === 1) return 'De esta edición se tomó su cita.';
+  if (k === n) return `De esta edición se tomaron sus ${n} citas.`;
+  if (k === 1) return `De esta edición se tomó 1 de sus ${n} citas.`;
+  return `De esta edición se tomaron ${k} de sus ${n} citas.`;
 }
 
 /**
@@ -809,12 +914,6 @@ export const ROTULOS_DE_ESTILO: Readonly<Record<EstiloDeReferencia, string>> = {
   chicago: 'Chicago',
 };
 
-/**
- * El atributo del marcador vacío donde va la fecha de consulta, con el estilo por valor:
- * `<span data-fecha-de-consulta="apa"></span>`. El build lo deja vacío —la fecha es la del
- * visitante, nunca la jornada del build— y la isla de Copiar lo rellena con `fechaDeConsulta`.
- */
-export const MARCADOR_DE_FECHA_DE_CONSULTA = 'data-fecha-de-consulta';
 
 /** Un trozo de la Referencia: texto, en cursiva si el estilo la pide, o el sitio de la fecha. */
 export type SegmentoDeReferencia = { texto: string; cursiva?: true } | { fecha: EstiloDeReferencia };
@@ -986,25 +1085,88 @@ export function referenciasDeCita(cita: Cita, autor: AutorParaReferencia, canoni
   }));
 }
 
+/** Lo que la Referencia de Obra toma de la edición que encabeza (`edicionQueEncabeza`). */
+export type EdicionParaReferencia = { nombre: string; traductor?: string };
+
 /**
- * La frase de la fecha de consulta de cada estilo, con el calendario local del `Date` que recibe:
- * APA «Recuperado el 8 de noviembre de 2026 de », MLA « Consultado el 8 nov. 2026.», Chicago
- * «Consultado el 8 de noviembre de 2026. ». Lleva sus espacios para que la Referencia sin fecha
- * —la del build, sin guion— no deje ninguno doble.
+ * La Referencia de una Obra en un estilo, en segmentos — Historia 32.5, FR-58, AD-28.
  *
- * Viaja a la isla de Copiar **por su texto** (`String(fechaDeConsulta)`), como `anunciar` por
- * `guionQueAnuncia`: sin importar nada, sin cierres sobre este módulo y sin comentarios dentro.
- * Las abreviaturas de MLA salen del nombre del mes: hasta cuatro letras, entero («mayo»); si no,
- * tres letras y punto, salvo septiembre, cuatro («sept.»). Está escrita corta —nombres de una letra,
- * sin plantillas anidadas— porque cuenta en `MAX_BYTES_DE_GUION` de cada Página de Cita.
+ * Hermana de `referenciaDeCita`, sin el texto de la Cita ni el «En »: sale solo de lo que consta
+ * de la Obra —el nombre del Autor (`nombreEnReferencia`, invertido solo con clave revisada), el
+ * título de la ficha en cursiva, el año de la Obra (ya resuelto con FR-42: sin él si sus Citas
+ * discrepan, nunca el de una traducción)—, de la edición cotejada que encabeza
+ * (`edicionQueEncabeza` de `src/lib/obras.ts`: su rótulo y su traductor común, **sin año**), de la
+ * marca y de la canónica de la página 1. El parámetro de la Obra es un `Pick` de `titulo` y `año`:
+ * la Ficha técnica (`wikidata`) no entra, y nada se completa desde ella ni desde otra Cita. Lo que
+ * no consta se omite. La fecha de consulta es un segmento propio, vacío en el build, que rellena
+ * la isla `CopiarReferencia.astro`. Las formas (supuesto que revisa Héctor) las fija la tabla de
+ * `tests/unit/atribucion.test.ts`:
+ *
+ *   · APA: `N (año). *Obra* (T, Trad.). Edición. Sabiduría de Bolsillo. {fecha}U`
+ *   · MLA: `N. *Obra*, traducido por T, año. Edición. *Sabiduría de Bolsillo*, U.{fecha}`
+ *   · Chicago: `N. *Obra*. año. Traducido por T. Edición. Sabiduría de Bolsillo. {fecha}U.`
  */
-export function fechaDeConsulta(estilo: string, fecha: Date): string {
-  const m = fecha.getMonth(), d = fecha.getDate(), a = fecha.getFullYear();
-  const mes = 'enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre'.split(' ')[m];
-  const larga = d + ' de ' + mes + ' de ' + a;
-  return estilo === 'mla'
-    ? ' Consultado el ' + d + ' ' + (mes.length < 5 ? mes : mes.slice(0, m === 8 ? 4 : 3) + '.') + ' ' + a + '.'
-    : estilo === 'apa' ? 'Recuperado el ' + larga + ' de ' : 'Consultado el ' + larga + '. ';
+export function referenciaDeObra(
+  obra: Pick<ObraResuelta, 'titulo' | 'año'>,
+  autor: AutorParaReferencia,
+  edicion: EdicionParaReferencia | undefined,
+  canonica: string,
+  estilo: EstiloDeReferencia,
+): SegmentoDeReferencia[] {
+  const nombre = nombreEnReferencia(autor, estilo);
+  const { titulo } = obra;
+  const año = obra.año === undefined ? undefined : añoLegible(obra.año);
+  const traductor = edicion?.traductor;
+  const rotulo = edicion?.nombre;
+
+  const s: SegmentoDeReferencia[] = [];
+  const t = (texto: string) => s.push({ texto });
+  const i = (texto: string) => s.push({ texto, cursiva: true });
+
+  if (estilo === 'apa') {
+    t(año !== undefined ? `${nombre} (${año}). ` : `${conPunto(nombre)} `);
+    i(titulo);
+    t(traductor !== undefined ? ` (${traductor}, Trad.). ` : `${punto(titulo)} `);
+    if (rotulo !== undefined) t(`${conPunto(rotulo)} `);
+    t(`${MARCA}. `);
+    s.push({ fecha: 'apa' });
+    t(canonica);
+  } else if (estilo === 'mla') {
+    t(`${conPunto(nombre)} `);
+    i(titulo);
+    const resto = [...(traductor !== undefined ? [`traducido por ${traductor}`] : []), ...(año !== undefined ? [año] : [])];
+    for (const parte of resto) t(`, ${parte}`);
+    t(`${punto(resto.at(-1) ?? titulo)} `);
+    if (rotulo !== undefined) t(`${conPunto(rotulo)} `);
+    i(MARCA);
+    t(`, ${canonica}.`);
+    s.push({ fecha: 'mla' });
+  } else {
+    t(`${conPunto(nombre)} `);
+    i(titulo);
+    t(`${punto(titulo)} `);
+    if (año !== undefined) t(`${conPunto(año)} `);
+    if (traductor !== undefined) t(`Traducido por ${conPunto(traductor)} `);
+    if (rotulo !== undefined) t(`${conPunto(rotulo)} `);
+    t(`${MARCA}. `);
+    s.push({ fecha: 'chicago' });
+    t(`${canonica}.`);
+  }
+  return s;
+}
+
+/** Las tres Referencias de una Obra, en su orden y con su rótulo, para `ComoCitar.astro`. */
+export function referenciasDeObra(
+  obra: Pick<ObraResuelta, 'titulo' | 'año'>,
+  autor: AutorParaReferencia,
+  edicion: EdicionParaReferencia | undefined,
+  canonica: string,
+): ReferenciaCompuesta[] {
+  return ESTILOS_DE_REFERENCIA.map((estilo) => ({
+    estilo,
+    rotulo: ROTULOS_DE_ESTILO[estilo],
+    segmentos: referenciaDeObra(obra, autor, edicion, canonica, estilo),
+  }));
 }
 
 /** La Referencia en texto plano —lo que copia el botón—, con la fecha dada o sin ella. */

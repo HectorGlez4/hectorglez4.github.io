@@ -15,12 +15,13 @@
 
 import { existsSync } from 'node:fs';
 import { readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import {
   clave,
   colapsar,
   colgarObras,
   avisosDeEdicionesSinCotejada,
+  fichaDeCita,
   congelacionVigente,
   dueñoDeCita,
   dueñoDeFicha,
@@ -48,7 +49,9 @@ import {
   leerCensoDeCotejo,
   leerCitas,
   leerCitasTolerante,
+  leerDocumentoDeFuente,
   leerDocumentosDeclarados,
+  leerDocumentosParaElCotejo,
   leerFichasDeObra,
   leerFichasDeObraRetiradas,
   mover,
@@ -57,13 +60,33 @@ import {
   separarFrontmatter,
   type Rutas,
 } from './corpus.ts';
-import { FICHERO_DEL_CENSO } from './cotejo.ts';
+import { FICHERO_DEL_CENSO, colapsarEspacios, documentosDeCita } from './cotejo.ts';
+import { type MotivoSinIncipit } from './pasaje.ts';
+import {
+  fuenteDelIncipit,
+  incipitDelDocumento,
+  type FalloDeLaFuenteDelIncipit,
+  type FalloDelIncipit,
+} from './posiciones.ts';
+import { MAX_CARACTERES_DEL_INCIPIT } from '../../src/lib/umbrales.ts';
 import { derivarDeLaDeclaracion, esElMismoAutor } from './documento.ts';
 import type { Resultado } from './gestion.ts';
 import { obrasDeLosDatos } from '../../src/lib/publicado.ts';
 import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
 import { esquemaDeObra } from '../../src/lib/admision.ts';
-import { TIENDAS, tiendaDe, type Tienda } from '../../src/lib/ingreso.ts';
+import { TIENDAS, tieneMarca, tiendaDe, type Tienda } from '../../src/lib/ingreso.ts';
+import {
+  cotejarAutorDeLaEntidad,
+  documentoDeLaCarpeta,
+  fichaTecnicaDe,
+  leerDocumentoDeWikidata,
+  leerVigentes,
+  leerWikidataDelCorpus,
+  obrasQueRemitenA,
+  ordenQueRecupera,
+  sustituirVigente,
+  type WikidataDelCorpus,
+} from './wikidata.ts';
 
 /** El esquema con que se leen y reescriben las fichas; por omisión, el del sitio (22.9). */
 type EsquemaDeFicha = Parameters<typeof leerFichasDeObra>[1];
@@ -542,6 +565,10 @@ function datosDeFicha(ficha: FichaDeObra) {
     ...(ficha.ediciones !== undefined && ficha.ediciones.length > 0
       ? { ediciones: ficha.ediciones.map((edicion) => ({ ...edicion })) }
       : {}),
+    // La entidad de Wikidata (32.1) la escribe solo su orden: reescribir no la toca.
+    ...(ficha.wikidata !== undefined ? { wikidata: { ...ficha.wikidata } } : {}),
+    // El incipit (32.3), igual: lo escribe solo `npm run obra -- incipit`.
+    ...(ficha.incipit !== undefined ? { incipit: { ...ficha.incipit } } : {}),
   };
 }
 
@@ -626,6 +653,10 @@ export async function reunirFichas(
     ...(a.ediciones !== undefined && a.ediciones.length > 0
       ? { ediciones: a.ediciones.map((edicion) => ({ ...edicion })) }
       : {}),
+    // La entidad de Wikidata (32.1) es de la destino; la de la absorbida describe otra ficha.
+    ...(a.wikidata !== undefined ? { wikidata: { ...a.wikidata } } : {}),
+    // El incipit (32.3), igual: el de la absorbida no se hereda.
+    ...(a.incipit !== undefined ? { incipit: { ...a.incipit } } : {}),
   };
 
   // Terceras fichas que se declaraban distintas de una forma de la absorbida: ahora lo son de
@@ -691,6 +722,25 @@ export async function reunirFichas(
               : `Las ${b.ediciones.length} ediciones en venta de «${b.nombre}» no pasan a la ` +
                 `reunida: se quedan en ${movida}. `) +
               `Si deben publicarse, declárelas en «${a.nombre}» con «npm run obra -- edicion».`,
+          ]
+        : []),
+      ...(b.wikidata !== undefined
+        ? [
+            `La entidad de Wikidata de «${b.nombre}» (${b.wikidata.entidad}, revisión ` +
+              `${b.wikidata.revision}) no pasa a la reunida: se queda en ${movida}. ` +
+              (a.wikidata !== undefined
+                ? `«${a.nombre}» conserva la suya (${a.wikidata.entidad}, revisión ${a.wikidata.revision}).`
+                : `Si describe la reunida, átela con «npm run obra -- wikidata ${a.nombre} <documento>».`),
+          ]
+        : []),
+      ...(b.incipit !== undefined
+        ? [
+            `El incipit de «${b.nombre}» (desde «${b.incipit.desde}» en ${b.incipit.documento}) no pasa ` +
+              `a la reunida: se queda en ${movida}. ` +
+              (a.incipit !== undefined
+                ? `«${a.nombre}» conserva el suyo (desde «${a.incipit.desde}» en ${a.incipit.documento}).`
+                : `Si es el comienzo de la reunida, declárelo con «npm run obra -- incipit ${a.nombre} ` +
+                  `corpus/fuentes/${b.incipit.documento}.txt "<desde>"».`),
           ]
         : []),
       ...(terceras.length > 0
@@ -915,7 +965,8 @@ export async function declararEdicion(
       motivos: [
         `«${edicion.tienda}» no es ninguna tienda declarada en TIENDAS de src/lib/ingreso.ts` +
           (tiendas.length === 0
-            ? ', y hoy no declara ninguna. La primera tienda, con su marca, la declara el dueño de la cuenta.'
+            ? ', y hoy no declara ninguna. La primera tienda la declara Héctor, sin marca o con ella: ' +
+              'la marca se le añade el día que se solicita la cuenta.'
             : `. Las declaradas: ${tiendas.map((t) => `«${t.clave}»`).join(', ')}.`),
         NADA_ESCRITO,
       ],
@@ -974,8 +1025,14 @@ export async function declararEdicion(
       `Edición ${formato} en ${tienda.nombre} declarada en «${ficha.nombre}».`,
       `  ${ficha.ruta}`,
       ...lineasDeEdiciones(admitida.data.ediciones ?? [], tiendas),
-      'La marca de afiliado la pone el build desde TIENDAS. La edición solo se pinta con la ' +
-        'afiliación encendida y alguna Cita de la Obra cotejada: nunca va sola (FR-54).',
+      // Historia 33.1 — con una tienda sin marca, la frase general («la pone el build») sería
+      // falsa: se dice lo que queda pendiente en su lugar, no a continuación.
+      tieneMarca(tienda)
+        ? 'La marca de afiliado la pone el build desde TIENDAS. La edición solo se pinta con la ' +
+          'afiliación encendida y alguna Cita de la Obra cotejada: nunca va sola (FR-54).'
+        : `La tienda «${tienda.clave}» (${tienda.nombre}) no tiene marca: la edición queda curada, ` +
+          'pero no se pintará hasta que Héctor declare la marca y encienda el Modelo, y entonces ' +
+          'solo con alguna Cita de la Obra cotejada: nunca va sola (FR-54).',
       ...(await avisoSinCotejada(rutas, { ...ficha, ediciones: admitida.data.ediciones ?? [] })),
     ].join('\n'),
   };
@@ -1556,4 +1613,412 @@ export async function levantarCongelacion(opciones: { umbrales?: string } = {}):
 
 function textoDe(fallo: unknown): string {
   return fallo instanceof Error ? fallo.message : String(fallo);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wikidata — Historia 32.1, AD-31
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * `npm run obra -- wikidata <ficha> <documento>`: ata a la ficha la entidad y la revisión de un
+ * documento de `corpus/wikidata/`, si su autor (P50) concuerda con el Autor de la ficha.
+ *
+ * Es el único escritor del campo `wikidata`. Se niega —nada escrito— si la ficha no existe, si el
+ * documento falta, no está en `corpus/wikidata/` o no es un documento de Wikidata coherente, si
+ * la ficha ya declara esa misma entidad y revisión, y si el cotejo del autor no concuerda o no se
+ * puede hacer (sin P50, sin revisión vigente de la persona, sin etiqueta en español). El build
+ * repite el cotejo con la misma función (`cotejarAutorDeLaEntidad`).
+ */
+export async function atarEntidadDeWikidata(
+  rutas: Rutas,
+  nombreDeFicha: string,
+  documento: string,
+  /** Para las pruebas: el esquema de un conjunto de tiendas dado (22.9). */
+  esquema?: EsquemaDeFicha,
+): Promise<Resultado> {
+  const activa = await fichaActiva(rutas, nombreDeFicha, esquema);
+  if (!activa.ok) return { ok: false, motivos: [...activa.motivos, NADA_ESCRITO] };
+  const ficha = activa.ficha;
+
+  const ruta = resolve(documento);
+  if (dirname(ruta) !== resolve(rutas.wikidata)) {
+    return {
+      ok: false,
+      motivos: [
+        `«${documento}» no está en ${rutas.wikidata}: una ficha solo declara un documento de ` +
+          'Wikidata versionado allí por `npx tsx tools/recuperar.ts`.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  if (!existsSync(ruta)) {
+    return { ok: false, motivos: [`No existe el documento ${ruta}. Se versiona con recuperar.`, NADA_ESCRITO] };
+  }
+  let lectura: ReturnType<typeof leerDocumentoDeWikidata>;
+  try {
+    lectura = leerDocumentoDeWikidata(basename(ruta), await readFile(ruta, 'utf8'));
+  } catch (fallo) {
+    return { ok: false, motivos: [`No se pudo leer ${ruta}: ${texto(fallo)}`, NADA_ESCRITO] };
+  }
+  if (!lectura.ok) return { ok: false, motivos: [lectura.motivo, NADA_ESCRITO] };
+  const { entidad, revision, datos } = lectura.documento;
+
+  if (ficha.wikidata?.entidad === entidad && ficha.wikidata.revision === revision) {
+    return {
+      ok: false,
+      motivos: [`«${ficha.nombre}» ya declara ${entidad} en la revisión ${revision}: no hay nada que atar.`, NADA_ESCRITO],
+    };
+  }
+
+  let nombreDelAutor: string | undefined;
+  let wikidata: WikidataDelCorpus;
+  let otraQueLaDeclara: string | undefined;
+  try {
+    nombreDelAutor = (await leerAutores(rutas)).find((a) => a.slug === ficha.autor)?.nombre;
+    wikidata = await leerWikidataDelCorpus(rutas);
+    otraQueLaDeclara = (await leerFichasDeObra(rutas, esquema)).find(
+      (f) => f.nombre !== ficha.nombre && f.wikidata?.entidad === entidad,
+    )?.nombre;
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  // Una vigente sin su documento rompe el build entero (el cargador la nombra): atar ahora daría
+  // por buena una ficha que la construcción siguiente no deja pasar.
+  if (wikidata.rotas.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        `${rutas.vigentesDeWikidata} declara vigentes sin su documento, y el build no construiría:`,
+        ...wikidata.rotas.map((rota) => `  · ${rota}`),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  // Una entidad describe una sola obra: dos Fichas que la declaran serían dos Obras con la misma
+  // Ficha técnica.
+  if (otraQueLaDeclara !== undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `«${otraQueLaDeclara}» ya declara ${entidad}: una entidad de Wikidata es una sola Obra. Si son ` +
+          'la misma, se reúnen (`npm run obra -- reunir`); si no, una de las dos lleva otra entidad.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  if (nombreDelAutor === undefined) {
+    return { ok: false, motivos: [`El Autor «${ficha.autor}» de «${ficha.nombre}» no existe.`, NADA_ESCRITO] };
+  }
+  const cotejo = cotejarAutorDeLaEntidad(datos, nombreDelAutor, wikidata.vigente);
+  if (!cotejo.ok) return { ok: false, motivos: [cotejo.motivo, NADA_ESCRITO] };
+
+  try {
+    await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), wikidata: { entidad, revision } }, esquema);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+
+  const tecnica = fichaTecnicaDe(datos, (q) => {
+    const v = wikidata.vigente(q);
+    return v.ok ? v.datos : undefined;
+  });
+  return {
+    ok: true,
+    ruta: ficha.ruta,
+    mensaje: [
+      `«${ficha.nombre}» declara ${entidad}, revisión ${revision}.`,
+      ...(ficha.wikidata !== undefined
+        ? [`  Sustituye a ${ficha.wikidata.entidad}, revisión ${ficha.wikidata.revision}.`]
+        : []),
+      `  Autor: «${cotejo.etiqueta}» (${cotejo.persona}) concuerda con «${nombreDelAutor}».`,
+      `  Géneros: ${tecnica.generos.length > 0 ? tecnica.generos.join(', ') : 'ninguno con etiqueta en español'}`,
+      `  Lenguas: ${tecnica.lenguas.length > 0 ? tecnica.lenguas.join(', ') : 'ninguna con etiqueta en español'}`,
+      `  Año: ${tecnica.año !== undefined ? tecnica.año : 'ninguno (sin una sola fecha de publicación con año)'}`,
+    ].join('\n'),
+  };
+}
+
+/**
+ * `npm run obra -- wikidata-vigente <Q> <N>`: cambia la revisión vigente de una entidad referida.
+ *
+ * No descarga (AD-22: la red solo en `tools/recuperar.ts`): el documento de la revisión nueva se
+ * versiona antes con `recuperar`, y si falta, la orden se niega dando la orden exacta. Dice
+ * cuántas Obras —fichas activas con `wikidata`— remiten a la entidad, y las nombra: son las que
+ * el cambio fecha cuando la 32.2 pinte la Ficha técnica.
+ */
+export async function cambiarVigenteDeWikidata(rutas: Rutas, entidad: string, revision: number): Promise<Resultado> {
+  let vigentes: Map<string, number>;
+  try {
+    vigentes = await leerVigentes(rutas.vigentesDeWikidata);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  const anterior = vigentes.get(entidad);
+  if (anterior === undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `${entidad} no es vigente en ${rutas.vigentesDeWikidata}: esta orden solo cambia una vigente. ` +
+          'Las referidas que faltan las añade `recuperar` al versionar la entidad de una Obra.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  if (anterior === revision) {
+    return { ok: false, motivos: [`${entidad} ya es vigente en la revisión ${revision}.`, NADA_ESCRITO] };
+  }
+  const suyo = await documentoDeLaCarpeta(rutas.wikidata, entidad, revision);
+  if (!suyo.ok) {
+    return {
+      ok: false,
+      motivos: [
+        suyo.motivo,
+        ...(suyo.ausente === true ? [`Versiónela antes: ${ordenQueRecupera(entidad, revision)}`] : []),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  let remiten: string[];
+  const discordantes: string[] = [];
+  try {
+    const fichas = await leerFichasDeObra(rutas);
+    const nombres = new Map((await leerAutores(rutas)).map((a) => [a.slug, a.nombre]));
+    const wikidata = await leerWikidataDelCorpus(rutas);
+    // Otra vigente sin su documento rompe el build igual tras el cambio (la de esta entidad, no:
+    // el cambio la arregla): la orden no da por bueno un estado que no construye, como atar.
+    const otrasRotas = wikidata.rotas.filter((rota) => !rota.startsWith(`${entidad}: `));
+    if (otrasRotas.length > 0) {
+      return {
+        ok: false,
+        motivos: [
+          `${rutas.vigentesDeWikidata} declara vigentes sin su documento, y el build no construiría:`,
+          ...otrasRotas.map((rota) => `  · ${rota}`),
+          NADA_ESCRITO,
+        ],
+      };
+    }
+    // Las vigentes tal como quedarían: el cotejo del autor se repite con la revisión nueva antes de
+    // escribir, para que la orden no deje un build que rompe (el cargador hace el mismo cotejo).
+    const nuevos = suyo.documento.datos;
+    const vigenteTrasElCambio: WikidataDelCorpus['vigente'] = (q) =>
+      q === entidad ? { ok: true, datos: nuevos } : wikidata.vigente(q);
+    const conDocumento: { nombre: string; datos: Record<string, unknown> }[] = [];
+    for (const ficha of fichas) {
+      if (ficha.wikidata === undefined) continue;
+      const lectura = await documentoDeLaCarpeta(rutas.wikidata, ficha.wikidata.entidad, ficha.wikidata.revision);
+      if (!lectura.ok) {
+        return { ok: false, motivos: [`${ficha.ruta}: ${lectura.motivo}`, NADA_ESCRITO] };
+      }
+      conDocumento.push({ nombre: ficha.nombre, datos: lectura.documento.datos });
+      // Historia 35.2 — la ficha de un Personaje puede no declarar Autor: no hay con quién cotejar.
+      if (ficha.autor === undefined) {
+        discordantes.push(`${ficha.ruta}: no declara Autor con el que cotejar la entidad de Wikidata.`);
+        continue;
+      }
+      const nombre = nombres.get(ficha.autor);
+      if (nombre === undefined) {
+        discordantes.push(`${ficha.ruta}: su Autor «${ficha.autor}» no existe.`);
+        continue;
+      }
+      const cotejo = cotejarAutorDeLaEntidad(lectura.documento.datos, nombre, vigenteTrasElCambio);
+      if (!cotejo.ok) discordantes.push(`${ficha.ruta}: ${cotejo.motivo}`);
+    }
+    remiten = obrasQueRemitenA(entidad, conDocumento);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  if (discordantes.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        `Con ${entidad} en la revisión ${revision}, el cotejo del autor dejaría de pasar y el build no construiría:`,
+        ...discordantes.map((d) => `  · ${d}`),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  try {
+    await sustituirVigente(rutas.vigentesDeWikidata, entidad, revision);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  return {
+    ok: true,
+    ruta: rutas.vigentesDeWikidata,
+    mensaje: [
+      `${entidad}: la revisión vigente pasa de ${anterior} a ${revision} en ${rutas.vigentesDeWikidata}.`,
+      remiten.length === 0
+        ? 'Ninguna Obra remite a ella.'
+        : `${remiten.length === 1 ? 'Remite a ella 1 Obra' : `Remiten a ella ${remiten.length} Obras`}:`,
+      ...remiten.map((nombre) => `  · ${nombre}`),
+    ].join('\n'),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El incipit — Historia 32.3, AD-30
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Por qué el documento de un incipit no se sostiene, como lo dice el parte. */
+const FALLO_DEL_INCIPIT: Record<FalloDelIncipit, string> = {
+  'forma-indeterminada':
+    'la forma de sus líneas es indeterminada (`formaDeLasLineas`): no se sabe dónde acaba una frase ni un verso, ' +
+    'y el incipit solo se corta en frase o verso.',
+  'no-se-localiza': 'el «desde» no aparece literal en su cuerpo (se compara con los espacios colapsados).',
+};
+
+/** Por qué la Fuente de la cabecera no firma un incipit, como lo dice el parte. */
+const FALLO_DE_LA_FUENTE_DEL_INCIPIT: Record<FalloDeLaFuenteDelIncipit, string> = {
+  'fuente-desconocida': 'la Fuente que declara su cabecera no es ninguna de FUENTES (`tools/lib/fuentes.ts`).',
+  'fuente-sin-reutilizacion': 'la licencia de la Fuente que declara su cabecera no permite reutilizar el texto.',
+  'fuente-mutable': 'la Fuente que declara su cabecera es mutable: de ella no sale el comienzo de ninguna Obra.',
+  'url-no-web': 'el «url:» de su cabecera no es una dirección http(s), y la página lo enlazaría tal cual.',
+};
+
+/** Por qué un incipit que se sostiene no saldría en la página, como lo dice el parte. */
+const MOTIVO_SIN_INCIPIT: Record<MotivoSinIncipit, string> = {
+  'sin-tope': 'MAX_CARACTERES_DEL_INCIPIT no tiene valor: la página no lo enseña.',
+  'primera-no-cabe': 'su primera frase —o su primer verso— pasa de MAX_CARACTERES_DEL_INCIPIT: la página no lo enseña.',
+  'forma-indeterminada': 'la forma de sus líneas es indeterminada: la página no lo enseña.',
+  'sin-texto': 'tras el «desde» no queda ninguna frase ni ningún verso (cae en el pie de licencia): la página no lo enseña.',
+};
+
+/**
+ * `npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"` — declara el comienzo
+ * de una Obra. Es el **único escritor** del campo `incipit` (AD-25, AD-30): nunca se infiere del
+ * orden del libro ni del primer documento.
+ *
+ * Se niega —código 1, nada escrito— si la ficha no existe; si el documento no es un `.txt` de
+ * `corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está
+ * en la unión de `documentosDeCita` de sus Citas publicadas: el casado del cotejo); si su forma es
+ * `indeterminada`; si `desde` no se localiza; o si la ficha ya declara ese mismo incipit. El build
+ * repite la forma y la localización con la misma función (`incipitDelDocumento`), pero no el
+ * casado. El parte dice la forma y el incipit que saldría con el tope de hoy, o por qué no sale.
+ */
+export async function declararIncipit(
+  rutas: Rutas,
+  nombreDeFicha: string,
+  documento: string,
+  desde: string,
+  opciones: { esquema?: EsquemaDeFicha; tope?: number | undefined } = {},
+): Promise<Resultado> {
+  const { esquema } = opciones;
+  const tope = 'tope' in opciones ? opciones.tope : MAX_CARACTERES_DEL_INCIPIT;
+  const activa = await fichaActiva(rutas, nombreDeFicha, esquema);
+  if (!activa.ok) return { ok: false, motivos: [...activa.motivos, NADA_ESCRITO] };
+  const { ficha, fichas } = activa;
+
+  const ruta = resolve(documento);
+  const dentro = relative(resolve(rutas.fuentes), ruta);
+  if (dentro === '' || dentro.startsWith('..') || isAbsolute(dentro) || extname(ruta) !== '.txt') {
+    return {
+      ok: false,
+      motivos: [
+        `«${documento}» no es un documento .txt de ${rutas.fuentes}: el incipit sale de un documento de ` +
+          'Fuente versionado allí por `npx tsx tools/recuperar.ts`.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  const nombre = basename(ruta, '.txt');
+  if (!existsSync(ruta)) {
+    return { ok: false, motivos: [`No existe el documento ${ruta}. Se versiona con recuperar.`, NADA_ESCRITO] };
+  }
+  const leido = await leerDocumentoDeFuente(rutas, nombre);
+  if (leido.estado !== 'legible') {
+    const porque =
+      leido.estado === 'biografia'
+        ? 'es una biografía, no un documento de Fuente: de una biografía no sale el comienzo de ninguna Obra.'
+        : leido.estado === 'falta'
+          ? 'no está en corpus/fuentes/.'
+          : leido.estado === 'ambiguo'
+            ? 'tiene el nombre de más de un documento de las subcarpetas de corpus/fuentes/: la ficha guarda el nombre y no sabría cuál.'
+            : 'no se deja analizar como documento de Fuente.';
+    return { ok: false, motivos: [`${ruta} ${porque}`, NADA_ESCRITO] };
+  }
+  // La ficha guarda solo el nombre, y el build lee el documento por él: lo que se comprueba aquí es
+  // lo que el build leerá, así que tiene que ser el documento que se nombró.
+  if (resolve(leido.ruta) !== ruta) {
+    return {
+      ok: false,
+      motivos: [
+        `${ruta} no es el documento que el nombre «${nombre}» designa en corpus/fuentes/ (${resolve(leido.ruta)}): ` +
+          'la ficha guarda solo el nombre, y el build leería el otro.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  const firmada = fuenteDelIncipit(leido.cabecera);
+  if (!firmada.ok) {
+    return { ok: false, motivos: [`${ruta}: ${FALLO_DE_LA_FUENTE_DEL_INCIPIT[firmada.fallo]}`, NADA_ESCRITO] };
+  }
+
+  // El casado: el documento es de esta Obra si es de alguna de sus Citas publicadas.
+  let deLaObra: Set<string>;
+  try {
+    const [citas, { documentos }] = await Promise.all([leerCitas(rutas.citas), leerDocumentosParaElCotejo(rutas)]);
+    deLaObra = new Set(
+      citas
+        .filter((cita) => fichaDeCita(cita, fichas)?.nombre === ficha.nombre)
+        .flatMap((cita) => documentosDeCita(cita.fuente, cita.procedencia?.obra, documentos)),
+    );
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  if (!deLaObra.has(nombre)) {
+    return {
+      ok: false,
+      motivos: [
+        `${nombre} no es un documento de «${ficha.nombre}»: ninguna de sus Citas publicadas casa con él ` +
+          '(`documentosDeCita`). El incipit sale de un documento de la propia Obra.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const situado = incipitDelDocumento({ cuerpo: leido.cuerpo, lineas: leido.cabecera.lineas, desde, tope });
+  if (!situado.ok) {
+    return { ok: false, motivos: [`${nombre}: ${FALLO_DEL_INCIPIT[situado.fallo]}`, NADA_ESCRITO] };
+  }
+
+  const incipit = { documento: nombre, desde: colapsarEspacios(desde) as string };
+  if (ficha.incipit?.documento === incipit.documento && colapsarEspacios(ficha.incipit.desde) === incipit.desde) {
+    return {
+      ok: false,
+      motivos: [`«${ficha.nombre}» ya declara ese incipit: no hay nada que declarar.`, NADA_ESCRITO],
+    };
+  }
+
+  try {
+    await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), incipit }, esquema);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+
+  return {
+    ok: true,
+    ruta: ficha.ruta,
+    mensaje: [
+      `«${ficha.nombre}» declara su incipit en ${nombre}, desde «${incipit.desde}».`,
+      ...(ficha.incipit !== undefined
+        ? [`  Sustituye al de ${ficha.incipit.documento}, desde «${ficha.incipit.desde}».`]
+        : []),
+      `  ${ficha.ruta}`,
+      `  Forma de las líneas: ${situado.forma}`,
+      ...(situado.repetido
+        ? [
+            `  Aviso: «${incipit.desde}» aparece más de una vez en ${nombre}; el incipit se ancla en la primera ` +
+              'aparición. Si no es el comienzo de la Obra, declara un «desde» más largo que no se repita.',
+          ]
+        : []),
+      'incipit' in situado.corte
+        ? `  Incipit que saldría (tope ${tope}):\n${situado.corte.incipit
+            .split('\n')
+            .map((linea) => `    ${linea}`)
+            .join('\n')}`
+        : `  ${MOTIVO_SIN_INCIPIT[situado.corte.motivo]}`,
+    ].join('\n'),
+  };
 }

@@ -53,6 +53,7 @@ const TOKEN_CSS: Record<string, string> = {
   'quote-lg': 'cita-lg',
   'quote-md': 'cita-md',
   'quote-sm': 'cita-sm',
+  'quote-xs': 'cita-xs',
   'headline-md': 'titular-md',
   'headline-sm': 'titular-sm',
   'title-lg': 'titular-obra',

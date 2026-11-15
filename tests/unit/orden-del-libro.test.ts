@@ -958,11 +958,15 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     expect(infractores).toEqual([]);
   });
 
-  it('content.config.ts toma `z` de astro/zod y de tools/lib/ importa solo posiciones.ts', async () => {
+  it('content.config.ts toma `z` de astro/zod y de tools/lib/ importa solo posiciones.ts y wikidata.ts', async () => {
     const codigo = sinComentarios(await readFile(join(RAIZ_DEL_REPO, 'src', 'content.config.ts'), 'utf8'));
     expect(codigo).not.toMatch(/import\s*\{[^}]*\bz\b[^}]*\}\s*from\s*['"]astro:content['"]/);
     expect(codigo).toMatch(/import\s*\{\s*z\s*\}\s*from\s*['"]astro\/zod['"]/);
-    expect(importados(codigo).filter((r) => /(^|\/)tools\//.test(r))).toEqual(['../tools/lib/posiciones.ts']);
+    // La segunda excepción con nombre es el cargador de Wikidata (Historia 32.1, AD-31).
+    expect(importados(codigo).filter((r) => /(^|\/)tools\//.test(r))).toEqual([
+      '../tools/lib/posiciones.ts',
+      '../tools/lib/wikidata.ts',
+    ]);
   });
 
   it('el único localizador: el `indexOf` de cotejo.ts está en `localizar`, y `apareceEnDocumento` lo usa', async () => {
@@ -984,7 +988,15 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     const deCotejo = /import\s*\{([^}]*)\}\s*from\s*'\.\/cotejo\.ts'/.exec(codigo)?.[1] ?? '';
     // De `corpus.ts`, solo los lectores: ninguna de sus funciones que escriben en `corpus/`.
     const nombres = (lista: string) => lista.split(',').map((n) => n.trim()).filter((n) => n !== '').sort();
-    expect(nombres(deCorpus)).toEqual(['leerCitas', 'leerDocumentosParaElCotejo', 'leerOrdenDeLosIndices', 'rutasDelCorpus']);
+    // La 32.3 añade los dos lectores del incipit: las fichas y un solo documento.
+    expect(nombres(deCorpus)).toEqual([
+      'leerCitas',
+      'leerDocumentoDeFuente',
+      'leerDocumentosParaElCotejo',
+      'leerFichasDeObra',
+      'leerOrdenDeLosIndices',
+      'rutasDelCorpus',
+    ]);
     for (const nombre of ['documentosDeCita', 'localizar']) expect(deCotejo).toMatch(new RegExp(`\\b${nombre}\\b`));
     // Y nada del sistema de ficheros por su cuenta: todo lo que importa es de `./`.
     expect(importados(codigo).filter((r) => !r.startsWith('./') && !r.startsWith('../../src/lib/'))).toEqual([]);

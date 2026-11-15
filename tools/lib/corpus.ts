@@ -28,7 +28,7 @@ import type {
   ObjetivoDeTradicion,
 } from '../../src/lib/objetivo.ts';
 import { BIOGRAFIA_MAL_COLOCADA, FICHERO_DEL_CENSO, type DocumentosDeFuente } from './cotejo.ts';
-import { analizarDocumento, CLASE_BIOGRAFIA, type CabeceraAnalizada } from './documento.ts';
+import { analizarDocumento, CLASE_BIOGRAFIA, type CabeceraAnalizada, type CabeceraDeDocumento } from './documento.ts';
 import {
   analizarIndice,
   documentosEnElOrdenDelIndice,
@@ -300,6 +300,17 @@ export interface Rutas {
    */
   biografias: string;
   /**
+   * Las revisiones fijas de Wikidata — Historia 32.1, AD-31: un documento JSON por (entidad,
+   * revisión), `{Q}--r{N}.json`, CC0. Lo escribe solo `tools/recuperar.ts`. No es una Fuente
+   * de texto: el cotejo de Citas, las posiciones y `extraer` no lo leen nunca.
+   */
+  wikidata: string;
+  /**
+   * Qué revisión de cada entidad referida (autor, género, lengua) es la vigente — 32.1.
+   * Solo se amplía (`recuperar`); cambiar una vigente es `npm run obra -- wikidata-vigente`.
+   */
+  vigentesDeWikidata: string;
+  /**
    * El censo de Citas anteriores a la v3 que todavía no tienen documento — Historia 11.2.
    *
    * Va junto a `corpus/portada.json`, que ya es metadato del Corpus y no colección.
@@ -417,6 +428,8 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
     biografias: join(raizCorpus, 'biografias'),
+    wikidata: join(raizCorpus, 'wikidata'),
+    vigentesDeWikidata: join(raizCorpus, 'wikidata', 'vigentes.yml'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
     serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
@@ -724,6 +737,14 @@ function yamlDeFicha(ficha: ObraAdmisible): string {
             ...(edicion.descripcion !== undefined ? { descripcion: edicion.descripcion } : {}),
           })),
         }
+      : {}),
+    // La entidad de Wikidata (32.1): la escribe solo `npm run obra -- wikidata`.
+    ...(ficha.wikidata !== undefined
+      ? { wikidata: { entidad: ficha.wikidata.entidad, revision: ficha.wikidata.revision } }
+      : {}),
+    // El incipit (32.3): lo escribe solo `npm run obra -- incipit`.
+    ...(ficha.incipit !== undefined
+      ? { incipit: { documento: ficha.incipit.documento, desde: ficha.incipit.desde } }
       : {}),
   });
 }
@@ -1211,6 +1232,41 @@ export async function leerDocumentosParaElCotejo(
     }
   }
   return { documentos, lineasDeclaradas };
+}
+
+/** Lo que hay en `corpus/fuentes/` con un nombre de documento — Historia 32.3. */
+export type DocumentoDeFuenteLeido =
+  | { estado: 'falta' }
+  | { estado: 'ambiguo' }
+  | { estado: 'ilegible' }
+  | { estado: 'biografia' }
+  | { estado: 'legible'; ruta: string; cabecera: CabeceraDeDocumento; cuerpo: string };
+
+/**
+ * **Un** documento de Fuente por su nombre sin extensión, con su cabecera — Historia 32.3. Lo
+ * leen el cargador del incipit y la orden que lo declara, para no abrir los demás documentos.
+ * Busca el `.txt` en el primer nivel de `corpus/fuentes/` y, si no está, en cualquier subcarpeta,
+ * como `ficherosDe` (el nombre es la identidad del documento); si dos subcarpetas tienen un
+ * documento con ese nombre, no elige ninguno (`ambiguo`). Da la ruta que leyó. No escribe nada.
+ */
+export async function leerDocumentoDeFuente(rutas: Rutas, nombre: string): Promise<DocumentoDeFuenteLeido> {
+  let ruta = join(rutas.fuentes, `${nombre}.txt`);
+  if (!existsSync(ruta)) {
+    const halladas = (await ficherosDe(rutas.fuentes, ['.txt'])).filter((r) => slugDeFichero(r) === nombre);
+    if (halladas.length === 0) return { estado: 'falta' };
+    if (halladas.length > 1) return { estado: 'ambiguo' };
+    ruta = halladas[0] as string;
+  }
+  let contenido: string;
+  try {
+    contenido = await readFile(ruta, 'utf8');
+  } catch {
+    return { estado: 'ilegible' };
+  }
+  const analizado = analizarDocumento(contenido);
+  if (analizado === undefined) return { estado: 'ilegible' };
+  if (analizado.cabecera.clase === CLASE_BIOGRAFIA) return { estado: 'biografia' };
+  return { estado: 'legible', ruta, cabecera: analizado.cabecera, cuerpo: analizado.cuerpo };
 }
 
 /**
@@ -1841,25 +1897,12 @@ export interface LecturaRegistrada {
 }
 
 /**
- * Las entradas de una serie ya leída, comprobando que el fichero sea lo que dice ser.
- *
- * Es la misma comprobación que la del registro de sesiones y por el mismo motivo, con una
- * agravante: este escritor **reescribe** el fichero entero en vez de añadir al final. Leer
- * mal lo que había no dejaría una lista huérfana, que es reparable — dejaría la serie
- * anterior fuera del fichero nuevo. Nada se escribe hasta que esto entiende lo que hay.
+ * Las entradas de una serie, sin juzgar ninguna: solo que el fichero sea YAML, que traiga la
+ * clave `lecturas:` en la raíz y que esa clave sea una lista (o esté vacía). Es la parte de
+ * fichero de `analizarSerie`, y la comparte con `leerEntradasDeLaSerieDeDemanda`, que no
+ * juzga las entradas porque para su consumidor una entrada ilegible no es un fichero ilegible.
  */
-function analizarSerie<T = LecturaRegistrada>(
-  nombre: string,
-  contenido: string,
-  /**
-   * La clave por la que la serie reemplaza: `fecha` en la de indexación, `mes` en la de
-   * tráfico (Historia 20.2) y `ventana` —el par `desde`–`hasta`— en la de demanda (20.3).
-   * Es lo único que cambia entre ellas al releerlas.
-   */
-  clave: 'fecha' | 'mes' | 'ventana' = 'fecha',
-): T[] {
-  const campos = clave === 'ventana' ? ['desde', 'hasta'] : [clave];
-  const nombreDeClave = clave === 'ventana' ? '«desde», «hasta»' : `«${clave}»`;
+function entradasDeLaSerie(nombre: string, contenido: string, primerCampo: string): unknown[] {
   let leido: unknown;
   try {
     leido = parsearYaml(contenido);
@@ -1893,9 +1936,34 @@ function analizarSerie<T = LecturaRegistrada>(
     throw new Error(
       `${nombre}: «${CLAVE_DE_LECTURAS}» tiene que ser una lista de lecturas, y es ` +
         `${typeof lecturas}. Escríbala como «${CLAVE_DE_LECTURAS}:» y una entrada ` +
-        `«  - ${campos[0]}: …» por entrada.`,
+        `«  - ${primerCampo}: …» por entrada.`,
     );
   }
+
+  return lecturas;
+}
+
+/**
+ * Las entradas de una serie ya leída, comprobando que el fichero sea lo que dice ser.
+ *
+ * Es la misma comprobación que la del registro de sesiones y por el mismo motivo, con una
+ * agravante: este escritor **reescribe** el fichero entero en vez de añadir al final. Leer
+ * mal lo que había no dejaría una lista huérfana, que es reparable — dejaría la serie
+ * anterior fuera del fichero nuevo. Nada se escribe hasta que esto entiende lo que hay.
+ */
+function analizarSerie<T = LecturaRegistrada>(
+  nombre: string,
+  contenido: string,
+  /**
+   * La clave por la que la serie reemplaza: `fecha` en la de indexación, `mes` en la de
+   * tráfico (Historia 20.2) y `ventana` —el par `desde`–`hasta`— en la de demanda (20.3).
+   * Es lo único que cambia entre ellas al releerlas.
+   */
+  clave: 'fecha' | 'mes' | 'ventana' = 'fecha',
+): T[] {
+  const campos = clave === 'ventana' ? ['desde', 'hasta'] : [clave];
+  const nombreDeClave = clave === 'ventana' ? '«desde», «hasta»' : `«${clave}»`;
+  const lecturas = entradasDeLaSerie(nombre, contenido, campos[0]);
 
   for (const [i, entrada] of lecturas.entries()) {
     if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
@@ -2420,6 +2488,24 @@ export async function leerSerieDeDemanda(rutas: Rutas): Promise<LecturaDeVentana
     `corpus/${FICHERO_DE_DEMANDA}`,
     await readFile(rutas.serieDeDemanda, 'utf8'),
     'ventana',
+  );
+}
+
+/**
+ * Las entradas de la serie de demanda **sin juzgarlas** — Historia 33.3.
+ *
+ * `leerSerieDeDemanda` lanza ante cualquier entrada mal formada, porque quien la usa reescribe
+ * el fichero. `npm run obra -- curar-primero` solo lee, y para ella una entrada ilegible no es
+ * un fichero ilegible: es una ventana «sin cifra», con su motivo. Por eso aquí solo se juzga el
+ * fichero —YAML, la clave `lecturas:`, que sea lista— y cada entrada llega tal cual. Una serie
+ * que no existe se lee como serie vacía.
+ */
+export async function leerEntradasDeLaSerieDeDemanda(rutas: Rutas): Promise<unknown[]> {
+  if (!existsSync(rutas.serieDeDemanda)) return [];
+  return entradasDeLaSerie(
+    `corpus/${FICHERO_DE_DEMANDA}`,
+    await readFile(rutas.serieDeDemanda, 'utf8'),
+    'desde',
   );
 }
 

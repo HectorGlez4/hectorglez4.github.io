@@ -41,6 +41,20 @@ export const MAX_CARACTERES_IMAGEN = 300;
 export const MAX_CARACTERES_DEL_PASAJE: number | undefined = undefined;
 
 /**
+ * Longitud máxima del incipit de una Obra, en puntos de código — Historia 32.3, AD-30.
+ *
+ * El incipit es el comienzo de la Obra que declara una persona en su ficha (`incipit`, con
+ * `npm run obra -- incipit`), y se corta solo en fin de frase o de verso: se toman unidades
+ * enteras mientras quepan, y si ni la primera cabe no hay incipit (`ofreceIncipit` de
+ * `tools/lib/pasaje.ts`, el único que lo decide; el borde, igual al tope, sí se ofrece).
+ *
+ * **Nace en `undefined`, y con él ninguna Página de Obra enseña «Cómo empieza»**. Su valor lo da
+ * Héctor, en un diff visible (la propuesta es 400); ningún agente se lo da, y ninguna prueba fija
+ * su valor: pasan el tope por parámetro o lo parchean en una copia.
+ */
+export const MAX_CARACTERES_DEL_INCIPIT: number | undefined = undefined;
+
+/**
  * Tope del fragmento de la Tarjeta de Cita en los listados — UX-DR132, Historia 34.1.
  *
  * Puntos de código sin contar los saltos de verso, «…» incluido; solo lo rebasa una primera
@@ -261,6 +275,38 @@ export const DESPLIEGUE_DEL_PASAJE: string | undefined = undefined;
  */
 export const DESPLIEGUE_DE_LA_ATRIBUIDA: string | undefined = undefined;
 
+/**
+ * La jornada UTC del primer día en que una Página de Obra enseña «Cómo empieza» en el sitio en
+ * vivo — Historia 32.3, AD-9, AD-13.
+ *
+ * No es la del merge ni la del despliegue del código: el desplegable solo aparece cuando una ficha
+ * declara su incipit y `MAX_CARACTERES_DEL_INCIPIT` tiene valor, así que la jornada es la del
+ * primer despliegue en que las dos cosas se cumplen, tras dar valor al tope. `undefined` mientras
+ * no haya llegado. **Le da valor Héctor, en un commit aparte del día en que llega, y ningún agente
+ * la elige.** Parte la serie de la continuación de la Página de Obra (`continuacion-de-obra`, que
+ * juzga SM-C4 en la orden de la línea base, Historia 32.4): la página 1 de una Obra con incipit
+ * tiene otra primera pantalla.
+ */
+export const DESPLIEGUE_DEL_INCIPIT: string | undefined = undefined;
+
+/**
+ * La llegada en vivo de «La Obra como destino» — Historia 32.4, AD-9, AD-13, PRD §7 (SM-C4).
+ *
+ * Es la jornada UTC del primer día en que la página 1 de Obra cambia en el sitio en vivo —«Dónde
+ * leer esta obra» plegado antes del listado y sin el salto de la 24.7—: la del trabajo «Desplegar»
+ * de Actions que la lleva, nunca la del merge, con la misma forma que las de arriba: `undefined`
+ * mientras no haya llegado. **Le da valor Héctor, en un commit aparte del día en que llega, y
+ * ningún agente la elige.**
+ *
+ * La lee la orden de la línea base (23.10) para contar desde ella las ventanas de SM-C4 —la
+ * continuación desde el listado de la Página de Obra—, en su tabla de juicios por ventanas: la
+ * primera empieza la primera jornada UTC completa tras la llegada, y la de llegada no entra en
+ * ninguna y se informa aparte, como «cambió». Es la llegada de un juicio, como
+ * `DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS`, y no un corte de serie: no entra en
+ * `CORTES_DE_SERIE_DECLARADOS`.
+ */
+export const DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO: string | undefined = '2026-11-15';
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -282,9 +328,9 @@ export const DESPLIEGUE_DE_LA_ATRIBUIDA: string | undefined = undefined;
  * Las series de la medición que un corte puede partir. `continuacion-de-cita` (Historia 30.1) es
  * la continuación de la Página de Cita (SM-4 y SM-3) y SM-C5, y nada más: partir `lectura`
  * partiría las tasas de lectura de todas las superficies. Se lee en la intersección de su tramo y
- * del de `lectura`.
+ * del de `lectura`. `continuacion-de-obra` (Historia 32.3) es la continuación de la Página de Obra.
  */
-export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda' | 'continuacion-de-cita';
+export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda' | 'continuacion-de-cita' | 'continuacion-de-obra';
 
 /** Un corte de serie tal como se declara: su jornada es la de una constante de despliegue. */
 export interface CorteDeSerie {
@@ -312,7 +358,8 @@ export interface CorteLlegado extends CorteDeSerie {
  * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
  * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
  * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2); la
- * de la primera atribuida (35.7), SM-8 y la continuación de la Página de Cita.
+ * de la primera atribuida (35.7), SM-8 y la continuación de la Página de Cita; la del incipit de
+ * la 32 parte solo la continuación de la Página de Obra (Historia 32.3).
  * Cada entrada nombra su constante en `deDondeLlega`, y una prueba lo coteja con su `jornada:`.
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
@@ -345,6 +392,12 @@ export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
     deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA',
     que: 'la primera Cita atribuida publicada',
     series: ['sm8', 'continuacion-de-cita'],
+  },
+  {
+    jornada: DESPLIEGUE_DEL_INCIPIT,
+    deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT',
+    que: '«Cómo empieza» en la página 1 de Obra',
+    series: ['continuacion-de-obra'],
   },
 ];
 
@@ -821,6 +874,26 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 4729;
  * unos 400.
  */
 export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 19611;
+
+/**
+ * Tope del guion de copiar la Referencia de la Página de Obra — Historia 32.5, AD-6, AD-9.
+ *
+ * Es el `<script>` procesado de `src/islands/CopiarReferencia.astro`, que la página 1 de toda Obra
+ * pide con `<script type="module" src>`: pone la fecha de consulta del visitante en las tres
+ * Referencias de «Cómo citar», enseña los botones, copia, anuncia «Copiado.» y pide
+ * `copiado-de-referencia`. Cuenta los bytes UTF-8 sin comprimir del fichero y de sus trozos, como
+ * los demás topes de la lista cerrada (`src/lib/guiones.ts`), y lo vigila
+ * `tests/unit/medicion.test.ts` sobre `dist/`.
+ *
+ * Medido el 2026-11-08: **1.653 bytes** —1.349 del fichero de entrada y 304 del trozo `anuncio` que
+ * comparte con el filtro y la búsqueda—, el mismo en toda página 1 de Obra y con o sin punto final de
+ * medición, porque no lleva contenido. Más unos 400 de margen, como los demás topes de la lista. La
+ * medida cuenta con que el guion importa solo hojas —`src/lib/fechaDeConsulta.ts` y
+ * `src/lib/anuncio.ts`— y el nombre del evento solo por su tipo: importando `fechaDeConsulta` de
+ * `src/lib/atribucion.ts` arrastraba el grafo de las Obras, las superficies y la tabla de eventos
+ * del vocabulario, en un trozo compartido con la búsqueda, y medía 4.369.
+ */
+export const MAX_BYTES_GUION_DE_COPIAR_REFERENCIA = 2053;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.

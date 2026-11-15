@@ -20,6 +20,7 @@
  */
 
 import type { FormatoDeEdicion } from './ediciones.ts';
+import { añoLegible } from './atribucion.ts';
 import { compararPorClave, normalizar } from './normalizar.ts';
 import { slugDeObra } from './slug.ts';
 import { rutaDeObra } from './superficies.ts';
@@ -233,6 +234,29 @@ export interface FichaDeObra {
    * `npm run obra -- edicion`; las órdenes que reescriben una ficha las conservan.
    */
   ediciones?: readonly EdicionDeObra[];
+  /**
+   * La entidad de Wikidata y su revisión fija (32.1, AD-31). La escribe solo
+   * `npm run obra -- wikidata`, que coteja el Autor; las órdenes que reescriben una ficha la
+   * conservan.
+   */
+  wikidata?: { entidad: string; revision: number };
+  /**
+   * El incipit (32.3, AD-30): el documento de `corpus/fuentes/` y el texto desde el que empieza
+   * la Obra. Lo escribe solo `npm run obra -- incipit`; las órdenes que reescriben una ficha lo
+   * conservan.
+   */
+  incipit?: { documento: string; desde: string };
+}
+
+/**
+ * El incipit de una Obra tal como lo pinta su página 1 — Historia 32.3, AD-30: el texto ya
+ * cortado en frase o verso (`incipitDe` de `tools/lib/pasaje.ts`, con `\n` solo en fin de verso o
+ * de párrafo) y la Fuente de su documento. Lo entrega la colección `incipits`.
+ */
+export interface IncipitDeObra {
+  documento: string;
+  texto: string;
+  fuente: { nombre: string; licencia?: string; url: string };
 }
 
 /** Una edición en venta de una ficha, ya admitida por el esquema (22.9). */
@@ -931,6 +955,29 @@ export interface ObraResuelta {
    * con la afiliación encendida y alguna edición cotejada (FR-54): nunca van solas.
    */
   ediciones?: readonly EdicionDeObra[];
+  /**
+   * La Ficha técnica de la entidad de Wikidata atada a la ficha (32.1, 32.2), tal como la entrega
+   * el cargador `fichasTecnicas`. Solo la pinta la página 1 de la Página de Obra; sin entidad
+   * atada, el campo se omite.
+   */
+  fichaTecnica?: FichaTecnicaDeObra;
+}
+
+/**
+ * La Ficha técnica de una Obra — Historia 32.2, AD-31.
+ *
+ * La misma forma que entrega la colección `fichasTecnicas` de `src/content.config.ts` (la
+ * declara para sí `tools/lib/wikidata.ts`, de donde `src/` no importa): géneros y lenguas con
+ * su etiqueta en español, el año de publicación si Wikidata da uno solo, y el permanente de la
+ * revisión.
+ */
+export interface FichaTecnicaDeObra {
+  entidad: string;
+  revision: number;
+  generos: readonly string[];
+  lenguas: readonly string[];
+  año?: number;
+  enlace: string;
 }
 
 /** Lo que de una Cita importa para derivar los atributos de su Obra. */
@@ -992,6 +1039,7 @@ function añosDeclarados(citas: readonly CitaParaObra[]): number[] {
 export function resolverObras(
   citas: readonly CitaParaObra[],
   fichas: readonly FichaDeObra[],
+  fichasTecnicas?: ReadonlyMap<string, FichaTecnicaDeObra>,
 ): Map<string, ObraResuelta> {
   // Un único origen de grafías por ficha: `citasPorFicha`, el mismo del que tira
   // `grafiasPorFicha` y, por ella, `tituloEfectivo`.
@@ -1008,6 +1056,7 @@ export function resolverObras(
     const temas = [...new Set(suyas.flatMap((c) => c.temas ?? []))].sort((a, b) =>
       a.localeCompare(b, 'es'),
     );
+    const fichaTecnica = fichasTecnicas?.get(ficha.nombre);
 
     resueltas.set(ficha.nombre, {
       nombre: ficha.nombre,
@@ -1021,6 +1070,7 @@ export function resolverObras(
       recuento: suyas.length,
       ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
       ...(ficha.ediciones !== undefined ? { ediciones: ficha.ediciones } : {}),
+      ...(fichaTecnica !== undefined ? { fichaTecnica } : {}),
     });
   }
 
@@ -1047,8 +1097,9 @@ export function obraDeCita(
 export function colgarObras<C extends CitaParaObra>(
   citas: readonly C[],
   fichas: readonly FichaDeObra[],
+  fichasTecnicas?: ReadonlyMap<string, FichaTecnicaDeObra>,
 ): (C & { obra?: ObraResuelta })[] {
-  const obras = resolverObras(citas, fichas);
+  const obras = resolverObras(citas, fichas, fichasTecnicas);
   const indice = indiceDeFichas(fichas);
   return citas.map((cita) => {
     const obra = obraDeCita(cita, indice, obras);
@@ -1077,6 +1128,33 @@ export function avisosDeAñosDeObras(
     avisos.push(
       `  · Obra con años discrepantes: ${ficha.ruta} → sus Citas declaran ${años.join(', ')}. ` +
         'La Obra no publica año; cada Cita sigue mostrando el de su Procedencia.',
+    );
+  }
+  return avisos;
+}
+
+/**
+ * «Ficha técnica con año discrepante» — Historia 32.2, FR-60.
+ *
+ * El año de publicación que da Wikidata y el año de la Obra que declaran sus Citas no
+ * coinciden. Avisa y no rompe, y no corrige ninguno: la línea de Ficha técnica pinta el de
+ * Wikidata y la Cabecera el de las Citas, y decidir cuál está mal es de una persona. Si falta
+ * uno de los dos, no hay nada que comparar.
+ */
+export function avisosDeAñoDeFichaTecnica(
+  obras: ReadonlyMap<string, ObraResuelta>,
+  fichasTecnicas: ReadonlyMap<string, FichaTecnicaDeObra>,
+  rutaDeFicha: (nombre: string) => string,
+): string[] {
+  const avisos: string[] = [];
+  for (const nombre of [...fichasTecnicas.keys()].sort((a, b) => a.localeCompare(b, 'es'))) {
+    const deWikidata = fichasTecnicas.get(nombre)?.año;
+    const deLasCitas = obras.get(nombre)?.año;
+    if (deWikidata === undefined || deLasCitas === undefined || deWikidata === deLasCitas) continue;
+    avisos.push(
+      `  · Ficha técnica con año discrepante: ${rutaDeFicha(nombre)} → Wikidata dice ${añoLegible(deWikidata)}; ` +
+        `sus Citas, ${añoLegible(deLasCitas)}. La línea de Ficha técnica pinta el de Wikidata y la Cabecera el de ` +
+        'las Citas; ninguno se corrige solo.',
     );
   }
   return avisos;
@@ -1407,7 +1485,7 @@ export interface CitaParaDondeLeer {
   procedencia?: { traduccion?: { traductor: string; año?: number } } | null;
 }
 
-/** Una línea de «Edición cotejada, gratuita»: una Fuente, o una traducción en una Fuente. */
+/** Una línea del grupo «Gratis» de «Dónde leer esta obra»: una Fuente, o una traducción en una Fuente. */
 export interface LineaDondeLeer {
   /** El nombre de la Fuente (`rotuloDeFuente`). Es el texto del enlace. */
   nombre: string;
@@ -1506,26 +1584,95 @@ export function entradaComun(urls: readonly string[]): string | undefined {
 }
 
 /**
- * El `id` de «Dónde leer esta obra» — Historia 24.7, UX-DR96.
+ * El nombre de «Dónde leer esta obra» — Historias 24.7 y 32.4, UX-DR125.
  *
- * Un solo dueño para las tres lecturas del identificador: el `href` del salto de la Cabecera de
- * Obra, el `id` del rótulo de la sección y su `aria-labelledby`. Escrito en tres sitios, cambiar
- * uno dejaría el salto apuntando a nada sin que el build lo notara. El valor no cambia: es el
- * fragmento que ya llevaba la sección desde la 22.6.
- */
-export const ANCLA_DE_DONDE_LEER = 'donde-leer-esta-obra';
-
-/**
- * El nombre de «Dónde leer esta obra» — Historia 24.7, UX-DR96.
- *
- * El texto del rótulo de la sección y el del salto que va a ella son el mismo a propósito: quien
- * activa «Dónde leer esta obra ↓» tiene que llegar a un encabezado que se llame igual. Escrito
- * dos veces, renombrar la sección dejaría al salto anunciando el nombre viejo.
+ * El texto del `<summary>` del desplegable de la página 1 de la Obra (`DondeLeer.astro`). Desde
+ * la 32.4 no hay salto ni ancla que vayan a él: el desplegable está antes del listado.
  */
 export const ROTULO_DE_DONDE_LEER = 'Dónde leer esta obra';
 
 /**
- * Dónde leer una Obra — Historia 22.6, UX-DR42.
+ * Las páginas distintas (normalizadas, ordenadas) y el rótulo de un grupo de Citas de la misma
+ * Fuente. Es la regla de «Dónde leer esta obra» y la del desempate de
+ * `edicionQueEncabeza`: una sola, para que las dos no elijan Fuentes distintas.
+ */
+function rotuloDeGrupo(id: string, fuentes: readonly FuenteParaLeer[]): { urls: string[]; nombre: string } {
+  const urls = [...new Set(fuentes.map((f) => paginaNormalizada(f.url)))].sort();
+  // Con nombres que discrepan no se elige el primero que llegue: se rotula como sin nombre.
+  const nombre =
+    rotuloDeFuente({ id, url: urls[0], nombre: valorComun(fuentes.map((f) => f.nombre)) }) ??
+    ROTULO_DE_FUENTE_SIN_NOMBRE;
+  return { urls, nombre };
+}
+
+/** La edición cotejada que encabeza una Obra: el rótulo de su Fuente y, si es común, su traductor. */
+export interface EdicionQueEncabeza {
+  nombre: string;
+  traductor?: string;
+}
+
+/**
+ * La edición cotejada que encabeza la Obra — Historias 32.2 y 32.5, FR-48, AD-28.
+ *
+ * Agrupa las Citas **con Fuente** solo por Fuente (sumando sus traductores, a diferencia de
+ * `dondeLeer`, que separa cada traducción), elige la de más Citas y, a igualdad, la de rótulo
+ * menor y luego la de identificador menor. Devuelve el rótulo de esa Fuente (`rotuloDeGrupo`) y su
+ * traductor solo si **todas** las Citas de esa Fuente lo declaran y es el mismo; sin ninguna Cita
+ * con Fuente, `undefined`. Es la única regla de la edición que encabeza: de ella salen el
+ * traductor de la línea de Ficha técnica y la edición y el traductor de la Referencia de Obra, así
+ * que los dos salen siempre de la misma Fuente. Nunca sale de la entidad de Wikidata, de otra
+ * Fuente ni de otra Cita.
+ */
+export function edicionQueEncabeza(citas: readonly CitaParaDondeLeer[]): EdicionQueEncabeza | undefined {
+  const porFuente = new Map<string, { fuentes: FuenteParaLeer[]; traductores: (string | undefined)[] }>();
+  for (const cita of citas) {
+    const fuente = cita.fuente;
+    if (fuente === undefined || fuente === null) continue;
+    const grupo = porFuente.get(fuente.id) ?? { fuentes: [], traductores: [] };
+    grupo.fuentes.push(fuente);
+    grupo.traductores.push(cita.procedencia?.traduccion?.traductor);
+    porFuente.set(fuente.id, grupo);
+  }
+  const candidatas = [...porFuente.entries()].map(([id, g]) => ({
+    id,
+    citas: g.fuentes.length,
+    nombre: rotuloDeGrupo(id, g.fuentes).nombre,
+    traductores: g.traductores,
+  }));
+  if (candidatas.length === 0) return undefined;
+  candidatas.sort(
+    (a, b) => b.citas - a.citas || a.nombre.localeCompare(b.nombre, 'es') || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
+  );
+  const [primera] = candidatas;
+  const traductor = valorComun(primera.traductores);
+  return traductor === undefined ? { nombre: primera.nombre } : { nombre: primera.nombre, traductor };
+}
+
+/**
+ * El traductor de la edición cotejada que encabeza la Obra — Historia 32.2, FR-48.
+ *
+ * Es el de `edicionQueEncabeza`: solo si **todas** las Citas de esa Fuente lo declaran y es el
+ * mismo; si no, o sin ninguna Cita con Fuente, `undefined`. Lo pinta la línea de Ficha técnica.
+ */
+export function traductorDeLaEdicionQueEncabeza(citas: readonly CitaParaDondeLeer[]): string | undefined {
+  return edicionQueEncabeza(citas)?.traductor;
+}
+
+/**
+ * Si la Obra lleva «Cómo citar» en su página 1 — Historia 32.5, UX-DR129. Hoy, toda Obra; la
+ * Historia 35.9 añadirá aquí sus exclusiones, y la página solo pregunta.
+ */
+export function obraTieneComoCitar(obra: Pick<ObraResuelta, 'nombre'>): boolean {
+  void obra;
+  return true;
+}
+
+/**
+ * Dónde leer una Obra — Historias 22.6 y 32.4, UX-DR125, UX-DR127.
+ *
+ * Es el **punto con nombre** que decide qué ediciones gratuitas enseña «Dónde leer esta obra»: hoy
+ * no excluye nada, y lo ampliará la 35.9 (las exclusiones de una Obra con derechos vigentes). Cada
+ * línea lleva sus `citas`, de las que sale la frase de lo tomado (`textoDeLoTomado`).
  *
  * Agrupa las Citas **con Fuente** por (Fuente, traductor): una traducción es otra edición, así
  * que dos traductores en la misma Fuente son dos líneas. Las ordena de más a menos Citas y, a
@@ -1559,11 +1706,7 @@ export function dondeLeer(citas: readonly CitaParaDondeLeer[]): ResumenDondeLeer
 
   const lineas: LineaDondeLeer[] = [];
   for (const { id, fuentes, traducciones } of grupos.values()) {
-    const urls = [...new Set(fuentes.map((f) => paginaNormalizada(f.url)))].sort();
-    // Con nombres que discrepan no se elige el primero que llegue: se rotula como sin nombre.
-    const nombre =
-      rotuloDeFuente({ id, url: urls[0], nombre: valorComun(fuentes.map((f) => f.nombre)) }) ??
-      ROTULO_DE_FUENTE_SIN_NOMBRE;
+    const { urls, nombre } = rotuloDeGrupo(id, fuentes);
     const licencia = valorComun(fuentes.map((f) => f.licencia));
     const traductor = traducciones[0]?.traductor;
     const año = valorComun(traducciones.map((t) => t?.año));

@@ -15,6 +15,7 @@ import {
   fuenteConTiendaDePrueba,
   limpiar,
   TIENDA_DE_PRUEBA,
+  TIENDA_SIN_MARCA_DE_PRUEBA,
 } from './ayuda/construir.js';
 import {
   bytesDeGuionEnLinea,
@@ -369,7 +370,11 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     const sinComentarios = (texto: string) => texto.replace(/\/\*[\s\S]*?\*\//g, '');
     // Historia 22.9 — y el de las ediciones en venta, por lo mismo: la Página de Obra lo
     // importa con la afiliación apagada.
-    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro']) {
+    // Historia 32.2 — y el de la línea de Ficha técnica: toda Página de Obra lo importa, y con el
+    // Corpus real (ninguna ficha atada) no pinta nada.
+    // Historia 32.3 — y el de «Cómo empieza»: toda Página de Obra lo importa, y con el Corpus real
+    // (ninguna ficha con incipit) no pinta nada; su única hoja es la de `Desplegable.astro`.
+    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro', 'FichaTecnica.astro', 'ComoEmpieza.astro']) {
       const fuente = await readFile(resolve(RAIZ, 'src/components', componente), 'utf8');
       expect(
         sinComentarios(fuente).match(/<style[\s>]/g) ?? [],
@@ -758,6 +763,49 @@ describe('Historia 14.2 — encender sin destino detiene la construcción', () =
 });
 
 /**
+ * Historia 33.1 — encender la afiliación con una tienda sin marca detiene la construcción.
+ *
+ * Como la de la 14.2, una construcción que **falla**, y barata: la puerta corta al cargar
+ * `src/lib/ingreso.ts`. La copia declara las dos tiendas inventadas —una con marca y otra sin—
+ * y enciende la afiliación; el fallo nombra la que no tiene marca, por clave y nombre, y no la
+ * otra.
+ */
+describe('Historia 33.1 — encender con una tienda sin marca detiene la construcción', () => {
+  const aLimpiar: string[] = [];
+  let resultado: { codigo: number; salida: string; proyecto: string };
+
+  beforeAll(async () => {
+    const fuente = fuenteConModeloEncendido(
+      fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'), [
+        TIENDA_DE_PRUEBA,
+        TIENDA_SIN_MARCA_DE_PRUEBA,
+      ]),
+      'afiliacion-de-libros',
+    );
+    resultado = await construirConCorpus(CORPUS, {
+      jornada: JORNADA,
+      ficheros: { 'src/lib/ingreso.ts': fuente },
+    });
+    aLimpiar.push(resultado.proyecto);
+  }, 240_000);
+
+  afterAll(async () => {
+    await Promise.all(aLimpiar.splice(0).map(limpiar));
+  });
+
+  it('el build falla', () => {
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+  });
+
+  it('y nombra la tienda sin marca, por clave y nombre, y no la que la tiene', () => {
+    const t = TIENDA_SIN_MARCA_DE_PRUEBA;
+    expect(resultado.salida).toContain(`«${t.clave}» (${t.nombre})`);
+    expect(resultado.salida).toContain('no se enciende mientras alguna tienda declarada no tenga marca');
+    expect(resultado.salida).not.toContain(`«${TIENDA_DE_PRUEBA.clave}»`);
+  });
+});
+
+/**
  * Historia 17.5 — el tope de guion se mide en **toda** superficie que admita un Modelo.
  *
  * El tope de `MAX_BYTES_DE_GUION` solo se medía en la Página de Cita, que hoy no admite
@@ -932,6 +980,11 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     // Historia 27.2 — y `/buscar/`, con los Modelos encendidos, sigue pidiendo su búsqueda por la
     // entrada `busqueda` de la lista, no en línea.
     expect(guionesExternosDe(paginas['buscar/index.html']).map((e) => guionExternoDe(e)?.id)).toContain('busqueda');
+    // Historia 32.5 — y la página 1 de Obra, con la afiliación encendida, pide la isla de copiar la
+    // Referencia por su entrada de la lista, `copiar-referencia`, y no en línea.
+    const obra = paginas['obra/seneca/sobre-la-brevedad-de-la-vida/index.html'];
+    expect(obra).toBeDefined();
+    expect(guionesExternosDe(obra).map((e) => guionExternoDe(e)?.id)).toContain('copiar-referencia');
   });
 
   it('y el contador de guion cuenta bytes de guion, no el ld+json ni lo que se descarga', () => {

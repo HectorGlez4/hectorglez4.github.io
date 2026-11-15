@@ -830,7 +830,7 @@ describe('el aislamiento del sitio (AD-24)', () => {
         '-l',
         '--untracked',
         '-E',
-        'serie-de-demanda|serieDeDemanda|FICHERO_DE_DEMANDA|tools/demanda|lib/demanda|demanda\\.ts',
+        'serie-de-demanda|[sS]erieDeDemanda|FICHERO_DE_DEMANDA|tools/demanda|lib/demanda|demanda\\.ts|curarPrimero|curar-primero',
         '--',
         'src',
         'integraciones',

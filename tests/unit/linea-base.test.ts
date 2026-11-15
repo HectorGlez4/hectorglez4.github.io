@@ -11,6 +11,7 @@ import {
   CORTES_DE_SERIE_DECLARADOS,
   CORTES_DE_SM8,
   DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS,
+  DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO,
   SM12_CON_FACEBOOK,
   cortesQueLlegaron,
   type CorteLlegado,
@@ -41,6 +42,7 @@ import {
   ningunaConsultaConForma,
   partirSerie,
   problemasDeLaLectura,
+  unidadDeLaPaginaDeObra,
   valoresDeLaLectura,
   type JuicioPorVentanas,
   type LecturaDeMedicion,
@@ -500,7 +502,7 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
    * sus exportaciones no la alcanza: se evalúa una copia del fuente con las dos constantes de
    * despliegue con valor. Es posible porque `umbrales.ts` no importa nada.
    */
-  async function umbralesCon(lectura: string, obraYDirectorios: string) {
+  async function umbralesCon(lectura: string, obraYDirectorios: string, incipit?: string) {
     const fuente = readFileSync(resolve(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
     // La declaración, con el valor que tenga: sin él hasta la 23.11 y la 26.11, y con el suyo
     // después. Esta prueba no fija ninguno de los dos, que son de Héctor.
@@ -513,7 +515,14 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
       .replace(
         declaracion('DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS'),
         `export const DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = '${obraYDirectorios}';`,
+      )
+      // Historia 32.3 — la del incipit, con valor solo si se pide; sin él, `undefined`, que es el
+      // valor con el que nace (y la prueba no fija el que tenga el árbol).
+      .replace(
+        declaracion('DESPLIEGUE_DEL_INCIPIT'),
+        `export const DESPLIEGUE_DEL_INCIPIT: string | undefined = ${incipit === undefined ? 'undefined' : `'${incipit}'`};`,
       );
+    expect(fuente).toMatch(declaracion('DESPLIEGUE_DEL_INCIPIT'));
     const dir = mkdtempSync(join(tmpdir(), 'sabiduria-umbrales-'));
     aBorrar.push(dir);
     const fichero = join(dir, 'umbrales.ts');
@@ -545,11 +554,33 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
       'DESPLIEGUE_DE_CITAR_Y_LLEVARSE',
       'DESPLIEGUE_DEL_PASAJE',
       'DESPLIEGUE_DE_LA_ATRIBUIDA',
+      'DESPLIEGUE_DEL_INCIPIT',
     ]);
     // Historia 31.2 — cada entrada nombra en `deDondeLlega` la constante de su `jornada:`.
     expect([...lista.matchAll(/jornada: ([A-Z_]+),\s*deDondeLlega: '([A-Z_]+)',/g)].map((m) => [m[1], m[2]])).toEqual(
       [...lista.matchAll(/jornada: ([A-Z_]+),/g)].map((m) => [m[1], m[1]]),
     );
+  });
+
+  it('Historia 32.3 — con valor, el corte del incipit parte solo la continuación de la Página de Obra; sin él, no está', async () => {
+    const con = await umbralesCon('2026-11-02', '2026-11-20', '2026-12-01');
+    const delIncipit = con.CORTES_DE_SERIE.filter((c) => c.jornada === '2026-12-01');
+    expect(delIncipit).toEqual([
+      { jornada: '2026-12-01', deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT', que: '«Cómo empieza» en la página 1 de Obra', series: ['continuacion-de-obra'] },
+    ]);
+    // No parte SM-8.
+    expect(con.CORTES_DE_SM8.map((c) => c.jornada)).toEqual(['2026-11-02', '2026-11-20']);
+    const sin = await umbralesCon('2026-11-02', '2026-11-20');
+    expect(sin.CORTES_DE_SERIE.some((c) => c.series.includes('continuacion-de-obra'))).toBe(false);
+  });
+
+  it('Historia 32.3 — el informe nombra la serie de la continuación de la Página de Obra, partida o entera', () => {
+    const entera = texto(leer({}));
+    expect(entera).toContain('  la continuación de la Página de Obra: ningún corte ha llegado todavía; la serie va entera, en un solo tramo.');
+    const partida = leer({}, { cortes: [CORTE_23, { jornada: D3, deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT', que: '«Cómo empieza» en la página 1 de Obra', series: ['continuacion-de-obra'] }] });
+    expect(partida.series['continuacion-de-obra'].cortes).toHaveLength(1);
+    expect(partida.series.sm8.cortes).toHaveLength(1);
+    expect(texto(partida)).toMatch(/ {2}la continuación de la Página de Obra: 2 tramos, que no se suman\..*«Cómo empieza» en la página 1 de Obra/u);
   });
 });
 
@@ -1284,7 +1315,8 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
       ],
     });
     expect(SM_C5.palanca).toBe('quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor');
-    // La entrada declarada nombra solo la serie nueva; las dos de antes, sin tocar.
+    // La entrada declarada nombra solo la serie nueva; las dos de antes, sin tocar, y la del incipit
+    // (Historia 32.3), que parte solo la continuación de la Página de Obra.
     const entrada = CORTES_DE_SERIE_DECLARADOS.find((c) => c.series.includes('continuacion-de-cita'))!;
     expect(entrada.series).toEqual(['continuacion-de-cita']);
     expect(entrada.que).toBe(
@@ -1295,6 +1327,7 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
       ['sm8'],
       ['continuacion-de-cita'],
       ['sm8', 'continuacion-de-cita'],
+      ['continuacion-de-obra'],
     ]);
     // Historia 31.2 — la del pasaje parte la misma serie, y solo esa.
     const delPasaje = CORTES_DE_SERIE_DECLARADOS.find((c) => c.deDondeLlega === 'DESPLIEGUE_DEL_PASAJE')!;
@@ -2015,5 +2048,76 @@ describe('Historia 23.10 — el aislamiento del sitio (AD-14)', () => {
       throw error;
     });
     expect(stdout.trim()).toBe('');
+  });
+});
+
+/*
+ * Historia 32.4, PRD §7 — SM-C4: la continuación de la Página de Obra hacia sus Citas, las salidas
+ * internas de la zona `listado` entre lecturas de la Página de Obra, contada desde la llegada de la
+ * página 1 reordenada (`DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO`) y con el corte del incipit
+ * (`DESPLIEGUE_DEL_INCIPIT`) partiendo su serie. Ninguna prueba fija el valor de las constantes.
+ */
+describe('Historia 32.4 — SM-C4, la continuación desde el listado de la Página de Obra', () => {
+  const SM_C4 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-C4')!;
+  const OBRA = '/obra/a/b/';
+  /** 120 lecturas de Obra al día; 12 salidas del listado los tres primeros días y 36 después; 50 de la Atribución, siempre. */
+  const partes = (): Partes => ({
+    vistasYLecturas: DIAS.flatMap((dia) => [vista(dia, OBRA, EVENTOS.vistaDeObra, 120, { indexable: 'indexable' }), lectura(dia, OBRA, 120)]),
+    salidas: DIAS.flatMap((dia, i) => [salida(dia, OBRA, 'listado', i < 3 ? 12 : 36), salida(dia, OBRA, 'atribucion', 50)]),
+  });
+
+  it('se declara en la tabla: la unidad de la Página de Obra, su llegada, la tasa del listado y el corte del incipit', () => {
+    expect(SM_C4).toBeDefined();
+    expect(SM_C4.unidad).toBe(unidadDeLaPaginaDeObra());
+    expect(SM_C4.unidad).toBe(unidadDeLaPaginaDeObra(SUPERFICIES));
+    expect(SM_C4.llegada).toBe(DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO);
+    expect(SM_C4.deDondeLlega).toBe('DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO');
+    expect(SM_C4.tasas).toEqual(['continuacion-desde-listado']);
+    expect(SM_C4.corte?.serie).toBe('continuacion-de-obra');
+    expect(SM_C4.corte?.llegadas.map((l) => l.deDondeLlega)).toEqual(['DESPLIEGUE_DEL_INCIPIT']);
+    // Si salta, el informe nombra qué se juzga (PRD §7: «si baja, se juzga lo que se movió»).
+    expect(SM_C4.palanca).toMatch(/lo decide Héctor$/);
+    // Es la llegada de un juicio, no un corte de serie.
+    expect(CORTES_DE_SERIE_DECLARADOS.some((c) => c.que.includes('Obra como destino'))).toBe(false);
+  });
+
+  it('la unidad sale de la declaración, nunca del prefijo: sin la vista de Obra declarada, lo dice', () => {
+    expect(SM_C4.unidad).toBe('la Página de Obra');
+    const sinObra = SUPERFICIES.filter((sup) => sup.vistaConMarca !== EVENTOS.vistaDeObra);
+    expect(unidadDeLaPaginaDeObra(sinObra)).toBe('(sin declarar: la vista de Obra)');
+  });
+
+  it('con la llegada anterior al cierre: desde la jornada siguiente, solo las salidas del listado, y ninguna ventana cruza la llegada', () => {
+    const l = leer(partes(), { minimo: 300, juicios: [{ ...SM_C4, llegada: D2 }] });
+    const [juicio] = l.juicios;
+    expect(juicio.referencia).toBe('serie-de-antes');
+    // La serie de antes es el día 1: 12 salidas del listado sobre 120 lecturas; la Atribución no cuenta.
+    expect(juicio.referencias).toEqual([{ tasa: 'continuación desde listado', valor: calculada(12, 120) }]);
+    expect(juicio.ventanas.map((v) => [v.desde, v.hasta, v.acumulado])).toEqual([
+      ['2026-11-04', '2026-11-06', 360],
+      ['2026-11-07', '2026-11-09', 360],
+    ]);
+    expect(juicio.ventanas.some((v) => v.desde <= D2 && D2 <= v.hasta)).toBe(false);
+    expect(juicio.ventanas[0].tasas).toEqual([{ tasa: 'continuación desde listado', valor: calculada(84, 360), direccion: 'sube' }]);
+    expect(juicio.ventanas[1].tasas).toEqual([{ tasa: 'continuación desde listado', valor: calculada(108, 360), direccion: 'sube' }]);
+    const informe = texto(l);
+    expect(informe).toContain(`SM-C4 (${SM_C4.unidad}; llegada: ${D2}, DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO)`);
+    expect(informe).toContain('continuación desde listado 23,3 % (84 de 360), sube');
+  });
+
+  it('sin la llegada: se informa como los demás sin llegada, nombrando la constante', () => {
+    const l = leer(partes(), { minimo: 300, juicios: [{ ...SM_C4, llegada: undefined }] });
+    expect(l.juicios[0].referencia).toBe('linea-base');
+    expect(texto(l)).toContain('SM-C4 (la Página de Obra; llegada: DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO): desde el cierre de la línea base, frente a ella.');
+    expect(texto(l)).toContain('2026-11-05 – 2026-11-07 (360): continuación desde listado 30,0 % (108 de 360), sube.');
+  });
+
+  it('con el corte del incipit llegado, su línea base es propia y ninguna ventana cruza esa jornada', () => {
+    const incipit: CorteLlegado = { jornada: '2026-11-05', deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT', que: 'el incipit en la página 1 de la Obra', series: ['continuacion-de-obra'] };
+    const l = leer(partes(), { minimo: 300, cortes: [CORTE_23, incipit], juicios: [{ ...SM_C4, llegada: undefined }] });
+    const [juicio] = l.juicios;
+    expect(juicio.corte).toMatchObject({ estado: 'llegado', deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT', jornada: '2026-11-05', desde: '2026-11-06' });
+    expect(juicio.ventanas.every((v) => v.desde > '2026-11-05')).toBe(true);
+    expect(texto(l)).toContain('Desde la llegada del 2026-11-05 (DESPLIEGUE_DEL_INCIPIT), su línea base es propia');
   });
 });
