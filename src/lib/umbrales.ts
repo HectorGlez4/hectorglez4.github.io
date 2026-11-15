@@ -241,7 +241,7 @@ export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-1
  * de Cita (SM-4, y su complemento SM-3) y SM-C5: su entrada en `CORTES_DE_SERIE_DECLARADOS` parte
  * solo la serie `continuacion-de-cita`, y el juicio de SM-C5 no compara ventanas a través de ella.
  */
-export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
+export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = '2026-11-08';
 
 /**
  * La llegada en vivo de «Lee el pasaje» — la Épica 31, AD-9, AD-13, Historia 31.2.
@@ -273,7 +273,7 @@ export const DESPLIEGUE_DEL_PASAJE: string | undefined = undefined;
  * nada más —ni la lectura, cuya unidad nueva no tiene serie de antes, ni la búsqueda, sin evento
  * ni tramo nuevos—.
  */
-export const DESPLIEGUE_DE_LA_ATRIBUIDA: string | undefined = undefined;
+export const DESPLIEGUE_DE_LA_ATRIBUIDA: string | undefined = '2026-11-15';
 
 /**
  * La jornada UTC del primer día en que una Página de Obra enseña «Cómo empieza» en el sitio en
@@ -322,7 +322,7 @@ export const DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO: string | undefined = '2026-11-1
  * entrada en `CORTES_DE_SERIE_DECLARADOS` parte las dos continuaciones, `continuacion-de-cita` y
  * `continuacion-de-obra`, y nada más.
  */
-export const DESPLIEGUE_DE_LOS_PANELES: string | undefined = undefined;
+export const DESPLIEGUE_DE_LOS_PANELES: string | undefined = '2026-11-15';
 
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.

@@ -523,11 +523,19 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
         declaracion('DESPLIEGUE_DEL_INCIPIT'),
         `export const DESPLIEGUE_DEL_INCIPIT: string | undefined = ${incipit === undefined ? 'undefined' : `'${incipit}'`};`,
       );
+    // Los demás cortes, sin valor en la copia: esta prueba cuenta solo los suyos, y el valor que
+    // les dé Héctor en el árbol (30.1, 35.7, 36.1, 31.2) no entra.
+    const ajenos = ['DESPLIEGUE_DE_CITAR_Y_LLEVARSE', 'DESPLIEGUE_DEL_PASAJE', 'DESPLIEGUE_DE_LA_ATRIBUIDA', 'DESPLIEGUE_DE_LOS_PANELES'];
+    for (const nombre of ajenos) expect(fuente).toMatch(declaracion(nombre));
+    const copiaSinAjenos = ajenos.reduce(
+      (texto, nombre) => texto.replace(declaracion(nombre), `export const ${nombre}: string | undefined = undefined;`),
+      copia,
+    );
     expect(fuente).toMatch(declaracion('DESPLIEGUE_DEL_INCIPIT'));
     const dir = mkdtempSync(join(tmpdir(), 'sabiduria-umbrales-'));
     aBorrar.push(dir);
     const fichero = join(dir, 'umbrales.ts');
-    writeFileSync(fichero, copia);
+    writeFileSync(fichero, copiaSinAjenos);
     return (await import(pathToFileURL(fichero).href)) as typeof import('../../src/lib/umbrales.ts');
   }
 
