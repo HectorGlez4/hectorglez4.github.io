@@ -9,6 +9,22 @@ import { cambiarAtribuida, type CambioDeAtribuida } from '../../tools/lib/cambio
 import { rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { leerAprobaciones } from '../../tools/lib/aprobaciones.ts';
 import type { ValoresDeLaPuerta } from '../../tools/lib/atribuidas.ts';
+import {
+  MAX_ATRIBUIDAS_POR_DUEÑO,
+  MAX_ATRIBUIDAS_POR_OBRA,
+  MAX_CARACTERES_DE_ATRIBUIDA,
+  MIN_ATESTIGUACIONES_DE_ATRIBUIDA,
+} from '../../src/lib/umbrales.ts';
+import { BUZON_DE_PETICIONES } from '../../src/lib/dominio.ts';
+
+/** Si la puerta del árbol está cerrada: las cinco constantes las fija Héctor, y la prueba no fija su valor. */
+const PUERTA_DEL_ARBOL_CERRADA = [
+  MAX_CARACTERES_DE_ATRIBUIDA,
+  MAX_ATRIBUIDAS_POR_OBRA,
+  MAX_ATRIBUIDAS_POR_DUEÑO,
+  MIN_ATESTIGUACIONES_DE_ATRIBUIDA,
+  BUZON_DE_PETICIONES,
+].some((valor) => valor === undefined);
 
 const ejecutar = promisify(execFile);
 
@@ -498,7 +514,7 @@ describe('Historia 35.6 — lo que la orden no cambia', () => {
     await seNiega(cambio, motivo);
   });
 
-  it('con la puerta del árbol, cerrada, toda invocación sale negada sin escribir', async () => {
+  it.skipIf(!PUERTA_DEL_ARBOL_CERRADA)('con la puerta del árbol, cerrada, toda invocación sale negada sin escribir', async () => {
     const directorio = await enDisco();
     const antes = await instantanea(directorio);
     const r = await cambiarAtribuida(rutasDelCorpus(directorio), { tipo: 'texto', slug: A1, texto: TEXTO_A1 });
@@ -545,7 +561,7 @@ describe('Historia 35.6 — la orden por proceso', () => {
     expect(await instantanea(directorio)).toEqual(antes);
   });
 
-  it('una invocación válida, con la puerta cerrada del árbol, sale con 1 sin escribir', async () => {
+  it.skipIf(!PUERTA_DEL_ARBOL_CERRADA)('una invocación válida, con la puerta cerrada del árbol, sale con 1 sin escribir', async () => {
     const directorio = await enDisco();
     const antes = await instantanea(directorio);
     const r = await correr(directorio, ['texto', A1, 'Hasta el infinito y más allá, ¡guardián del cosmos!']);

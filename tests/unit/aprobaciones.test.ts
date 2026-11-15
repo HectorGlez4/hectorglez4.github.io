@@ -193,10 +193,12 @@ describe('35.11 — la puerta pura del build', () => {
 describe('35.11 — el fichero del árbol', () => {
   const RUTA = `corpus/${FICHERO_DE_APROBACIONES}`;
 
-  it(`${RUTA} es su cabecera y la lista vacía`, () => {
+  // Las aprobaciones las anota la siembra: la prueba no fija cuántas hay, solo la forma del fichero.
+  it(`${RUTA} empieza por su cabecera y trae una lista, vacía o no`, () => {
     const contenido = readFileSync(join(RAIZ, RUTA), 'utf8');
-    expect(contenido).toBe(CABECERA_DE_APROBACIONES);
-    expect(parsearYaml(contenido)).toEqual({ aprobaciones: null });
+    expect(contenido.startsWith(CABECERA_DE_APROBACIONES)).toBe(true);
+    const { aprobaciones } = parsearYaml(contenido) as { aprobaciones: unknown };
+    expect(aprobaciones === null || Array.isArray(aprobaciones)).toBe(true);
   });
 
   it(`${RUTA} empieza, byte a byte, por el del primer padre`, async () => {
