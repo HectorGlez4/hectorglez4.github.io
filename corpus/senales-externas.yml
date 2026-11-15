@@ -79,3 +79,9 @@ senales:
     origen: "https://www.youtube.com/@sabiduriadebolsillo"
     destino: "/"
     nota: "enlaces del canal (Personalización)"
+  - fecha: "2026-11-15"
+    tipo: "propia"
+    origen: "https://www.threads.com/@sabiduriabolsillo"
+    destino: "/"
+    marcado: true
+    nota: "enlaces del perfil"
