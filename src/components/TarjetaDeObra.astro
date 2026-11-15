@@ -40,8 +40,16 @@
  * Fuera de Pagefind con `all` y no con el atributo a secas: la tarjeta nombra el título y el
  * Autor, que el índice no debe recoger ni como texto ni como filtro desde cada Página de Cita
  * (NFR-13). Sin guion: todo sale del build.
+ *
+ * **En el Panel de bloque de la Obra** (Historia 36.1, DESIGN.md v9.3): la `section` va dentro de
+ * `PanelDeBloque` con `familia="obra"`, que le da el tinte `--contenedor-obra`, el radio, el relleno
+ * y el Rótulo de panel, y deja de llevar filete de apertura; entre sus dos filas, solo la divisoria
+ * `--filete-obra`. Sigue en tinta y sin siena, y su hoja sigue sin fondo ni radio propios: son del
+ * panel. Los 4 × `--unidad` de lo de arriba los pone la Página de Cita al panel. Solo la usa la
+ * Página de Cita: la portada compone la suya, que sigue plana.
  */
 import Rotulo from './Rotulo.astro';
+import PanelDeBloque from './PanelDeBloque.astro';
 import FilaDeBloque from './FilaDeBloque.astro';
 import type { Cita, SiguienteCita } from '../lib/publicado.ts';
 import type { Dueño } from '../lib/obras.ts';
@@ -123,24 +131,21 @@ if (siguiente !== undefined) {
   */}
 {
   obra !== undefined && contenido !== undefined && (
-    <section class="tarjeta-de-obra" aria-labelledby="de-la-obra" data-pagefind-ignore="all">
+    <PanelDeBloque familia="obra" cierre="fila"><section class="tarjeta-de-obra" aria-labelledby="de-la-obra" data-pagefind-ignore="all">
       <Rotulo id="de-la-obra" nivel={nivel}>De la obra</Rotulo>
       <p class="titulo">{obra.titulo}</p>
       <p class="hechos">{contenido.hechos.map((parte, i) => (<>{i > 0 && (<><span aria-hidden="true"> · </span><span class="solo-para-lectores">, </span></>)}{parte}</>))}</p>
       <ul class="filas">{siguiente !== undefined && (<FilaDeBloque href={rutaDeCita(siguiente.cita.slug)} zona="siguiente" avance>{textoDeSiguiente(siguiente)}</FilaDeBloque>)}<FilaDeBloque href={rutaDeLaObra(obra)} zona="tarjeta-de-obra" avance>{contenido.fila}</FilaDeBloque></ul>
-    </section>
+    </section></PanelDeBloque>
   )
 }
 
 <style>
   /*
-   * Plana y en tinta (variante 1A): la delimitan el filete de arriba y su rótulo, como las Rutas
-   * de salida. Ni fondo, ni radio, ni siena: un fondo sería el primero de la Página de Cita.
+   * En tinta y sin siena. Desde la 36.1 la delimita el Panel de bloque de la Obra, que pone el
+   * fondo, el radio y el aire: aquí ni filete de apertura, ni fondo, ni radio.
    */
   .tarjeta-de-obra {
-    margin-top: calc(var(--unidad) * 4);
-    border-top: var(--grosor-filete) solid var(--filete);
-    padding-top: calc(var(--unidad) * 3);
     max-width: var(--medida-prosa);
   }
 
@@ -175,12 +180,11 @@ if (siguiente !== undefined) {
     color: var(--tinta-apagada);
   }
 
-  /* El filete de encima de la primera fila; el de debajo de cada una lo pone la fila, y entre
-   * «Siguiente…» y «Ver la obra» no hay más separación que ese filete (UX-DR65). */
+  /* Sin filete encima de la primera: entre «Siguiente…» y «Ver la obra», solo la divisoria de la
+   * Obra que pone el panel, y ninguna bajo la última (UX-DR65, DESIGN.md v9.3). */
   .filas {
     list-style: none;
     margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
-    border-top: var(--grosor-filete) solid var(--filete);
   }
 </style>

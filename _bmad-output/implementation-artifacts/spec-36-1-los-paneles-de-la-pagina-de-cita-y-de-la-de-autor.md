@@ -2,8 +2,8 @@
 title: 'Historia 36.1 — Los paneles de la Página de Cita y de la de Autor'
 type: 'feature'
 created: '2026-11-15'
-status: 'ready-for-dev'
-baseline_revision: '6b8391ed0072bd1861bfa3a0b5716360d7765613'
+status: 'done'
+baseline_revision: '9502445ffbb9f4e15dbe0824b8671e1a0366233a'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -29,6 +29,13 @@ deferred:
     severity: low
   - summary: 'NFR-7 (Lighthouse, medias de 10 corridas alternas) se mide en la puerta de la Épica 36 antes del merge, no en esta historia: aquí solo se anota el delta en bytes de la hoja de estilo de la Página de Cita y de la de Autor. La historia no añade guion.'
     evidence: 'epics.md Story 36.1, último Given; memoria del bucle (puerta NFR-7 por medias de 10 corridas).'
+    severity: low
+  - summary: >-
+      La instantánea `buscar-con-resultados` de `tests/e2e/tipografia-calculada.spec.ts` depende del momento: según la carga, la región `p.estado` de `/buscar/` ya tiene texto al medir y sale una ruta que la instantánea no trae.
+    evidence: |-
+      `npx playwright test tests/e2e/tipografia-calculada.spec.ts --repeat-each=3 -g buscar-con-resultados` falla 5 de 6 con la misma diferencia (`main > div.contenedor.pagina > div.recuento > p.estado`) en la revisión base 9502445ffb, sin esta historia; `/buscar/` no cambia con ella y su instantánea no se regrabó.
+    location: >-
+      tests/e2e/tipografia-calculada.spec.ts:37
     severity: low
 ---
 
@@ -118,6 +125,17 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+(Las cinco capas son externas y la invocación no trajo hallazgos suyos: esta pasada no tiene ninguno.)
+
 ## Design Notes
 
 El panel envuelve y no sustituye: las `section` de hoy (`tarjeta-de-obra`, `obras-del-autor`, con `aria-labelledby`) siguen siendo lo que eran, así que no se añade ni se quita ninguna región, y las pruebas que buscan `<section class="…"` siguen valiendo. Todo el trato de dentro vive en `PanelDeBloque.astro` con `:global` acotado bajo `.panel`, para que `Rotulo`, `Desplegable`, `FilaDeBloque`, `Chips` y `ListaDeObras` —compartidos con la portada, los Directorios y `/obras/`— salgan idénticos fuera de un panel. Comprobar especificidad: `.panel[data-astro-cid-…] .desplegable` gana a `.desplegable[data-astro-cid-…]`.
@@ -142,5 +160,35 @@ El panel envuelve y no sustituye: las `section` de hoy (`tarjeta-de-obra`, `obra
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna (alto tras la planificación, como pide la invocación).
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** Pasada solo visual (UX v9.3, «Fichas»): doce tokens nuevos en `tokens.css`; la primitiva `PanelDeBloque.astro` (fondo por familia, radio, relleno, Rótulo de panel y el trato de dentro con `:global` acotado bajo `.panel`); la Tarjeta de Obra, «Cómo citar» + «Inserta esta cita» y los tres grupos de las Rutas de salida en sus paneles en la Página de Cita; la Ficha de Autor y la Lista de Obras en los suyos en la página 1 de Autor; la Tarjeta de Cita compuesta como Ficha de Cita (y, por AD-19, en todos los listados, cuyo `ul` pierde el filete superior); y el corte `DESPLIEGUE_DE_LOS_PANELES` (en `undefined`) para la continuación de la Página de Cita y SM-C5. Ni orden, ni textos, ni `data-zona`, ni rutas, metas, JSON-LD ni `data-pagefind-*` cambian.
+
+**Desviación del Code Map.** La familia va en la clase `panel-{familia}` (`panel panel-obra cierre-fila`), no en `{familia}` a secas: `.autor` y `.obra` ya eran las clases de la Atribución (`p.autor`) y de la Tarjeta de Cita (`span.obra`), y un `div.panel.autor` hacía casar `page.locator('.autor')` con dos elementos (dos pruebas de `accesibilidad.spec.ts` y `pagina-de-cita.spec.ts` en rojo). El comentario de cabecera de `PanelDeBloque.astro` lo dice.
+
+**Ficheros.**
+- `src/styles/tokens.css` — los diez colores y los dos radios de DESIGN.md v9.3.
+- `src/components/PanelDeBloque.astro` — nuevo: la primitiva, `familia` y `cierre` obligatorios y validados al construir.
+- `src/components/TarjetaDeObra.astro` — en el panel de la Obra; sin filete de apertura ni de primera fila.
+- `src/components/RutasDeSalida.astro` — cada grupo en su panel; el `nav` conserva su apertura y pierde filete y relleno; fichas y cierre a 1 × unidad.
+- `src/components/TarjetaDeCita.astro` — Ficha de Cita: caja blanca, filete `--filete-ficha`, radio `--radio-ficha`, fragmento en `--cita-xs` regular.
+- `src/pages/cita/[slug].astro` — el panel de las herramientas; los paneles a 4 × unidad de lo de arriba.
+- `src/pages/autor/[slug]/[...page].astro` — paneles Autor y Obra en la página 1 (el `h1` en `--sobre-contenedor-autor`); las 2+ sin panel; listado sin filete.
+- `src/pages/{tema,coleccion,obra,personaje}/…/[...page].astro` — solo el `border-top` de `.listado`.
+- `src/lib/umbrales.ts`, `tools/lib/lineaBase.ts` — el corte `DESPLIEGUE_DE_LOS_PANELES` y su llegada en SM-C5.
+- `tests/unit/paneles.test.ts`, `tests/e2e/paneles.spec.ts` — nuevos (tokens contra el frontmatter; qué bloque en qué panel en `dist/`, sin panel vacío, anidado, con rol, `aria-*` ni zona; ninguna otra superficie con panel; contraste AA, 44 px, radio 12 px, foco en siena, `<summary>` en panel, CAP-1).
+- `tests/unit/{tarjeta-de-obra,como-citar,lee-el-pasaje,linea-base}.test.ts`, `tests/e2e/{pagina-de-cita,rutas-de-salida,como-citar}.spec.ts` — puestas al día de lo que fijaba el trato de antes (el panel como hijo del `article`, filetes, aire, el corte nuevo en las llegadas pendientes).
+- `tests/e2e/tipografia-calculada.spec.ts-snapshots/` — regrabadas solo cita (4 tramos), autor, tema, colección y obra, en los dos perfiles: rutas de clases con el `div.panel` y el fragmento de 600 | 1,3 a 400 | 1,45; portada, 404, Directorios y `/buscar/` sin cambio.
+
+**Revisión.** 0 parches, 0 diferidos, 0 rechazados (sin hallazgos externos en esta invocación). `followup_review_recommended: false` (puntuación 0).
+
+**Verificación.**
+- `npx vitest run` de `paneles`, `tipografia-en-tokens`, `tarjeta-de-obra`, `tarjeta-de-cita`, `rutas-de-salida`, `desplegable`, `como-citar`, `espinas-de-ux`, `contraste-del-contorno`, `superficies`, `lista-de-obras`, `directorio-de-obras`, `linea-base`, `lee-el-pasaje`: verde.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test` completo (desacoplado): 209 ficheros, 9.049 pasan y 1 falló (`lee-el-pasaje`, que esperaba un `<details>` como primer hijo de `.desplegables`); corregido y repasado el fichero en verde.
+- `npm run build` (en el `webServer` de Playwright) termina; `npx tsx integraciones/peso.ts` sobre ese `dist/`: 568.571.178 bytes juzgados, por debajo del aviso.
+- `npx playwright test` de `paneles`, `accesibilidad`, `desplegable`, `rutas-de-salida`, `pagina-de-cita` y `tipografia-calculada` en los dos perfiles: 495 pasan. Suite e2e entera después: 1.483 pasan y 1 falla, `buscar-con-resultados` de `tipografia-calculada`, que falla igual en la revisión base (diferido).
+- Delta de CSS (NFR-7 se mide en la puerta de la Épica 36), con `/cita/alberto-masferrer-silencio-es-concentrarse-seguir-la-propia-orbita/` y `/autor/alberto-masferrer/` frente a una construcción de la base: Página de Cita +2.258 bytes (hoja externa 6.634 → 6.383, en línea 16.285 → 18.794); Página de Autor +2.489 (en línea 14.945 → 17.434); un Tema +304; la portada +308, solo los tokens. Sin guion nuevo. El marcado de la portada, `/autores/` y `/obras/` es el de la base (salvo el guion de medición de la construcción de prueba).
+
+**Riesgos.** El trato de dentro del panel depende de la especificidad de `.panel[cid] …` sobre las reglas con ámbito de cada componente; lo fijan las pruebas e2e de `paneles` y de `pagina-de-cita`. La Ficha global cambia ya los listados de Tema, Colección, Obra y Personaje (sus paneles son de la 36.2). `DESPLIEGUE_DE_LOS_PANELES` espera su valor de Héctor.

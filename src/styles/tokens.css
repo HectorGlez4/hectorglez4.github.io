@@ -28,6 +28,23 @@
   --siena: #8c4a2f;
   --sobre-siena: #ffffff;
 
+  /*
+   * Historia 36.1 — los tintes de familia del Panel de bloque y el filete de la Ficha de Cita
+   * (DESIGN.md v9.3, dirección «Fichas»). Son fondos, no acentos: ninguno señala que algo actúa.
+   * El del Autor tiene su token propio aunque su valor coincida con `secondary-container`, que es
+   * de la curación y no aparece en público.
+   */
+  --contenedor-obra: #f7e3d8;
+  --sobre-contenedor-obra: #5c2c18;
+  --filete-obra: #ebcdbd;
+  --contenedor-autor: #dde5ef;
+  --sobre-contenedor-autor: #2b3a4a;
+  --filete-autor: #c9d5e3;
+  --contenedor-tema: #e4ebdc;
+  --sobre-contenedor-tema: #2e4228;
+  --contorno-tema: #55704a;
+  --filete-ficha: #e6dccd;
+
   /* ── Tipografía ───────────────────────────────────────────────────────── */
   /* Las define la Fonts API de Astro; aquí solo se les da el nombre del proyecto. */
   --serif: var(--fuente-serif), Georgia, 'Times New Roman', serif;
@@ -96,6 +113,9 @@
   /* ── Forma ────────────────────────────────────────────────────────────── */
   --radio: 3px;
   --radio-tarjeta: 6px;
+  /* Historia 36.1 — los dos radios grandes de DESIGN.md v9.3: la Ficha de Cita y el Panel de bloque. */
+  --radio-ficha: 0.75rem;
+  --radio-panel: 1rem;
   --grosor-filete: 1px;
 
   /* ── Medida ───────────────────────────────────────────────────────────── */

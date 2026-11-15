@@ -168,10 +168,11 @@ test.describe('Historia 30.3 — «Cómo citar», con JavaScript', () => {
     await expect(desplegable(page).locator('[data-referencia] i')).toHaveText('Sabiduría de Bolsillo');
   });
 
-  test('el primer filete a 4 × unidad de la Tarjeta de Obra', async ({ page }) => {
+  test('el bloque, a 4 × unidad del panel de la Tarjeta de Obra', async ({ page }) => {
     await page.goto(`/cita/${COMPLETA!.slug}/`);
     const distancia = await page.locator('div.desplegables').evaluate((n) => {
-      const antes = document.querySelector('section.tarjeta-de-obra')!.getBoundingClientRect();
+      // Historia 36.1 — la tarjeta va en el Panel de bloque de la Obra: se mide desde su borde.
+      const antes = document.querySelector('section.tarjeta-de-obra')!.closest('.panel')!.getBoundingClientRect();
       return n.getBoundingClientRect().top - antes.bottom;
     });
     expect(Math.round(distancia)).toBe(32);

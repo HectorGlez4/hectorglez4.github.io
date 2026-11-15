@@ -340,7 +340,8 @@ describe('Historia 31.2 — «Lee el pasaje» en la Página de Cita construida',
       expect(pagina, slug).not.toContain('Lee el pasaje');
       expect(pagina, slug).not.toMatch(/class="[^"]*\b(pasaje|parrafo|fuente-del-pasaje)\b/);
       const region = regionDeDesplegables(pagina);
-      expect(region, slug).toMatch(/^<div class="desplegables[^"]*"[^>]*>\s*<details\b/);
+      // Historia 36.1 — sin pasaje, el bloque empieza por el panel de las herramientas, sin hueco delante.
+      expect(region, slug).toMatch(/^<div class="desplegables[^"]*"[^>]*>\s*<div class="panel panel-herramientas[^"]*"[^>]*>\s*<details\b/);
       // Ni su presentación: la hoja del pasaje solo va donde se pinta.
       expect(pagina, slug).not.toContain('.pasaje .parrafo');
     }

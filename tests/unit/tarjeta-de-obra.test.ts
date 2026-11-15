@@ -418,17 +418,19 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(h3[3]).toBe(h2[3]);
   });
 
-  it('la hoja de la tarjeta: plana, en tinta, con los tokens del spec y nada que recorte', async () => {
+  it('la hoja de la tarjeta: en tinta, con los tokens del spec y nada que recorte; el fondo y el radio son del panel (36.1)', async () => {
     const reglas = await reglasDe(TARJETA);
     const de = (selector: string) => {
       const regla = reglas.find((r) => r.selector === selector);
       expect(regla, `sin regla \`${selector}\``).toBeDefined();
       return regla!.declaraciones;
     };
+    // Historia 36.1 — en el Panel de bloque de la Obra: sin filete de apertura ni aire propio; los
+    // 4 × `--unidad` de lo de arriba los pone la Página de Cita al panel.
     const seccion = de('.tarjeta-de-obra');
-    expect(seccion.get('margin-top')).toBe('calc(var(--unidad) * 4)');
-    expect(seccion.get('border-top')).toBe('var(--grosor-filete) solid var(--filete)');
-    expect(seccion.get('padding-top')).toBe('calc(var(--unidad) * 3)');
+    expect(seccion.has('margin-top')).toBe(false);
+    expect(seccion.has('border-top')).toBe(false);
+    expect(seccion.has('padding-top')).toBe(false);
     expect(seccion.get('max-width')).toBe('var(--medida-prosa)');
 
     const titulo = de('.titulo');
@@ -455,7 +457,8 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(filas.get('list-style')).toBe('none');
     expect(filas.get('margin')).toBe('calc(var(--unidad) * 2) 0 0');
     expect(filas.get('padding')).toBe('0');
-    expect(filas.get('border-top')).toBe('var(--grosor-filete) solid var(--filete)');
+    // Historia 36.1 — sin filete encima de la primera fila: el panel dice dónde empieza.
+    expect(filas.has('border-top')).toBe(false);
 
     // Ni fondo, ni radio, ni sombra, ni siena; y nada que recorte, en ninguna regla.
     for (const regla of reglas) {
@@ -794,6 +797,13 @@ function hijosDelArticle(pagina: string): {
             : elemento.etiqueta === 'p' && clase.split(/\s+/).includes('fuente')
               ? 'fuente'
               : elemento.etiqueta === 'section' && clase.split(/\s+/).includes('tarjeta-de-obra')
+                ? 'tarjeta-de-obra'
+              // Historia 36.1 — la tarjeta, dentro de su Panel de bloque de la Obra.
+              : elemento.etiqueta === 'div' &&
+                  clase.split(/\s+/).includes('panel') &&
+                  dentro.length === 1 &&
+                  dentro[0].etiqueta === 'section' &&
+                  (dentro[0].atributos.get('class') ?? '').split(/\s+/).includes('tarjeta-de-obra')
                 ? 'tarjeta-de-obra'
                 : elemento.etiqueta === 'nav' && clase.split(/\s+/).includes('salidas')
                   ? 'salidas'

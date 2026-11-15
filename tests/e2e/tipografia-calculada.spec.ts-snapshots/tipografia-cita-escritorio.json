@@ -23,34 +23,55 @@
   "main > article.contenedor.pagina > div > span": {
     "400 | 1.650": 1
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.como-citar > div.estilo > button.copiar-referencia > span": {
+  "main > article.contenedor.pagina > div.cierre-fila.panel.panel-obra > section.tarjeta-de-obra > h2.rotulo": {
+    "600 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > div.cierre-fila.panel.panel-obra > section.tarjeta-de-obra > p.hechos": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > div.cierre-fila.panel.panel-obra > section.tarjeta-de-obra > p.hechos > span": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > div.cierre-fila.panel.panel-obra > section.tarjeta-de-obra > p.hechos > span.solo-para-lectores": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > div.cierre-fila.panel.panel-obra > section.tarjeta-de-obra > p.titulo": {
+    "600 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > div.cierre-fila.panel.panel-obra > section.tarjeta-de-obra > ul.filas > li.fila-de-bloque > a > span": {
+    "400 | 1.400": 2
+  },
+  "main > article.contenedor.pagina > div.cierre-fila.panel.panel-obra > section.tarjeta-de-obra > ul.filas > li.fila-de-bloque > a > span > span": {
+    "400 | 1.400": 2
+  },
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > div.contenido > div.como-citar > div.estilo > button.copiar-referencia > span": {
     "400 | 1.600": 3
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia": {
     "400 | 1.600": 3
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia > i": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia > i": {
     "400 | 1.600": 4
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia > span": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia > span": {
     "400 | 1.600": 3
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.como-citar > div.estilo > p.rotulo": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > div.contenido > div.como-citar > div.estilo > p.rotulo": {
     "600 | 1.500": 3
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.inserta > button.copiar-fragmento > span": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > div.contenido > div.inserta > button.copiar-fragmento > span": {
     "400 | 1.600": 1
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.inserta > label": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > div.contenido > div.inserta > label": {
     "400 | 1.500": 1
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.inserta > textarea": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > div.contenido > div.inserta > textarea": {
     "400 | 1.500": 1
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > summary > span": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > summary > span": {
     "600 | 1.400": 2
   },
-  "main > article.contenedor.pagina > div.desplegables > details.desplegable > summary > span > span.glifo > span.giro": {
+  "main > article.contenedor.pagina > div.desplegables > div.cierre-fila.panel.panel-herramientas > details.desplegable > summary > span > span.glifo > span.giro": {
     "600 | 1.400": 2
   },
   "main > article.contenedor.pagina > div.fila-de-acciones > div.isla > button.abrir": {
@@ -104,40 +125,40 @@
   "main > article.contenedor.pagina > figure.bloque > figcaption > p.procedencia > a.enlace-en-tinta": {
     "400 | 1.500": 1
   },
-  "main > article.contenedor.pagina > nav.salidas > section.de-la-misma-obra > h2.rotulo": {
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-autor > section.mas-del-autor > h2.rotulo": {
     "600 | 1.400": 1
   },
-  "main > article.contenedor.pagina > nav.salidas > section.de-la-misma-obra > ul.tarjetas > li.fila-de-bloque > a > span": {
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-autor > section.mas-del-autor > ul.tarjetas > li.fila-de-bloque > a > span": {
     "400 | 1.400": 1
   },
-  "main > article.contenedor.pagina > nav.salidas > section.de-la-misma-obra > ul.tarjetas > li.fila-de-bloque > a > span > span": {
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-autor > section.mas-del-autor > ul.tarjetas > li.fila-de-bloque > a > span > span": {
     "400 | 1.400": 1
   },
-  "main > article.contenedor.pagina > nav.salidas > section.de-la-misma-obra > ul.tarjetas > li.tarjeta > a > span.fragmento": {
-    "600 | 1.300": 3
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-autor > section.mas-del-autor > ul.tarjetas > li.tarjeta > a > span.fragmento": {
+    "400 | 1.450": 2
   },
-  "main > article.contenedor.pagina > nav.salidas > section.mas-del-autor > h2.rotulo": {
-    "600 | 1.400": 1
-  },
-  "main > article.contenedor.pagina > nav.salidas > section.mas-del-autor > ul.tarjetas > li.fila-de-bloque > a > span": {
-    "400 | 1.400": 1
-  },
-  "main > article.contenedor.pagina > nav.salidas > section.mas-del-autor > ul.tarjetas > li.fila-de-bloque > a > span > span": {
-    "400 | 1.400": 1
-  },
-  "main > article.contenedor.pagina > nav.salidas > section.mas-del-autor > ul.tarjetas > li.tarjeta > a > span.fragmento": {
-    "600 | 1.300": 2
-  },
-  "main > article.contenedor.pagina > nav.salidas > section.mas-del-autor > ul.tarjetas > li.tarjeta > a > span.obra": {
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-autor > section.mas-del-autor > ul.tarjetas > li.tarjeta > a > span.obra": {
     "400 | 1.500": 2
   },
-  "main > article.contenedor.pagina > nav.salidas > section.mas-del-autor > ul.tarjetas > li.tarjeta > a > span.solo-para-lectores": {
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-autor > section.mas-del-autor > ul.tarjetas > li.tarjeta > a > span.solo-para-lectores": {
     "400 | 1.650": 2
   },
-  "main > article.contenedor.pagina > nav.salidas > section.temas-de-la-cita > h2.rotulo": {
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-obra > section.de-la-misma-obra > h2.rotulo": {
     "600 | 1.400": 1
   },
-  "main > article.contenedor.pagina > nav.salidas > section.temas-de-la-cita > ul.chips > li > a.chip": {
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-obra > section.de-la-misma-obra > ul.tarjetas > li.fila-de-bloque > a > span": {
+    "400 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-obra > section.de-la-misma-obra > ul.tarjetas > li.fila-de-bloque > a > span > span": {
+    "400 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-fila.panel.panel-obra > section.de-la-misma-obra > ul.tarjetas > li.tarjeta > a > span.fragmento": {
+    "400 | 1.450": 3
+  },
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-texto.panel.panel-tema > section.temas-de-la-cita > h2.rotulo": {
+    "600 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > nav.salidas > div.cierre-texto.panel.panel-tema > section.temas-de-la-cita > ul.chips > li > a.chip": {
     "400 | 1.650": 1
   },
   "main > article.contenedor.pagina > p.fuente": {
@@ -145,26 +166,5 @@
   },
   "main > article.contenedor.pagina > p.fuente > a": {
     "400 | 1.500": 1
-  },
-  "main > article.contenedor.pagina > section.tarjeta-de-obra > h2.rotulo": {
-    "600 | 1.400": 1
-  },
-  "main > article.contenedor.pagina > section.tarjeta-de-obra > p.hechos": {
-    "400 | 1.500": 1
-  },
-  "main > article.contenedor.pagina > section.tarjeta-de-obra > p.hechos > span": {
-    "400 | 1.500": 1
-  },
-  "main > article.contenedor.pagina > section.tarjeta-de-obra > p.hechos > span.solo-para-lectores": {
-    "400 | 1.500": 1
-  },
-  "main > article.contenedor.pagina > section.tarjeta-de-obra > p.titulo": {
-    "600 | 1.400": 1
-  },
-  "main > article.contenedor.pagina > section.tarjeta-de-obra > ul.filas > li.fila-de-bloque > a > span": {
-    "400 | 1.400": 2
-  },
-  "main > article.contenedor.pagina > section.tarjeta-de-obra > ul.filas > li.fila-de-bloque > a > span > span": {
-    "400 | 1.400": 2
   }
 }

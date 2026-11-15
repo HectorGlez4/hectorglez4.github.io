@@ -3,10 +3,16 @@
  * Tarjeta de Cita para listados — UX-DR70 (enmienda UX-DR11), Historia 24.3.
  *
  * El fragmento y, debajo, lo que su contexto no da por sabido: el Autor y el título de la Obra
- * de la que sale. Filete divisorio, fondo a `surface-container-low` al pasar el cursor. Toda
- * la tarjeta es zona de toque, con 44px mínimo de alto. Sin imagen, sin fondo propio y sin
+ * de la que sale. Toda la tarjeta es zona de toque, con 44px mínimo de alto. Sin imagen y sin
  * sombra al pasar el cursor. Es la **única** Tarjeta de Cita (AD-19): sin tamaño compacto ni
  * variante, y lo que cambia de un sitio a otro lo declara cada uso con `atribucion`.
+ *
+ * **Se compone como Ficha de Cita** (Historia 36.1, DESIGN.md v9.3), en todas partes a la vez,
+ * porque no admite variante: caja blanca (`--contenedor-minimo`) con el filete `--filete-ficha`,
+ * el radio `--radio-ficha` y 2 × `--unidad` de relleno, que pasa a `--contenedor-bajo` al pasar el
+ * cursor; apiladas a una `--unidad`, sin filete entre ellas; y el fragmento en `--cita-xs`
+ * regular, para que una Cita relacionada no se lea con el cuerpo ni el peso de la que se lee.
+ * Cambia cómo se ve, no su contenido por sitio, su recorte ni su verso.
  *
  * El enlace envuelve la tarjeta entera en lugar de ir solo en el fragmento: en móvil,
  * acertarle a una línea de texto con el pulgar es justo el gesto que UJ-1 no concede. Por eso
@@ -165,9 +171,9 @@ const fragmento = recortarPorPalabra(cita.texto, MAX_CARACTERES_DE_TARJETA_DE_CI
 </li>
 
 <style>
-  .tarjeta {
-    /* UX-DR13 — el filete de 1px es el único separador. */
-    border-bottom: var(--grosor-filete) solid var(--filete);
+  /* Historia 36.1 — apiladas a una `--unidad`, sin filete entre ellas: la caja ya las separa. */
+  .tarjeta + .tarjeta {
+    margin-top: var(--unidad);
   }
 
   .tarjeta a {
@@ -176,9 +182,11 @@ const fragmento = recortarPorPalabra(cita.texto, MAX_CARACTERES_DE_TARJETA_DE_CI
     gap: var(--unidad);
     /* UX-DR22 — zona de toque de 44px como mínimo, con separación. */
     min-height: var(--zona-de-toque);
-    padding-block: calc(var(--unidad) * 2);
-    padding-inline: var(--unidad);
-    margin-inline: calc(var(--unidad) * -1);
+    padding: calc(var(--unidad) * 2);
+    background: var(--contenedor-minimo);
+    /* Decorativo: la forma la da el fondo, y la ficha entera es el enlace (DESIGN.md v9.3). */
+    border: var(--grosor-filete) solid var(--filete-ficha);
+    border-radius: var(--radio-ficha);
     text-decoration: none;
     color: inherit;
     transition: background-color 150ms;
@@ -189,11 +197,12 @@ const fragmento = recortarPorPalabra(cita.texto, MAX_CARACTERES_DE_TARJETA_DE_CI
     background: var(--contenedor-bajo);
   }
 
+  /* `quote-xs`: un solo cuerpo para toda ficha, fuera de los tramos de la Cita principal. */
   .fragmento {
     font-family: var(--serif);
-    font-size: var(--titular-sm);
-    font-weight: var(--peso-fuerte);
-    line-height: var(--interlineado-titular-sm);
+    font-size: var(--cita-xs);
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-cita-xs);
     color: var(--tinta);
     text-wrap: pretty;
   }

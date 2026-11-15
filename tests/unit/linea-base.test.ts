@@ -12,6 +12,7 @@ import {
   CORTES_DE_SM8,
   DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS,
   DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO,
+  DESPLIEGUE_DE_LOS_PANELES,
   SM12_CON_FACEBOOK,
   cortesQueLlegaron,
   type CorteLlegado,
@@ -555,6 +556,7 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
       'DESPLIEGUE_DEL_PASAJE',
       'DESPLIEGUE_DE_LA_ATRIBUIDA',
       'DESPLIEGUE_DEL_INCIPIT',
+      'DESPLIEGUE_DE_LOS_PANELES',
     ]);
     // Historia 31.2 — cada entrada nombra en `deDondeLlega` la constante de su `jornada:`.
     expect([...lista.matchAll(/jornada: ([A-Z_]+),\s*deDondeLlega: '([A-Z_]+)',/g)].map((m) => [m[1], m[2]])).toEqual(
@@ -1312,6 +1314,7 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
         { deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' },
         { deDondeLlega: 'DESPLIEGUE_DEL_PASAJE', marca: 'el primer despliegue con valor en MAX_CARACTERES_DEL_PASAJE, no el merge' },
         { deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA', marca: 'la primera Cita atribuida publicada en vivo, no el merge' },
+        { deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES' },
       ],
     });
     expect(SM_C5.palanca).toBe('quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor');
@@ -1328,6 +1331,8 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
       ['continuacion-de-cita'],
       ['sm8', 'continuacion-de-cita'],
       ['continuacion-de-obra'],
+      // Historia 36.1 — la de los paneles parte solo la continuación de la Página de Cita.
+      ['continuacion-de-cita'],
     ]);
     // Historia 31.2 — la del pasaje parte la misma serie, y solo esa.
     const delPasaje = CORTES_DE_SERIE_DECLARADOS.find((c) => c.deDondeLlega === 'DESPLIEGUE_DEL_PASAJE')!;
@@ -1536,7 +1541,7 @@ describe('Historia 31.2 — el corte de «Lee el pasaje»', () => {
         estado: 'pendiente',
         deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA',
         marca: 'la primera Cita atribuida publicada en vivo, no el merge',
-      },
+      },      { estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES' },
     ]);
     const informe = texto(l);
     expect(informe).toContain(
@@ -1549,7 +1554,7 @@ describe('Historia 31.2 — el corte de «Lee el pasaje»', () => {
     const l = leer(partes(), { minimo: 300, cortes: [CORTE_23, corte30('2026-11-05')], juicios: [SM_C5] });
     const [juicio] = l.juicios;
     expect(juicio.corte).toMatchObject({ estado: 'llegado', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE', desde: '2026-11-06' });
-    expect(juicio.pendientes?.map((p) => p.deDondeLlega)).toEqual(['DESPLIEGUE_DEL_PASAJE', 'DESPLIEGUE_DE_LA_ATRIBUIDA']);
+    expect(juicio.pendientes?.map((p) => p.deDondeLlega)).toEqual(['DESPLIEGUE_DEL_PASAJE', 'DESPLIEGUE_DE_LA_ATRIBUIDA', 'DESPLIEGUE_DE_LOS_PANELES']);
     const informe = texto(l);
     expect(informe).toContain('Desde la llegada del 2026-11-05 (DESPLIEGUE_DE_CITAR_Y_LLEVARSE), su línea base es propia');
     expect(informe).toContain(`La llegada de DESPLIEGUE_DEL_PASAJE no ha ocurrido`);
@@ -1571,7 +1576,7 @@ describe('Historia 31.2 — el corte de «Lee el pasaje»', () => {
         estado: 'pendiente',
         deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA',
         marca: 'la primera Cita atribuida publicada en vivo, no el merge',
-      },
+      },      { estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES' },
     ]);
     expect(texto(l)).toContain(`La llegada del ${HOY} (DESPLIEGUE_DEL_PASAJE) es de hoy o posterior: no ha ocurrido todavía`);
   });
@@ -1589,7 +1594,7 @@ describe('Historia 31.2 — el corte de «Lee el pasaje»', () => {
       cerradaEl: '2026-11-08',
     });
     // Historia 35.7 — la de la atribuida sigue pendiente, con su marca.
-    expect(juicio.pendientes?.map((p) => p.deDondeLlega)).toEqual(['DESPLIEGUE_DE_LA_ATRIBUIDA']);
+    expect(juicio.pendientes?.map((p) => p.deDondeLlega)).toEqual(['DESPLIEGUE_DE_LA_ATRIBUIDA', 'DESPLIEGUE_DE_LOS_PANELES']);
     expect(juicio.ventanas.map((v) => [v.desde, v.hasta, v.acumulado])).toEqual([['2026-11-09', '2026-11-11', 360]]);
     expect(juicio.ventanas.every((v) => v.desde > pasaje)).toBe(true);
     expect(l.series['continuacion-de-cita'].cambios.map((c) => c.jornada)).toEqual(['2026-11-03', pasaje]);
@@ -1649,9 +1654,54 @@ describe('Historia 35.7 — el corte de la primera atribuida', () => {
     });
     const [juicio] = l.juicios;
     expect(juicio.corte).toMatchObject({ estado: 'llegado', deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA', desde: '2026-11-06' });
-    expect(juicio.pendientes).toEqual([]);
+    // Historia 36.1 — la de los paneles, declarada después, sigue pendiente.
+    expect(juicio.pendientes).toEqual([{ estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES' }]);
     expect(juicio.ventanas.every((v) => v.desde > llegada)).toBe(true);
     expect(l.series.sm8.cambios.map((c) => c.jornada)).toContain(llegada);
+    expect(texto(l)).not.toContain('La llegada de DESPLIEGUE_DE_LA_ATRIBUIDA no ha ocurrido');
+    expect(texto(l)).toContain('La llegada de DESPLIEGUE_DE_LOS_PANELES no ha ocurrido');
+  });
+});
+
+describe('Historia 36.1 — el corte de los paneles de la Página de Cita', () => {
+  const SM_C5 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-C5')!;
+  const corteDe = (deDondeLlega: string, jornada: string, series: CorteLlegado['series']): CorteLlegado => ({
+    jornada,
+    deDondeLlega,
+    que: deDondeLlega,
+    series,
+  });
+  const partes = () => ({
+    vistasYLecturas: DIAS.map((dia) => lectura(dia, '/cita/una/', 120)),
+    salidas: DIAS.map((dia, i) => salida(dia, '/cita/una/', 'atribucion', i < 3 ? 12 : i < 7 ? 36 : 60)),
+    acciones: DIAS.map((dia, i) => accion(dia, '/cita/una/', EVENTOS.copiado, i < 3 ? 12 : 6)),
+  });
+
+  it('declara su constante en `undefined` y parte solo la continuación de la Página de Cita', () => {
+    expect(DESPLIEGUE_DE_LOS_PANELES).toBeUndefined();
+    const entrada = CORTES_DE_SERIE_DECLARADOS.find((c) => c.deDondeLlega === 'DESPLIEGUE_DE_LOS_PANELES')!;
+    expect(entrada).toBeDefined();
+    expect(entrada.series).toEqual(['continuacion-de-cita']);
+  });
+
+  it('con valor: es la llegada de SM-C5, sin pendientes, y ninguna ventana la cruza', () => {
+    const llegada = '2026-11-05';
+    const l = leer(partes(), {
+      minimo: 300,
+      cortes: [
+        CORTE_23,
+        corteDe('DESPLIEGUE_DE_CITAR_Y_LLEVARSE', '2026-11-01', ['continuacion-de-cita']),
+        corteDe('DESPLIEGUE_DEL_PASAJE', '2026-11-02', ['continuacion-de-cita']),
+        corteDe('DESPLIEGUE_DE_LA_ATRIBUIDA', '2026-11-03', ['sm8', 'continuacion-de-cita']),
+        corteDe('DESPLIEGUE_DE_LOS_PANELES', llegada, ['continuacion-de-cita']),
+      ],
+      juicios: [SM_C5],
+    });
+    const [juicio] = l.juicios;
+    expect(juicio.corte).toMatchObject({ estado: 'llegado', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES', desde: '2026-11-06' });
+    expect(juicio.pendientes).toEqual([]);
+    expect(juicio.ventanas.every((v) => v.desde > llegada)).toBe(true);
+    expect(l.series['continuacion-de-cita'].cambios.map((c) => c.jornada)).toContain(llegada);
     expect(texto(l)).not.toContain('no ha ocurrido');
   });
 });
