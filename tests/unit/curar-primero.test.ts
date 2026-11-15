@@ -584,6 +584,18 @@ describe('Historia 33.3 — npm run obra -- curar-primero sobre disco', () => {
     expect(await foto(corpus)).toEqual(antes);
   });
 
+  it('una ficha cuyo Autor no está se niega con 1, nombra las fichas de Obra y no escribe nada (35.9)', async () => {
+    const corpus = await corpusMinimo();
+    await writeFile(join(corpus, 'obras', 'nadie--la-obra.yml'), 'autor: nadie\ntitulo: La obra\nformas:\n  - la obra\n', 'utf8');
+    const antes = await foto(corpus);
+    const r = await correr(corpus, ['curar-primero']);
+    expect(r.codigo).toBe(1);
+    expect(r.salida + r.error).toContain('las fichas de Obra');
+    expect(r.salida + r.error).toContain('No se ha escrito nada.');
+    expect(r.salida + r.error).not.toMatch(/\n\s+at /u);
+    expect(await foto(corpus)).toEqual(antes);
+  });
+
   it('una bandera desconocida o un argumento de más salen 2', async () => {
     const corpus = await corpusMinimo();
     expect((await correr(corpus, ['curar-primero', '--bandera'])).codigo).toBe(2);

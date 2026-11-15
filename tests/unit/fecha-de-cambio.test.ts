@@ -1945,9 +1945,7 @@ describe('Historia 35.9 — el plazo de los derechos fecha y avisa lo que mueve'
       PLAZO_DE_PROTECCION_AÑOS: 80,
     });
     // El fichero del árbol: las dos sin valor (las fija Héctor), y lo lee sin lanzar.
-    expect(versionDeUmbrales(readFileSync(resolve(import.meta.dirname, '../../src/lib/umbrales.ts'), 'utf8'))).toEqual(
-      expect.any(Object),
-    );
+    expect(versionDeUmbrales(readFileSync(resolve(import.meta.dirname, '../../src/lib/umbrales.ts'), 'utf8'))).toEqual({});
   });
 
   it('`versionDeUmbrales` reconoce las declaraciones del fichero del árbol cuando tienen valor', () => {
@@ -1976,8 +1974,15 @@ describe('Historia 35.9 — el plazo de los derechos fecha y avisa lo que mueve'
     for (const valor of ['70.5', '-1', '70 as number']) {
       const version = versionDeUmbrales(`export const PLAZO_DE_PROTECCION_AÑOS = ${valor};\nexport const AÑO_DE_REFERENCIA = 2026;\n`);
       expect(typeof version.PLAZO_DE_PROTECCION_AÑOS, valor).toBe('string');
-      expect(derechosEnLosUmbrales({ tipo: 'autor', añoFallecimiento: 1980 }).valor(version), valor).toBe('¿?');
+      expect(derechosEnLosUmbrales({ tipo: 'autor', añoFallecimiento: 1980 }).valor(version), valor).toMatch(/^¿\?/u);
     }
+    // Dos versiones indeterminables distintas son un cambio entre sí; la misma, no.
+    const reciente = derechosEnLosUmbrales({ tipo: 'autor', añoFallecimiento: 1980 });
+    const con = (plazo: string) =>
+      versionDeUmbrales(`export const PLAZO_DE_PROTECCION_AÑOS = ${plazo};\nexport const AÑO_DE_REFERENCIA = 2026;\n`);
+    expect(cambiaronLosCampos({ antes: con('70 as number'), despues: con('80 as number') }, [reciente])).toBe(true);
+    expect(cambiaronLosCampos({ antes: con('70 as number'), despues: con('70 as number') }, [reciente])).toBe(false);
+    expect(cambiaronLosCampos({ antes: SIN_AÑO, despues: versionDeUmbrales('export const PLAZO_DE_PROTECCION_AÑOS = 80;\n') }, [reciente])).toBe(true);
     // Repartida en varias líneas: no se lee como «sin valor», sino como indeterminable.
     const repartida = versionDeUmbrales('export const PLAZO_DE_PROTECCION_AÑOS:\n  number | undefined =\n  70;\n');
     expect(typeof repartida.PLAZO_DE_PROTECCION_AÑOS).toBe('string');
@@ -2091,6 +2096,47 @@ describe('Historia 35.9 — el plazo de los derechos fecha y avisa lo que mueve'
       expect(fechas.get('/cita/reciente-de-siempre')).toBe('2024-01-02T09:00:00.000Z');
       expect(fechas.get('/obra/larra/articulos')).toBe('2024-01-02T09:00:00.000Z');
       expect(fechas.get('/autor/reciente')).toBe('2024-01-02T09:00:00.000Z');
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+
+  it('desde el disco y git: crear o borrar `umbrales.ts` con las constantes sin valor no fecha nada', async () => {
+    const raiz = await temporal('sabiduria-plazo-alta-');
+    const git = gitEn(raiz);
+    const corpus = join(raiz, 'corpus');
+    try {
+      await git(['init', '--initial-branch=principal']);
+      for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras']) await mkdir(join(corpus, dir), { recursive: true });
+      await writeFile(join(corpus, 'autores', 'reciente.yml'), 'nombre: Reciente\nañoFallecimiento: 1980\n', 'utf8');
+      await writeFile(join(corpus, 'temas', 'el-tiempo.yml'), 'nombre: El tiempo\n', 'utf8');
+      await writeFile(
+        join(corpus, 'citas', 'reciente--b.md'),
+        '---\nslug: reciente-atribuida\nautor: reciente\nclase: atribuida\ntemas:\n  - el-tiempo\nprocedencia:\n  obra: La obra\n---\n\nTexto.\n',
+        'utf8',
+      );
+      await writeFile(
+        join(corpus, 'obras', 'reciente--la-obra.yml'),
+        `autor: reciente\ntitulo: La obra\nformas:\n  - "${formaDeObra('La obra')}"\n`,
+        'utf8',
+      );
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el Corpus'], '2024-01-02T09:00:00+0000');
+
+      await mkdir(join(raiz, 'src', 'lib'), { recursive: true });
+      await writeFile(
+        join(raiz, FICHERO_DE_LOS_UMBRALES),
+        'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;\nexport const AÑO_DE_REFERENCIA: number | undefined = undefined;\n',
+        'utf8',
+      );
+      await git(['add', 'src']);
+      await git(['commit', '-m', 'alta de los umbrales'], '2024-03-04T09:00:00+0000');
+      await git(['rm', '-q', FICHERO_DE_LOS_UMBRALES]);
+      await git(['commit', '-m', 'baja de los umbrales'], '2024-05-06T09:00:00+0000');
+
+      const fechas = await fechasDeLasSuperficies(raiz, () => {});
+      expect(fechas.get('/obra/reciente/la-obra')).toBe('2024-01-02T09:00:00.000Z');
+      expect(fechas.get('/cita/reciente-atribuida')).toBe('2024-01-02T09:00:00.000Z');
     } finally {
       await rm(raiz, { recursive: true, force: true });
     }

@@ -241,6 +241,14 @@ describe('Historia 29.4 — casiDuplicados', () => {
     const resultado = await casiDuplicados(rutasDelCorpus(corpus));
     expect(resultado.ok).toBe(false);
   });
+
+  it('una ficha cuyo Autor no está se niega con su motivo, sin salir por una traza (35.9)', async () => {
+    const corpus = await corpusConDosObras();
+    await writeFile(join(corpus, 'obras', 'nadie--la-obra.yml'), 'autor: "nadie"\ntitulo: "La obra"\nformas:\n  - "la obra"\n', 'utf8');
+    const resultado = await casiDuplicados(rutasDelCorpus(corpus));
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) expect(resultado.motivos.join('\n')).toContain('No se pudieron resolver las Obras');
+  });
 });
 
 describe('Historia 29.4 — npm run obra -- casi-duplicados', () => {

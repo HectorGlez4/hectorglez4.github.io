@@ -127,6 +127,22 @@ Las cinco capas de revisión son externas (las corre el orquestador de v9-ralph)
 
 Rechazados, con su razón: la Tarjeta, el orden por slug y la Ficha técnica sin traductor en una Obra con derechos vigentes que tuviera Citas de siempre con Fuente (inalcanzable: `tools/lib/clases.ts` rompe el build ante una Cita de siempre de un Autor que no es de dominio público, y la Cita de un Personaje es siempre atribuida); que el sitio y la fecha lean distinto `vivo`/`añoFallecimiento` (los dos normalizan con `dueñoAutor`); que cambiar `vivo` o `añoFallecimiento` no refeche la Obra (`CAMPOS_DEL_AUTOR_FUERA` ya los compone); `reglaCambiada` (cubre todo cambio de `umbrales.ts`); `esElDeLosUmbrales` (solo ve las rutas que se le piden); el `primera: ''` de `ofreceIncipit` (mismo veto y mismo error del tope); `CUALQUIER_AUTOR` (ayuda de pruebas); el Personaje inexistente (lo para el build) y su nombre por slug (35.2); la lectura de la historia en el árbol de `posiciones.ts`/`historial.ts`/`alcance.ts` (estados que el build ya para con su mensaje; `alcance` ya envuelve en `try`); las lecturas del contrato (Personaje sin «Cómo citar», plazo sin año como cambio de toda Obra de Autor fallecido, Corpus de hoy); el fichero de prueba distinto de `ingreso-construido.test.ts` (registrado como desviación); el plazo sin prueba de construcción (el veredicto es el de `derechosVigentes`, probado puro, con git y por la puerta de `clases.ts` en `clase-build`, que da el plazo en la copia); la identidad de `dist/` (se repite en esta pasada); la página 2+ (la regla general de `modelosEnRuta` y `ingreso-construido`); el estado del spec antes de las capas externas (esta es su pasada; el barrido e2e de `ingreso-accesible` lo corrió en verde la capa ac-auditor, 13/13); el espaciado `sola` (ya diferido a `bmad-ux`).
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 6 (high 0, medium 1, low 5)
+- defer: 0
+- reject: 32
+- addressed_findings:
+  - `[medium]` `[patch]` Dos versiones indeterminables distintas de `umbrales.ts` (`70 as number` → `80 as number`, o plazo sin año que pasa de 70 a 80) daban el mismo `¿?` y no fechaban ni avisaban nada. `derechosEnLosUmbrales` devuelve ahora el prefijo `¿?` seguido de lo leído de las dos constantes; prueba nueva en `tests/unit/fecha-de-cambio.test.ts`, en rojo sin el cambio.
+  - `[low]` `[patch]` `versionDelLado` (alta y baja de `umbrales.ts` sin valores) no tenía prueba: un repo temporal con el Corpus, el alta y la baja en commits propios comprueba que la Obra de un Autor fallecido y la Página de Cita de su atribuida conservan la fecha del Corpus; en rojo sin `versionDelLado`.
+  - `[low]` `[patch]` Las negativas que el primer triaje añadió a `casi-duplicados` y `curar-primero` ante una ficha cuyo Autor no está, sin prueba: un caso en cada fichero (`ok: false` con «No se pudieron resolver las Obras»; código 1, «las fichas de Obra», «No se ha escrito nada.», sin traza y el Corpus intacto).
+  - `[low]` `[patch]` La aserción `toEqual(expect.any(Object))` sobre el `umbrales.ts` del árbol no comprobaba nada: ahora `toEqual({})`.
+  - `[low]` `[patch]` Un comentario de `src/lib/publicado.ts` atribuía a la 17.2 la lectura temprana de los Autores: es de la 35.9.
+  - `[low]` `[patch]` Dos líneas largas de AGENTS.md (el incipit y la afiliación) se reparten como el resto del fichero, y la frase «Apagada, `dist/` es idéntico…» vuelve a su párrafo; el bloque de resultados del spec nombra su pasada de construcción.
+
+Rechazados, con su razón: otras formas de declaración (`export let`, sin `export`, reexportación, duplicadas, octal, hexadecimal: ninguna la usa `umbrales.ts`, TypeScript rechaza las duplicadas y el octal, y lo que no se lee cuenta como cambio, el sentido seguro); el `catch` amplio del veredicto (falla hacia fechar de más, nunca de menos); `esElDeLosUmbrales` por sufijo (solo recibe rutas relativas de git); la guarda de portada por familia (al aviso solo llegan ficheros de las familias del Corpus y `umbrales.ts`); por qué la Página de Cita de una atribuida compone `umbrales.ts` y la línea de AD-27 que lo pide (lo fija el contrato); `derechosSiSeSaben` ante una ficha sin `autor` ni `personaje`, un plazo sin año en el build, `corpusParaFechar`/`relacionAntes` y `citasConObra` ante un Autor ausente (estados que el esquema o el build ya paran con su mensaje); la guarda del incipit en la página, el `primera: ''` de `ofreceIncipit`, `CUALQUIER_AUTOR`, `autoresPorSlug` por llamada y los tipos `unknown` de `AutorParaDerechos` (defensivos o de estilo, sin camino real); `AÑO_DE_REFERENCIA` como expresión de fecha (el valor lo da Héctor, y lo no literal cuenta como cambio); la prueba del orden por slug, las filas de la matriz que faltan, la Ficha técnica con entidad y la página 2+ (cubiertas por la regla general o inalcanzables, ya rechazadas en la pasada anterior); el mensaje de `DondeLeer.astro` sin la Obra (solo lo ve un uso roto que la página evita); el índice de Pagefind (no determinista); un aviso nuevo en AGENTS.md para el parámetro de Autores (el contrato y la sección de la historia ya lo dicen); las lecturas del contrato y la desviación declarada del fichero de prueba (intent-alignment, ac-auditor); el espaciado `sola` (ya diferido a `bmad-ux`).
+
 ## Design Notes
 
 El indicador de venta sola viaja en el resumen, no en el componente, para que la página decida existencia con un dato: `conDondeLeer = primera && (!obra.derechosVigentes || enVenta?.grupos.length > 0)`. Que todas las Citas de una Obra con derechos vigentes vayan por slug ya lo da `ordenDelLibro` (el cargador de posiciones no sitúa atribuidas, `tools/lib/posiciones.ts:120`): basta fijarlo con una prueba. El veredicto derivado de AD-27, como `NOMBRE_EN_REFERENCIA`:
@@ -148,6 +164,8 @@ const derechosEn = (dueño: DueñoDeDerechos): CampoDerivado => ({
 
 ## Auto Run Result
 
+### Pasada de construcción (2026-11-15)
+
 Status: done
 Blocking condition: ninguna.
 
@@ -165,9 +183,9 @@ Blocking condition: ninguna.
 - `tests/unit/venta-sola-build.test.ts` (nuevo), `tests/unit/ayuda/derechos.ts` (nuevo, `CUALQUIER_AUTOR`), `obras`, `incipit`, `incipit-cli`, `curar-primero`, `fecha-de-cambio`, `orden-del-libro`, `clase` y los fixtures de `ObraResuelta`/`colgarObras` de otras quince pruebas; `tests/e2e/ingreso-accesible.spec.ts` barre la venta sola (lo corre Héctor).
 - `AGENTS.md` — curar-primero, el incipit, la Tarjeta de Obra, «Cómo citar» la Obra, la afiliación (la excepción de la venta sola) y AD-27.
 
-**Hallazgos de revisión.** Ninguno en esta pasada (capas externas sin hallazgos): 0 parches, 0 diferidos, 0 rechazados.
+**Hallazgos de revisión.** Ninguno en esta pasada (la de construcción: las capas externas aún no habían corrido): 0 parches, 0 diferidos, 0 rechazados. Las dos pasadas de revisión siguientes lo superan.
 
-**Revisión de seguimiento.** `followup_review_recommended: false` — parches: 0 high, 0 medium, 0 low; puntuación 0.
+**Revisión de seguimiento (de esta pasada).** `false` — parches: 0 high, 0 medium, 0 low; puntuación 0. El valor vigente del frontmatter es el de la última pasada.
 
 **Verificación.**
 - `npx astro check`: 0 errores, 0 avisos (14 sugerencias).
@@ -212,3 +230,30 @@ Blocking condition: ninguna.
 - e2e no corrido en esta pasada (la capa ac-auditor corrió `ingreso-accesible.spec.ts --project=escritorio` en verde, 13/13, sobre `350121d711`).
 
 **Riesgos residuales.** Los de la pasada de construcción. Una Obra con derechos vigentes y Citas de la clase de siempre sigue sin tratamiento propio porque `tools/lib/clases.ts` la hace inalcanzable: si esa puerta cambiara, la Tarjeta y el orden habría que revisarlos.
+
+### Segunda pasada de revisión (2026-11-15)
+
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** Las cinco capas externas de la segunda pasada se clasificaron en 6 parches, 0 diferidos y 32 rechazados, sin intent_gap ni bad_spec. El único defecto de comportamiento: dos versiones indeterminables distintas de `umbrales.ts` daban el mismo veredicto y no fechaban ni avisaban; ahora el valor indeterminable lleva lo leído de las dos constantes. El resto son pruebas de lo que el primer triaje parcheó sin prueba (el alta y la baja de `umbrales.ts`, las negativas de `casi-duplicados` y `curar-primero`), una aserción vacía, un comentario con la historia equivocada y el formato de AGENTS.md y de este spec.
+
+**Ficheros.**
+- `tools/lib/cambios.ts` — `derechosEnLosUmbrales`: el indeterminable es `¿?` más lo leído.
+- `tests/unit/fecha-de-cambio.test.ts` — indeterminables distintos, alta y baja de `umbrales.ts` con git, la aserción del árbol.
+- `tests/unit/casi-duplicados.test.ts`, `tests/unit/curar-primero.test.ts` — la ficha de un Autor ausente.
+- `src/lib/publicado.ts` — el comentario cita la 35.9.
+- `AGENTS.md` — dos líneas largas repartidas.
+
+**Hallazgos.** 6 parches (high 0, medium 1, low 5), 0 diferidos, 32 rechazados (detalle en el Review Triage Log).
+
+**Revisión de seguimiento.** `followup_review_recommended: true` — parches: 0 high, 1 medium, 5 low; puntuación 3 × 1 + 5 = 8 (≥ 5). La pasada era la última del bucle: lo que queda es de pruebas y de forma.
+
+**Verificación.**
+- `npx astro check`: 0 errores, 0 avisos (14 sugerencias).
+- `npx vitest run tests/unit/fecha-de-cambio.test.ts -t 35.9`: verde; sin el cambio de `derechosEnLosUmbrales` y sin `versionDelLado` en `historialDeLosFicheros`, los dos casos nuevos en rojo (comprobado y restituido).
+- `npx vitest run tests/unit/casi-duplicados.test.ts tests/unit/curar-primero.test.ts -t 35.9`: verde.
+- `npm test` (correr.sh, `logs/s-35/unit-35.9-triage2.log`): 208 ficheros, 9033/9033, EXIT=0.
+- La construcción del Corpus real no cambia: el parche solo toca la lectura del historial ante versiones indeterminables, que el árbol no tiene (`umbrales.ts` con las dos constantes en `undefined`).
+
+**Riesgos residuales.** Los de las pasadas anteriores. El espaciado `sola` sigue pendiente de `bmad-ux`.

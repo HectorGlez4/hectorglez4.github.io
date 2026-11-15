@@ -2056,7 +2056,7 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
     }
   }
   /*
-   * Historia 17.2 — los Autores se leen aquí, antes de colgar las Obras: desde la 35.9 cada Obra
+   * Historia 35.9 — los Autores se leen aquí, antes de colgar las Obras: desde esta historia cada Obra
    * resuelta dice si tiene derechos vigentes, y eso lo decide su dueño (`derechosDeLaObra`).
    */
   const entradasDeAutor = await getCollection('autores');

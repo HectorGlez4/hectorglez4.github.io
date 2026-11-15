@@ -282,7 +282,11 @@ function referenciaDe(version: Readonly<Record<string, unknown>>): ReferenciaDeD
   return referencia;
 }
 
-/** Lo que el veredicto vale cuando no se puede dar —plazo sin año, un valor que no es número—. */
+/**
+ * Lo que el veredicto vale cuando no se puede dar —plazo sin año, un valor que no es número—: el
+ * prefijo seguido de lo que se leyó de las dos constantes, para que dos versiones indeterminables
+ * distintas (`70 as number` → `80 as number`) cuenten como cambio entre sí.
+ */
 const VEREDICTO_INDETERMINABLE = '¿?';
 
 /**
@@ -300,7 +304,8 @@ export function derechosEnLosUmbrales(dueño: DueñoDeDerechos): CampoDerivado {
       try {
         return derechosVigentes(dueño, referenciaDe(version));
       } catch {
-        return VEREDICTO_INDETERMINABLE;
+        const leido = CONSTANTES_DE_LOS_DERECHOS.map((nombre) => version[nombre] ?? null);
+        return `${VEREDICTO_INDETERMINABLE} ${JSON.stringify(leido)}`;
       }
     },
   };

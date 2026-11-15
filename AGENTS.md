@@ -1480,8 +1480,8 @@ el documento falta, no se deja analizar o es biografía, si su forma es `indeter
 ya no se localiza o si la Fuente o el `url:` de su cabecera no valen (lo mismo que la orden); no repite el casado, para que retirar la última Cita de ese documento no rompa la
 construcción siguiente. Desde la 35.9 el cargador no ofrece el incipit de una Obra con derechos
 vigentes, y `integraciones/obras.ts` **rompe** ante la ficha con derechos vigentes que lo declare,
-nombrándola (`fallosDeIncipitConDerechos`): son las tres puertas del veto. El corte es de `incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de
-frase o de verso**: unidades enteras mientras quepan en `MAX_CARACTERES_DEL_INCIPIT`, parado antes
+nombrándola (`fallosDeIncipitConDerechos`): son las tres puertas del veto. El corte es de
+`incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de frase o de verso**: unidades enteras mientras quepan en `MAX_CARACTERES_DEL_INCIPIT`, parado antes
 del pie de licencia de Wikisource; si se ofrece lo decide solo `ofreceIncipit` (sin tope, no; si la
 primera frase o el primer verso no cabe, no). La página 1 de la Obra lo pinta en
 `src/components/ComoEmpieza.astro` —el `Desplegable.astro` «Cómo empieza», cerrado, entre la
@@ -2483,7 +2483,9 @@ esquema rechaza toda edición: ninguna ficha puede declarar una.
    tienda, en un `data-ingreso`; si no, no hay desplegable ni hueco (`dondeLeer` da `ventaSola` y la
    página decide que exista), y el build no avisa de ella. Lo cotejado es de la clase de siempre: la
    Fuente de una atribuida no hace línea de «Gratis», no cuenta en `fuentes` ni en `edicionCotejada`
-   ni encabeza la edición, y sí cuenta en el total de la frase de lo tomado. Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
+   ni encabeza la edición, y sí cuenta en el total de la frase de lo tomado.
+
+   Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
    ediciones o sin ellas: lo construye en cuatro variantes `tests/unit/ediciones-en-venta.test.ts`.
    **Con la familia Obra congelada** (`congelacionVigente()`, SM-11) ninguna Página de Obra pinta
    ediciones aunque el Modelo esté encendido: la página no las compone, la ficha las conserva y
