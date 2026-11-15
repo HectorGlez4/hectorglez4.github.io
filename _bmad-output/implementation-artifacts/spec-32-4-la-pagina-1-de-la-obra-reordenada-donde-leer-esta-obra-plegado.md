@@ -235,3 +235,32 @@ Baseline: 0eb8fdaf5f6de5ee073bd9b5a8a6a606cde292cc (la reanudación; el trabajo 
 - `npm test` (desatendido) — 175 ficheros, 7.927 pruebas, verde.
 
 **Riesgos residuales.** Los de la pasada anterior, y la frase «se tomó 1 de sus {n} citas» (decisión delegada por Héctor, 2026-11-14) pendiente de asentar en UX-DR127 con `bmad-ux`.
+
+## Verificación previa a la fusión — 2026-11-15
+
+Puerta de la etapa s-32 (Historias 32.1–32.5, todas en revisión), en `v9/epica-32`.
+
+**Puesta al día.** `origin/main` (fdcf26164c: las Épicas 28 y 31, la planificación v9.2 y el arreglo del token `quote-xs`) no era antepasado: fusión ddc7b965ac. Conflictos resueltos conservando los dos lados (AGENTS.md, la relación de superficies de `tools/lib/cambios.ts`, la importación de `src/content.config.ts`); `sprint-status.yaml` toma la principal con los estados de la rama. El corte del incipit (32.3) toma la forma que la 31.2 dio a los cortes —`deDondeLlega` en `CORTES_DE_SERIE_DECLARADOS`— y SM-C4 declara su llegada en `corte.llegadas`, con la marca de que su jornada no es la del merge, como la del pasaje. `npx tsx tools/autor.ts proponer-claves`: ninguna clave nueva, no escribió nada.
+
+**Arreglos de la puerta** (dos rondas, ninguna prueba rebajada ni ningún tope relajado):
+- 6067c8700d — la fusión dejó `FORMA_AJUSTADA` declarada dos veces en `tools/lib/pasaje.ts` (la del pasaje y la del incipit, el mismo valor): esbuild rechazaba el módulo. Queda una.
+- 093d4fa1bb — `ficha-tecnica.spec.ts` e `incipit.spec.ts` chocaban en 4405/4406 con «Lee el pasaje» y las Obras de la portada (`puertos-e2e.test.ts` en rojo): pasan a 4408 y 4409.
+- aa58e6f84d — `receptor.spec.ts` exigía que las dos Obras pidieran solo el fichero de medición, pero desde la 32.5 la página 1 de toda Obra carga `copiar-referencia`: las dos filas lo declaran por su id; la exigencia sigue entera.
+- ed8fa1f7a0 — la tipografía calculada de la portada dependía del día: las Obras de hoy (28.3, dentro de `data-jornada`) suman un separador por cada Obra con año (6 → 7). Dentro de lo que rota cada par cuenta 1; las instantáneas de la portada se regraban solo con los recuentos a 1 (mismas claves y pares); las del 404 no cambian. Defecto de la principal, no de la etapa.
+
+**CI equivalente** (`publicar.yml`; `package-lock.json` sin cambios, sin `npm ci`), tras la segunda ronda: `npm run build` verde; `npx astro check` 0 errores, 0 avisos (13 sugerencias); `npm test` 183 ficheros, 8.097 pruebas, verde.
+
+**Punta a punta** (`npm run test:e2e`, los dos perfiles, contra el receptor local en 8787), tras la segunda ronda: 1.468 verdes, 177 saltadas, 3 rojas que pasan al repetir sus ficheros (`como-citar.spec.ts` y `tipografia-calculada.spec.ts`, 56 verdes): `como-citar.spec.ts:186` (móvil) y `:222` (escritorio), el último `copiado-de-referencia` aún sin llegar al leerse, y `tipografia-calculada` «buscar-con-resultados», la región `p.estado` con texto al medir (también en la primera pasada, en móvil): inestables por tiempo, no de la etapa. En la primera pasada, construida en la jornada UTC 2026-11-14, `kit.spec.ts:22` y `portada.spec.ts:101` cayeron en los dos perfiles con una Cita del Día en verso (la expresión `.+` no cruza el salto de verso; el texto de `innerText` no está literal en el HTML) y pasaron al repetir con la jornada 2026-11-15: dependen del día, de la principal, y quedan para la principal.
+
+**NFR-7** (aplica: la etapa cambia lo que pintan la Página de Obra y la Página de Cita). Lighthouse 13.5.0 (`npx -y lighthouse@13.5.0`, móvil, `--throttling-method=simulate`, Chrome sin cabeza), `origin/main` fdcf26164c en un `git worktree` aparte frente a la rama, las dos construidas con `MEDICION_ENDPOINT=http://localhost:8787/` y `FECHA_JORNADA=2026-11-15` (la portada sale idéntica byte a byte), servidas con `tests/servidor.mjs` de la rama, `SERVIDOR_CACHE_CONTROL=max-age=600` y `SERVIDOR_GZIP=1`, un receptor 204 en 8787; 10 corridas por página y construcción, alternas. Medias (ms):
+
+| Página | LCP main | LCP rama | Δ | FCP main | FCP rama | Δ |
+|---|---|---|---|---|---|---|
+| `/cita/antonio-machado-caminante-no-hay-camino-se-hace-camino/` | 1.638 | 1.624 | −14 | 928 | 892 | −36 |
+| `/obra/miguel-de-cervantes/don-quijote/` (página 1, «Cómo citar» y «Dónde leer esta obra») | 1.652 | 1.652 | 0 | 771 | 854 | +83 |
+| `/` | 1.501 | 1.502 | +1 | 769 | 770 | +1 |
+| `/buscar/` | 1.608 | 1.652 | +45 | 881 | 927 | +47 |
+
+Margen de cada comparación: 100 ms (el 5 % de cada media es menor). LCP de la Cita bajo 2.500 ms. Veredicto: **ok**; no hizo falta el desempate con `devtools`. Ninguna Obra del Corpus real ata hoy una revisión de Wikidata, así que la Ficha técnica no sale en ninguna página medida.
+
+**Medición.** La etapa no toca `src/lib/vocabulario.ts` ni añade ficheros a `medicion/migrations/` respecto de `origin/main`.
