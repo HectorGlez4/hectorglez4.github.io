@@ -146,8 +146,15 @@ async function revision(rutas: Rutas): Promise<string[]> {
 }
 
 describe('Historia 35.10 — la lista de la semilla de prueba', () => {
-  it('el árbol la versiona vacía: la llena Héctor', () => {
-    expect(SEMILLA_DE_ATRIBUIDAS).toEqual([]);
+  // La llena Héctor: la prueba no fija su valor, solo que lo que haya en el árbol se sostiene.
+  it('la del árbol, la llene Héctor como la llene, se sostiene y nombra Autores o Personajes que existen', () => {
+    expect(problemasDeLaSemilla(SEMILLA_DE_ATRIBUIDAS)).toEqual([]);
+    for (const { slug } of SEMILLA_DE_ATRIBUIDAS) {
+      expect(
+        existsSync(join(RAIZ, 'corpus/autores', `${slug}.yml`)) || existsSync(join(RAIZ, 'corpus/personajes', `${slug}.yml`)),
+        slug,
+      ).toBe(true);
+    }
   });
 
   it('admite slugs con forma y páginas https:// de BrainyQuote, y nombra lo que no', () => {
