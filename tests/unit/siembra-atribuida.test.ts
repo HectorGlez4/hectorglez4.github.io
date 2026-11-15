@@ -19,7 +19,7 @@ import {
   proponerAtribuidas,
   formatearPropuesta,
 } from '../../tools/lib/siembraAtribuida.ts';
-import { SEMILLA_DE_ATRIBUIDAS, type EntradaDeSemilla } from '../../src/lib/umbrales.ts';
+import { MIN_ATESTIGUACIONES_DE_ATRIBUIDA, SEMILLA_DE_ATRIBUIDAS, type EntradaDeSemilla } from '../../src/lib/umbrales.ts';
 import type { ValoresDeLaPuerta } from '../../tools/lib/atribuidas.ts';
 
 const ejecutar = promisify(execFile);
@@ -252,7 +252,8 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     expect((await readdir(rutas.citas)).sort()).not.toContain('buzz--al-rescate-que-la-galaxia-no-se.md');
   });
 
-  it('sin MIN_ATESTIGUACIONES_DE_ATRIBUIDA informa sus dominios sin juzgar el mínimo, y la deja en revisión', async () => {
+  // El esquema aplica el mínimo del árbol aunque la orden lo anule por parámetro: solo se prueba sin él.
+  it.skipIf(MIN_ATESTIGUACIONES_DE_ATRIBUIDA !== undefined)('sin MIN_ATESTIGUACIONES_DE_ATRIBUIDA informa sus dominios sin juzgar el mínimo, y la deja en revisión', async () => {
     const rutas = await corpusDePrueba();
     const una = deBuzz({ atestiguaciones: [ATESTIGUADA.atestiguaciones[0]] });
     const resultado = await proponerAtribuidas(rutas, [una], { semilla: SEMILLA, minAtestiguaciones: null });
@@ -298,7 +299,8 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     [
       'sin ninguna atestiguación que cuente',
       { atestiguaciones: [{ url: 'https://www.brainyquote.com/quotes/buzz_1', consultadaEl: '2026-11-01' }] },
-      /ninguna de sus atestiguaciones cuenta/u,
+      // Sin mínimo en el árbol lo dice la orden; con él, el esquema antes que ella.
+      /ninguna de sus atestiguaciones cuenta|MIN_ATESTIGUACIONES_DE_ATRIBUIDA/u,
     ],
     ['un Tema desconocido', { temas: ['no-existe'] }, /Tema desconocido/u],
     ['una Obra que no se resuelve sin decidir', { personaje: undefined, autor: 'vivo', obra: 'La patrulla' }, /patrulla/iu],
@@ -533,7 +535,7 @@ describe('Historia 35.10 — por proceso, con el árbol: la semilla vacía lo ni
 
 describe('Historia 35.10 — por proceso, en una copia del proyecto con la semilla llena', () => {
   /** Una copia de lo que la orden importa, con `SEMILLA_DE_ATRIBUIDAS` llena solo en la copia. */
-  async function proyectoConSemilla(): Promise<string> {
+  async function proyectoConSemilla(opciones: { sinMinimo?: boolean } = {}): Promise<string> {
     const proyecto = await temporal('sabiduria-siembra-proyecto-');
     for (const dir of ['src', 'tools', 'integraciones']) await cp(join(RAIZ, dir), join(proyecto, dir), { recursive: true });
     await mkdir(join(proyecto, 'public'), { recursive: true });
@@ -542,9 +544,16 @@ describe('Historia 35.10 — por proceso, en una copia del proyecto con la semil
     await enlazarDependencias(proyecto);
     const umbrales = join(proyecto, 'src/lib/umbrales.ts');
     const original = await readFile(umbrales, 'utf8');
-    const vacia = 'export const SEMILLA_DE_ATRIBUIDAS: readonly EntradaDeSemilla[] = [];';
-    expect(original).toContain(vacia);
-    await writeFile(umbrales, original.replace(vacia, `export const SEMILLA_DE_ATRIBUIDAS: readonly EntradaDeSemilla[] = ${JSON.stringify(SEMILLA)};`), 'utf8');
+    // La semilla del árbol se sustituye tenga el valor que tenga (la llena Héctor).
+    const declaracion = /export const SEMILLA_DE_ATRIBUIDAS: readonly EntradaDeSemilla\[\] = \[[\s\S]*?\];/u;
+    expect(original).toMatch(declaracion);
+    let copia = original.replace(declaracion, `export const SEMILLA_DE_ATRIBUIDAS: readonly EntradaDeSemilla[] = ${JSON.stringify(SEMILLA)};`);
+    if (opciones.sinMinimo) {
+      const minimo = /export const MIN_ATESTIGUACIONES_DE_ATRIBUIDA: number \| undefined = [^;]+;/u;
+      expect(copia).toMatch(minimo);
+      copia = copia.replace(minimo, 'export const MIN_ATESTIGUACIONES_DE_ATRIBUIDA: number | undefined = undefined;');
+    }
+    await writeFile(umbrales, copia, 'utf8');
     return proyecto;
   }
 
@@ -629,7 +638,7 @@ describe('Historia 35.10 — por proceso, en una copia del proyecto con la semil
   });
 
   it('proponer: escribe las que pasan en revisión y sale con 1 nombrando las rechazadas', async () => {
-    const proyecto = await proyectoConSemilla();
+    const proyecto = await proyectoConSemilla({ sinMinimo: true });
     const rutas = await corpusDePrueba();
     const lote = join(dirname(rutas.raiz), 'lote.yaml');
     await writeFile(

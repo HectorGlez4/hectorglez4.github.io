@@ -1513,7 +1513,7 @@ export const PESO_NOMBRE_PROPIO_INTERIOR = 1;
  * Es un literal a propósito: el filtro de los Directorios importa este módulo, y un literal no
  * arrastra nada al guion del cliente.
  */
-export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;
+export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = 70;
 
 /**
  * El año contra el que se mide el plazo de protección — Historia 35.1, AD-9, AD-12.
@@ -1523,7 +1523,7 @@ export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;
  * reproducibilidad por commit (AD-12) y movería la clase de una Cita sin que nadie lo decidiera.
  * Solo se lee si `PLAZO_DE_PROTECCION_AÑOS` tiene valor.
  */
-export const AÑO_DE_REFERENCIA: number | undefined = undefined;
+export const AÑO_DE_REFERENCIA: number | undefined = 2026;
 
 /*
  * La puerta de la atribuida — Historia 35.1b, AD-32.
@@ -1540,26 +1540,26 @@ export const AÑO_DE_REFERENCIA: number | undefined = undefined;
  * El texto más largo de una atribuida, en puntos de código — Historia 35.1b. Lo fija Héctor.
  * Una más larga no se publica (y, cuando exista, también se juzga la variante, 35.6).
  */
-export const MAX_CARACTERES_DE_ATRIBUIDA: number | undefined = undefined;
+export const MAX_CARACTERES_DE_ATRIBUIDA: number | undefined = 240;
 
 /**
  * Cuántas atribuidas admite, como mucho, una Obra cuyo dueño tiene derechos vigentes —
  * Historia 35.1b. Lo fija Héctor. Se cuenta sobre todo el Corpus más lo que la pasada publica.
  */
-export const MAX_ATRIBUIDAS_POR_OBRA: number | undefined = undefined;
+export const MAX_ATRIBUIDAS_POR_OBRA: number | undefined = 5;
 
 /**
  * Cuántas atribuidas admite, como mucho, un dueño —el Autor o, sin él, el Personaje— con
  * derechos vigentes — Historia 35.1b. Lo fija Héctor.
  */
-export const MAX_ATRIBUIDAS_POR_DUEÑO: number | undefined = undefined;
+export const MAX_ATRIBUIDAS_POR_DUEÑO: number | undefined = 100;
 
 /**
  * Cuántos dominios registrables distintos tienen que atestiguar una atribuida — Historia 35.1b.
  * Lo fija Héctor. Cuenta solo `dominioDeAtestiguacion` (`src/lib/atestiguaciones.ts`): BrainyQuote
  * y el propio dominio no atestiguan, y dos subdominios del mismo dominio cuentan uno.
  */
-export const MIN_ATESTIGUACIONES_DE_ATRIBUIDA: number | undefined = undefined;
+export const MIN_ATESTIGUACIONES_DE_ATRIBUIDA: number | undefined = 2;
 
 /** Una entrada de la semilla de prueba: el Personaje o Autor y su página de BrainyQuote. */
 export interface EntradaDeSemilla {
