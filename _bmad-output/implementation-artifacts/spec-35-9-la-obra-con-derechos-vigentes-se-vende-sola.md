@@ -5,7 +5,7 @@ created: '2026-11-15'
 status: 'done'
 baseline_revision: 'b1282748aefa743d7a1715581e22d40122d55cb4'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/AGENTS.md'
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
@@ -108,6 +108,25 @@ deferred:
 
 Las cinco capas de revisión son externas (las corre el orquestador de v9-ralph) y esta pasada no trae hallazgos suyos.
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 9 (high 0, medium 2, low 7)
+- defer: 0
+- reject: 22
+- addressed_findings:
+  - `[medium]` `[patch]` `versionDeUmbrales` leía con una expresión sin ancla: una declaración comentada contaba, una sin `;` o repartida en líneas se leía en silencio como «sin valor» y un decimal valía de plazo. Ahora busca al principio de línea, admite la falta de `;`, un comentario detrás y `70_000`; un decimal, un negativo, un `as` o una declaración que no reconoce son indeterminables (`¿?`), nunca «sin valor». Pruebas nuevas sobre esas formas y sobre el texto real de `src/lib/umbrales.ts` con 70/2026 dados en la copia (`tests/unit/fecha-de-cambio.test.ts`).
+  - `[medium]` `[patch]` El aviso por rango (`tools/avisar.ts` `leerRango`/`ensayoDelRango`) no tenía ninguna prueba con un commit que solo diera valor al plazo y al año. `tests/unit/avisar-rango.test.ts` gana el commit `plazo-dado` (1970/2026, Séneca †65) y dos casos: avisa exactamente Cartas y Brevedad —Ira cambia de veredicto pero no se indexa—, sin portada; el ensayo fecha las tres Obras y nada más. Se comprobó que quitar `deLaRegla` los pone en rojo.
+  - `[low]` `[patch]` `integraciones/obras.ts`: con Fichas técnicas, `resolverObras` lanzaba un `Error` suelto ante una ficha cuyo Autor no está, antes de que `fallosDeObras` lo nombrara con los demás. El aviso de año de la Ficha técnica no se compone mientras alguna ficha tenga un dueño sin resolver.
+  - `[low]` `[patch]` `npm run obra -- casi-duplicados` y `curar-primero` salían por una traza si colgar las Obras lanzaba (Autor ausente, plazo sin año): ahora se niegan con su resultado `ok: false` y sin escribir.
+  - `[low]` `[patch]` `dondeLeer` en la venta sola daba `citasSinDocumento: citas.length`; ahora es el recuento real (las sin Fuente cotejada de la clase de siempre).
+  - `[low]` `[patch]` `DondeLeer.astro` en la venta sola sin ediciones pintaba un `<summary>` vacío si un uso no lo evitaba: ahora se para con un mensaje; la página ya lo evitaba.
+  - `[low]` `[patch]` `tests/e2e/ayuda/corpus.ts` colgaba las Obras del Corpus real con `CUALQUIER_AUTOR` y sin `clase`: ahora lee los Autores reales (`vivo`, `añoFallecimiento`) y la clase de cada Cita, como el sitio.
+  - `[low]` `[patch]` La línea de `curar-primero` «Fuera por no tener edición cotejada, de dominio público» afirmaba un estado legal; dice la regla aplicada: «… ni derechos vigentes» (orden, pruebas y AGENTS.md).
+  - `[low]` `[patch]` AGENTS.md decía que crear `umbrales.ts` «no fecha nada» sin la condición: ahora dice que crearlo o borrarlo fecha lo mismo que dar o quitar sus valores, y qué declaraciones cuentan como indeterminables.
+
+Rechazados, con su razón: la Tarjeta, el orden por slug y la Ficha técnica sin traductor en una Obra con derechos vigentes que tuviera Citas de siempre con Fuente (inalcanzable: `tools/lib/clases.ts` rompe el build ante una Cita de siempre de un Autor que no es de dominio público, y la Cita de un Personaje es siempre atribuida); que el sitio y la fecha lean distinto `vivo`/`añoFallecimiento` (los dos normalizan con `dueñoAutor`); que cambiar `vivo` o `añoFallecimiento` no refeche la Obra (`CAMPOS_DEL_AUTOR_FUERA` ya los compone); `reglaCambiada` (cubre todo cambio de `umbrales.ts`); `esElDeLosUmbrales` (solo ve las rutas que se le piden); el `primera: ''` de `ofreceIncipit` (mismo veto y mismo error del tope); `CUALQUIER_AUTOR` (ayuda de pruebas); el Personaje inexistente (lo para el build) y su nombre por slug (35.2); la lectura de la historia en el árbol de `posiciones.ts`/`historial.ts`/`alcance.ts` (estados que el build ya para con su mensaje; `alcance` ya envuelve en `try`); las lecturas del contrato (Personaje sin «Cómo citar», plazo sin año como cambio de toda Obra de Autor fallecido, Corpus de hoy); el fichero de prueba distinto de `ingreso-construido.test.ts` (registrado como desviación); el plazo sin prueba de construcción (el veredicto es el de `derechosVigentes`, probado puro, con git y por la puerta de `clases.ts` en `clase-build`, que da el plazo en la copia); la identidad de `dist/` (se repite en esta pasada); la página 2+ (la regla general de `modelosEnRuta` y `ingreso-construido`); el estado del spec antes de las capas externas (esta es su pasada; el barrido e2e de `ingreso-accesible` lo corrió en verde la capa ac-auditor, 13/13); el espaciado `sola` (ya diferido a `bmad-ux`).
+
 ## Design Notes
 
 El indicador de venta sola viaja en el resumen, no en el componente, para que la página decida existencia con un dato: `conDondeLeer = primera && (!obra.derechosVigentes || enVenta?.grupos.length > 0)`. Que todas las Citas de una Obra con derechos vigentes vayan por slug ya lo da `ordenDelLibro` (el cargador de posiciones no sitúa atribuidas, `tools/lib/posiciones.ts:120`): basta fijarlo con una prueba. El veredicto derivado de AD-27, como `NOMBRE_EN_REFERENCIA`:
@@ -163,3 +182,33 @@ Blocking condition: ninguna.
 - La línea de Ficha técnica sin traductor se garantiza por la página y por lo cotejado de la clase de siempre; no tiene prueba de construcción porque una Obra con derechos vigentes no puede reunir hoy Citas de siempre con traductor.
 
 **Riesgos residuales.** El historial lee ahora cada versión de `src/lib/umbrales.ts` (un blob por commit que lo toca) para fechar el sitemap: más bytes por `git cat-file`, sin efecto medido en la construcción. El barrido e2e de la venta sola no se ha corrido (lo corre Héctor).
+
+### Primera pasada de revisión (2026-11-15)
+
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** Las cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) se clasificaron en 9 parches, 0 diferidos y 22 rechazados, sin intent_gap ni bad_spec. Los parches, en `bf0475b4ce1d006f9204f79718dbeddabcfb69e5`: la lectura del plazo y el año en `versionDeUmbrales` (anclada, sin callar lo que no reconoce) y sus pruebas sobre el texto real; el aviso por rango con un commit que solo da valor al plazo (`avisar-rango.test.ts`); el fallo nombrado en vez del `Error` suelto en `integraciones/obras.ts`; `casi-duplicados` y `curar-primero` que se niegan en vez de lanzar; el recuento real de `citasSinDocumento` en la venta sola; la guarda de `DondeLeer.astro`; el apoyo e2e con los Autores y la clase reales; la línea «Fuera … ni derechos vigentes»; y la precisión de AGENTS.md sobre crear o borrar `umbrales.ts`.
+
+**Ficheros.**
+- `tools/lib/cambios.ts` — `versionDeUmbrales` anclada a la línea, con `;` opcional, comentario detrás y separadores; lo que no lee es indeterminable.
+- `integraciones/obras.ts` — el aviso de año de la Ficha técnica no se compone mientras una ficha tenga un dueño sin resolver.
+- `tools/lib/casiDuplicados.ts`, `tools/lib/curarPrimero.ts` — colgar las Obras dentro de su negativa; la línea de «Fuera».
+- `src/lib/obras.ts` — `dondeLeer` en la venta sola con el recuento real.
+- `src/components/DondeLeer.astro` — se para en la venta sola sin ediciones.
+- `tests/e2e/ayuda/corpus.ts` — Autores y clase reales.
+- `tests/unit/fecha-de-cambio.test.ts`, `tests/unit/avisar-rango.test.ts`, `tests/unit/obras.test.ts`, `tests/unit/curar-primero.test.ts` — las pruebas de los parches.
+- `AGENTS.md` — AD-27 y curar-primero.
+
+**Hallazgos.** 9 parches (high 0, medium 2, low 7), 0 diferidos, 22 rechazados (detalle en el Review Triage Log).
+
+**Revisión de seguimiento.** `followup_review_recommended: true` — parches: 0 high, 2 medium, 7 low; puntuación 3 × 2 + 7 = 13 (≥ 5).
+
+**Verificación.**
+- `npx astro check`: 0 errores, 0 avisos (14 sugerencias).
+- `npx vitest run` de `avisar-rango`, `fecha-de-cambio`, `obras`, `curar-primero`, `casi-duplicados`: verde; quitar `deLaRegla` de `leerRango` pone en rojo los dos casos nuevos del rango (comprobado y restituido).
+- `npm test` (correr.sh, `logs/s-35/unit-35.9-triage1.log`): 208 ficheros, 9030/9030, EXIT=0.
+- `npx astro build` con `FECHA_JORNADA=2026-11-15` en el árbol y en un worktree desacoplado de `fa03c0773f00546dfcb9ec946a1bf4a000487d9f` (retirado): `diff -rq` de los dos `dist/` sin ninguna diferencia (Pagefind no se corrió: no es determinista).
+- e2e no corrido en esta pasada (la capa ac-auditor corrió `ingreso-accesible.spec.ts --project=escritorio` en verde, 13/13, sobre `350121d711`).
+
+**Riesgos residuales.** Los de la pasada de construcción. Una Obra con derechos vigentes y Citas de la clase de siempre sigue sin tratamiento propio porque `tools/lib/clases.ts` la hace inalcanzable: si esa puerta cambiara, la Tarjeta y el orden habría que revisarlos.
