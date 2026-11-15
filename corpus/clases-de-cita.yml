@@ -4441,3 +4441,6 @@ clases:
   - { slug: "virgilio-tu-empero-no-sucumbas-a-la-desgracia", clase: siempre, fecha: "2026-11-07" }
   - { slug: "voltaire-la-alegria-de-un-dichoso-fuera-insulto", clase: siempre, fecha: "2026-11-07" }
   - { slug: "voltaire-la-bilis-hace-iracundo-y-causa-enfermedades", clase: siempre, fecha: "2026-11-07" }
+  - { slug: "steve-jobs-tu-tiempo-es-limitado-asi-que-no", clase: atribuida, fecha: "2026-11-15" }
+  - { slug: "steve-jobs-la-unica-manera-de-hacer-un-gran", clase: atribuida, fecha: "2026-11-15" }
+  - { slug: "steve-jobs-recordar-que-vas-a-morir-es-la", clase: atribuida, fecha: "2026-11-15" }
