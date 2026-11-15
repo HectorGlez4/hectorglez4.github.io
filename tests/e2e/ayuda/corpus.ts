@@ -351,6 +351,8 @@ export function obraConLosPanelesDelPie(): string | undefined {
   const publicados = new Set([...citasPorTema()].filter(([, n]) => n >= MIN_CITAS_POR_TEMA).map(([slug]) => slug));
   const fichas = citasResueltas()
     .filter((c) => c.ficha !== undefined && c.obraConComoCitar === true && c.temas.some((t) => publicados.has(t)))
+    // Un nombre de ficha sin `--` no da ruta de Obra: no se elige (y no se compone una ruta rota).
+    .filter((c) => c.ficha!.includes('--'))
     .map((c) => c.ficha!)
     .sort();
   const ficha = fichas[0];

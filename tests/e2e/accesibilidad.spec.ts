@@ -1859,7 +1859,6 @@ test.describe('Historia 32.4 — la página 1 de la Obra, reordenada', () => {
   const ANCLA = 'donde-leer-esta-obra';
   const DESPLEGABLES = 'header.cabecera-de-obra + div[data-pagefind-ignore="all"]';
   const DONDE_LEER = `${DESPLEGABLES} > details.desplegable:first-child`;
-  const COMO_CITAR = 'div[data-pagefind-ignore="all"]:has(> details.desplegable [data-como-citar])';
   /*
    * Historia 36.2 (decisión 3) — al pie, cada bloque en su Panel de bloque: el aire se mide entre
    * los paneles, que son lo que se ve.

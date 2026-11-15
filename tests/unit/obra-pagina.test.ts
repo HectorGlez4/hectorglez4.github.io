@@ -1199,7 +1199,7 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
     };
     // Historia 36.2 — los Temas van en su panel, sin margen propio; el panel, a 5 × de «Buscar en esta obra».
     expect(todas.some((r) => r.selector === '.temas')).toBe(false);
-    expect(de('.pagina>.buscar-en+.panel').get('margin-top')).toBe('calc(var(--unidad) * 5)');
+    expect(de('.pagina>:not(.panel)+.panel').get('margin-top')).toBe('calc(var(--unidad) * 5)');
     expect(de('.linea').get('margin')).toBe('var(--unidad) 0 0');
     expect(todas.some((r) => r.selector === '.donde-leer')).toBe(false);
     const nota = de('.nota-de-la-ficha');

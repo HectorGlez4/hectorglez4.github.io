@@ -425,11 +425,13 @@ const conDondeLeer =
 
   /*
    * UX-DR42, UX-DR95, Historia 36.2 — el primer panel del pie («Temas» o, sin ellos, «Cómo citar»),
-   * a 5 × `--unidad` de lo que lo precede: «Buscar en esta obra». Entre los dos paneles manda la
-   * regla de la primitiva (2 × `--unidad`), y la sección de Temas no lleva margen propio dentro del
-   * suyo.
+   * a 5 × `--unidad` de lo que lo precede: hoy «Buscar en esta obra». El selector no nombra al
+   * vecino —todo panel hijo de `.pagina` que no sigue a otro panel—, para que lo que llegue entre el
+   * formulario y los paneles («Compartir en», 25.6) no le quite el aire. Por encima del listado no
+   * hay ningún panel (decisión 3). Entre los dos paneles manda la regla de la primitiva
+   * (2 × `--unidad`), y la sección de Temas no lleva margen propio dentro del suyo.
    */
-  .pagina > :global(.buscar-en + .panel) {
+  .pagina > :global(:not(.panel) + .panel) {
     margin-top: calc(var(--unidad) * 5);
   }
 

@@ -289,6 +289,14 @@ test.describe('Historia 36.2 — la Página de Obra con los paneles al pie', () 
       }
     }
     expect(await estilo(tema.locator('h2.rotulo'), 'color')).toBe(await token(page, '--sobre-contenedor-tema'));
+    // El rótulo del Tema y el `<summary>` de «Cómo citar», legibles sobre su tinte.
+    expect(
+      await contraste(page, await estilo(tema.locator('h2.rotulo'), 'color'), await estilo(tema, 'background-color')),
+    ).toBeGreaterThanOrEqual(4.5);
+    const resumen = herramientas.locator('summary');
+    expect(
+      await contraste(page, await estilo(resumen, 'color'), await estilo(herramientas, 'background-color')),
+    ).toBeGreaterThanOrEqual(4.5);
     const chip = tema.locator('.chip').first();
     expect(await contraste(page, await estilo(chip, 'border-top-color'), await estilo(tema, 'background-color'))).toBeGreaterThanOrEqual(3);
     // La nota, si la hay, fuera de todo panel.

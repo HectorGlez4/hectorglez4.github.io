@@ -415,7 +415,9 @@ describe('Historia 36.1 — qué bloque cae en qué panel, en `dist/`', () => {
     expect(bloques.filter((b) => b.que === 'ficha-de-cita').every((b) => b.panel === undefined)).toBe(true);
     // El nombre, el universo, dentro del panel del Autor.
     expect(pagina).toMatch(/<div class="panel panel-autor cierre-texto"[^>]*><header class="ficha"[^>]*><h1[^>]*>Personaje Uno<\/h1><p class="universo"/);
-    expect(pagina).toMatch(/<div class="panel panel-obra cierre-(?:fila|texto)"[^>]*><section class="obras-del-personaje"/);
+    expect(pagina).toMatch(/<div class="panel panel-obra cierre-fila"[^>]*><section class="obras-del-personaje"/);
+    // Sin Citas sin obra no hay pie bajo la Lista de Obras: el panel cierra en `fila`.
+    expect(pagina).not.toContain('sin obra documentada');
     panelesSanos(pagina, '/personaje/uno/');
   });
 
@@ -437,8 +439,9 @@ describe('Historia 36.1 — qué bloque cae en qué panel, en `dist/`', () => {
     for (const familia of ['obra', 'personaje']) {
       try {
         await recorrer(join(dist, familia));
-      } catch {
-        // Sin páginas de esa familia en el fixture.
+      } catch (e) {
+        // Sin páginas de esa familia en el fixture; cualquier otro fallo de lectura, en rojo.
+        if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
       }
     }
     const de2 = segundas.filter((p) => /\/\d+\/index\.html$/u.test(p));
@@ -468,6 +471,10 @@ describe('Historia 36.1 — qué bloque cae en qué panel, en `dist/`', () => {
     }
     for (const p of ajenas) {
       expect(await readFile(join(dist, p), 'utf8'), p).not.toContain('class="panel ');
+    }
+    // El fixture no construye ninguna Colección: su página no toma paneles porque no los importa.
+    for (const fuente of ['src/pages/coleccion/[slug]/[...page].astro', 'src/pages/tema/[slug]/[...page].astro']) {
+      expect(await readFile(join(RAIZ, fuente), 'utf8'), fuente).not.toContain('PanelDeBloque');
     }
   });
 });

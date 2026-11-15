@@ -5,7 +5,7 @@ created: '2026-11-15'
 status: 'done'
 baseline_revision: '4eb36621d99466e35da8b7d2282e8ae13f17f6c6'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-36-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-36-1-los-paneles-de-la-pagina-de-cita-y-de-la-de-autor.md'
@@ -83,6 +83,26 @@ deferred:
 
 (Las cinco capas son externas y la invocación no trajo hallazgos suyos: esta pasada no tiene ninguno.)
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10: (high 0, medium 4, low 6)
+- defer: 0
+- reject: 23: (high 0, medium 3, low 20)
+- addressed_findings:
+  - `[medium]` `[patch]` El aire del primer panel del pie dependía del vecino (`.pagina > .buscar-en + .panel`): lo que llegue entre el formulario y los paneles («Compartir en», 25.6) se lo quitaba. Pasa a `.pagina > :global(:not(.panel) + .panel)` —todo panel hijo de `.pagina` que no sigue a otro; por encima del listado no hay ninguno—, y `obra-pagina.test.ts` busca la regla nueva.
+  - `[medium]` `[patch]` Las 2+ de Personaje sin panel no se ejercitaban (el fixture de `paneles.test.ts` no construye ninguna): `pagina-de-personaje.test.ts` exige en `/personaje/a/2/` ningún `class="panel "` y la Ficha con solo el `h1` sobre el papel.
+  - `[medium]` `[patch]` La semblanza del Personaje en el panel del Autor no se probaba (el Personaje del fixture de `paneles.test.ts` no la trae): `pagina-de-personaje.test.ts` exige, para la semblanza propia (`/personaje/b/`) y la de biografía (`/personaje/c/`), que el párrafo y su atribución caigan dentro de `div.panel.panel-autor`.
+  - `[medium]` `[patch]` La hoja de la Página de Personaje no la miraba nadie: `pagina-de-personaje.test.ts` lee la hoja emitida de `/personaje/a/` y exige `.panel-autor h1 { color: var(--sobre-contenedor-autor) }`, la lista a `var(--unidad)` de su rótulo y `.obras-del-personaje` sin `margin-top`.
+  - `[low]` `[patch]` El `cierre` de la Lista de Obras del Personaje se aceptaba de las dos maneras: `paneles.test.ts` exige `cierre-fila` (sin Citas sin obra, sin pie).
+  - `[low]` `[patch]` El recorrido de las 2+ en `paneles.test.ts` se tragaba cualquier error de lectura: solo calla `ENOENT`.
+  - `[low]` `[patch]` `obraConLosPanelesDelPie` (`tests/e2e/ayuda/corpus.ts`) componía una ruta rota con un nombre de ficha sin `--`: esos no se eligen.
+  - `[low]` `[patch]` `paneles.spec.ts` mide además el contraste ≥ 4,5:1 del Rótulo del Tema sobre `.panel-tema` y del `<summary>` de «Cómo citar» sobre `.panel-herramientas`.
+  - `[low]` `[patch]` La constante `COMO_CITAR` de `accesibilidad.spec.ts` quedó muerta tras `PANEL_DE_COMO_CITAR`: retirada.
+  - `[low]` `[patch]` El caso «ninguna otra superficie» nombra Colección sin construir ninguna: comprueba además que las páginas de Tema y de Colección no importan `PanelDeBloque`.
+
+Rechazados, con su porqué: el registro de la pasada anterior es cierto (no traía hallazgos); la adyacencia formulario→panel de `buscar-en.test.ts` es el sitio sin hueco de «Compartir en» que fija la 25.6, a propósito; la semblanza de las 2+ ya era `undefined` (`semblanza = primera ? … : undefined`), sin cambio de conducta; la regla del `h1` en el panel del Autor calca la de la Página de Autor, como pide el spec, y ahora la vigila la prueba de la hoja; el ayudante e2e solo elige Obras de un Autor sin derechos vigentes, cuya referencia existe, y la suite pasa; que el e2e no corra en CI es regla del proyecto; el anillo de foco en siena del chip ya supera 4,5:1 sobre el tinte del Tema (medido); la ficha escrita en el fixture es dato de prueba, no Corpus; el cambio de recuentos del fixture deja verdes los casos de la 36.1; la decisión 3 fuera de DESIGN.md ya está en `deferred`, y su divergencia con epics.md la delegó Héctor (va a `bmad-ux`); NFR-7 se mide en la puerta de la épica; las instantáneas tipográficas se regrabaron con comprobación de recuentos y la inestabilidad de `/buscar/` ya está diferida desde la 36.1; `cierre="texto"` en el panel de Temas es el mismo que el de los Temas de la Página de Cita (`RutasDeSalida.astro`); quitar las aserciones de existencia de Obra y Personaje no esconde nada, porque sus casos leen la página y fallan si no está; la Página de Personaje sin e2e es el riesgo residual declarado (el Corpus real no tiene Personajes).
+
 ## Design Notes
 
 Por qué la decisión 3 no mueve la primera pantalla: todo lo que se envuelve queda **bajo** el listado (Temas y «Cómo citar» van tras «Buscar en esta obra», que ya va tras la paginación desde la 27.8). El aire al pie: el ritmo de bloques del pie era 5u; al pasar a paneles se conserva el 5u hacia el primer panel y entre los dos paneles manda el 2u de la primitiva, como entre los paneles del pie de la Página de Cita. La nota (4u + filete + 3u) sigue igual, ahora medida desde el borde del último panel.
@@ -147,5 +167,7 @@ Blocking condition: ninguna.
 - `npm test` completo (desacoplado): 209 ficheros, 9.056 pruebas, verde.
 
 **NFR-7.** Queda para la puerta de la Épica 36. Delta de CSS: la Página de Obra carga ahora la hoja de `PanelDeBloque` — las reglas con `.panel` suman 2.367 bytes sin comprimir en una hoja en línea de 19.080 (p. ej. `/obra/agustin-alvarez/la-transformacion-de-las-razas-en-america/`), menos la regla retirada de `.temas`; ningún guion nuevo. La Página de Personaje gana lo mismo, pero el Corpus de hoy no construye ninguna.
+
+**Segunda pasada de revisión (2026-11-15).** 33 hallazgos externos: 10 parches (4 medios, 6 bajos), 0 diferidos, 23 rechazados (detalle en el Review Triage Log). Ficheros: `src/pages/obra/[autor]/[slug]/[...page].astro` (selector del primer panel del pie sin nombrar al vecino), `tests/unit/obra-pagina.test.ts`, `tests/unit/paneles.test.ts`, `tests/unit/pagina-de-personaje.test.ts` (2+ sin panel, semblanza en el panel, hoja emitida), `tests/e2e/paneles.spec.ts` (contraste del rótulo y del `<summary>`), `tests/e2e/accesibilidad.spec.ts` (constante muerta), `tests/e2e/ayuda/corpus.ts`. `followup_review_recommended: true` (parches: 4 medios y 6 bajos; puntuación 3 × 4 + 6 = 18). Verificación: `npx vitest run` de `pagina-de-personaje`, `paneles`, `obra-pagina`, `buscar-en` y `como-citar-obra-build`, 120 verdes (y `paneles` de nuevo tras el último parche); `npx astro check`, 0 errores; `npx playwright test` de `paneles`, `incipit`, `ficha-tecnica`, `accesibilidad` y `desplegable`, 360 verdes y 24 omitidos por diseño, con las puertas de primera pantalla en verde; `npm test` completo, desacoplado: 209 ficheros, 9.058 pruebas, verde.
 
 **Riesgos residuales.** La Página de Personaje solo se prueba en la unitaria (el Corpus real no tiene Personajes): el contraste y el foco sobre su panel los cubren los de la Página de Autor, que usa los mismos tokens y la misma primitiva. Asentar la decisión 3 en DESIGN.md sigue pendiente de Héctor (`bmad-ux`, en `deferred`).
