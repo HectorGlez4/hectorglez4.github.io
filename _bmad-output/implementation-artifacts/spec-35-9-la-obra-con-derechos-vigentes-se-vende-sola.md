@@ -2,14 +2,22 @@
 title: 'Historia 35.9 — La Obra con derechos vigentes se vende sola'
 type: 'feature'
 created: '2026-11-15'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'b1282748aefa743d7a1715581e22d40122d55cb4'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
   - '{project-root}/AGENTS.md'
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Pendiente de Héctor (bmad-ux): asentar en DESIGN.md el espaciado de la venta sola, el primer grupo de venta a 2 × --unidad del summary sin el 3 × que lo separaría de Gratis.
+    evidence: |-
+      EdicionesEnVenta.astro gana la prop `sola` para cumplir UX-DR127 en la Obra con derechos vigentes; es una [ASSUMPTION] de presentación aceptada por la delegación de Héctor del 2026-11-14.
+    location: >-
+      src/components/EdicionesEnVenta.astro
+    severity: low
 ---
 
 <intent-contract>
@@ -89,6 +97,17 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas de revisión son externas (las corre el orquestador de v9-ralph) y esta pasada no trae hallazgos suyos.
+
 ## Design Notes
 
 El indicador de venta sola viaja en el resumen, no en el componente, para que la página decida existencia con un dato: `conDondeLeer = primera && (!obra.derechosVigentes || enVenta?.grupos.length > 0)`. Que todas las Citas de una Obra con derechos vigentes vayan por slug ya lo da `ordenDelLibro` (el cargador de posiciones no sitúa atribuidas, `tools/lib/posiciones.ts:120`): basta fijarlo con una prueba. El veredicto derivado de AD-27, como `NOMBRE_EN_REFERENCIA`:
@@ -110,5 +129,37 @@ const derechosEn = (dueño: DueñoDeDerechos): CampoDerivado => ({
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación detenida a petición («Halt after planning»), sobre la rama v9/epica-35 tras el merge de la principal (1ea86a382de6f2230fdbf2fa6002f369af440402).
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** La Obra con derechos vigentes se vende sola (FR-70, AD-20/25/27/30 v9.1). `derechosDeLaObra` de `src/lib/obras.ts` es la única regla —el dueño de la ficha (`dueñoDeFicha`) juzgado por `derechosVigentes` de `src/lib/clase.ts`; un Personaje, siempre—, y `ObraResuelta` la lleva en `derechosVigentes`; `resolverObras`/`colgarObras` reciben los Autores como parámetro obligatorio y lanzan, nombrando la ficha, ante un Autor dueño que no está. Lo cotejado es de la clase de siempre (`tieneFuente`, `fuenteCotejada`): la Fuente de una atribuida no cuenta en `fuentes`, `edicionCotejada`, «Gratis», `edicionQueEncabeza` ni el aviso, y sí en el total. La página 1 de una Obra con derechos vigentes: sin «Gratis», frase de lo tomado ni de cotejo; «Dónde leer esta obra» solo con ediciones en venta (afiliación encendida y admitida, sin congelar), y si no, nada; sin «Cómo empieza» ni «Cómo citar» (`obraTieneComoCitar` → `!derechosVigentes`), y Ficha técnica sin traductor. El incipit se veta en sus tres puertas (`ofreceIncipit` con motivo `derechos-vigentes`, decidido primero; el cargador; `npm run obra -- incipit` con 1; el build con `fallosDeIncipitConDerechos`). `curar-primero` propone también las de derechos vigentes —también la de un Personaje sin Autor, con el filtro de `obrasDelConjunto`— y lo dice en su línea. AD-27: `src/lib/umbrales.ts` compone por su veredicto (`derechosEnLosUmbrales`, campo derivado sobre `versionDeUmbrales`) la Obra de un Autor fallecido y las Páginas de Cita de sus atribuidas; el historial y el aviso lo leen como un fichero más, sin familia (sin portada).
+
+**Ficheros.**
+- `src/lib/obras.ts` — `derechosDeLaObra`, `AutorParaDerechos`, `derechosVigentes` en `ObraResuelta`, Autores obligatorios, lo cotejado de la clase de siempre, `dondeLeer(…, { derechosVigentes })` con `ventaSola`, `obraTieneComoCitar`, aviso y `fallosDeIncipitConDerechos`.
+- `src/lib/publicado.ts` — los Autores se leen antes de colgar las Obras; `obrasDeLosDatos` con `AutorParaDerechos`.
+- `src/pages/obra/[autor]/[slug]/[...page].astro`, `src/components/DondeLeer.astro`, `src/components/EdicionesEnVenta.astro` — la venta sola (prop `sola`, sin el margen que la separaría de «Gratis»).
+- `integraciones/obras.ts` — el fallo del incipit y el aviso con los Autores.
+- `tools/lib/pasaje.ts`, `tools/lib/posiciones.ts`, `tools/lib/obras.ts` — el veto del incipit; `citasConObra` no compone la ficha provisional de un Autor que no está (la rechaza después la Pieza) y no lanza; `avisoSinCotejada` con los Autores.
+- `tools/lib/curarPrimero.ts` — candidatas cotejadas o con derechos vigentes, la línea y el titular.
+- `tools/lib/cambios.ts`, `integraciones/historial.ts`, `tools/lib/avisar.ts`, `tools/avisar.ts` — AD-27: `FICHERO_DE_LOS_UMBRALES`, `versionDeUmbrales`, `derechosEnLosUmbrales`, `AutorParaFechar`, `atribuida` en `CitaParaFechar`, `umbrales` en el corpus, llave de memoria por nombre de campo derivado, el historial y el rango lo leen (alta y baja = constantes sin valor), y la portada solo con familia de fichero.
+- `tools/lib/alcance.ts`, `tools/lib/casiDuplicados.ts` — pasan los Autores.
+- `tests/unit/venta-sola-build.test.ts` (nuevo), `tests/unit/ayuda/derechos.ts` (nuevo, `CUALQUIER_AUTOR`), `obras`, `incipit`, `incipit-cli`, `curar-primero`, `fecha-de-cambio`, `orden-del-libro`, `clase` y los fixtures de `ObraResuelta`/`colgarObras` de otras quince pruebas; `tests/e2e/ingreso-accesible.spec.ts` barre la venta sola (lo corre Héctor).
+- `AGENTS.md` — curar-primero, el incipit, la Tarjeta de Obra, «Cómo citar» la Obra, la afiliación (la excepción de la venta sola) y AD-27.
+
+**Hallazgos de revisión.** Ninguno en esta pasada (capas externas sin hallazgos): 0 parches, 0 diferidos, 0 rechazados.
+
+**Revisión de seguimiento.** `followup_review_recommended: false` — parches: 0 high, 0 medium, 0 low; puntuación 0.
+
+**Verificación.**
+- `npx astro check`: 0 errores, 0 avisos (14 sugerencias).
+- `npx vitest run` de los catorce ficheros tocados (`venta-sola-build`, `ingreso-construido`, `obras`, `pasaje`, `incipit`, `incipit-cli`, `incipit-build`, `curar-primero`, `tarjeta-de-obra`, `como-citar-obra-build`, `ediciones-en-venta`, `fecha-de-cambio`, `indexnow`, `orden-del-libro`): 705/705.
+- `npm test` (correr.sh): primera pasada 9023/9026 —`pieza-cli` (la ficha provisional de un Autor ausente lanzaba en `citasConObra`), `clase.test.ts` (`tools/lib/curarPrimero.ts` lee la `clase` de una ventana de demanda: llegó con la fusión de la 33.3 y se añade a sus exentos con su motivo) y `cotejo.test.ts` (un comentario nombraba la palabra en `src/lib/obras.ts`)—; corregidos, la segunda pasada da 9026/9026, EXIT=0.
+- `npm run build` con `FECHA_JORNADA=2026-11-15` en el árbol y en un worktree desacoplado de `fa03c0773f00546dfcb9ec946a1bf4a000487d9f` (retirado): `diff -rq` solo difiere en `dist/pagefind/` (`pf_meta` y filtros), que cambian también al volver a correr Pagefind sobre el mismo `dist/` de la base (no determinista); todo HTML, sitemap y PNG idénticos. `TIENDAS` vacío, afiliación apagada, `AÑO_DE_REFERENCIA` y `PLAZO_DE_PROTECCION_AÑOS` en `undefined`.
+- La matriz, fila a fila: venta sola, apagada/congelada (con `dist/` entero igual con y sin ediciones) y Personaje en `venta-sola-build`; dominio público con atribuida en `obras` y `venta-sola-build`; incipit vetado en `incipit`, `incipit-cli`, `obras` y `venta-sola-build`; Autor ausente en `obras`; plazo movido en `fecha-de-cambio` (pura, con git y con el aviso).
+
+**Decisiones y desviaciones.**
+- `EdicionesEnVenta.astro` gana la prop `sola` (el Code Map lo daba sin cambios): sin ella, la venta sola llevaba los 3 × `--unidad` que la separan de «Gratis» y el primer grupo no caía a 2 × del `<summary>` (UX-DR127). [ASSUMPTION] de presentación, aceptada por la delegación de Héctor del 2026-11-14; pendiente de asentarla con `bmad-ux` en `DESIGN.md`.
+- `dist/` idéntico con y sin ediciones y el Modelo apagado se comprueba en `tests/unit/venta-sola-build.test.ts` (sobre una Obra con derechos vigentes, que es donde la 35.9 lo cambia), no en `ingreso-construido.test.ts`, que sigue verde sin cambios; y el `ofreceIncipit` nuevo, en `incipit.test.ts`, donde viven sus pruebas, no en `pasaje.test.ts`.
+- La línea de Ficha técnica sin traductor se garantiza por la página y por lo cotejado de la clase de siempre; no tiene prueba de construcción porque una Obra con derechos vigentes no puede reunir hoy Citas de siempre con traductor.
+
+**Riesgos residuales.** El historial lee ahora cada versión de `src/lib/umbrales.ts` (un blob por commit que lo toca) para fechar el sitemap: más bytes por `git cat-file`, sin efecto medido en la construcción. El barrido e2e de la venta sola no se ha corrido (lo corre Héctor).
