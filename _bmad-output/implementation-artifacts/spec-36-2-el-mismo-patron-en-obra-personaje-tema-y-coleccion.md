@@ -1,0 +1,114 @@
+---
+title: 'Historia 36.2 — El mismo patrón en Obra, Personaje, Tema y Colección'
+type: 'feature'
+created: '2026-11-15'
+status: 'ready-for-dev'
+review_loop_iteration: 0
+followup_review_recommended: false
+context:
+  - '{project-root}/_bmad-output/implementation-artifacts/epic-36-context.md'
+  - '{project-root}/_bmad-output/implementation-artifacts/spec-36-1-los-paneles-de-la-pagina-de-cita-y-de-la-de-autor.md'
+  - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
+  - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md'
+warnings: [oversized]
+deferred:
+  - 'pendiente de Héctor (bmad-ux): asentar en DESIGN.md que la página 1 de Obra no lleva panel encima del listado, solo al pie (decisión 3 de la 36.2, delegada el 2026-11-14); y recoger en la espina la decisión 1b de la 32.5 («Cómo citar» al pie, no junto a los otros dos desplegables).'
+---
+
+<intent-contract>
+
+## Intent
+
+**Problem:** Tras la 36.1, la Página de Cita y la de Autor distinguen sus bloques con Paneles de bloque, pero la de Obra y la de Personaje siguen con todos sus bloques sobre el papel; Tema y Colección ya llevan Fichas (AD-19, 36.1) y no tienen bloques secundarios.
+
+**Approach:** Reutilizar sin redefinir `PanelDeBloque.astro`, los tokens y la Ficha de Cita de la 36.1. Personaje calca Autor en su página 1 (Ficha en panel Autor, Lista de Obras en panel Obra); sus 2+ sin panel. Obra, por la **decisión 3** (abajo): en la página 1 **ningún panel por encima del listado** —Cabecera, línea de Ficha técnica y los desplegables «Dónde leer esta obra» y «Cómo empieza» siguen sobre el papel exactamente como los dejó la 32.4—; al pie, los Temas en un panel Tema y «Cómo citar» (al pie desde la decisión 1b de la 32.5) en un panel de herramientas; las 2+ de Obra sin panel. Tema y Colección ya pintan Fichas desde la 36.1 (AD-19) y no tienen bloque secundario que encerrar: se aplica lo demás que pida la historia que no mueva ninguna puerta de primera pantalla.
+
+**Decisión delegada por Héctor (chat, 2026-11-14)** — decisión 3, opción 2 del bloqueo anterior de este spec: la Página de Obra «en paneles» de la espina v9.3 (Cabecera + Ficha técnica en panel Obra y desplegables en panel de herramientas, por encima del listado) añadía ~79 px y sacaba la primera Tarjeta de la primera pantalla de 360 × 640 (incipit ~717 px, ficha técnica ~672 px; tope 640). Se resuelve sin panel encima del listado en la página 1 y con paneles solo al pie. Queda pendiente de Héctor (`bmad-ux`) asentarlo en DESIGN.md.
+
+## Boundaries & Constraints
+
+**Always:**
+- Los invariantes de la 36.1 (solo aspecto; sin cambio de orden, textos, `data-zona`, `COLOCACION`, `vocabulario.ts`, rutas, metas, JSON-LD ni `data-pagefind-*`; panel `<div>` sin rol, `aria-*` ni zona; ningún literal fuera de `tokens.css`; AA, foco, 44 px, axe).
+- SM-C4: a 360 × 640 la primera Tarjeta del listado de toda página 1 de Obra sigue en la primera pantalla; son puertas `tests/e2e/incipit.spec.ts:232`, `tests/e2e/ficha-tecnica.spec.ts:167` y `tests/e2e/accesibilidad.spec.ts:1923`.
+
+**Block If:**
+- Tras la decisión 3, algo de la historia mueve la primera Tarjeta de una página 1 de Obra fuera de la primera pantalla de 360 × 640 (SM-C4): `tests/e2e/incipit.spec.ts` y `tests/e2e/ficha-tecnica.spec.ts` siguen siendo puerta y tienen que pasar.
+
+**Never:**
+- Paneles en portada, 404, Directorios ni `/buscar/`; ningún panel por encima del listado en una página de Obra (decisión 3) ni en sus 2+; tocar `EdicionesEnVenta.astro` o lo que va en un `data-ingreso`; editar planificación o specs; mover un bloque de sitio.
+
+</intent-contract>
+
+## Code Map
+
+- `src/components/PanelDeBloque.astro` -- primitiva de la 36.1, **de solo lectura**: `familia` y `cierre` obligatorios; relleno 3u arriba, 2u a los lados, abajo 1u (`fila`) o 3u (`texto`); `.panel + .panel` 2u; posee el trato de dentro (Rótulo de panel en la tinta de su familia y su contenido a 1u, Desplegables planos con el `<summary>` como Rótulo de panel en tinta y sin divisoria sobre el primero, Lista de Obras con `--filete-obra`, Chip de Tema sobre blanco con `--contorno-tema`).
+- `src/pages/obra/[autor]/[slug]/[...page].astro` -- `header.cabecera-de-obra` (l. 213-240) y el `div` de «Dónde leer» + «Cómo empieza» (l. 254-260) **no se tocan** (decisión 3). Al pie: `section.temas` (l. 295-302, `.temas { margin-top: 5u }` l. 412-414) → dentro de `<PanelDeBloque familia="tema" cierre="texto">`; el `div data-pagefind-ignore="all" style="margin-top: 5u"` de «Cómo citar» (l. 315-320) → su `Desplegable` dentro de `<PanelDeBloque familia="herramientas" cierre="fila">`, conservando el `data-pagefind-ignore="all"` en un contenedor dentro del panel (el panel solo lleva `class`); `<CopiarReferencia />` (l. 321) sigue fuera de todo panel; `p.nota-de-la-ficha` (l. 328-330) sobre el papel con su filete y sus 4u.
+- `src/pages/personaje/[slug]/[...page].astro` -- calcar `src/pages/autor/[slug]/[...page].astro:119-166` y su hoja (`.obras-del-autor` sin margen propio, lista a 1u del rótulo, `:global(.panel-autor) h1 { color: var(--sobre-contenedor-autor) }`): en p. 1 `header.ficha` (h1, `.universo`, semblanza + `AtribucionDeSemblanza`) dentro de `PanelDeBloque familia="autor" cierre="texto"`; en 2+ `header.ficha` solo con el `h1`, sobre el papel; `section.obras-del-personaje` dentro de `PanelDeBloque familia="obra"` con `cierre={pieDeObras !== undefined ? 'texto' : 'fila'}`, y su `margin-top: 5u` y el `margin-top: 2u` de la lista pasan a 0 / 1u.
+- `src/components/RutasDeSalida.astro:121-129` -- «Más de {Personaje}» ya va en panel Autor desde la 36.1 (se pinta en la Página de Cita): sin cambio, solo se comprueba.
+- `src/pages/tema/[slug]/[...page].astro`, `src/pages/coleccion/[slug]/[...page].astro` -- `h1`, criterio y `BuscarEn` sobre el papel, listado ya en Fichas (36.1, AD-19): **sin cambio**.
+- `tests/unit/paneles.test.ts` -- `leer()`/`orden()`/`panelesSanos()` (l. 195-257) reutilizables; el fixture `corpus()` ya trae el Personaje `uno` (l. 103-114, 176-191) con Citas atribuidas en Obras con Tema `el-tiempo`, y Obras de Séneca; l. 361-380, «ninguna otra superficie toma paneles», excluye hoy `obra/` y `personaje/` de las comprobadas.
+- `tests/e2e/paneles.spec.ts` -- helpers `contraste`, `token`, `estilo`, `anillo` (l. 18-80) y el patrón de la Página de Autor (l. 225-262); el Corpus real no tiene Personajes, así que la Página de Personaje solo se prueba en la unitaria.
+- `tests/e2e/incipit.spec.ts:232`, `tests/e2e/ficha-tecnica.spec.ts:167`, `tests/e2e/accesibilidad.spec.ts:1923` -- puertas de primera pantalla de la Obra; no se tocan.
+
+## Tasks & Acceptance
+
+**Execution:**
+- `src/pages/obra/[autor]/[slug]/[...page].astro` -- envolver los Temas en panel Tema y «Cómo citar» en panel de herramientas al pie; trasladar el aire: el primer panel del pie a 5u de lo que lo precede («Buscar en esta obra»), «Cómo citar» a 2u tras el panel de Temas (regla `.panel + .panel`) o a 5u sin él; la sección de Temas sin margen propio dentro del panel. Comentarios con la decisión 3. Nada por encima del listado cambia -- decisión 3 y SM-C4.
+- `src/pages/personaje/[slug]/[...page].astro` -- Ficha en panel Autor (p. 1) y Lista de Obras en panel Obra, calcando la de Autor; 2+ sin panel -- AC de Personaje, «calca Autor» (35.3).
+- `tests/unit/paneles.test.ts` -- nuevo `describe('Historia 36.2 …')` (o casos en el de la 36.1 compartiendo la construcción): Página de Obra p. 1 con Temas y «Cómo citar» → orden con todo lo de encima del listado `@papel`, el listado `@papel`, `temas@tema`, `desplegable:Cómo citar@herramientas`, y ninguna `nota-de-la-ficha` dentro de un panel (añadir al fixture una `nota` en la ficha de una Obra si no la hay, y lo mínimo para que una Obra tenga Temas y «Cómo citar»); Página de Personaje p. 1 → `ficha-de-autor@autor`, `obras-del-personaje@obra`, `listado@papel`, con `h1` dentro de `.panel-autor`; toda página 2+ de Obra o Personaje presente en `dist/` sin `class="panel "`; `panelesSanos` en cada página tocada; acotar el caso de l. 361 a todo lo que no es `cita/`, `autor/`, `obra/` ni `personaje/` y renombrarlo (portada, 404, Directorios, Tema, Colección, `/buscar/`).
+- `tests/e2e/paneles.spec.ts` -- `describe('Historia 36.2 — la Página de Obra con los paneles al pie')` sobre una Obra real con Temas y «Cómo citar» (elegirla con un ayudante de `tests/e2e/ayuda/corpus.ts`; `test.skip` si no la hay): ningún `.panel` antes del `ul.listado`; AA (≥ 4,5:1) de `--tinta`, `--tinta-apagada` y `--siena` sobre el fondo de `.panel-tema` y `.panel-herramientas`; el `<summary>` de «Cómo citar» con 44 px y anillo de foco en siena; chip de Tema con foco visible.
+
+**Acceptance Criteria:**
+- Given una página 1 de Obra con Ficha técnica, «Dónde leer», «Cómo empieza», Temas, «Cómo citar» y nota, when se construye, then Cabecera, Ficha técnica, desplegables de arriba, listado, paginación, «Buscar en esta obra» y nota quedan fuera de todo panel, los Temas en `div.panel.panel-tema` y «Cómo citar» en `div.panel.panel-herramientas`, en el orden de hoy y con los mismos textos, zonas y `data-pagefind-*`.
+- Given la Obra de Larra con incipit (`incipit.spec.ts`) y la de Ficha técnica (`ficha-tecnica.spec.ts`), when se miden a 360 × 640, then la primera Tarjeta sigue en la primera pantalla (< 640 px; 637,5 y 592,5 px tras la 36.1, y nada de encima del listado cambia).
+- Given una página 2+ de Obra o de Personaje, when se construye, then no lleva ningún panel.
+- Given una página 1 de Personaje con semblanza y Lista de Obras, when se construye, then la Ficha (nombre en `--sobre-contenedor-autor`, universo, semblanza y su atribución) va en panel Autor, la Lista de Obras con su pliegue y su pie en panel Obra, y el listado en Fichas sobre el papel.
+- Given una Página de Cita atribuida a un Personaje, when se construye, then «Más de {Personaje}» sigue en panel Autor (36.1).
+- Given las páginas de Tema y de Colección, la portada, el 404, los Directorios y `/buscar/`, when se construye, then ninguna lleva `class="panel "` y su marcado no cambia.
+- Given toda página tocada, when se barre con axe y se mide contraste, foco y área táctil, then cumple lo mismo que la 36.1; NFR-7 queda para la puerta de la Épica 36 (aquí, delta de bytes de CSS de Obra y Personaje anotado en el Auto Run Result).
+
+## Spec Change Log
+
+## Review Triage Log
+
+## Design Notes
+
+Por qué la decisión 3 no mueve la primera pantalla: todo lo que se envuelve queda **bajo** el listado (Temas y «Cómo citar» van tras «Buscar en esta obra», que ya va tras la paginación desde la 27.8). El aire al pie: el ritmo de bloques del pie era 5u; al pasar a paneles se conserva el 5u hacia el primer panel y entre los dos paneles manda el 2u de la primitiva, como entre los paneles del pie de la Página de Cita. La nota (4u + filete + 3u) sigue igual, ahora medida desde el borde del último panel.
+
+Personaje: misma pieza que Autor, sin variar nada; el universo (`.universo`, en `--tinta-apagada`) cae sobre `--contenedor-autor`, cuyo AA con la tinta apagada ya fija la 36.1.
+
+### Historia del bloqueo (plan anterior, resuelto por la decisión 3)
+
+Status: blocked
+Blocking condition: intent gap — la Página de Obra «en paneles» de la espina v9.3 rompe la puerta de primera pantalla SM-C4, y la espina no tiene otra lectura que la evite.
+
+**La evidencia.** La espina (DESIGN.md § Página de Obra «En paneles»; EXPERIENCE.md v9.3, misma página) pone la Cabecera de Obra con la Ficha técnica en un panel Obra **en todas sus páginas** y los desplegables en el panel de las herramientas, los dos por encima del listado. Con el relleno que fija § Primitivas → Panel de bloque, eso añade unos 79 px por encima de la primera Tarjeta. Las medidas tras la 36.1 dejan 2,5 px de margen en el caso más alto: `tests/e2e/incipit.spec.ts` (Obra de Larra con incipit, «Dónde leer» y Ficha técnica) pone la primera Tarjeta a 637,5 px, y `tests/e2e/ficha-tecnica.spec.ts` a 592,5 px; con los paneles quedarían en unos 717 px y 672 px, fuera de los 640 px, y las dos pruebas son puerta. En el Corpus real la peor Obra (Lastarria, sin incipit) pasaría de 550,8 a unos 630 px, con 10 px de margen, y la saca el primer incipit que se declare en una Obra de título largo. Ningún relleno menor cabe en la espina, y no hay forma de ahorrar 77 px sin cambiar el orden o la composición.
+
+**Una segunda contradicción, menor.** La espina pide «los tres Desplegables juntos en el panel de las herramientas», pero «Cómo citar» va al pie desde la decisión 1b (delegada por Héctor el 2026-11-14, precisamente para la primera pantalla) y la épica prohíbe mover bloques. La espina no recoge la 1b.
+
+**Qué tiene que decidir Héctor (`bmad-ux`)**, con lecturas que dan resultados distintos a la vista:
+1. Cabecera y Ficha técnica **sobre el papel** en la página 1 (el panel Obra solo en las 2+, o en ninguna), y los desplegables de arriba en el panel de las herramientas: unos +32 px; la puerta del incipit seguiría fuera (~670 px).
+2. **Sin paneles por encima del listado** en la página 1 (Cabecera y desplegables sobre el papel, como hoy); paneles solo al pie: Temas en panel Tema y «Cómo citar» en un panel de herramientas propio. No mueve la primera pantalla.
+3. Mantener la espina y **rebajar o retirar la puerta** de primera pantalla de la Obra (SM-C4), o llevar los desplegables de arriba bajo el listado (otra decisión como la 1b).
+4. Un relleno menor para los paneles de la Página de Obra (cambia § Primitivas).
+
+Además: si «Cómo citar» al pie va en un panel de herramientas propio o sobre el papel, y si el `h1` de la Obra en el panel sigue en tinta (DESIGN.md § Colors dice que lo que va sobre el tinte de la Obra va en tinta; el nombre del Autor sí toma `--sobre-contenedor-autor`).
+
+**Lo que no está bloqueado** y se podría construir sin esa decisión: la Página de Personaje (calca la de Autor: Ficha en panel Autor y Lista de Obras en panel Obra en la página 1, listado en Fichas) y los Temas de la Obra en panel Tema al pie. Tema y Colección no cambian. Partir la historia también es decisión de Héctor (`bmad-create-epics-and-stories`).
+
+## Verification
+
+**Commands:**
+- `npx vitest run tests/unit/paneles.test.ts` (y uno a uno: `tipografia-en-tokens`, `superficies`, `medicion`, `espinas-de-ux`, `obras` si toca su prueba de la Página de Obra) -- verde.
+- `npx astro check` -- 0 errores.
+- `npm run build` -- termina; el paso del peso no se para.
+- `npx playwright test tests/e2e/{paneles,incipit,ficha-tecnica,accesibilidad,desplegable}.spec.ts` -- verde contra `tests/servidor.mjs` (puertos según RULES); incipit y ficha técnica son puerta.
+- `npm test` completo, desacoplado con `correr.sh` -- verde.
+
+**Manual checks (if no CLI):**
+- Captura a 360 × 640 y a 1280 de una página 1 de Obra con Temas y «Cómo citar»: encima del listado idéntico a la 36.1; al pie, los dos paneles con su tinte y ningún panel vacío.
+
+## Auto Run Result
+
+Status: ready-for-dev
+Plan rehecho con la decisión 3, delegada por Héctor (chat, 2026-11-14): en la página 1 de Obra ningún panel por encima del listado; Temas en panel Tema y «Cómo citar» en panel de herramientas, al pie. Personaje calca Autor. Tema y Colección sin cambio. Detenido tras planificar.
