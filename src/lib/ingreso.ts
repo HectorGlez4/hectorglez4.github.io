@@ -390,6 +390,7 @@ export function edicionesEnVenta(
       href: urlDeEdicion(edicion, tienda),
       formato: edicion.formato as FormatoDeEdicion,
       tienda: tienda.nombre,
+      claveDeTienda: tienda.clave,
       ...(edicion.descripcion !== undefined ? { descripcion: edicion.descripcion } : {}),
     };
   });

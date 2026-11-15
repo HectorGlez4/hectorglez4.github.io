@@ -2,8 +2,8 @@
 title: 'Historia 33.2 — Las ediciones en venta, por formato y por tienda dentro de «Dónde leer esta obra»'
 type: 'feature'
 created: '2026-11-15'
-status: 'ready-for-dev'
-baseline_revision: '5a8344601b82a920e7a39189038efc57f2f5bd5a'
+status: 'done'
+baseline_revision: 'a38d79125d93bb46a895379670e31343dfe9504c'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -92,6 +92,8 @@ deferred: []
 
 `RotuloDeGrupo` en vez de un `p` con `style`: la AC pide «el mismo elemento de rótulo de grupo que «Gratis»», y su hoja ya está en toda página 1 de Obra porque `DondeLeer` lo importa; apagado no cambia nada, y dentro del bloque solo cambia el `p` marcado. La congelación se resuelve en la página y no en `DondeLeer`, que no debe saber de Modelos ni de umbrales. La clave de tienda viaja en `EdicionEnVenta` porque dos tiendas pueden llamarse igual y la clave es la identidad que declara `revisarTiendas`.
 
+**`[ASSUMPTION]` aceptada por delegación.** La pregunta abierta de la Épica 33 —si dentro de un formato las tiendas siguen el orden de `TIENDAS` o el de la ficha— se resuelve por el de `TIENDAS`, aceptado por delegación de Héctor (chat, 2026-11-14) y **pendiente de Héctor (`bmad-ux`)**: lo dice la cabecera de `edicionesPorFormato` y AGENTS.md; cambiarlo es cambiar esa función y `tests/unit/ediciones.test.ts`.
+
 ## Verification
 
 **Commands:**
@@ -99,3 +101,50 @@ deferred: []
 - `npx vitest run tests/unit/ediciones-en-venta.test.ts` -- expected: verde, incluidas las cuatro variantes apagadas y las copias congeladas.
 - `npx vitest run tests/unit/ingreso-construido.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/fecha-de-cambio.test.ts tests/unit/medicion.test.ts` -- expected: verde.
 - `npx astro check` -- expected: 0 errores.
+
+## Spec Change Log
+
+_Sin entradas: ninguna vuelta atrás por `bad_spec`._
+
+## Review Triage Log
+
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas de revisión son externas (orquestador v9-ralph) y esta pasada no recibió hallazgos.
+
+## Auto Run Result
+
+Status: done
+
+**Resumen.** `edicionesPorFormato` (`src/lib/ediciones.ts`) reparte las ediciones en venta en «Electrónica» y luego «Impresa», por tienda en el orden de `TIENDAS` y, a igual tienda, en el de la ficha, sin grupos vacíos, y lanza ante una clave fuera del orden. `EdicionEnVenta` lleva `claveDeTienda`. La Página de Obra compone `enVenta.grupos` solo con la afiliación admitida en la ruta, ediciones declaradas y `congelacionVigente() === undefined`. `EdicionesEnVenta.astro` pinta, dentro de un único `div[data-ingreso]` a 3 × `--unidad` de «Gratis», un `div` por grupo con `RotuloDeGrupo` y su lista (el segundo a 3 × `--unidad`), con los `id` numerados seguidos; sin `h3` ni «Ediciones en venta», sin `<style>`.
+
+**Ficheros.**
+- `src/lib/ediciones.ts` — `claveDeTienda`, `GrupoDeEdiciones`, `edicionesPorFormato` y la pregunta abierta en su cabecera.
+- `src/lib/ingreso.ts` — `edicionesEnVenta` devuelve `claveDeTienda`.
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — la congelación oculta las ediciones; grupos con las claves de `TIENDAS`; comentarios al día.
+- `src/components/DondeLeer.astro` — prop `enVenta.grupos`; comentarios al día.
+- `src/components/EdicionesEnVenta.astro` — los grupos con `RotuloDeGrupo`; sin `h3` ni `DEL_ROTULO`.
+- `tests/unit/ediciones.test.ts` (nuevo) — la matriz de la función pura.
+- `tests/unit/ediciones-en-venta.test.ts` — grupos y orden en la Brevedad y en Cartas, sin «Consíguelo»/«Cómprala»/«Ediciones en venta», `dist/` fuera de `obra/` idéntico encendida/apagada, páginas 2+ sin `data-ingreso`, y el describe de la congelación (dos copias más).
+- `tests/e2e/ingreso-accesible.spec.ts` — rótulos «Electrónica» e «Impresa» y orden electrónica→impresa.
+- `tests/e2e/tipografia-calculada.spec.ts` — comentario.
+- `AGENTS.md` — § Encender la afiliación de libros: grupos, orden, congelación que oculta y la prueba de los dos estados.
+
+**Revisión.** 0 parches, 0 diferidos, 0 rechazados (capas externas sin hallazgos). Recomendación de revisión de seguimiento: `false` (0 high, 0 medium, 0 low; puntuación 0).
+
+**Verificación.**
+- `npx vitest run tests/unit/ediciones.test.ts` — 7/7 verde.
+- `npx vitest run tests/unit/ediciones-en-venta.test.ts` — verde (74 pruebas, con las cuatro variantes apagadas y las dos copias congeladas).
+- `npx vitest run tests/unit/ingreso-construido.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/fecha-de-cambio.test.ts tests/unit/medicion.test.ts tests/unit/obra-pagina.test.ts tests/unit/espinas-de-ux.test.ts` — verde tras corregir un comentario de la hoja de `DondeLeer.astro` que nombraba «venta» (lo vigila `obra-pagina.test.ts`).
+- `npx astro check` — 0 errores, 0 avisos.
+- `astro build` con el Corpus real (`FECHA_JORNADA=2026-11-15`) en la base `a38d79125d` y en la rama: `diff -r` de los dos `dist/` sin diferencias.
+- Auditoría de la matriz: cada fila la cubre una prueba que corrió en verde (cinco en `ediciones.test.ts`, la congelada en `ediciones-en-venta.test.ts`).
+
+**Riesgos residuales.** El barrido e2e `tests/e2e/ingreso-accesible.spec.ts` no se corrió (lo corre Héctor en local; el CI no corre e2e). El orden por `TIENDAS` es una `[ASSUMPTION]` pendiente de `bmad-ux`.

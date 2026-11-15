@@ -47,6 +47,7 @@ import {
   temasPublicados,
 } from '../../../../lib/publicado.ts';
 import {
+  congelacionVigente,
   dondeLeer,
   edicionQueEncabeza,
   obraTieneComoCitar,
@@ -54,7 +55,8 @@ import {
   segmentosDeObra,
   traductorDeLaEdicionQueEncabeza,
 } from '../../../../lib/obras.ts';
-import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
+import { edicionesEnVenta, modelosEnRuta, TIENDAS } from '../../../../lib/ingreso.ts';
+import { edicionesPorFormato } from '../../../../lib/ediciones.ts';
 import { descripcionDeObra, referenciasDeObra } from '../../../../lib/atribucion.ts';
 import { ROTULO_BUSCAR_EN_ESTA_OBRA } from '../../../../lib/busqueda.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
@@ -121,21 +123,33 @@ const segmentos = segmentosDeObra(obra.nombre);
 const tarjeta = `/tarjeta/obra/${segmentos.autor}/${segmentos.obra}.png`;
 const canonica = new URL(ruta, Astro.site).href;
 const primera = pagina.currentPage === 1;
-/* «Dónde leer esta obra» va en toda página 1, se indexe o no, congelada o no. */
+/*
+ * «Dónde leer esta obra» va en toda página 1, se indexe o no. La congelación de la familia Obra
+ * oculta las ediciones en venta (33.2, AD-25), no el desplegable.
+ */
 const conDondeLeer = primera && resumenDondeLeer !== undefined;
 /* Historia 32.5 — «Cómo citar», solo en la página 1; si la Obra lo tiene lo dice `obraTieneComoCitar`. */
 const conComoCitar = primera && obraTieneComoCitar(obra);
 const conIncipit = primera && incipit !== undefined;
 
 /*
- * Historia 22.9 — las ediciones en venta. Se pregunta por la **ruta**: la afiliación se admite
- * en esta superficie, y `modelosEnRuta` la excluye por forma de las páginas 2+ y la deja en la 1
- * se indexe la Obra o no. Apagada, no hay `enVenta` y «Dónde leer» se pinta como antes.
+ * Historias 22.9 y 33.2 — las ediciones en venta. Se pregunta por la **ruta**: la afiliación se
+ * admite en esta superficie, y `modelosEnRuta` la excluye por forma de las páginas 2+ y la deja en
+ * la 1 se indexe la Obra o no. Llegan repartidas por formato y por tienda (`edicionesPorFormato`,
+ * en el orden de `TIENDAS`). Con la familia Obra congelada (`congelacionVigente`, SM-11) no se
+ * componen aunque el Modelo esté encendido: la ficha las conserva y ninguna página las enseña
+ * (AD-25). Apagada o congelada, no hay `enVenta` y «Dónde leer» se pinta como antes.
  */
 const afiliacion = modelosEnRuta(ruta).find((modelo) => modelo.id === 'afiliacion-de-libros');
 const enVenta =
-  afiliacion !== undefined && obra.ediciones !== undefined
-    ? { id: afiliacion.id, ediciones: edicionesEnVenta(obra.ediciones, obra.nombre) }
+  afiliacion !== undefined && obra.ediciones !== undefined && congelacionVigente() === undefined
+    ? {
+        id: afiliacion.id,
+        grupos: edicionesPorFormato(
+          edicionesEnVenta(obra.ediciones, obra.nombre),
+          TIENDAS.map((tienda) => tienda.clave),
+        ),
+      }
     : undefined;
 ---
 

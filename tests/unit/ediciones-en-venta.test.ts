@@ -125,11 +125,17 @@ describe('Historia 22.9 — urlDeEdicion', () => {
       [TIENDA],
     );
     expect(compuestas).toEqual([
-      { href: `https://www.${DOMINIO}/dp/X?tag=marca-de-prueba-21`, formato: 'impresa', tienda: TIENDA.nombre },
+      {
+        href: `https://www.${DOMINIO}/dp/X?tag=marca-de-prueba-21`,
+        formato: 'impresa',
+        tienda: TIENDA.nombre,
+        claveDeTienda: TIENDA.clave,
+      },
       {
         href: `https://www.${DOMINIO}/dp/X?tag=marca-de-prueba-21`,
         formato: 'electronica',
         tienda: TIENDA.nombre,
+        claveDeTienda: TIENDA.clave,
         descripcion: 'Cátedra, 2015',
       },
     ]);
@@ -879,6 +885,19 @@ function seccionDondeLeer(pagina: string): string {
   return '';
 }
 
+/** La huella SHA-256 de cada fichero del `dist/` de un proyecto, por su ruta relativa. */
+async function huellasDeDist(proyecto: string): Promise<Record<string, string>> {
+  const dist = join(proyecto, 'dist');
+  const entradas = await readdir(dist, { recursive: true, withFileTypes: true });
+  const salida: Record<string, string> = {};
+  for (const e of entradas) {
+    if (!e.isFile()) continue;
+    const completa = join(e.parentPath, e.name);
+    salida[completa.slice(dist.length + 1)] = createHash('sha256').update(await readFile(completa)).digest('hex');
+  }
+  return salida;
+}
+
 /** El `<div data-ingreso>` completo, contando anidamiento. */
 function bloqueDeEdiciones(html: string): string {
   const inicio = html.lastIndexOf('<div', html.indexOf('data-ingreso="afiliacion-de-libros"'));
@@ -937,14 +956,28 @@ describe('Historia 22.9 — encendida, construida', () => {
     salida = resultado.salida;
   }, 300_000);
 
-  it('con edición cotejada: un único bloque, dentro de «Dónde leer», con dos ediciones', async () => {
+  it('con edición cotejada: un único bloque, dentro de «Dónde leer», con «Electrónica» y luego «Impresa»', async () => {
     const pagina = await html(PAGINA_1);
     expect(modelosMarcadosEn(pagina)).toEqual(['afiliacion-de-libros']);
     const bloque = bloqueDeEdiciones(pagina);
-    expect(bloque).toMatch(/^<div data-ingreso="afiliacion-de-libros" style="margin-top: calc\(var\(--unidad\) \* 2\)">/);
+    // Historia 33.2 — a 3 × `--unidad` de «Gratis», sin `h3` ni el rótulo de la 22.9.
+    expect(bloque).toMatch(/^<div data-ingreso="afiliacion-de-libros" style="margin-top: calc\(var\(--unidad\) \* 3\)">/);
     expect(bloque).not.toContain('<aside');
-    expect(bloque).toMatch(/<h3[^>]*>Ediciones en venta<\/h3>/);
+    expect(bloque).not.toContain('<h3');
+    expect(bloque).not.toContain('Ediciones en venta');
     expect(bloque.match(/<li\b/g)).toHaveLength(2);
+    expect(pagina.match(/data-ingreso=/g)).toHaveLength(1);
+    // Los dos rótulos de grupo, el mismo elemento que «Gratis», dentro del bloque y en ese orden.
+    const rotulos = [...bloque.matchAll(/<p class="rotulo-de-grupo"[^>]*>([^<]*)<\/p>/g)].map((m) => m[1]);
+    expect(rotulos).toEqual(['Electrónica', 'Impresa']);
+    // Cada grupo es su `div` con su lista: el segundo, a 3 × `--unidad` del primero.
+    const electronica = bloque.indexOf('>Electrónica</p>');
+    const impresa = bloque.indexOf('>Impresa</p>');
+    expect(bloque.indexOf('/e/B2')).toBeGreaterThan(electronica);
+    expect(bloque.indexOf('/e/B2')).toBeLessThan(impresa);
+    expect(bloque.indexOf('/dp/B1')).toBeGreaterThan(impresa);
+    expect(bloque.match(/<div style="margin-top: calc\(var\(--unidad\) \* 3\)">/g)).toHaveLength(1);
+    expect(bloque.match(/<ul\b/g)).toHaveLength(2);
 
     // Contenido en el `<details>` de «Dónde leer esta obra» (32.4) y después del grupo «Gratis».
     const seccion = seccionDondeLeer(pagina);
@@ -961,8 +994,8 @@ describe('Historia 22.9 — encendida, construida', () => {
 
     const enlaces = [...bloque.matchAll(/<a ([^>]*)>([\s\S]*?)<\/a>/g)];
     expect(enlaces).toHaveLength(2);
-    expect(enlaces[0][1]).toContain(`href="https://www.${DOMINIO}/dp/B1?tag=${TIENDA.marca}"`);
-    expect(enlaces[1][1]).toContain(`href="https://${DOMINIO}/e/B2?th=1&amp;tag=${TIENDA.marca}"`);
+    expect(enlaces[0][1]).toContain(`href="https://${DOMINIO}/e/B2?th=1&amp;tag=${TIENDA.marca}"`);
+    expect(enlaces[1][1]).toContain(`href="https://www.${DOMINIO}/dp/B1?tag=${TIENDA.marca}"`);
     for (const [i, [, atributos, texto]] of enlaces.entries()) {
       expect(atributos).toContain('rel="sponsored noopener"');
       expect(atributos).toContain('target="_blank"');
@@ -977,8 +1010,8 @@ describe('Historia 22.9 — encendida, construida', () => {
       m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(),
     );
     expect(lineas).toEqual([
-      `Edición impresa en ${TIENDA.nombre} (se abre en una pestaña nueva): Cátedra, 2015. Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.`,
       `Edición electrónica en ${TIENDA.nombre} (se abre en una pestaña nueva). Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.`,
+      `Edición impresa en ${TIENDA.nombre} (se abre en una pestaña nueva): Cátedra, 2015. Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.`,
     ]);
   });
 
@@ -992,7 +1025,14 @@ describe('Historia 22.9 — encendida, construida', () => {
     const pagina = await html(CARTAS_1);
     expect(pagina).toMatch(/<meta name="robots" content="noindex, follow"/);
     expect(modelosMarcadosEn(pagina)).toEqual(['afiliacion-de-libros']);
-    expect(bloqueDeEdiciones(pagina).match(/<li\b/g)).toHaveLength(1);
+    const bloque = bloqueDeEdiciones(pagina);
+    expect(bloque.match(/<li\b/g)).toHaveLength(1);
+    // Historia 33.2 — solo impresas: un único grupo, sin rótulo ni hueco de «Electrónica».
+    const rotulos = [...bloque.matchAll(/<p class="rotulo-de-grupo"[^>]*>([^<]*)<\/p>/g)].map((m) => m[1]);
+    expect(rotulos).toEqual(['Impresa']);
+    expect(bloque).not.toContain('Electrónica');
+    expect(bloque.match(/<div\b/g)).toHaveLength(2);
+    expect(bloque).not.toMatch(/<div style="margin-top/);
   });
 
   it('sin edición cotejada no hay bloque, y el build lo avisa nombrando la ficha', async () => {
@@ -1015,6 +1055,22 @@ describe('Historia 22.9 — encendida, construida', () => {
       'obra/seneca/cartas-a-lucilio/index.html',
       'obra/seneca/sobre-la-brevedad-de-la-vida/index.html',
     ]);
+  });
+
+  it('Historia 33.2 — ningún HTML dice «Consíguelo», «Cómprala» ni «Ediciones en venta»', async () => {
+    const dist = join(proyecto, 'dist');
+    const entradas = await readdir(dist, { recursive: true, withFileTypes: true });
+    let paginas = 0;
+    for (const e of entradas) {
+      if (!e.isFile() || !e.name.endsWith('.html')) continue;
+      paginas += 1;
+      const completa = join(e.parentPath, e.name);
+      const pagina = await readFile(completa, 'utf8');
+      for (const palabra of ['Consíguelo', 'Cómprala', 'Ediciones en venta']) {
+        expect(pagina, `${completa}: ${palabra}`).not.toContain(palabra);
+      }
+    }
+    expect(paginas).toBeGreaterThan(5);
   });
 });
 
@@ -1104,7 +1160,7 @@ describe('Historias 22.9 y 33.1 — apagada, `dist/` igual con tiendas con marca
  * Historias 24.7 y 32.4 — «Dónde leer esta obra» no aloja ningún Modelo fuera de su
  * `div[data-ingreso]`: el `<summary>`, el grupo «Gratis» y todo lo demás salen idénticos con la
  * afiliación encendida o apagada (FR-35), y lo único que separa las dos páginas es el bloque de
- * «Ediciones en venta», dentro del `<details>` tras «Gratis». Ya no hay salto (32.4). Las dos
+ * las ediciones en venta, dentro del `<details>` tras «Gratis». Ya no hay salto (32.4). Las dos
  * construcciones son las de arriba, sin construir otra.
  */
 describe('Historia 32.4 — «Dónde leer», igual con la afiliación encendida o apagada', () => {
@@ -1141,7 +1197,7 @@ describe('Historia 32.4 — «Dónde leer», igual con la afiliación encendida 
     expect(sinBloque(donde), ruta).toBe(seccionDondeLeer(sin));
   });
 
-  it.each([PAGINA_1, CARTAS_1])('%s: encendida es la apagada más el bloque de «Ediciones en venta»', async (ruta) => {
+  it.each([PAGINA_1, CARTAS_1])('%s: encendida es la apagada más el bloque de las ediciones en venta', async (ruta) => {
     const con = await html(encendida, ruta);
     const bloque = bloqueDeEdiciones(con);
     expect(bloque, ruta).toMatch(/^<div data-ingreso="afiliacion-de-libros"/);
@@ -1153,6 +1209,74 @@ describe('Historia 32.4 — «Dónde leer», igual con la afiliación encendida 
     const con = await html(encendida, ruta);
     expect(con, ruta).not.toContain('data-ingreso');
     expect(con, ruta).toBe(await html(apagada, ruta));
+  });
+
+  it('Historia 33.2 — fuera de `obra/` los dos `dist/` son idénticos byte a byte, y ninguna página 2+ de Obra lleva `data-ingreso`', async () => {
+    const [con, sin] = [await huellasDeDist(encendida), await huellasDeDist(apagada)];
+    const fuera = (huellas: Record<string, string>) =>
+      Object.fromEntries(Object.entries(huellas).filter(([ruta]) => !ruta.startsWith('obra/')));
+    expect(Object.keys(fuera(con)).length).toBeGreaterThan(5);
+    expect(fuera(con)).toEqual(fuera(sin));
+    expect(Object.keys(con).sort()).toEqual(Object.keys(sin).sort());
+    const segundas = Object.keys(con).filter((ruta) => /^obra\/.+\/\d+\/index\.html$/.test(ruta));
+    expect(segundas.length).toBeGreaterThan(0);
+    for (const ruta of segundas) {
+      expect(await readFile(join(encendida, 'dist', ruta), 'utf8'), ruta).not.toContain('data-ingreso');
+    }
+  });
+});
+
+/*
+ * Historia 33.2, AD-25, UX-DR147 — con la familia Obra congelada (SM-11) las ediciones se
+ * conservan en la ficha y ninguna página las enseña, aunque el Modelo esté encendido. Dos copias
+ * más, con `CONGELACION_DE_OBRAS` puesta en su `umbrales.ts` (nunca el del árbol, AD-21) y la
+ * tienda de prueba, encendida y apagada. «Levantar» queda probado arriba: `construida('encendida')`
+ * es la misma copia sin la congelación, y pinta el bloque.
+ */
+describe('Historia 33.2 — congelada, ninguna Página de Obra pinta ediciones', () => {
+  const proyectos: Record<'encendida' | 'apagada', string> = { encendida: '', apagada: '' };
+
+  beforeAll(async () => {
+    const original = await readFile(resolve(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
+    const declaracion = 'export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = undefined;';
+    expect(original.split(declaracion)).toHaveLength(2);
+    const congelado = original.replace(
+      declaracion,
+      "export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = {\n  desde: '2026-12-06',\n  indexables: [\n    'seneca--sobre-la-brevedad-de-la-vida',\n  ],\n};",
+    );
+    // Una tras otra, nunca a la vez.
+    for (const afiliacion of ['encendida', 'apagada'] as const) {
+      const resultado = await construirConCorpus(corpusConstruido('con-marca'), {
+        ficheros: { 'src/lib/ingreso.ts': await ingresoConTienda(afiliacion), 'src/lib/umbrales.ts': congelado },
+      });
+      aLimpiar.push(resultado.proyecto);
+      expect(resultado.codigo, resultado.salida).toBe(0);
+      proyectos[afiliacion] = resultado.proyecto;
+    }
+  }, 600_000);
+
+  it('ningún HTML de la encendida lleva `data-ingreso`, ni el dominio de la tienda', async () => {
+    const dist = join(proyectos.encendida, 'dist');
+    const entradas = await readdir(dist, { recursive: true, withFileTypes: true });
+    let paginas = 0;
+    for (const e of entradas) {
+      if (!e.isFile() || !e.name.endsWith('.html')) continue;
+      paginas += 1;
+      const completa = join(e.parentPath, e.name);
+      const pagina = await readFile(completa, 'utf8');
+      expect(pagina, completa).not.toContain('data-ingreso');
+      expect(pagina, completa).not.toContain(DOMINIO);
+    }
+    expect(paginas).toBeGreaterThan(5);
+  });
+
+  it('cada Página de Obra es idéntica byte a byte, encendida y apagada, y «Dónde leer» sigue en su página 1', async () => {
+    const [con, sin] = [await huellasDeDist(proyectos.encendida), await huellasDeDist(proyectos.apagada)];
+    const deObra = Object.keys(con).filter((ruta) => ruta.startsWith('obra/') && ruta.endsWith('.html'));
+    expect(deObra.length).toBeGreaterThan(3);
+    for (const ruta of deObra) expect(con[ruta], ruta).toBe(sin[ruta]);
+    const pagina = await readFile(paginaConstruida(proyectos.encendida, PAGINA_1), 'utf8');
+    expect(seccionDondeLeer(pagina)).toMatch(/<p class="rotulo-de-grupo"[^>]*>Gratis<\/p>/);
   });
 });
 

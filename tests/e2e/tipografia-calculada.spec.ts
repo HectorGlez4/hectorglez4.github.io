@@ -41,8 +41,8 @@ import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
  * esta prueba guarda y compara sus JSON por su cuenta, sin `toMatchSnapshot`, cuyo nombre lleva el
  * sistema por la plantilla de la configuración. `--update-snapshots` las regraba igual.
  *
- * El bloque «Ediciones en venta» (`EdicionesEnVenta.astro`) no sale en ninguna página mientras la
- * afiliación esté apagada: lo cubre solo la guardia estática de
+ * El bloque de las ediciones en venta (`EdicionesEnVenta.astro`, «Electrónica» e «Impresa») no
+ * sale en ninguna página mientras la afiliación esté apagada: lo cubre solo la guardia estática de
  * `tests/unit/tipografia-en-tokens.test.ts`.
  *
  * Solo local, como toda prueba de Playwright: el CI no la corre.

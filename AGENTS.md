@@ -1811,10 +1811,16 @@ ficha.
 
 Todo el camino está construido y apagado: el conjunto cerrado de tiendas `TIENDAS` en
 `src/lib/ingreso.ts`, el campo `ediciones` de la Ficha de Obra juzgado por el esquema
-(`src/lib/admision.ts`), `urlDeEdicion`, que añade la marca a la dirección al construir, y el
-bloque «Ediciones en venta» (`src/components/EdicionesEnVenta.astro`) dentro del desplegable
-«Dónde leer esta obra», tras el grupo «Gratis». El repositorio versiona **`TIENDAS` vacío**, y mientras lo
-esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
+(`src/lib/admision.ts`), `urlDeEdicion`, que añade la marca a la dirección al construir, y las
+ediciones en venta (`src/components/EdicionesEnVenta.astro`) dentro del desplegable «Dónde leer
+esta obra», bajo el grupo «Gratis»: desde la 33.2, los grupos «Electrónica» y luego «Impresa»,
+con el mismo Rótulo de grupo que «Gratis», en un único `data-ingreso`, y dentro de cada uno por
+tienda en el orden de `TIENDAS` y, a igual tienda, en el de la ficha. El reparto lo decide solo
+`edicionesPorFormato` de `src/lib/ediciones.ts`; un formato sin ediciones no deja rótulo ni
+hueco, y no hay rótulo de tienda ni «Ediciones en venta». (Que el orden sea el de `TIENDAS` y no
+el de la ficha es la pregunta abierta de la Épica 33, aceptada por delegación de Héctor y
+pendiente de `bmad-ux`.) El repositorio versiona **`TIENDAS` vacío**, y mientras lo esté el
+esquema rechaza toda edición: ninguna ficha puede declarar una.
 
 1. **Las tiendas las declara Héctor** en `TIENDAS`, y **sin marca** (Historia 33.1):
    `{ clave, nombre, dominio, parametro }`, con el campo `marca` omitido —nunca `''` ni
@@ -1848,9 +1854,17 @@ esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
    sola (FR-54)—; si no la hay, el build avisa «Ediciones sin edición cotejada» nombrando la
    ficha. Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
    ediciones o sin ellas: lo construye en cuatro variantes `tests/unit/ediciones-en-venta.test.ts`.
-4. **Barrido de accesibilidad con el Modelo encendido**: el mismo
-   `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`, que ya barre
-   la Página de Obra con dos ediciones de una tienda inventada en la copia.
+   **Con la familia Obra congelada** (`congelacionVigente()`, SM-11) ninguna Página de Obra pinta
+   ediciones aunque el Modelo esté encendido: la página no las compone, la ficha las conserva y
+   «Dónde leer esta obra» sigue en su sitio (AD-25, Historia 33.2).
+4. **Las dos pruebas de los dos estados, con el Modelo encendido**: la de `dist/`,
+   `npx vitest run tests/unit/ediciones-en-venta.test.ts` —encendida es la apagada más el bloque
+   en cada Página de Obra, fuera de `obra/` los dos `dist/` son idénticos, y congelada ninguna
+   página lleva `data-ingreso` y cada Página de Obra sale igual encendida y apagada—, y el barrido
+   de accesibilidad,
+   `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`, que barre
+   la Página de Obra con dos ediciones de una tienda inventada en la copia y espera los rótulos
+   «Electrónica» e «Impresa».
 
 **Retirar una tienda** de `TIENDAS` exige antes quitar con `quitar-edicion` todas sus ediciones
 de **toda** ficha, activa en `corpus/obras/` o retirada en `corpus/_obras-retiradas/`: el
