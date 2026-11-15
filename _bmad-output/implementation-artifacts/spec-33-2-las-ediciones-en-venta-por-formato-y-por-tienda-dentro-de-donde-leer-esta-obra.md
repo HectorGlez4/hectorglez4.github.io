@@ -5,7 +5,7 @@ created: '2026-11-15'
 status: 'done'
 baseline_revision: 'a38d79125d93bb46a895379670e31343dfe9504c'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-33-context.md'
 warnings: ['oversized']
@@ -131,7 +131,7 @@ _Sin entradas: ninguna vuelta atrás por `bad_spec`._
 
 ## Review Triage Log
 
-### 2026-11-15 — Review pass
+### 2026-11-15 — Review pass (abortada)
 - intent_gap: 0
 - bad_spec: 0
 - patch: 0
@@ -140,7 +140,7 @@ _Sin entradas: ninguna vuelta atrás por `bad_spec`._
 - addressed_findings:
   - none
 
-Las cinco capas de revisión son externas (orquestador v9-ralph) y esta pasada no recibió hallazgos.
+Pasada abortada, no una revisión: las cinco capas son externas (orquestador v9-ralph) y esta invocación llegó sin sus hallazgos, así que no se juzgó nada. La revisión de verdad es la pasada siguiente.
 
 ### 2026-11-15 — Review pass
 - intent_gap: 0
@@ -155,6 +155,18 @@ Las cinco capas de revisión son externas (orquestador v9-ralph) y esta pasada n
   - `[low]` `[patch]` El Auto Run Result decía que el barrido e2e no se había corrido; el ac-auditor lo corrió en local (12/12). Riesgos residuales y verificación puestos al día.
 
 Rechazados, con su motivo: la línea de `sprint-status.yaml` y el estado `review` de la 32.4 y la 33.1 los escribe el cierre del bucle (las épicas se funden enteras); el registro de triaje anterior lo sustituye esta pasada; los grupos de venta sin la clase `.grupo` y el rótulo con la hoja de `RotuloDeGrupo` son lo que pide el contrato (presentación en `style`, «el mismo elemento que Gratis»); el `p.rotulo-de-grupo` sin asociar a su lista es el mismo patrón que «Gratis»; `nombreDelFormato` (minúscula en la frase) y el rótulo son textos distintos; la clave repetida en `TIENDAS` ya la rechaza `revisarTiendas`; un aviso de build cuando la congelación oculta ediciones no lo pide la intención y AGENTS.md documenta el efecto; el parche de `umbrales.ts` por texto es el de `obra-pagina.test.ts` y `congelacionVigente` no lee `desde`; «levantar» se cubre con la misma copia sin el parche; las tres Obras del corpus de prueba y la página 2 se comparan todas; los asertos de marcado, `parentPath` (Node 24, ya usado en otras pruebas), el coste del paso 4, el tránsito de 2 × a 3 × (es UX-DR127, del contrato), la tipografía calculada y la congelada sin marca (la congelación corta antes de leer marcas).
+
+### 2026-11-15 — Review pass (segunda pasada de triaje)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 2 (high 0, medium 0, low 2)
+- defer: 0
+- reject: 25 (high 0, medium 0, low 25)
+- addressed_findings:
+  - `[low]` `[patch]` El barrido e2e citado como verificación corrió en 5715810a74, antes de los parches que renumeraron los `id`, y «los parches no cambian el marcado» se afirmaba sin repetirlo (blind-hunter, intent-alignment). Repetido en 9a71fe9d17: `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`, 12/12 verde; la línea de verificación de la pasada anterior ya no lo da por hecho.
+  - `[low]` `[patch]` La primera entrada del registro de triaje parecía una revisión con cero hallazgos y no lo era (blind-hunter). Rotulada «abortada»: la invocación llegó sin los hallazgos de las capas externas.
+
+Rechazados, en orden de capa. **blind-hunter:** (1) el `h3` sustituido por `p.rotulo-de-grupo` sin `aria-labelledby` es lo que pide el contrato («el mismo elemento que Gratis», sin «Ediciones en venta»), y cada línea declara la afiliación; (2) `nombreDelFormato` con dos ramas está cerrado por el tipo `FormatoDeEdicion` y `edicionesPorFormato` lanza antes ante un formato sin grupo; (3) el `as FormatoDeEdicion` de `edicionesEnVenta` lee fichas que ya validó el esquema del build; (4) que la congelación oculte sin aviso no lo pide la intención y AGENTS.md lo documenta; (5) la decisión de la página se prueba con las construcciones que exige el contrato; (6) el nombre de tienda repetido ya está diferido; (7) `desde` futuro en la copia congelada: `congelacionVigente` no lo lee y es dato de prueba; (8) el parche de `umbrales.ts` por texto es el patrón de `obra-pagina.test.ts`; (9) los recuentos de `div`/`ul` son asertos de marcado deliberados; (10) los separadores de Windows: el proyecto corre en macOS y Linux; (11) e2e de la congelación y de dos tiendas: lo cubren las pruebas de `dist/`; (13) `status: done` con `followup_review_recommended: true` es el resultado que el flujo escribe, y el `baseline_revision` es el commit del plan; (15) el formato de los rechazos no cambia nada que consuma nadie; (16) dónde vive la decisión de UX ya está diferido; (17) los dos mecanismos de espaciado los fija el contrato (presentación en `style`, sin `<style>`); (18) `claveDeTienda` obligatoria: `astro check` compila todo constructor de `EdicionEnVenta`; (19) la clave repetida en el orden ya la rechaza `revisarTiendas`. **intent-alignment:** cada Obra se compara (PAGINA_1, CARTAS_1, IRA_1, PAGINA_2, según el ac-auditor); «levantar» con la misma copia sin parche es equivalente; R2 frente a R2′ es la `[ASSUMPTION]` aceptada y diferida; R3a es la letra del contrato; las precondiciones las corrió el ac-auditor (945/945); el lanzamiento y el campo nuevo son decisiones del plan. **ac-auditor:** la línea de `sprint-status.yaml` la escribe el cierre del bucle; el rótulo con la hoja de `RotuloDeGrupo` es lo que el contrato pide.
 
 ## Auto Run Result
 
@@ -188,6 +200,13 @@ Ficheros de los parches:
 - `npx vitest run tests/unit/ingreso-construido.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/fecha-de-cambio.test.ts tests/unit/medicion.test.ts tests/unit/obra-pagina.test.ts tests/unit/ediciones.test.ts` — 938/938 verde.
 - `npx astro check` — 0 errores, 0 avisos.
 - `npm test` — 186 ficheros, 8.173 pruebas, verde (1.259 s).
-- Barrido e2e `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` — 12/12 verde en local en la revisión (ac-auditor, HEAD 5715810a74); los parches no cambian el marcado de una tienda.
+- Barrido e2e `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` — 12/12 verde en local en la revisión (ac-auditor, HEAD 5715810a74). Tras los parches de esta pasada se repitió en la segunda pasada de triaje (abajo).
+
+**Revisión (segunda pasada de triaje, 2026-11-15).** 2 parches (low, ambos de contabilidad del spec: el barrido e2e repetido tras los parches y la primera entrada del registro rotulada como abortada), 0 diferidos nuevos, 25 rechazados. Ningún fichero de código cambia en esta pasada; la HEAD del código sigue en 9a71fe9d17. Recomendación de revisión de seguimiento: `false` (0 high, 0 medium, 2 low; puntuación 2 < 5).
+
+Verificación de esta pasada, sobre 9a71fe9d17:
+- `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` — 12/12 verde (1,9 min), sin servidores en escucha después.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` — 186 ficheros, 8.173 pruebas, verde (1.243 s); cubre los cuatro mandatos de vitest de § Verification.
 
 **Riesgos residuales.** El orden por `TIENDAS` es una `[ASSUMPTION]` aceptada por delegación y pendiente de `bmad-ux` (diferido). El CI no corre el barrido e2e: repetirlo el día de encender es de Héctor (AGENTS.md, paso 4).
