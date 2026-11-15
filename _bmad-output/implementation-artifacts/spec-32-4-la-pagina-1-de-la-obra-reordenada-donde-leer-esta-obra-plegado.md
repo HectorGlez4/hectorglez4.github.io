@@ -264,3 +264,25 @@ Puerta de la etapa s-32 (Historias 32.1–32.5, todas en revisión), en `v9/epic
 Margen de cada comparación: 100 ms (el 5 % de cada media es menor). LCP de la Cita bajo 2.500 ms. Veredicto: **ok**; no hizo falta el desempate con `devtools`. Ninguna Obra del Corpus real ata hoy una revisión de Wikidata, así que la Ficha técnica no sale en ninguna página medida.
 
 **Medición.** La etapa no toca `src/lib/vocabulario.ts` ni añade ficheros a `medicion/migrations/` respecto de `origin/main`.
+
+## Verificación en el sitio en vivo — 2026-11-15
+
+Tras el merge 83317d7d7e, «Publicar» 43661321008 en verde y «Desplegar» terminado el 2026-11-15T01:36:34Z. Solo `curl` contra https://sabiduriadebolsillo.net (sin navegador, sin JavaScript: nada escribe en el D1 de producción). Muestra: la página 1 y la 2 de *Don Quijote* y una de cada 13 de las 518 Obras que enlaza `/obras/` (40 páginas 1, indexables y `noindex`).
+
+| Historia | URL | Qué se buscó | Resultado |
+|---|---|---|---|
+| 32.1 | las 42 páginas de la muestra | «Datos: Wikidata, CC0» o cualquier mención de Wikidata | sin datos que enseñar: ninguna ficha ata `wikidata` (`corpus/obras/` no declara el campo; `corpus/wikidata/` solo trae `vigentes.yml`) |
+| 32.2 | las 42 páginas de la muestra | la línea de Ficha técnica bajo la Cabecera de Obra | sin datos que enseñar: ninguna Obra tiene entidad atada; no hay línea, rótulo ni hueco |
+| 32.3 | las 42 páginas de la muestra | el desplegable «Cómo empieza» | sin datos que enseñar: ninguna ficha declara `incipit` y `MAX_CARACTERES_DEL_INCIPIT` sigue en `undefined`; no hay desplegable ni hueco |
+| 32.4 | /obra/miguel-de-cervantes/don-quijote/ | orden de la página 1: Cabecera → «Dónde leer esta obra» plegado → listado (`data-zona="listado"`) → «Buscar en esta obra» → Temas → «Cómo citar» al pie | encontrado; dos `<details class="desplegable">` sin `open` |
+| 32.4 | /obra/miguel-de-cervantes/don-quijote/ | grupo «Gratis» con la Fuente como enlace y su licencia; «De esta edición se tomaron sus 66 citas.» | encontrado |
+| 32.4 | /obra/miguel-de-cervantes/don-quijote/ | ausencia de «Edición cotejada, gratuita», «no tienen documento cotejado», «Consíguelo», «Cómprala», `data-ingreso` y de un ancla a «Dónde leer esta obra» (el único `href="#…"` es el salto a `#contenido`) | ausentes, como se pedía |
+| 32.4 | /obra/miguel-de-cervantes/don-quijote/2/ | la 2+ sin desplegables, «Dónde leer esta obra», «Cómo citar», «Buscar en esta obra» ni isla de copiar, con su listado | encontrado así |
+| 32.4 | 39 Obras de la muestra con Cita cotejada (p. ej. /obra/juan-valera/dona-luz/, /obra/seneca/de-la-pobreza/) | «De esta edición se tomó su cita.» (n = 1) y «…se tomaron sus {n} citas.» (k = n) | encontrado en las 39; el caso k < n («{k} de sus {n}») no sale en la muestra |
+| 32.4 | /obra/francisco-de-quevedo/letrillas-satiricas/ | Obra sin Cita cotejada: sin «Gratis» y «Ninguna de sus citas tiene todavía documento cotejado.» | encontrado |
+| 32.5 | /obra/miguel-de-cervantes/don-quijote/ y las 40 de la muestra | «Cómo citar» en toda página 1, con APA, MLA y Chicago, bajo `data-pagefind-ignore="all"` | encontrado en las 41 |
+| 32.5 | /obra/miguel-de-cervantes/don-quijote/ | Referencia con Autor, título, edición que encabeza (Project Gutenberg), «Sabiduría de Bolsillo» y la URL canónica; sin guion, «Sin fecha de consulta: añade la de hoy.» y los botones con `hidden` | encontrado (Autor sin invertir: su clave no está revisada) |
+| 32.5 | /obra/francisco-de-quevedo/letrillas-satiricas/ | Referencia sin edición en una Obra sin Cita cotejada | encontrado |
+| 32.5 | /obra/miguel-de-cervantes/don-quijote/ | región `role="status"` vacía dentro del `<details>` de «Cómo citar» y la isla `/_astro/CopiarReferencia…D8RVNWeF.js` (200, 1.365 bytes, con «Copiado.») | encontrado |
+
+No se comprobó el copiado ni el evento `copiado-de-referencia`, que exigen ejecutar la página.

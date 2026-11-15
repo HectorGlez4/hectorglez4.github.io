@@ -273,7 +273,7 @@ export const DESPLIEGUE_DEL_INCIPIT: string | undefined = undefined;
  * `DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS`, y no un corte de serie: no entra en
  * `CORTES_DE_SERIE_DECLARADOS`.
  */
-export const DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO: string | undefined = undefined;
+export const DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO: string | undefined = '2026-11-15';
 
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
