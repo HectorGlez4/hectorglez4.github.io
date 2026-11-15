@@ -1314,7 +1314,7 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
         { deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' },
         { deDondeLlega: 'DESPLIEGUE_DEL_PASAJE', marca: 'el primer despliegue con valor en MAX_CARACTERES_DEL_PASAJE, no el merge' },
         { deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA', marca: 'la primera Cita atribuida publicada en vivo, no el merge' },
-        { deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES' },
+        { deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES', marca: 'el despliegue en vivo de la Épica 36, no el merge' },
       ],
     });
     expect(SM_C5.palanca).toBe('quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor');
@@ -1331,8 +1331,8 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
       ['continuacion-de-cita'],
       ['sm8', 'continuacion-de-cita'],
       ['continuacion-de-obra'],
-      // Historia 36.1 — la de los paneles parte solo la continuación de la Página de Cita.
-      ['continuacion-de-cita'],
+      // Historia 36.1 — la de los paneles parte las continuaciones de la Página de Cita y de la de Obra.
+      ['continuacion-de-cita', 'continuacion-de-obra'],
     ]);
     // Historia 31.2 — la del pasaje parte la misma serie, y solo esa.
     const delPasaje = CORTES_DE_SERIE_DECLARADOS.find((c) => c.deDondeLlega === 'DESPLIEGUE_DEL_PASAJE')!;
@@ -1541,7 +1541,8 @@ describe('Historia 31.2 — el corte de «Lee el pasaje»', () => {
         estado: 'pendiente',
         deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA',
         marca: 'la primera Cita atribuida publicada en vivo, no el merge',
-      },      { estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES' },
+      },
+      { estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES', marca: 'el despliegue en vivo de la Épica 36, no el merge' },
     ]);
     const informe = texto(l);
     expect(informe).toContain(
@@ -1576,7 +1577,8 @@ describe('Historia 31.2 — el corte de «Lee el pasaje»', () => {
         estado: 'pendiente',
         deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA',
         marca: 'la primera Cita atribuida publicada en vivo, no el merge',
-      },      { estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES' },
+      },
+      { estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES', marca: 'el despliegue en vivo de la Épica 36, no el merge' },
     ]);
     expect(texto(l)).toContain(`La llegada del ${HOY} (DESPLIEGUE_DEL_PASAJE) es de hoy o posterior: no ha ocurrido todavía`);
   });
@@ -1655,11 +1657,12 @@ describe('Historia 35.7 — el corte de la primera atribuida', () => {
     const [juicio] = l.juicios;
     expect(juicio.corte).toMatchObject({ estado: 'llegado', deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA', desde: '2026-11-06' });
     // Historia 36.1 — la de los paneles, declarada después, sigue pendiente.
-    expect(juicio.pendientes).toEqual([{ estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES' }]);
+    expect(juicio.pendientes).toEqual([{ estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES', marca: 'el despliegue en vivo de la Épica 36, no el merge' }]);
     expect(juicio.ventanas.every((v) => v.desde > llegada)).toBe(true);
     expect(l.series.sm8.cambios.map((c) => c.jornada)).toContain(llegada);
     expect(texto(l)).not.toContain('La llegada de DESPLIEGUE_DE_LA_ATRIBUIDA no ha ocurrido');
     expect(texto(l)).toContain('La llegada de DESPLIEGUE_DE_LOS_PANELES no ha ocurrido');
+    expect(texto(l)).toContain('La marca el despliegue en vivo de la Épica 36, no el merge.');
   });
 });
 
@@ -1677,11 +1680,17 @@ describe('Historia 36.1 — el corte de los paneles de la Página de Cita', () =
     acciones: DIAS.map((dia, i) => accion(dia, '/cita/una/', EVENTOS.copiado, i < 3 ? 12 : 6)),
   });
 
-  it('declara su constante en `undefined` y parte solo la continuación de la Página de Cita', () => {
-    expect(DESPLIEGUE_DE_LOS_PANELES).toBeUndefined();
+  it('se declara con su constante y parte las continuaciones de la Página de Cita y de la de Obra, y nada más', () => {
+    // Sin fijar su valor: lo da Héctor al desplegar, y la prueba sigue el que tenga.
     const entrada = CORTES_DE_SERIE_DECLARADOS.find((c) => c.deDondeLlega === 'DESPLIEGUE_DE_LOS_PANELES')!;
     expect(entrada).toBeDefined();
-    expect(entrada.series).toEqual(['continuacion-de-cita']);
+    expect(entrada.jornada).toBe(DESPLIEGUE_DE_LOS_PANELES);
+    expect(entrada.series).toEqual(['continuacion-de-cita', 'continuacion-de-obra']);
+  });
+
+  it('SM-C4 la declara también como llegada de su serie, con su marca', () => {
+    const SM_C4 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-C4')!;
+    expect(SM_C4.corte?.llegadas.at(-1)).toEqual({ deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES', marca: 'el despliegue en vivo de la Épica 36, no el merge' });
   });
 
   it('con valor: es la llegada de SM-C5, sin pendientes, y ninguna ventana la cruza', () => {
@@ -1693,7 +1702,7 @@ describe('Historia 36.1 — el corte de los paneles de la Página de Cita', () =
         corteDe('DESPLIEGUE_DE_CITAR_Y_LLEVARSE', '2026-11-01', ['continuacion-de-cita']),
         corteDe('DESPLIEGUE_DEL_PASAJE', '2026-11-02', ['continuacion-de-cita']),
         corteDe('DESPLIEGUE_DE_LA_ATRIBUIDA', '2026-11-03', ['sm8', 'continuacion-de-cita']),
-        corteDe('DESPLIEGUE_DE_LOS_PANELES', llegada, ['continuacion-de-cita']),
+        corteDe('DESPLIEGUE_DE_LOS_PANELES', llegada, ['continuacion-de-cita', 'continuacion-de-obra']),
       ],
       juicios: [SM_C5],
     });
@@ -2124,7 +2133,7 @@ describe('Historia 32.4 — SM-C4, la continuación desde el listado de la Pági
     expect(SM_C4.deDondeLlega).toBe('DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO');
     expect(SM_C4.tasas).toEqual(['continuacion-desde-listado']);
     expect(SM_C4.corte?.serie).toBe('continuacion-de-obra');
-    expect(SM_C4.corte?.llegadas.map((l) => l.deDondeLlega)).toEqual(['DESPLIEGUE_DEL_INCIPIT']);
+    expect(SM_C4.corte?.llegadas.map((l) => l.deDondeLlega)).toEqual(['DESPLIEGUE_DEL_INCIPIT', 'DESPLIEGUE_DE_LOS_PANELES']);
     // Si salta, el informe nombra qué se juzga (PRD §7: «si baja, se juzga lo que se movió»).
     expect(SM_C4.palanca).toMatch(/lo decide Héctor$/);
     // Es la llegada de un juicio, no un corte de serie.

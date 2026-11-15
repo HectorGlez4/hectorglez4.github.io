@@ -68,9 +68,18 @@ describe('Historia 36.1 — los tokens de la v9.3 en `tokens.css`', () => {
     expect(declaraciones('--interlineado-cita-xs')).toEqual(['1.45']);
   });
 
-  it('ningún componente nombra `secondary`: el tinte del Autor es su token propio', async () => {
-    const fuente = await readFile(join(RAIZ, 'src/components/PanelDeBloque.astro'), 'utf8');
-    expect(fuente).not.toMatch(/secondary|#[0-9a-f]{3,8}\b|box-shadow/i);
+  it('ni el panel ni lo que la historia viste nombran `secondary`, un hexadecimal ni una sombra', async () => {
+    for (const fichero of [
+      'src/components/PanelDeBloque.astro',
+      'src/components/TarjetaDeCita.astro',
+      'src/components/TarjetaDeObra.astro',
+      'src/components/RutasDeSalida.astro',
+      'src/pages/cita/[slug].astro',
+      'src/pages/autor/[slug]/[...page].astro',
+    ]) {
+      const fuente = await readFile(join(RAIZ, fichero), 'utf8');
+      expect(fuente, fichero).not.toMatch(/secondary|#[0-9a-f]{3,8}\b|box-shadow/i);
+    }
   });
 });
 
@@ -193,7 +202,18 @@ const FAMILIAS = ['obra', 'autor', 'tema', 'herramientas'];
 
 /** Los paneles de una página: sus atributos y los bloques que contienen. */
 function leer(html: string): { bloques: Bloque[]; paneles: { atributos: ReadonlyMap<string, string>; hijos: number; anidado: boolean }[] } {
-  const rotulos = [...html.matchAll(/<details class="desplegable"[^>]*><summary[^>]*><span[^>]*>([^<]+)</g)].map((m) => m[1].trim());
+  /*
+   * El rótulo de cada `<details>`, en el orden del marcado: el texto de su `<summary>` sin
+   * etiquetas ni el glifo, sea cual sea el orden de sus atributos. El recorrido cuenta los mismos
+   * `<details>` en el mismo orden, y al final se exige que sean tantos como rótulos.
+   */
+  const rotulos = [...html.matchAll(/<details\b[^>]*>\s*<summary\b[^>]*>([\s\S]*?)<\/summary>/g)].map((m) =>
+    m[1]
+      .replace(/<span[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;|\u00a0/g, ' ')
+      .trim(),
+  );
   let detalles = 0;
   const bloques: Bloque[] = [];
   const paneles = new Map<Elemento, { atributos: ReadonlyMap<string, string>; hijos: number; anidado: boolean }>();
@@ -219,6 +239,7 @@ function leer(html: string): { bloques: Bloque[]; paneles: { atributos: Readonly
     else if (elemento.etiqueta === 'li' && c.includes('tarjeta')) que = 'ficha-de-cita';
     if (que !== undefined) bloques.push({ que, panel: familia });
   });
+  expect(detalles, 'cada `<details>` con su rótulo').toBe(rotulos.length);
   return { bloques, paneles: [...paneles.values()] };
 }
 

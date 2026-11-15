@@ -5,7 +5,7 @@ created: '2026-11-15'
 status: 'done'
 baseline_revision: '9502445ffbb9f4e15dbe0824b8671e1a0366233a'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-36-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
@@ -24,7 +24,7 @@ deferred:
   - summary: 'Consecuencia forzada por AD-19 (la Ficha no admite variante): al cambiar `TarjetaDeCita.astro`, los listados de Tema, Colección, Obra y Personaje pasan ya a Fichas en esta historia; aquí solo se les quita el filete superior del `ul` (incoherente sobre una pila de cajas). Sus paneles siguen siendo de la 36.2.'
     evidence: 'EXPERIENCE.md § Tarjeta de Cita (v9.3, «la misma tarjeta en todas partes… sin variante compacta»); `border-top` de `.listado` en tema/coleccion/obra/personaje `[...page].astro`.'
     severity: low
-  - summary: 'Corte de serie: la pasada cambia el aspecto de la Tarjeta de Obra y de las Rutas de salida, que son lo que mide la continuación de la Página de Cita (SM-4, SM-3) y SM-C5, así que se declara su corte con una constante nueva `DESPLIEGUE_DE_LOS_PANELES` en `undefined`. Su valor lo da Héctor al desplegar, en un commit aparte; ningún agente lo elige.'
+  - summary: 'Corte de serie: la pasada cambia el aspecto de la Tarjeta de Obra y de las Rutas de salida, que son lo que mide la continuación de la Página de Cita (SM-4, SM-3) y SM-C5, y —por AD-19— el listado de la Página de Obra, que mide SM-C4; así que se declara su corte con una constante nueva `DESPLIEGUE_DE_LOS_PANELES` en `undefined`, que parte `continuacion-de-cita` y `continuacion-de-obra` (desde la primera pasada de revisión). Su valor lo da Héctor al desplegar, en un commit aparte; ningún agente lo elige.'
     evidence: 'epic-36-context.md § Requirements; src/lib/umbrales.ts CORTES_DE_SERIE_DECLARADOS; tools/lib/lineaBase.ts JUICIOS_POR_VENTANAS SM-C5.'
     severity: low
   - summary: 'NFR-7 (Lighthouse, medias de 10 corridas alternas) se mide en la puerta de la Épica 36 antes del merge, no en esta historia: aquí solo se anota el delta en bytes de la hoja de estilo de la Página de Cita y de la de Autor. La historia no añade guion.'
@@ -136,6 +136,27 @@ deferred:
 
 (Las cinco capas son externas y la invocación no trajo hallazgos suyos: esta pasada no tiene ninguno.)
 
+### 2026-11-15 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 3, low 8)
+- defer: 0
+- reject: 23
+- addressed_findings:
+  - `[medium]` `[patch]` `linea-base.test.ts` fijaba `DESPLIEGUE_DE_LOS_PANELES` en `undefined` (AGENTS.md: ninguna prueba fija el valor de las constantes de despliegue): ahora coteja la `jornada` de la entrada con la constante, tenga el valor que tenga.
+  - `[medium]` `[patch]` El corte solo partía `continuacion-de-cita`, y la Ficha global (AD-19) cambia el listado de la Página de Obra que mide SM-C4: la entrada parte también `continuacion-de-obra`, su `que` nombra las Fichas de los listados, y SM-C4 la declara como llegada (la prueba de coherencia juicio ↔ cortes lo exige). Pruebas puestas al día.
+  - `[medium]` `[patch]` Las reglas del Rótulo de panel (`.rotulo`, `.rotulo + *`) alcanzaban los `p.rotulo` de estilo de `ComoCitar.astro` dentro del panel de las herramientas (0,06em de espaciado): acotadas a `:is(h2, h3).rotulo`, el encabezado de `Rotulo.astro`; el e2e de `paneles` exige `letter-spacing: normal` en esas etiquetas.
+  - `[low]` `[patch]` La llegada de los paneles en SM-C5 (y en SM-C4) no llevaba `marca`: ahora «el despliegue en vivo de la Épica 36, no el merge», y el informe la dice.
+  - `[low]` `[patch]` Artefactos de formato en `linea-base.test.ts` (dos entradas pegadas a la línea anterior): separadas.
+  - `[low]` `[patch]` Con colores forzados el panel perdía su límite: contorno transparente en `@media (forced-colors: active)`, que no ocupa sitio.
+  - `[low]` `[patch]` Nada medía el aire entre «Lee el pasaje» y el panel de las herramientas: prueba nueva en `lee-el-pasaje.spec.ts` (4 × unidad, y el pasaje fuera de todo panel).
+  - `[low]` `[patch]` Nada afirmaba la tinta del Rótulo de panel por familia: el e2e de `paneles` exige `--sobre-contenedor-{familia}` en cada panel de la Página de Cita y en el de Obra de la de Autor.
+  - `[low]` `[patch]` La guardia de `secondary`/hexadecimal/sombra miraba solo `PanelDeBloque.astro`: ahora también la Tarjeta de Cita, la de Obra, las Rutas de salida y las dos páginas.
+  - `[low]` `[patch]` `leer()` de `paneles.test.ts` emparejaba rótulos por un regex atado a una serialización: ahora toma el texto de cada `<summary>` sin etiquetas ni glifo, sea cual sea el orden de atributos, y exige tantos `<details>` como rótulos.
+  - `[low]` `[patch]` El e2e de la semblanza con biografía tomaba el primer enlace del panel: ahora el de la atribución.
+
+Rechazados, con su motivo: el cierre del panel con un Desplegable abierto (su `.contenido` ya trae 3 × unidad abajo); `cierre` sin cotejo (decisión de la primitiva; el de la Lista de Obras es correcto); `:last-child` con `li[hidden]` (dentro de un panel no hay filas ocultas: el filtro es de `/obras/`); tokens oscuros (el sitio no tiene tema oscuro); la Ficha global en los listados (AD-19, la lectura del contrato) y sus instantáneas regrabadas (revisadas en la pasada de implementación); los filetes de «Lee el pasaje» sobre el papel (por diseño: queda fuera del panel); `max-width` y relleno (`box-sizing: border-box` global); CAP-1 en su forma débil (lo refuerza la prueba 29.3 del `h1` en primera pantalla); `anillo()` (Playwright, tras una tecla, da `:focus-visible`); la anotación de la primera pasada y el NFR-7 con sus cifras (ya en el Auto Run Result); la instantánea inestable de `/buscar/` (ya diferida); `.sin-obra` a 1 × unidad del rótulo (es la regla del panel); las lecturas A2/B2/C2/D2/E2/F2 del contrato (aceptadas por la delegación de Héctor); la semblanza con biografía que el Corpus de hoy no tiene; el contorno del campo dentro del panel (3,33:1 sobre `--contenedor`).
+
 ## Design Notes
 
 El panel envuelve y no sustituye: las `section` de hoy (`tarjeta-de-obra`, `obras-del-autor`, con `aria-labelledby`) siguen siendo lo que eran, así que no se añade ni se quita ninguna región, y las pruebas que buscan `<section class="…"` siguen valiendo. Todo el trato de dentro vive en `PanelDeBloque.astro` con `:global` acotado bajo `.panel`, para que `Rotulo`, `Desplegable`, `FilaDeBloque`, `Chips` y `ListaDeObras` —compartidos con la portada, los Directorios y `/obras/`— salgan idénticos fuera de un panel. Comprobar especificidad: `.panel[data-astro-cid-…] .desplegable` gana a `.desplegable[data-astro-cid-…]`.
@@ -192,3 +213,26 @@ Blocking condition: ninguna.
 - Delta de CSS (NFR-7 se mide en la puerta de la Épica 36), con `/cita/alberto-masferrer-silencio-es-concentrarse-seguir-la-propia-orbita/` y `/autor/alberto-masferrer/` frente a una construcción de la base: Página de Cita +2.258 bytes (hoja externa 6.634 → 6.383, en línea 16.285 → 18.794); Página de Autor +2.489 (en línea 14.945 → 17.434); un Tema +304; la portada +308, solo los tokens. Sin guion nuevo. El marcado de la portada, `/autores/` y `/obras/` es el de la base (salvo el guion de medición de la construcción de prueba).
 
 **Riesgos.** El trato de dentro del panel depende de la especificidad de `.panel[cid] …` sobre las reglas con ámbito de cada componente; lo fijan las pruebas e2e de `paneles` y de `pagina-de-cita`. La Ficha global cambia ya los listados de Tema, Colección, Obra y Personaje (sus paneles son de la 36.2). `DESPLIEGUE_DE_LOS_PANELES` espera su valor de Héctor.
+
+### Revisión externa, pasada 1 (2026-11-15)
+
+**Resumen.** Once parches sobre los hallazgos de las cinco capas externas, sin `bad_spec` ni `intent_gap`: el Rótulo de panel acotado al encabezado de `Rotulo.astro` (no alcanza ya las etiquetas de estilo de «Cómo citar»), un contorno transparente del panel con colores forzados, el corte `DESPLIEGUE_DE_LOS_PANELES` también sobre `continuacion-de-obra` (SM-C4, por la Ficha global en el listado de la Obra) y con su marca en SM-C5 y SM-C4, la prueba que fijaba la constante en `undefined` retirada, y pruebas nuevas o más estrictas (aire entre «Lee el pasaje» y las herramientas, tinta del rótulo por familia, guardia de literales en los ficheros vestidos, emparejado de rótulos en `paneles.test.ts`, enlace de la atribución de la semblanza).
+
+**Ficheros.**
+- `src/components/PanelDeBloque.astro` — `:is(h2, h3).rotulo` en las reglas del Rótulo de panel; `@media (forced-colors: active)` con contorno transparente.
+- `src/lib/umbrales.ts` — la entrada de los paneles parte `continuacion-de-cita` y `continuacion-de-obra`; comentarios y `que` al día.
+- `tools/lib/lineaBase.ts` — la llegada de los paneles, con marca, en SM-C5 y en SM-C4.
+- `tests/unit/linea-base.test.ts` — sin fijar el valor de la constante; las dos series, la llegada de SM-C4, la marca en el informe; formato.
+- `tests/unit/paneles.test.ts` — guardia de literales sobre seis ficheros; `leer()` con rótulos tomados de cada `<summary>`.
+- `tests/e2e/paneles.spec.ts` — tinta del rótulo por familia; las etiquetas de «Cómo citar» sin espaciado; el enlace de la atribución.
+- `tests/e2e/lee-el-pasaje.spec.ts` — el panel de las herramientas a 4 × unidad de «Lee el pasaje».
+
+**Revisión.** 11 parches (0 altos, 3 medios, 8 bajos), 0 diferidos, 23 rechazados. Puntuación 3 × 3 + 8 = 17 ≥ 5: `followup_review_recommended: true`.
+
+**Verificación.**
+- `npx vitest run tests/unit/linea-base.test.ts` (114), `paneles` y `tipografia-en-tokens`: verde.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npx playwright test` de `paneles`, `lee-el-pasaje`, `desplegable`, `como-citar`, `pagina-de-cita`, `rutas-de-salida`, `accesibilidad` y `tipografia-calculada` en los dos perfiles: 529 pasan, 65 se saltan, 0 fallan. Puertos libres antes y después.
+- `npm test` completo, desacoplado: 209 ficheros, 9.052 pruebas, verde.
+
+**Riesgos.** La prueba de las etiquetas de «Cómo citar» es condicional a que la Cita del Corpus elegida lo lleve; la de la semblanza con biografía sigue saltándose con el Corpus de hoy. NFR-7, en la puerta de la Épica 36.

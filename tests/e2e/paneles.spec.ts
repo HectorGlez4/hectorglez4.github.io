@@ -79,10 +79,16 @@ test.describe('Historia 36.1 — la Página de Cita en paneles', () => {
       for (const color of [tinta, apagada, siena]) {
         expect(await contraste(page, color, fondo), `${color} sobre ${fondo}`).toBeGreaterThanOrEqual(4.5);
       }
-      const rotulo = panel.locator('.rotulo').first();
+      const rotulo = panel.locator(':is(h2, h3).rotulo').first();
       if ((await rotulo.count()) > 0) {
         expect(await contraste(page, await estilo(rotulo, 'color'), fondo)).toBeGreaterThanOrEqual(4.5);
         expect(await estilo(rotulo, 'text-transform')).toBe('none');
+        // En la tinta de su familia, no solo con contraste bastante.
+        const clase = await panel.getAttribute('class');
+        const deLaFamilia = ['obra', 'autor', 'tema'].find((f) => clase!.split(/\s+/).includes(`panel-${f}`));
+        if (deLaFamilia !== undefined) {
+          expect(await estilo(rotulo, 'color'), `rótulo del panel ${deLaFamilia}`).toBe(await token(page, `--sobre-contenedor-${deLaFamilia}`));
+        }
       }
     }
     // El texto de la Ficha sobre su caja blanca.
@@ -152,6 +158,14 @@ test.describe('Historia 36.1 — la Página de Cita en paneles', () => {
     expect(await estilo(desplegables.first(), 'border-top-width')).toBe('0px');
     expect(await estilo(desplegables.last(), 'border-bottom-width')).toBe('0px');
     if (n > 1) expect(await estilo(desplegables.nth(1), 'border-top-width')).toBe('1px');
+    // Las etiquetas de estilo de «Cómo citar» (APA, MLA…) no son Rótulos de panel: sin el espaciado de 0,06em.
+    const comoCitar = page.locator('.panel-herramientas details.desplegable', { has: page.locator('.como-citar') });
+    if ((await comoCitar.count()) > 0) {
+      await comoCitar.locator('summary').click();
+      const etiqueta = comoCitar.locator('.como-citar .rotulo').first();
+      expect(await estilo(etiqueta, 'letter-spacing')).toBe('normal');
+      await comoCitar.locator('summary').click();
+    }
     // Abierto, el campo de «Inserta esta cita» conserva su fondo y su contorno.
     await page.locator('.panel-herramientas details.desplegable > summary').last().click();
     const campo = page.locator('.panel-herramientas textarea').first();
@@ -187,6 +201,7 @@ test.describe('Historia 36.1 — la Página de Autor en paneles', () => {
       for (const color of [tinta, apagada, siena]) expect(await contraste(page, color, fondo)).toBeGreaterThanOrEqual(4.5);
     }
     expect(await estilo(autor.locator('h1'), 'color')).toBe(await token(page, '--sobre-contenedor-autor'));
+    expect(await estilo(obra.locator('h2.rotulo'), 'color')).toBe(await token(page, '--sobre-contenedor-obra'));
     const fila = obra.locator('.lista-de-obras a').first();
     const a = await anillo(page, fila);
     expect(a).toEqual({ estilo: 'solid', color: siena, visible: true });
@@ -201,7 +216,8 @@ test.describe('Historia 36.1 — la Página de Autor en paneles', () => {
     test.skip(BIOGRAFIA === undefined, 'El Corpus no tiene ningún Autor con biografía.');
     await page.goto(`/autor/${BIOGRAFIA}/`);
     const panel = page.locator('.panel-autor');
-    const enlace = panel.locator('a').first();
+    // El enlace de la atribución, no el primero que haya: la semblanza propia no lleva atribución.
+    const enlace = panel.locator('[data-pagefind-ignore] p a').first();
     await expect(enlace).toBeVisible();
     expect(await contraste(page, await estilo(enlace, 'color'), await estilo(panel, 'background-color'))).toBeGreaterThanOrEqual(4.5);
   });

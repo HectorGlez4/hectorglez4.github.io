@@ -191,6 +191,26 @@ test.describe('Historia 31.2 — «Lee el pasaje» en el navegador', () => {
     expect(await enElDocumento(pasaje(page))).toBe(pasajeAntes);
   });
 
+  test('el panel de las herramientas va a 4 × unidad de «Lee el pasaje», que sigue sobre el papel (Historia 36.1)', async ({ page }) => {
+    await irA(page, CON_PASAJE);
+    await expect(pasaje(page)).toHaveCount(1);
+    expect(await pasaje(page).evaluate((e) => e.closest('.panel') === null)).toBe(true);
+    const herramientas = page.locator('.desplegables > .panel-herramientas');
+    await expect(herramientas).toHaveCount(1);
+    const unidad = await page.evaluate(() => {
+      const muestra = document.createElement('div');
+      muestra.style.width = 'var(--unidad)';
+      document.body.append(muestra);
+      const ancho = muestra.getBoundingClientRect().width;
+      muestra.remove();
+      return ancho;
+    });
+    expect(unidad).toBeGreaterThan(0);
+    const fin = await pasaje(page).evaluate((e) => e.getBoundingClientRect().bottom);
+    const inicio = await herramientas.evaluate((e) => e.getBoundingClientRect().top);
+    expect(inicio - fin).toBeCloseTo(unidad * 4, 0);
+  });
+
   test('a 320 px, abierto, sin desplazamiento horizontal', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await irA(page, CON_PASAJE);

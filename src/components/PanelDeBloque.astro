@@ -93,26 +93,30 @@ if (!FAMILIAS.includes(familia) || !CIERRES.includes(cierre)) {
     background: var(--contenedor);
   }
 
-  /* El Rótulo de panel: el mismo `h2`, que deja de ser la versalita gris del Rótulo de sección. */
-  .panel :global(.rotulo) {
+  /*
+   * El Rótulo de panel: el mismo `h2`, que deja de ser la versalita gris del Rótulo de sección.
+   * Solo el encabezado de `Rotulo.astro` —`h2` o `h3`—: «Cómo citar» lleva sus propios
+   * `p.rotulo` (APA, MLA…) dentro del panel de las herramientas, y no son Rótulos de panel.
+   */
+  .panel :global(:is(h2, h3).rotulo) {
     text-transform: none;
     letter-spacing: 0.06em;
   }
 
-  .panel.panel-obra :global(.rotulo) {
+  .panel.panel-obra :global(:is(h2, h3).rotulo) {
     color: var(--sobre-contenedor-obra);
   }
 
-  .panel.panel-autor :global(.rotulo) {
+  .panel.panel-autor :global(:is(h2, h3).rotulo) {
     color: var(--sobre-contenedor-autor);
   }
 
-  .panel.panel-tema :global(.rotulo) {
+  .panel.panel-tema :global(:is(h2, h3).rotulo) {
     color: var(--sobre-contenedor-tema);
   }
 
   /* Lo que sigue al rótulo, a una `--unidad`. */
-  .panel :global(.rotulo + *) {
+  .panel :global(:is(h2, h3).rotulo + *) {
     margin-top: var(--unidad);
   }
 
@@ -162,5 +166,15 @@ if (!FAMILIAS.includes(familia) || !CIERRES.includes(cierre)) {
 
   .panel.panel-tema :global(.chip:hover) {
     background: var(--contenedor-bajo);
+  }
+
+  /*
+   * Con colores forzados (Alto contraste de Windows) el fondo desaparece, y con él el límite del
+   * panel: un contorno transparente, que no ocupa sitio y que el modo forzado pinta.
+   */
+  @media (forced-colors: active) {
+    .panel {
+      outline: var(--grosor-filete) solid transparent;
+    }
   }
 </style>
