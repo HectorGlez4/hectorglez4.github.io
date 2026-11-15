@@ -91,6 +91,30 @@ describe('Historia 1.7 — Autores', () => {
     expect(contenido).toContain('añoFallecimiento: 65');
   });
 
+  it('Historia 35.1 — crear un Autor vivo escribe «vivo: true» y ningún año de fallecimiento', async () => {
+    const rutas = await corpusVacio();
+    const resultado = await crearAutor(rutas, {
+      nombre: 'Paulo Coelho',
+      añoNacimiento: 1947,
+      vivo: true,
+      semblanza: 'Novelista brasileño.',
+    });
+
+    expect(resultado.ok).toBe(true);
+    const contenido = await readFile(join(rutas.autores, 'paulo-coelho.yml'), 'utf8');
+    expect(contenido).toContain('vivo: true');
+    expect(contenido).not.toContain('añoFallecimiento');
+  });
+
+  it('Historia 35.1 — un Autor vivo con año de fallecimiento se rechaza sin escribir', async () => {
+    const rutas = await corpusVacio();
+    const resultado = await crearAutor(rutas, { ...SENECA, vivo: true });
+
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) expect(resultado.motivos.join(' ')).toMatch(/vivo/);
+    expect(await readdir(rutas.autores)).toHaveLength(0);
+  });
+
   it('un campo opcional sin valor se omite, nunca vacío ni null', async () => {
     const rutas = await corpusVacio();
     await crearAutor(rutas, { ...SENECA, añoNacimiento: undefined });

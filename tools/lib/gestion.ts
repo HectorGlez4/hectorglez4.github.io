@@ -85,6 +85,8 @@ export interface DatosDeAutor {
   añoFallecimiento?: number;
   añoNacimiento?: number;
   semblanza?: string;
+  /** Historia 35.1 — el Autor vive: lleva `vivo: true` y nunca `añoFallecimiento`. */
+  vivo?: true;
   /**
    * La tradición del Autor — §6.1 del PRD, y el dato del que sale el suelo del 40 %.
    *
@@ -153,6 +155,7 @@ export async function crearAutor(rutas: Rutas, datos: DatosDeAutor): Promise<Res
     // El orden importa para quien lee el fichero: nacimiento antes que fallecimiento.
     añoNacimiento: validado.data.añoNacimiento,
     añoFallecimiento: validado.data.añoFallecimiento,
+    vivo: validado.data.vivo,
     semblanza: validado.data.semblanza,
     // `aYaml` omite lo que no tiene valor, así que un Autor sin declarar sale sin la clave.
     tradicion: validado.data.tradicion,

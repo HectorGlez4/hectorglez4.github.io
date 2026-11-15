@@ -68,7 +68,7 @@ const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
 
 const USO = [
   'Uso:',
-  '  npx tsx tools/autor.ts crear  --nombre "…" --fallecimiento AAAA --semblanza "…"',
+  '  npx tsx tools/autor.ts crear  --nombre "…" (--fallecimiento AAAA | --vivo) --semblanza "…"',
   `                               [--nacimiento AAAA] [--tradicion ${TRADICIONES.join('|')}]`,
   '                               [--corpus corpus]',
   '  npx tsx tools/autor.ts editar <slug> [--nombre "…"] [--semblanza "…"]',
@@ -117,6 +117,8 @@ function datosDe(args: string[]): DatosDeAutor {
     añoNacimiento: entero(opcion(args, '--nacimiento')),
     semblanza: opcion(args, '--semblanza'),
     tradicion: tradicionDe(args),
+    // Historia 35.1 — un Autor vivo lleva «vivo: true» en vez del año de fallecimiento.
+    ...(args.includes('--vivo') ? { vivo: true as const } : {}),
   };
 }
 
@@ -145,7 +147,7 @@ if (
   slugPosicional.push(argumentos[2]);
 }
 const noReconocidos = motivosDeArgumentosNoReconocidos(argumentos, {
-  solas: [orden ?? '', ...slugPosicional],
+  solas: [orden ?? '', ...slugPosicional, ...(orden === 'crear' ? ['--vivo'] : [])],
   // Cada orden admite las suyas: un `--motivo` en `crear` o un `--nombre` en `retirar` se
   // rechazan igual que una bandera inventada, en vez de ignorarse.
   conValor:
