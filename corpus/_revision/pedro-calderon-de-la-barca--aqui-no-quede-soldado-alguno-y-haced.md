@@ -1,5 +1,5 @@
 ---
-texto: "Aquí no quede soldado alguno, y haced marchar con brevedad; que me importa llegar presto a Portugal. [A CRESPO] Vos, por alcalde perpetuo de aquesta villa os quedad."
+texto: "Aquí no quede soldado\nalguno, y haced marchar\ncon brevedad; que me importa\nllegar presto a Portugal.\n[A CRESPO]\nVos, por alcalde perpetuo\nde aquesta villa os quedad."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-aqui-no-quede-soldado-alguno-y-haced"
 procedencia:

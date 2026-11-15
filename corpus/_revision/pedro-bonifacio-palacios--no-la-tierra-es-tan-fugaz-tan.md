@@ -1,5 +1,5 @@
 ---
-texto: "No; la Tierra es tan fugaz, tan reducida, como un campo de gitanos: para ti la Eternidad."
+texto: "No; la Tierra es tan fugaz, tan reducida,\ncomo un campo de gitanos:\npara ti la Eternidad."
 autor: "pedro-bonifacio-palacios"
 slug: "pedro-bonifacio-palacios-no-la-tierra-es-tan-fugaz-tan"
 procedencia:

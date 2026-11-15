@@ -1,5 +1,5 @@
 ---
-texto: "Dama del ajedrez, dama de cera, dama de faltriquera, si queréis ver ocultas vuestras faltas, dejad de acompañar mujeres altas; que malográis así vuestros deseos, porque fuerais enana entre pigmeos."
+texto: "Dama del ajedrez, dama de cera,\ndama de faltriquera,\nsi queréis ver ocultas vuestras faltas,\ndejad de acompañar mujeres altas;\nque malográis así vuestros deseos,\nporque fuerais enana entre pigmeos."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-dama-del-ajedrez-dama-de-cera-dama"
 procedencia:

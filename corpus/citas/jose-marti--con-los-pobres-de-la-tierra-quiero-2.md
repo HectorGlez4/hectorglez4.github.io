@@ -1,5 +1,5 @@
 ---
-texto: "Con los pobres de la tierra Quiero yo mi suerte echar: El arroyo de la sierra Me complace más que el mar."
+texto: "Con los pobres de la tierra\nQuiero yo mi suerte echar:\nEl arroyo de la sierra\nMe complace más que el mar."
 autor: "jose-marti"
 temas:
   - "la-justicia"

@@ -1,5 +1,5 @@
 ---
-texto: "El viento sosegado, el can dormido, éste yace, aquél quedo los átomos no mueve, con el susurro hacer temiendo leve, aunque poco, sacrílego ruïdo, violador del silencio sosegado."
+texto: "El viento sosegado, el can dormido,\néste yace, aquél quedo\nlos átomos no mueve,\ncon el susurro hacer temiendo leve,\naunque poco, sacrílego ruïdo,\nviolador del silencio sosegado."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-el-viento-sosegado-el-can-dormido-este"
 procedencia:

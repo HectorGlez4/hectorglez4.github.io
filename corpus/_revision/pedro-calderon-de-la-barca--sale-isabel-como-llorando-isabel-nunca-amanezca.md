@@ -1,5 +1,5 @@
 ---
-texto: "Sale ISABEL como llorando ISABEL: Nunca amanezca a mis ojos la luz hermosa del día, porque a su sombra no tenga vergüenza yo de mí misma."
+texto: "Sale ISABEL como llorando\nISABEL: Nunca amanezca a mis ojos\nla luz hermosa del día,\nporque a su sombra no tenga\nvergüenza yo de mí misma."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sale-isabel-como-llorando-isabel-nunca-amanezca"
 procedencia:

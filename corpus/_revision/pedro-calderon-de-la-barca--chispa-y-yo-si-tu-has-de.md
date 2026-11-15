@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: Y yo, si tú has de volver allá, ¿qué tengo de hacer?"
+texto: "CHISPA: Y yo, si tú has de volver\nallá, ¿qué tengo de hacer?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-y-yo-si-tu-has-de"
 procedencia:

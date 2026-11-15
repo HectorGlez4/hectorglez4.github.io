@@ -226,3 +226,113 @@ describe('Historia 15.2 — una Cita contenida en otra también se señala', () 
     expect(informe.publicadas).toHaveLength(1);
   });
 });
+
+describe('Historia 29.4 — la clase de la coincidencia y la casi igual', () => {
+  const LARGA: EntradaDeLote = {
+    ...ORIGINAL,
+    texto: 'No es que tengamos poco tiempo, sino que perdemos mucho, y la vida es larga si sabes usarla.',
+  };
+
+  it('el posible duplicado dice su clase: repetidas o contenida', async () => {
+    const rutas = await corpusDePrueba();
+    await darDeAltaLote([LARGA], rutas);
+
+    const repetida = await darDeAltaLote([{ ...LARGA, texto: LARGA.texto!.toUpperCase() }], rutas);
+    expect(repetida.posiblesDuplicados.map((d) => d.clase)).toEqual(['repetidas']);
+
+    const contenida = await darDeAltaLote(
+      [{ ...LARGA, texto: 'No es que tengamos poco tiempo, sino que perdemos mucho' }],
+      rutas,
+    );
+    expect(contenida.posiblesDuplicados.map((d) => d.clase)).toEqual(['contenida']);
+  });
+
+  it('la casi igual de una publicada de su Obra se publica y se nombra, en seco y de verdad', async () => {
+    const rutas = await corpusDePrueba();
+    const primera = await darDeAltaLote([LARGA], rutas);
+    expect(primera.publicadas).toHaveLength(1);
+    const otra = primera.publicadas[0].slug;
+
+    const casi = { ...LARGA, texto: LARGA.texto!.replace('perdemos', 'gastamos') };
+    const seco = await darDeAltaLote([casi], rutas, { seco: true });
+    expect(seco.casiIguales).toHaveLength(1);
+
+    const informe = await darDeAltaLote([casi], rutas);
+    expect(informe.posiblesDuplicados).toEqual([]);
+    expect(informe.publicadas).toHaveLength(1);
+    expect(informe.casiIguales).toHaveLength(1);
+    expect(informe.casiIguales[0]).toMatchObject({
+      coincideCon: otra,
+      donde: 'publicadas',
+      palabra: { a: 'gastamos', b: 'perdemos' },
+    });
+    expect(informe.casiIguales[0].parecido).toBeGreaterThanOrEqual(0.85);
+    const { formatearInforme } = await import('../../tools/alta.ts');
+    expect(formatearInforme(informe)).toContain(`Casi igual a ${otra} (publicadas; casi iguales`);
+  });
+
+  it('la casi igual de otra Obra no se señala', async () => {
+    const rutas = await corpusDePrueba();
+    await darDeAltaLote([LARGA], rutas);
+    const informe = await darDeAltaLote(
+      [{ ...LARGA, texto: LARGA.texto!.replace('perdemos', 'gastamos'), procedencia: { obra: 'Cartas a Lucilio', año: 64 } }],
+      rutas,
+    );
+    expect(informe.casiIguales).toEqual([]);
+  });
+  it('una casi igual que se aparta por repetida no sale como escrita; con --con-duplicados, sí', async () => {
+    const rutas = await corpusDePrueba();
+    const casi = { ...LARGA, texto: LARGA.texto!.replace('perdemos', 'gastamos') };
+    await darDeAltaLote([LARGA], rutas);
+    await darDeAltaLote([casi], rutas);
+
+    // La misma que `casi`, ya publicada: se aparta por repetida, y su casi igual con LARGA no se anota.
+    const apartada = await darDeAltaLote([{ ...casi, texto: casi.texto!.toUpperCase() }], rutas);
+    expect(apartada.posiblesDuplicados.map((d) => d.clase)).toEqual(['repetidas']);
+    expect(apartada.casiIguales).toEqual([]);
+
+    const forzada = await darDeAltaLote([{ ...casi, texto: casi.texto!.toUpperCase() }], rutas, { conDuplicados: true });
+    expect(forzada.publicadas).toHaveLength(1);
+    expect(forzada.casiIguales.map((c) => c.donde)).toEqual(['publicadas']);
+  });
+
+  it('dos casi iguales de la misma Obra en un mismo lote: la segunda nombra a la primera', async () => {
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote([LARGA, { ...LARGA, texto: LARGA.texto!.replace('perdemos', 'gastamos') }], rutas);
+    expect(informe.publicadas).toHaveLength(2);
+    expect(informe.casiIguales).toEqual([
+      expect.objectContaining({ coincideCon: informe.publicadas[0].slug, donde: 'el propio lote' }),
+    ]);
+  });
+
+  it('el parte nombra la clase del posible duplicado y escribe la cifra con coma', async () => {
+    const { formatearInforme } = await import('../../tools/alta.ts');
+    const rutas = await corpusDePrueba();
+    const primera = await darDeAltaLote([LARGA], rutas);
+    const contenida = await darDeAltaLote(
+      [{ ...LARGA, texto: 'No es que tengamos poco tiempo, sino que perdemos mucho' }],
+      rutas,
+    );
+    expect(formatearInforme(contenida)).toContain(`Coincide con ${primera.publicadas[0].slug} (publicadas; contenida).`);
+    const repetida = await darDeAltaLote([{ ...LARGA, texto: LARGA.texto!.toUpperCase() }], rutas);
+    expect(formatearInforme(repetida)).toContain(`Coincide con ${primera.publicadas[0].slug} (publicadas; repetidas).`);
+    const casi = await darDeAltaLote([{ ...LARGA, texto: LARGA.texto!.replace('perdemos', 'gastamos') }], rutas, { seco: true });
+    expect(formatearInforme(casi)).toMatch(/casi iguales, 0,\d\d; gastamos\/perdemos\)\./);
+  });
+
+  it('si la contienen una candidata en revisión y una publicada, nombra la publicada', async () => {
+    const rutas = await corpusDePrueba();
+    // Primero la que va a revisión (sin Fuente), luego la publicada: la de revisión entra antes en el índice.
+    const { fuente: _sinFuente, ...sinFuente } = LARGA;
+    await darDeAltaLote([{ ...sinFuente, texto: `${LARGA.texto} Y así se pasa.` }], rutas);
+    const publicada = await darDeAltaLote([LARGA], rutas, { conDuplicados: true });
+    expect(publicada.publicadas).toHaveLength(1);
+    const informe = await darDeAltaLote(
+      [{ ...LARGA, texto: 'No es que tengamos poco tiempo, sino que perdemos mucho' }],
+      rutas,
+    );
+    expect(informe.posiblesDuplicados).toEqual([
+      expect.objectContaining({ coincideCon: publicada.publicadas[0].slug, donde: 'publicadas', clase: 'contenida' }),
+    ]);
+  });
+});

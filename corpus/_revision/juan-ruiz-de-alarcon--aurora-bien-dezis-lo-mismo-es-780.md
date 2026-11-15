@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Bien dezis; lo mismo es 780 enamorado, que loco: y no muestra estarlo poco, pues prefiere el interes de su antojo a mi opinion."
+texto: "AURORA\nBien dezis; lo mismo es 780\nenamorado, que loco:\ny no muestra estarlo poco,\npues prefiere el interes\nde su antojo a mi opinion."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-bien-dezis-lo-mismo-es-780"
 procedencia:

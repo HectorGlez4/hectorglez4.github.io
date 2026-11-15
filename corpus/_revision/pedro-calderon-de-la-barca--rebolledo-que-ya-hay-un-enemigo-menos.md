@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: ...que ya hay un enemigo menos a quien tener miedo."
+texto: "REBOLLEDO: ...que ya hay un enemigo\nmenos a quien tener miedo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-que-ya-hay-un-enemigo-menos"
 procedencia:

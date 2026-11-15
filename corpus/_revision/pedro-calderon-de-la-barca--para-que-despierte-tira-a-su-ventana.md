@@ -1,5 +1,5 @@
 ---
-texto: "Para que despierte, tira a su ventana una piedra."
+texto: "Para que despierte, tira\na su ventana una piedra."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-para-que-despierte-tira-a-su-ventana"
 procedencia:

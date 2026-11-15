@@ -1,5 +1,5 @@
 ---
-texto: "Su alegre estancia risueña medio-templo, medio-nido, conversa al alma que sueña con un lenguaje escondido."
+texto: "Su alegre estancia risueña\nmedio-templo, medio-nido,\nconversa al alma que sueña\ncon un lenguaje escondido."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-su-alegre-estancia-risuena-medio-templo-medio"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Señor, como los hidalgos viven tan bien por acá, el verdugo que tenemos no ha aprendido a degollar; y ésa es querella del muerto, que toca a su autoridad, y hasta que él mismo se queje, no les toca a los demás."
+texto: "Señor, como los hidalgos\nviven tan bien por acá,\nel verdugo que tenemos\nno ha aprendido a degollar;\ny ésa es querella del muerto,\nque toca a su autoridad,\ny hasta que él mismo se queje,\nno les toca a los demás."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-senor-como-los-hidalgos-viven-tan-bien"
 procedencia:

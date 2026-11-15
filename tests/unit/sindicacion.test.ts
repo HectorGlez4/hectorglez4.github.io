@@ -98,3 +98,17 @@ describe('el canal de la Cita del Día', () => {
     expect(xml).toContain('Con &lt;ángulos&gt;');
   });
 });
+
+describe('Historia 29.3 — una Cita en verso en el canal', () => {
+  it('la `description` va en una línea, con « / » entre versos y sin ningún salto', () => {
+    const enVerso = [cita('x', 'seneca', 'Verde que te quiero verde.\nVerde viento.\nVerdes ramas.')];
+    const xml = canalRss(
+      entradasDelCanal(enVerso, AUTORES, '2026-08-26', {}, 1),
+      'https://sabiduriadebolsillo.net',
+      'Título',
+      'Descripción',
+    );
+    const descripcion = xml.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)![1];
+    expect(descripcion).toBe('«Verde que te quiero verde. / Verde viento. / Verdes ramas.» — Séneca');
+  });
+});

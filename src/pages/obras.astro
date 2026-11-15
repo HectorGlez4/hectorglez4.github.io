@@ -64,7 +64,7 @@ const ENTIDADES_DE_LAS_LETRAS = 'Obras de autores';
             {grupo.entradas.map((autor) => (
               <section class="autor">
                 <h3 data-zona="directorio"><a href={autor.ruta}>{autor.nombre}</a></h3>
-                <ListaDeObras obras={autor.obras} zona="directorio" />
+                <ListaDeObras obras={autor.obras} zona="directorio" pliegue={false} />
               </section>
             ))}
           </GrupoDeLetra>

@@ -1,5 +1,5 @@
 ---
-texto: "A quien naturaleza tanto inclina, que al hombre que viuir sabe sin ella sabe auisar el animal mas bruto."
+texto: "A quien naturaleza tanto inclina,\nque al hombre que viuir sabe sin ella\nsabe auisar el animal mas bruto."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-a-quien-naturaleza-tanto-inclina-que-al"
 procedencia:

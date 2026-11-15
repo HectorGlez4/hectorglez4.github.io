@@ -28,14 +28,18 @@
 import { readFile } from 'node:fs/promises';
 import { parse as parsearYaml } from 'yaml';
 import { citaAdmisible, gradoDeProcedencia, type CitaAdmisible } from '../src/lib/admision.ts';
-import { motivoParaNoPublicar } from './lib/cotejo.ts';
+import { documentosDeCita, motivoParaNoPublicar } from './lib/cotejo.ts';
+import { documentoParaLosSaltos, parteDeSaltosDescartados, textoConSaltos } from './lib/lineas.ts';
 import { normalizar } from '../src/lib/normalizar.ts';
-import { MIN_CARACTERES_PARA_CONTENCION } from '../src/lib/umbrales.ts';
+import { cifraDeParecido, formaParaComparar, parecidoEntre, type FormaParaComparar } from './lib/parecido.ts';
+import { clave, fichaDeCita, formaDeObra, indiceDeFichas } from '../src/lib/obras.ts';
 import { slugDeAutor, slugDeCita, slugDeTema, slugLibre } from '../src/lib/slug.ts';
 import {
   escribirCita,
   leerAutores,
   leerCitas,
+  leerDocumentosDeclarados,
+  leerFichasDeObra,
   leerTemas,
   nombreDeFicheroDeCita,
   rutasDelCorpus,
@@ -84,6 +88,23 @@ export interface PosibleDuplicado {
   /** Slug de la Cita que ya está en el corpus, o `«el propio lote»` si repite dentro. */
   coincideCon: string;
   donde: 'publicadas' | 'en revisión' | 'el propio lote';
+  /** Historia 29.4 — cómo coincide, según `parecidoEntre`: la misma forma, o una dentro de la otra. */
+  clase: 'repetidas' | 'contenida';
+}
+
+/**
+ * Historia 29.4 — una entrada casi igual a una Cita publicada **de su misma Obra** (`parecidoEntre`,
+ * clase «casi iguales»). Es solo aviso: no aparta la entrada, que se escribe como siempre.
+ */
+export interface CasiIgual {
+  texto: string;
+  /** Slug de la publicada con la que casi coincide. */
+  coincideCon: string;
+  /** Una publicada de antes, o una que este mismo lote publica. */
+  donde: 'publicadas' | 'el propio lote';
+  parecido: number;
+  /** La palabra que cambia en cada una, si es una sola en la misma posición. */
+  palabra?: { a: string; b: string };
 }
 
 export interface InformeDeAlta {
@@ -103,6 +124,11 @@ export interface InformeDeAlta {
    */
   posiblesDuplicados: PosibleDuplicado[];
   /**
+   * Historia 29.4 — entradas casi iguales a una publicada de su misma Obra. **No bloquean**: se
+   * escriben igual, con `--con-duplicados` o sin él, también en seco; el parte lo dice.
+   */
+  casiIguales: CasiIgual[];
+  /**
    * Entradas que se publicarían pero no tendrían **ningún Tema publicado** —contando las
    * publicadas y las que este mismo lote publica— — Historia 26.8, NFR-5. **No se escriben en
    * ningún sitio**, ni en `corpus/citas/` ni en `corpus/_revision/`: el lote se corrige y se
@@ -117,6 +143,11 @@ export interface InformeDeAlta {
    * de la que dependía su Tema—. Ya están en `corpus/citas/`. Vacío casi siempre — Historia 26.8.
    */
   publicadasSinTema?: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  /**
+   * Historia 29.1 — entradas cuyo texto traía saltos que ningún documento de verso suyo respalda:
+   * se escribieron con un espacio en su lugar (AD-29). No impiden nada; el parte lo dice.
+   */
+  saltosDescartados?: { texto: string; descartados: number }[];
 }
 
 /**
@@ -134,9 +165,53 @@ export async function darDeAltaLote(
   const temas = await leerTemas(rutas);
   const yaPublicadas = await leerCitas(rutas.citas);
   const enRevisionYa = await leerCitas(rutas.revision);
+  const fichas = indiceDeFichas(await leerFichasDeObra(rutas));
+
+  /*
+   * Historia 29.4 — las publicadas de cada Obra resuelta (por ficha), con su forma precalculada:
+   * contra ellas se mira la casi igual. Solo la misma Obra: entre Obras distintas, una palabra
+   * cambiada suele ser otra Cita.
+   */
+  const publicadasDeCadaObra = new Map<
+    string,
+    { slug: string; donde: CasiIgual['donde']; forma: FormaParaComparar }[]
+  >();
+  for (const c of yaPublicadas) {
+    const ficha = fichaDeCita(c, fichas);
+    if (ficha === undefined) continue;
+    const lista = publicadasDeCadaObra.get(ficha.nombre) ?? [];
+    lista.push({ slug: c.slug, donde: 'publicadas', forma: formaParaComparar(c.texto) });
+    publicadasDeCadaObra.set(ficha.nombre, lista);
+  }
 
   const slugsDeAutor = new Set(autores.map((a) => a.slug));
   const slugsDeTema = new Set(temas.map((t) => t.slug));
+
+  /*
+   * Historia 29.1 — el `texto` lo escribe `textoConSaltos`, con los saltos del documento de verso
+   * de la Cita si lo hay. Los documentos se leen solo si alguna entrada declara Fuente: sin ella
+   * no hay documento, y el texto va en una línea.
+   */
+  const documentos = lote.some((e) => typeof e.fuente?.id === 'string')
+    ? await leerDocumentosDeclarados(rutas)
+    : new Map<string, { cuerpo: string; lineas?: string }>();
+  function textoDelAlta(entrada: EntradaDeLote): { texto: string; descartados: number } {
+    const recibido = entrada.texto ?? '';
+    // Un `texto` que no es cadena (un número del YAML) sigue tal cual hasta el esquema, que lo
+    // rechaza con su regla: el escritor solo escribe cadenas.
+    if (typeof recibido !== 'string') return { texto: recibido, descartados: 0 };
+    const id = entrada.fuente?.id;
+    const obra = entrada.procedencia?.obra;
+    const candidatos = documentosDeCita(
+      typeof id === 'string' ? { id } : undefined,
+      typeof obra === 'string' ? obra : undefined,
+      documentos,
+    ).map((nombre) => {
+      const d = documentos.get(nombre)!;
+      return { nombre, cuerpo: d.cuerpo, ...(d.lineas !== undefined ? { lineas: d.lineas } : {}) };
+    });
+    return textoConSaltos(recibido, documentoParaLosSaltos(recibido, candidatos));
+  }
 
   /*
    * Historia 26.8 — antes de escribir nada se **ensaya** el lote entero (`recorrer` sin
@@ -213,14 +288,20 @@ export async function darDeAltaLote(
     // FR-14 — el índice de comparación usa la forma canónica de AD-3, la misma que la
     // búsqueda. Ese es justo el punto: si duplicados y búsqueda usaran criterios distintos,
     // el corpus podría acabar con dos Citas que la búsqueda presenta como una sola.
-    const yaEnCorpus = new Map<string, { slug: string; donde: PosibleDuplicado['donde'] }>();
+    const yaEnCorpus: YaEnCorpus = new Map();
+    // Historia 29.4 — las de cada Obra, para la casi igual, con lo que esta pasada vaya publicando.
+    // Cada pasada empieza de lo publicado: lo de un ensayo no cuenta en la siguiente. Las listas no
+    // se mutan, se sustituyen, así que basta copiar el mapa.
+    const publicadasPorObra = new Map(publicadasDeCadaObra);
     for (const c of enRevisionYa) {
-      yaEnCorpus.set(normalizar(c.texto), { slug: c.slug, donde: 'en revisión' });
+      const f = formaParaComparar(c.texto);
+      yaEnCorpus.set(f.canonica, { slug: c.slug, donde: 'en revisión', forma: f });
     }
     // Las publicadas se indexan después para que ganen: si el mismo texto está en los dos
     // sitios, lo que el editor necesita saber es que ya está publicado.
     for (const c of yaPublicadas) {
-      yaEnCorpus.set(normalizar(c.texto), { slug: c.slug, donde: 'publicadas' });
+      const f = formaParaComparar(c.texto);
+      yaEnCorpus.set(f.canonica, { slug: c.slug, donde: 'publicadas', forma: f });
     }
 
     const informe: InformeDeAlta = {
@@ -228,30 +309,78 @@ export async function darDeAltaLote(
       enRevision: [],
       autoresDesconocidos: [],
       posiblesDuplicados: [],
+      casiIguales: [],
       rechazadasPorTema: [],
     };
 
     for (const [indice, entrada] of lote.entries()) {
       if (apartadas.has(indice)) continue;
-      const texto = entrada.texto ?? '';
+      const escrito = textoDelAlta(entrada);
+      const texto = escrito.texto;
       const motivos: string[] = [];
-
-      // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
-      const canonico = normalizar(texto);
-      const yaEsta = canonico === '' ? undefined : (yaEnCorpus.get(canonico) ?? contenidaEn(canonico, yaEnCorpus));
-      if (yaEsta && !opciones.conDuplicados) {
-        // No se escribe y no se descarta: se señala y el editor decide. El sistema no
-        // tiene criterio para saber si dos textos equivalentes son la misma Cita o dos
-        // ediciones legítimas de la misma frase.
-        informe.posiblesDuplicados.push({ texto, coincideCon: yaEsta.slug, donde: yaEsta.donde });
-        continue;
-      }
 
       // ── El Autor se resuelve antes que nada: sin él no hay slug que generar ──
       const referenciaAutor = entrada.autor ?? '';
       const slugAutor = slugsDeAutor.has(referenciaAutor)
         ? referenciaAutor
         : slugDeAutor(referenciaAutor);
+
+      // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
+      const nueva = formaParaComparar(texto);
+      const canonico = nueva.canonica;
+
+      /*
+       * Historia 29.4 — la casi igual, frente a las publicadas de su misma Obra (y las que este lote
+       * ya publicó). Es aviso y nada más: no aparta la entrada, y sale también con `--con-duplicados`.
+       */
+      const obraDeLaEntrada = entrada.procedencia?.obra;
+      const fichaDeLaEntrada =
+        typeof obraDeLaEntrada === 'string'
+          ? fichaDeCita({ slug: '', autor: slugAutor, procedencia: { obra: obraDeLaEntrada } }, fichas)
+          : undefined;
+      /*
+       * La Obra de la entrada: su ficha, o —si su Obra aún no tiene ficha, porque este lote la
+       * crea— su identidad (Autor, forma), para que dos entradas del mismo lote de una Obra nueva
+       * se comparen entre sí. Una forma vacía no es Obra.
+       */
+      const formaDeLaEntrada = typeof obraDeLaEntrada === 'string' ? formaDeObra(obraDeLaEntrada) : '';
+      const obraDeComparacion =
+        fichaDeLaEntrada?.nombre ?? (formaDeLaEntrada === '' ? undefined : `sin-ficha:${clave(slugAutor, formaDeLaEntrada)}`);
+      // Se anotan en el informe solo si la entrada llega a publicarse: el parte dice «escritas igual».
+      const casiDeLaEntrada: CasiIgual[] = [];
+      for (const otra of obraDeComparacion === undefined ? [] : (publicadasPorObra.get(obraDeComparacion) ?? [])) {
+        const coincidencia = parecidoEntre(nueva, otra.forma);
+        if (coincidencia?.clase !== 'casi-iguales') continue;
+        casiDeLaEntrada.push({
+          texto,
+          coincideCon: otra.slug,
+          donde: otra.donde,
+          parecido: coincidencia.parecido,
+          ...(coincidencia.palabra !== undefined ? { palabra: coincidencia.palabra } : {}),
+        });
+      }
+
+      const yaEsta = repetidaOContenida(nueva, yaEnCorpus);
+      if (yaEsta && !opciones.conDuplicados) {
+        // No se escribe y no se descarta: se señala y el editor decide. El sistema no
+        // tiene criterio para saber si dos textos equivalentes son la misma Cita o dos
+        // ediciones legítimas de la misma frase.
+        informe.posiblesDuplicados.push({
+          texto,
+          coincideCon: yaEsta.slug,
+          donde: yaEsta.donde,
+          clase: yaEsta.clase,
+        });
+        continue;
+      }
+      // El parte de saltos habla solo de lo que se escribe (a `citas/` o a revisión), no de un
+      // duplicado que se aparta sin escribir.
+      if (escrito.descartados > 0) {
+        informe.saltosDescartados = [
+          ...(informe.saltosDescartados ?? []),
+          { texto, descartados: escrito.descartados },
+        ];
+      }
 
       if (referenciaAutor === '') {
         motivos.push('Regla incumplida: falta el Autor de la Cita.');
@@ -352,7 +481,7 @@ export async function darDeAltaLote(
           : await escribirCita(rutas.revision, nombreFichero, candidata);
         informe.enRevision.push({ texto, ruta, motivos });
         if (canonico !== '') {
-          yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
+          yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote', forma: nueva });
         }
         continue;
       }
@@ -377,7 +506,15 @@ export async function darDeAltaLote(
       }
       // Lo aceptado entra en el índice: así un lote que repite la misma Cita dos veces se
       // detecta igual que si la segunda llegara mañana en otro lote.
-      yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
+      yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote', forma: nueva });
+      // Y la casi igual, igual: la siguiente entrada de su Obra se compara también con esta.
+      if (obraDeComparacion !== undefined) {
+        publicadasPorObra.set(obraDeComparacion, [
+          ...(publicadasPorObra.get(obraDeComparacion) ?? []),
+          { slug: candidata.slug, donde: 'el propio lote', forma: nueva },
+        ]);
+      }
+      informe.casiIguales.push(...casiDeLaEntrada);
       informe.publicadas.push({
         slug: candidata.slug,
         ruta,
@@ -465,11 +602,25 @@ export function formatearInforme(informe: InformeDeAlta): string {
     lineas.push('', `Posibles duplicados, no escritos: ${informe.posiblesDuplicados.length}`);
     for (const d of informe.posiblesDuplicados) {
       lineas.push(`  · «${recortar(d.texto)}»`);
-      lineas.push(`      Coincide con ${d.coincideCon} (${d.donde}).`);
+      lineas.push(`      Coincide con ${d.coincideCon} (${d.donde}; ${d.clase}).`);
     }
     lineas.push(
       '  Nada se ha descartado. Para incorporarlos igualmente, repita con --con-duplicados.',
     );
+  }
+
+  if (informe.casiIguales.length > 0) {
+    lineas.push('', `Casi iguales a una publicada de su Obra, escritas igual: ${informe.casiIguales.length}`);
+    for (const c of informe.casiIguales) {
+      const palabra = c.palabra !== undefined ? `; ${c.palabra.a}/${c.palabra.b}` : '';
+      lineas.push(`  ⚠ «${recortar(c.texto)}»`);
+      lineas.push(`      Casi igual a ${c.coincideCon} (${c.donde}; casi iguales, ${cifraDeParecido(c.parecido)}${palabra}).`);
+    }
+    lineas.push('  Es aviso: retirar una, conservar las dos o restituir el literal lo decide una persona.');
+  }
+
+  for (const salto of informe.saltosDescartados ?? []) {
+    lineas.push('', `«${recortar(salto.texto)}»: ${parteDeSaltosDescartados(salto.descartados)}`);
   }
 
   if (informe.autoresDesconocidos.length > 0) {
@@ -480,31 +631,30 @@ export function formatearInforme(informe: InformeDeAlta): string {
   return lineas.join('\n');
 }
 
+type YaEnCorpus = Map<string, { slug: string; donde: PosibleDuplicado['donde']; forma: FormaParaComparar }>;
+
 /**
- * La otra forma de duplicar: una Cita **entera dentro de otra** — Historia 15.2.
- *
- * El índice de la Historia 1.6 compara formas canónicas iguales, y por eso no vio el caso que
- * de verdad ocurrió: «la diligencia es madre de la buena ventura» publicada, y después la misma
- * sentencia con su segunda mitad. No son iguales, así que el informe dijo cero duplicados y
- * `slugLibre` renombró la segunda a `-2` en silencio. El sitio acabó con dos URL que solo se
- * diferenciaban en un dígito y con la misma sentencia en las dos.
- *
- * Se mira en las dos direcciones —la nueva dentro de una vieja y una vieja dentro de la nueva—
- * porque el orden en que llegan los lotes no lo decide nadie. Y se pide un mínimo de longitud a
- * la más corta (AD-9, `MIN_CARACTERES_PARA_CONTENCION`): sin él, «Yo sé quién soy» quedaría
- * atrapada por cualquier Cita larga que contuviese esas palabras, y un aviso que salta de más es
- * un aviso que se aprende a ignorar.
- *
- * Como su hermana, **no descarta: señala**. A veces el recorte es justo la Cita que se quiere.
+ * La repetida o la contenida de una entrada frente a lo que ya hay —todo lo publicado, todo lo de
+ * revisión y el propio lote—, con `parecidoEntre` (Historia 29.4; la contención es de la 15.2 y su
+ * porqué vive en `tools/lib/parecido.ts`). Primero la misma forma canónica; si no la hay, la
+ * primera que la contiene o que está dentro de ella, las publicadas antes que lo demás.
  */
-function contenidaEn(
-  canonico: string,
-  yaEnCorpus: Map<string, { slug: string; donde: PosibleDuplicado['donde'] }>,
-): { slug: string; donde: PosibleDuplicado['donde'] } | undefined {
-  for (const [otro, quien] of yaEnCorpus) {
-    const corta = canonico.length <= otro.length ? canonico : otro;
-    if (corta.length < MIN_CARACTERES_PARA_CONTENCION) continue;
-    if (otro.includes(canonico) || canonico.includes(otro)) return quien;
+function repetidaOContenida(
+  nueva: FormaParaComparar,
+  yaEnCorpus: YaEnCorpus,
+): { slug: string; donde: PosibleDuplicado['donde']; clase: PosibleDuplicado['clase'] } | undefined {
+  if (nueva.canonica === '') return undefined;
+  const igual = yaEnCorpus.get(nueva.canonica);
+  if (igual !== undefined && parecidoEntre(nueva, igual.forma, 'contenida')?.clase === 'repetidas') {
+    return { slug: igual.slug, donde: igual.donde, clase: 'repetidas' };
+  }
+  // Como en la repetida, si la contienen (o contiene) a la vez una publicada y otra cosa, gana la
+  // publicada: lo que el editor necesita saber es que ya está publicada.
+  const valores = [...yaEnCorpus.values()];
+  for (const quien of [...valores.filter((v) => v.donde === 'publicadas'), ...valores.filter((v) => v.donde !== 'publicadas')]) {
+    if (parecidoEntre(nueva, quien.forma, 'contenida')?.clase === 'contenida') {
+      return { slug: quien.slug, donde: quien.donde, clase: 'contenida' };
+    }
   }
   return undefined;
 }

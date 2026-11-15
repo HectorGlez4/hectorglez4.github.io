@@ -1,5 +1,5 @@
 ---
-texto: "Pues huir no podemos, Desde aquí sus desdichas escuchemos: Sepamos lo que dice."
+texto: "Pues huir no podemos,\nDesde aquí sus desdichas escuchemos:\nSepamos lo que dice."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-huir-no-podemos-desde-aqui-sus"
 procedencia:

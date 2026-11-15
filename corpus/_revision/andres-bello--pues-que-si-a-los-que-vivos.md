@@ -1,5 +1,5 @@
 ---
-texto: "¿Pues qué, si a los que vivos todavía la patria goza (y plegue a Dios que el día en que los llore viuda, tarde sea) no se arredrare de elevar la idea?"
+texto: "¿Pues qué, si a los que vivos todavía\nla patria goza (y plegue a Dios que el día\nen que los llore viuda, tarde sea)\nno se arredrare de elevar la idea?"
 autor: "andres-bello"
 slug: "andres-bello-pues-que-si-a-los-que-vivos"
 procedencia:

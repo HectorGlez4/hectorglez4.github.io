@@ -1,5 +1,5 @@
 ---
-texto: "¿Piensas que apagarás con sangre el fuego de libertad en tantas almas grandes?"
+texto: "¿Piensas que apagarás con sangre el fuego\nde libertad en tantas almas grandes?"
 autor: "andres-bello"
 slug: "andres-bello-piensas-que-apagaras-con-sangre-el-fuego"
 procedencia:

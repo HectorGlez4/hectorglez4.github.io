@@ -32,8 +32,13 @@
  * falla nombrándolo mientras no lo esté.
  *
  *   · **Página de Cita** — su fichero, su Autor (nombre y años: título, meta, JSON-LD y Tarjeta
- *     de Obra), sus Temas (el nombre de cada chip) y su ficha de Obra (el título de la
- *     Atribución y del `isPartOf`). **Nunca Citas hermanas**: la Tarjeta de Obra (24.4) pinta
+ *     de Obra; y, desde la 30.3, el nombre de «Cómo citar», que una clave revisada invierte:
+ *     `NOMBRE_EN_REFERENCIA`), sus Temas (el nombre de cada chip), su ficha de Obra (el título de la
+ *     Atribución y del `isPartOf` y, desde la 31.2, sus `formas`) y, desde la 31.2, **los
+ *     documentos de su Obra** —la unión de `documentosDeCita` de sus Citas vivas, con su índice de
+ *     subpáginas—, de los que sale «Lee el pasaje»; una Cita sin Obra, solo los suyos. Recuperar
+ *     una página nueva de una Obra fecha así sus Páginas de Cita a sabiendas: puede darles pasaje.
+ *     **Nunca los ficheros de Citas hermanas**: la Tarjeta de Obra (24.4) pinta
  *     el año, el recuento y si hay edición cotejada de la Obra, «Siguiente…» (24.5) depende del
  *     orden del libro y del listado del Tema, y las Rutas de salida del pie (24.6) pintan textos,
  *     Obras y recuentos de otras Citas. Todo eso es navegación y, por excepción declarada de
@@ -45,7 +50,14 @@
  *   · **Página de Obra** — su ficha, sus Citas, su Autor y **sus documentos**: la unión de
  *     `documentosDeCita` de sus Citas sobre los nombres de `corpus/fuentes/`, y el índice de
  *     subpáginas que los ordena (`{fuente}--{obra}.indice.yml`, Historia 24.9). Un documento no se
- *     analiza: cualquier cambio suyo puede reordenar la Obra, y solo fecha esa página.
+ *     analiza: cualquier cambio suyo puede reordenar la Obra —y, desde la 31.2, cambiar el pasaje
+ *     de sus Citas—, y fecha esa página y sus Páginas de Cita. Desde la
+ *     Historia 32.2, también **su Ficha técnica**: el documento de Wikidata de la revisión que
+ *     declara su ficha (`corpus/wikidata/{Q}--r{N}.json`, cualquier cambio) y, de
+ *     `corpus/wikidata/vigentes.yml`, solo las claves de las entidades cuya etiqueta pinta
+ *     (género P136 y lengua P407; el autor P50 se coteja y no se pinta). Si su documento no se
+ *     deja leer, compone `vigentes.yml` entero: antes fechar de más que de menos. Desde la
+ *     Historia 32.5, de su Autor también el nombre de «Cómo citar» (`NOMBRE_EN_REFERENCIA`).
  *   · **Directorio de Autores** (Historia 26.3) — lo que pinta: de cada Autor con alguna Cita, el
  *     nombre, los años y la clave de orden (`ordenAlfabetico`), que lo ordena y lo agrupa; de cada
  *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
@@ -109,6 +121,7 @@ import {
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
 import { formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
+import { ESTILOS_DE_REFERENCIA, nombreEnReferencia } from '../../src/lib/atribucion.ts';
 import { documentoDeCita, documentosDeCita } from './cotejo.ts';
 import { obraDeIndice } from './indice.ts';
 import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
@@ -160,8 +173,44 @@ export interface CambioDeFichero extends Transicion {
 /** Que cualquier cambio del fichero cuenta: el documento de Fuente en la Página de Obra. */
 export const CUALQUIER_CAMBIO: unique symbol = Symbol('cualquier cambio');
 
+/**
+ * Un campo que una superficie no pinta tal cual sino **derivado** de varios del fichero — Historia
+ * 30.3: el nombre invertido de «Cómo citar» sale de `nombre`, `ordenAlfabetico` y `ordenRevisado`.
+ * `de` son las claves del esquema que lee (las clasifica la prueba de la 24.8) y `valor` lo que la
+ * superficie pinta de ellas; `cambiaronLosCampos` compara ese valor como compara un campo.
+ */
+export interface CampoDerivado {
+  readonly derivado: string;
+  readonly de: readonly string[];
+  valor(version: Readonly<Record<string, unknown>>): unknown;
+}
+
+/** Un campo que se pinta: una clave —o un subcampo con punto— o un campo derivado. */
+export type Campo = string | CampoDerivado;
+
 /** Los campos que una superficie pinta de un fichero, o que le basta con que cambie. */
-export type Campos = typeof CUALQUIER_CAMBIO | readonly string[];
+export type Campos = typeof CUALQUIER_CAMBIO | readonly Campo[];
+
+/**
+ * El nombre del Autor en las tres Referencias de «Cómo citar» — Historia 30.3, AD-27. Lo pinta la
+ * Página de Cita con `nombreEnReferencia` de `src/lib/atribucion.ts`, la misma función que aquí, y
+ * desde la 32.5 también la Página de Obra, en las Referencias de la Obra: revisar una clave que es
+ * palabra del nombre lo invierte («Martí, J.») y cambia las dos; un lote de `proponer-claves` sin
+ * revisar no cambia ninguna Referencia y no las fecha.
+ */
+export const NOMBRE_EN_REFERENCIA: CampoDerivado = {
+  derivado: 'nombreEnReferencia',
+  de: ['nombre', 'ordenAlfabetico', 'ordenRevisado'],
+  valor: (version) =>
+    typeof version.nombre !== 'string'
+      ? version.nombre
+      : ESTILOS_DE_REFERENCIA.map((estilo) =>
+          nombreEnReferencia(
+            { nombre: version.nombre as string, ordenAlfabetico: version.ordenAlfabetico, ordenRevisado: version.ordenRevisado },
+            estilo,
+          ),
+        ),
+};
 
 /**
  * Si una transición cambió alguno de los campos dados — **la** regla de AD-27.
@@ -180,8 +229,9 @@ export function cambiaronLosCampos(transicion: Transicion, campos: Campos): bool
   return campos.some((campo) => canonica(valorDelCampo(antes, campo)) !== canonica(valorDelCampo(despues, campo)));
 }
 
-/** El valor de un campo —o de un subcampo con punto— de una versión; ausente si no está. */
-function valorDelCampo(version: Readonly<Record<string, unknown>>, campo: string): unknown {
+/** El valor de un campo —o de un subcampo con punto, o uno derivado— de una versión; ausente si no está. */
+function valorDelCampo(version: Readonly<Record<string, unknown>>, campo: Campo): unknown {
+  if (typeof campo !== 'string') return campo.valor(version);
   return campo
     .split('.')
     .reduce<unknown>(
@@ -241,8 +291,10 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  *
  *   · la **semblanza** y la **biografía** de un Autor solo las pinta su página (1);
  *   · la ficha de Obra pinta su `titulo` en la Página de Cita y en los listados, y en su propia
- *     página además `autor`, `formas` —qué Citas reúne—, `nota` y `ediciones`;
- *   · un documento, cualquier cambio, y solo en la Página de Obra;
+ *     página además `autor`, `formas` —qué Citas reúne—, `nota`, `ediciones` y `wikidata` (la
+ *     línea de Ficha técnica, 32.2);
+ *   · un documento, cualquier cambio, y solo en la Página de Obra; lo mismo un documento de
+ *     Wikidata (32.2), cuya `vigentes.yml` la relación compone por claves, fuera de la tabla;
  *   · el Directorio de Autores (26.3) pinta de un Autor el nombre, los años y su clave de orden,
  *     y de una Cita solo su `autor`: la cuenta por Autor;
  *   · el Directorio de Obras (26.4) pinta de un Autor el nombre y la clave —no los años—, de una
@@ -267,11 +319,12 @@ export const CAMPOS_QUE_PINTA = {
     directorioDeObras: ['autor', 'procedencia.obra', 'procedencia.año'],
   },
   autor: {
-    cita: CAMPOS_DEL_AUTOR_FUERA,
+    cita: [...CAMPOS_DEL_AUTOR_FUERA, NOMBRE_EN_REFERENCIA],
     autor: [...CAMPOS_DEL_AUTOR_FUERA, 'semblanza', 'biografia'],
     tema: CAMPOS_DEL_AUTOR_FUERA,
     coleccion: CAMPOS_DEL_AUTOR_FUERA,
-    obra: CAMPOS_DEL_AUTOR_FUERA,
+    // Desde la 32.5 la página 1 de Obra lleva «Cómo citar», con el nombre en Referencia.
+    obra: [...CAMPOS_DEL_AUTOR_FUERA, NOMBRE_EN_REFERENCIA],
     directorioDeAutores: [...CAMPOS_DEL_AUTOR_FUERA, 'ordenAlfabetico'],
     directorioDeObras: ['nombre', 'ordenAlfabetico'],
   },
@@ -283,14 +336,22 @@ export const CAMPOS_QUE_PINTA = {
     coleccion: ['nombre', 'criterio', 'miembros'],
   },
   obra: {
-    cita: ['titulo'],
+    // Historia 31.2 — las `formas` deciden qué Citas son de la Obra y, con ellas, qué documentos
+    // componen el pasaje de cada Página de Cita.
+    cita: ['titulo', 'formas'],
     autor: ['titulo'],
     tema: ['titulo'],
     coleccion: ['titulo'],
-    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones'],
+    // El incipit (32.3) lo pinta solo la página 1 de su Obra.
+    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones', 'wikidata', 'incipit'],
     directorioDeObras: ['titulo', 'formas'],
   },
   documento: {
+    // Historia 31.2 — el pasaje de la Página de Cita sale de los documentos de su Obra.
+    cita: CUALQUIER_CAMBIO,
+    obra: CUALQUIER_CAMBIO,
+  },
+  wikidata: {
     obra: CUALQUIER_CAMBIO,
   },
 } as const satisfies Record<FamiliaDeFichero, Partial<Record<Columna, Campos>>>;
@@ -303,16 +364,17 @@ export const CAMPOS_QUE_PINTA = {
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
- *   · `ordenRevisado` (26.1) solo dice que una persona revisó la clave: no lo pinta ninguna
- *     superficie, nunca. La clave, `ordenAlfabetico`, sí: la pintan los dos Directorios (26.3,
- *     26.4), y por eso está en la tabla y no aquí.
+ *   · `ordenRevisado` (26.1) estuvo aquí hasta la 30.3: desde entonces decide si la Página de
+ *     Cita invierte el nombre del Autor en «Cómo citar», y entra en la tabla por el campo
+ *     derivado `NOMBRE_EN_REFERENCIA`, nunca como clave suelta (`proponer-claves` sin revisar no
+ *     cambia ninguna Referencia).
  *
  * Está escrita para que un campo no fechable sea una decisión con nombre y no un olvido: la
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
   cita: ['aptaParaPortada', 'estadoDerechos'],
-  autor: ['tradicion', 'ordenRevisado'],
+  autor: ['tradicion'],
   obra: ['distintaDe'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
@@ -350,6 +412,17 @@ export interface ObraParaFechar {
   autor: string;
   /** Las formas canónicas que reclama: resuelven las bajas de Cita y las de ficha. */
   formas?: readonly string[];
+  /**
+   * Historia 32.2 — la ficha atada a Wikidata: la ruta de su documento y las entidades cuya
+   * etiqueta pinta su línea de Ficha técnica (`entidadesQuePinta`). `pinta` ausente es «el
+   * documento no se dejó leer», y entonces compone `vigentes.yml` con cualquier cambio.
+   */
+  wikidata?: { documento: string; pinta?: readonly string[] };
+  /**
+   * Historia 32.3 — el nombre del documento de `corpus/fuentes/` de su incipit, si lo declara: la
+   * página 1 pinta su texto, así que la compone aunque ya no sea de ninguna de sus Citas.
+   */
+  incipit?: string;
   ruta: string;
 }
 
@@ -389,6 +462,8 @@ export interface CorpusParaFechar {
   obras?: readonly ObraParaFechar[];
   /** Las rutas de los documentos de `corpus/fuentes/` — Historia 24.8. */
   documentos?: readonly string[];
+  /** La ruta de `corpus/wikidata/vigentes.yml` — Historia 32.2. */
+  vigentesDeWikidata?: string;
   /** Las bajas, que salen del historial y no del disco — Historia 24.8. */
   bajas?: BajasParaFechar;
 }
@@ -505,7 +580,34 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     if (cita.obra !== undefined) apilar(citasDeObra, cita.obra, cita);
   }
 
-  // La Página de Cita: su fichero, su Autor, sus Temas y su ficha de Obra. Nunca sus hermanas.
+  /**
+   * Los ficheros de `corpus/fuentes/` de unas Citas: la unión de `documentosDeCita` de cada una
+   * y el índice de subpáginas que ordena los documentos de su obra (Historia 24.9), que compone
+   * como uno de ellos. Lo usan la Página de Obra y, desde la 31.2, la Página de Cita.
+   */
+  const documentosDeLasCitas = (citas: readonly CitaParaFechar[]): Set<string> => {
+    const ficheros = new Set<string>();
+    for (const cita of citas) {
+      if (cita.fuente === undefined) continue;
+      for (const nombre of documentosDeCita({ id: cita.fuente }, cita.obraDeclarada, documentos)) {
+        for (const documento of documentos.get(nombre) ?? []) ficheros.add(documento);
+      }
+      const corto = documentoDeCita({ id: cita.fuente }, cita.obraDeclarada);
+      for (const indice of corto === undefined ? [] : (indices.get(corto) ?? [])) ficheros.add(indice);
+    }
+    return ficheros;
+  };
+  /** Los documentos de cada Obra con Citas, calculados una vez para todas sus Páginas de Cita. */
+  const documentosDeObra = new Map<string, Set<string>>();
+  for (const [obra, citas] of citasDeObra) documentosDeObra.set(obra, documentosDeLasCitas(citas));
+
+  /*
+   * La Página de Cita: su fichero, su Autor, sus Temas y su ficha de Obra —el título y, desde la
+   * 31.2, las `formas`— y, desde la 31.2, **los documentos de su Obra** —los de todas sus Citas
+   * vivas, con su índice—, de los que sale su pasaje; sin Obra, solo los suyos. Nunca los ficheros
+   * de sus hermanas: un documento nuevo de la Obra puede darle pasaje, una Cita nueva no le cambia
+   * nada que afirme.
+   */
   for (const cita of corpus.citas) {
     const ruta = rutaDeCita(cita.slug);
     declarar(ruta, 'cita');
@@ -513,6 +615,9 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     componer(ruta, ficheroDeAutor.get(cita.autor), 'autor');
     for (const tema of cita.temas ?? []) componer(ruta, ficheroDeTema.get(tema), 'tema');
     for (const ficha of fichasDeLaCita(cita)) componer(ruta, ficha, 'obra');
+    const deSusDocumentos =
+      (cita.obra === undefined ? undefined : documentosDeObra.get(cita.obra)) ?? documentosDeLasCitas([cita]);
+    for (const documento of deSusDocumentos) componer(ruta, documento, 'documento');
   }
 
   // Los listados de Autor, Tema y Colección.
@@ -586,17 +691,20 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     const ruta = rutaDeLaObra(obra);
     declarar(ruta, 'obra');
     componer(ruta, obra.ruta, 'obra');
+    // Historia 32.2 — su Ficha técnica: el documento de su revisión y, de las vigentes, solo las
+    // claves que pinta (o todas, si su documento no se dejó leer).
+    if (obra.wikidata !== undefined) {
+      componer(ruta, obra.wikidata.documento, 'wikidata');
+      componerCampos(ruta, corpus.vigentesDeWikidata, obra.wikidata.pinta ?? CUALQUIER_CAMBIO);
+    }
+    // Historia 32.3 — el documento de su incipit, sea o no de alguna de sus Citas.
+    if (obra.incipit !== undefined) {
+      for (const documento of documentos.get(obra.incipit) ?? []) componer(ruta, documento, 'documento');
+    }
     for (const cita of citas) componer(ruta, cita.ruta, 'cita');
     componer(ruta, ficheroDeAutor.get(obra.autor), 'autor');
-    for (const cita of citas) {
-      if (cita.fuente === undefined) continue;
-      for (const nombre of documentosDeCita({ id: cita.fuente }, cita.obraDeclarada, documentos)) {
-        for (const documento of documentos.get(nombre) ?? []) componer(ruta, documento, 'documento');
-      }
-      // Historia 24.9 — el índice que ordena los documentos de su obra la compone como uno de ellos.
-      const corto = documentoDeCita({ id: cita.fuente }, cita.obraDeclarada);
-      for (const indice of corto === undefined ? [] : (indices.get(corto) ?? [])) componer(ruta, indice, 'documento');
-    }
+    // Sus documentos, con el índice que los ordena (Historia 24.9) como uno de ellos.
+    for (const documento of documentosDeObra.get(obra.nombre) ?? []) componer(ruta, documento, 'documento');
   }
 
   /*
@@ -785,7 +893,11 @@ export function bajasDelHistorial(
 /** El mismo corpus con cada ruta de fichero traducida —a relativa, por ejemplo—. */
 export function conRutas(corpus: CorpusParaFechar, traducir: (ruta: string) => string): CorpusParaFechar {
   const cita = (c: CitaParaFechar) => ({ ...c, ruta: traducir(c.ruta) });
-  const obra = (o: ObraParaFechar) => ({ ...o, ruta: traducir(o.ruta) });
+  const obra = (o: ObraParaFechar): ObraParaFechar => ({
+    ...o,
+    ruta: traducir(o.ruta),
+    ...(o.wikidata === undefined ? {} : { wikidata: { ...o.wikidata, documento: traducir(o.wikidata.documento) } }),
+  });
   return {
     citas: corpus.citas.map(cita),
     autores: corpus.autores.map((a) => ({ ...a, ruta: traducir(a.ruta) })),
@@ -793,6 +905,7 @@ export function conRutas(corpus: CorpusParaFechar, traducir: (ruta: string) => s
     colecciones: corpus.colecciones.map((c) => ({ ...c, ruta: traducir(c.ruta) })),
     ...(corpus.obras === undefined ? {} : { obras: corpus.obras.map(obra) }),
     ...(corpus.documentos === undefined ? {} : { documentos: corpus.documentos.map(traducir) }),
+    ...(corpus.vigentesDeWikidata === undefined ? {} : { vigentesDeWikidata: traducir(corpus.vigentesDeWikidata) }),
     ...(corpus.bajas === undefined
       ? {}
       : {
@@ -814,7 +927,9 @@ export function ficherosDelCorpus(corpus: CorpusParaFechar): string[] {
       ...corpus.temas.map((tema) => tema.ruta),
       ...corpus.colecciones.map((coleccion) => coleccion.ruta),
       ...(corpus.obras ?? []).map((obra) => obra.ruta),
+      ...(corpus.obras ?? []).flatMap((obra) => (obra.wikidata === undefined ? [] : [obra.wikidata.documento])),
       ...(corpus.documentos ?? []),
+      ...(corpus.vigentesDeWikidata === undefined ? [] : [corpus.vigentesDeWikidata]),
     ]),
   ];
 }

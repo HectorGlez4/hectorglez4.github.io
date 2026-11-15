@@ -1,5 +1,5 @@
 ---
-texto: "No negará su voz divina Apolo a tu virtud, ¡oh Piar!, su voz divina, que la memoria de alentados hechos redime al tiempo y a la Parca avara."
+texto: "No negará su voz divina Apolo\na tu virtud, ¡oh Piar!, su voz divina,\nque la memoria de alentados hechos\nredime al tiempo y a la Parca avara."
 autor: "andres-bello"
 slug: "andres-bello-no-negara-su-voz-divina-apolo-a"
 procedencia:

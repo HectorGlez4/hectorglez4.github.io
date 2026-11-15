@@ -1,5 +1,5 @@
 ---
-texto: "¡No hay vates!, gritarán, ¡en lastimero estado el teatro está!..."
+texto: "¡No hay vates!, gritarán, ¡en lastimero\nestado el teatro está!..."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-no-hay-vates-gritaran-en-lastimero-estado"
 procedencia:

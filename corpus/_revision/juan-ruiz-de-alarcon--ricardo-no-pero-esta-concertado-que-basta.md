@@ -1,5 +1,5 @@
 ---
-texto: "RICARDO No, pero està concertado; que basta para perder 385 la vida con la esperança."
+texto: "RICARDO\nNo, pero està concertado;\nque basta para perder 385\nla vida con la esperança."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ricardo-no-pero-esta-concertado-que-basta"
 procedencia:

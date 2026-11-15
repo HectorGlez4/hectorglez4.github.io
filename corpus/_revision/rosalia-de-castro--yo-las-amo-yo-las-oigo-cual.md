@@ -1,5 +1,5 @@
 ---
-texto: "Yo las amo, yo las oigo, Cual oigo el rumor del viento, El murmurar de la fuente O el balido del cordero."
+texto: "Yo las amo, yo las oigo,\nCual oigo el rumor del viento,\nEl murmurar de la fuente\nO el balido del cordero."
 autor: "rosalia-de-castro"
 slug: "rosalia-de-castro-yo-las-amo-yo-las-oigo-cual"
 procedencia:

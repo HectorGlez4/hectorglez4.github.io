@@ -1,5 +1,5 @@
 ---
-texto: "Y luego que las cuerdas armoniza, el coro celestial en nuevo canto celebra tu llegada, y solemniza."
+texto: "Y luego que las cuerdas armoniza,\nel coro celestial en nuevo canto\ncelebra tu llegada, y solemniza."
 autor: "andres-bello"
 slug: "andres-bello-y-luego-que-las-cuerdas-armoniza-el"
 procedencia:

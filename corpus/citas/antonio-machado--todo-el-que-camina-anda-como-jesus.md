@@ -1,5 +1,5 @@
 ---
-texto: "Todo el que camina anda, como Jesús, sobre el mar."
+texto: "Todo el que camina anda,\ncomo Jesús, sobre el mar."
 autor: "antonio-machado"
 temas:
   - "la-vida"

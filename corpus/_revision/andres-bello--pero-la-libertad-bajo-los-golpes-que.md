@@ -1,5 +1,5 @@
 ---
-texto: "Pero la libertad, bajo los golpes que la ensangrientan, cada vez más brava, más indomable, nuevos cuellos yergue, que al despotismo harán soltar la clava."
+texto: "Pero la libertad, bajo los golpes\nque la ensangrientan, cada vez más brava,\nmás indomable, nuevos cuellos yergue,\nque al despotismo harán soltar la clava."
 autor: "andres-bello"
 slug: "andres-bello-pero-la-libertad-bajo-los-golpes-que"
 procedencia:

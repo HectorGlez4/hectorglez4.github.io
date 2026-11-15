@@ -1,5 +1,5 @@
 ---
-texto: "ni se obedece intruso poderío, que, ora promulga leyes, y ora anula, siendo la ley suprema su albedrío;"
+texto: "ni se obedece intruso poderío,\nque, ora promulga leyes, y ora anula,\nsiendo la ley suprema su albedrío;"
 autor: "andres-bello"
 slug: "andres-bello-ni-se-obedece-intruso-poderio-que-ora"
 procedencia:

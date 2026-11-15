@@ -1,5 +1,5 @@
 ---
-texto: "MENDO: Y es dicha mía, pues con este cesarán los celos del capitán."
+texto: "MENDO: Y es dicha mía,\npues con este cesarán\nlos celos del capitán."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mendo-y-es-dicha-mia-pues-con"
 procedencia:

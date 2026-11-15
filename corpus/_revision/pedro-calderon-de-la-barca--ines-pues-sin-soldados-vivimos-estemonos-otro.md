@@ -1,5 +1,5 @@
 ---
-texto: "INÉS: Pues sin soldados vivimos, estémonos otro poco gozando a la puerta el frío viento que corre; que luego saldrán por ahí los vecinos."
+texto: "INÉS: Pues sin soldados vivimos,\nestémonos otro poco\ngozando a la puerta el frío\nviento que corre; que luego\nsaldrán por ahí los vecinos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ines-pues-sin-soldados-vivimos-estemonos-otro"
 procedencia:

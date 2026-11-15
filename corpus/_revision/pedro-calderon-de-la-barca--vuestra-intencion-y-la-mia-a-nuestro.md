@@ -1,5 +1,5 @@
 ---
-texto: "Vuestra intención y la mia A nuestro tio contamos: El respondió que quería Componernos, y aplazamos Este puesto y este dia."
+texto: "Vuestra intención y la mia\nA nuestro tio contamos:\nEl respondió que quería\nComponernos, y aplazamos\nEste puesto y este dia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vuestra-intencion-y-la-mia-a-nuestro"
 procedencia:

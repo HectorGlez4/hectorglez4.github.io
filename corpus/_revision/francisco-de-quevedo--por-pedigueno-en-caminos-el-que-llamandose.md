@@ -1,5 +1,5 @@
 ---
-texto: "Por pedigüeño en caminos, El que llamándose Juan, De noche, para las capas, Se confirmaba en Tomás,"
+texto: "Por pedigüeño en caminos,\nEl que llamándose Juan,\nDe noche, para las capas,\nSe confirmaba en Tomás,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-por-pedigueno-en-caminos-el-que-llamandose"
 procedencia:

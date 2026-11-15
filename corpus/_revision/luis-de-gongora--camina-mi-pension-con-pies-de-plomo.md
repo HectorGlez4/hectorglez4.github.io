@@ -1,5 +1,5 @@
 ---
-texto: "Camina mi pensión con pies de plomo, el mío, como dicen, en la huesa; a ojos yo cerrados, tenue o gruesa, por dar más luz al mediodía la tomo."
+texto: "Camina mi pensión con pies de plomo,\nel mío, como dicen, en la huesa;\na ojos yo cerrados, tenue o gruesa,\npor dar más luz al mediodía la tomo."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-camina-mi-pension-con-pies-de-plomo"
 procedencia:

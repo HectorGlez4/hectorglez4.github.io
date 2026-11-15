@@ -1,5 +1,5 @@
 ---
-texto: "La primera es la venida del Rey, que estará hoy aquí, o mañana en todo el día según dicen."
+texto: "La primera es la venida\ndel Rey, que estará hoy aquí,\no mañana en todo el día\nsegún dicen."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-la-primera-es-la-venida-del-rey"
 procedencia:

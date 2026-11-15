@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Sin duda se ha querellado el villano."
+texto: "REBOLLEDO: Sin duda se ha querellado\nel villano."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-sin-duda-se-ha-querellado-el"
 procedencia:

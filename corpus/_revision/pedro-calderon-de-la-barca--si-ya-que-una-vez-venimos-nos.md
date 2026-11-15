@@ -1,5 +1,5 @@
 ---
-texto: "Si ya, que una vez venimos, nos atrevemos a todo, buena venida habrá sido."
+texto: "Si ya, que una vez venimos,\nnos atrevemos a todo,\nbuena venida habrá sido."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-ya-que-una-vez-venimos-nos"
 procedencia:

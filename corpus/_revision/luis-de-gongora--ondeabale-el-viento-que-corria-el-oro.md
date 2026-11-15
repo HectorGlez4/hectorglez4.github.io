@@ -1,5 +1,5 @@
 ---
-texto: "Ondeábale, el viento que corría, el oro fino con error galano, cual verde hoja de álamo lozano se mueve al rojo despuntar del día;"
+texto: "Ondeábale, el viento que corría,\nel oro fino con error galano,\ncual verde hoja de álamo lozano\nse mueve al rojo despuntar del día;"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-ondeabale-el-viento-que-corria-el-oro"
 procedencia:

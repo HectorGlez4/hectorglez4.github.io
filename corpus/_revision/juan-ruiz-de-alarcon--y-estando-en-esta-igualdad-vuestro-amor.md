@@ -1,5 +1,5 @@
 ---
-texto: "Y estando en esta igualdad, vuestro amor ha de vencer."
+texto: "Y estando en esta igualdad,\nvuestro amor ha de vencer."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-estando-en-esta-igualdad-vuestro-amor"
 procedencia:

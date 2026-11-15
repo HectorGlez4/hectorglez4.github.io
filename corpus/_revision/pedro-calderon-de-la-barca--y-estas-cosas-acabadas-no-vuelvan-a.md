@@ -1,5 +1,5 @@
 ---
-texto: "Y estas cosas acabadas, no vuelvan a ser, porque la paz otra vez pondré, ¡voto a Dios!, a cuchilladas."
+texto: "Y estas cosas acabadas,\nno vuelvan a ser, porque\nla paz otra vez pondré,\n¡voto a Dios!, a cuchilladas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-estas-cosas-acabadas-no-vuelvan-a"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Yo sé que el necio se entierra Con gran lujo y con gran llanto, - Y que no hay fruta en la tierra Como la del camposanto."
+texto: "Yo sé que el necio se entierra\nCon gran lujo y con gran llanto, -\nY que no hay fruta en la tierra\nComo la del camposanto."
 autor: "jose-marti"
 temas:
   - "la-muerte"

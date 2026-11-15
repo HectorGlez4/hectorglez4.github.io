@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Otra vez os afirmo que podéis descuidar de él; que va, señora, conmigo."
+texto: "LOPE: Otra vez os afirmo\nque podéis descuidar de él;\nque va, señora, conmigo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-otra-vez-os-afirmo-que-podeis"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Basilio, que ya, señora, Se rinde al común desden"
+texto: "Basilio, que ya, señora,\nSe rinde al común desden"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-basilio-que-ya-senora-se-rinde-al"
 procedencia:

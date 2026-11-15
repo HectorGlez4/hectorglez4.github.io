@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: Pues, señor, si has de volver, mira que habrás menester volver bien acompañado, porque al fin no hay que fiar de villanos."
+texto: "SARGENTO: Pues, señor, si has de volver,\nmira que habrás menester\nvolver bien acompañado,\nporque al fin no hay que fiar\nde villanos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-pues-senor-si-has-de-volver"
 procedencia:

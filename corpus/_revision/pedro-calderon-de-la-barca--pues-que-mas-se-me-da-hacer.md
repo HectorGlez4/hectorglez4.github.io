@@ -1,5 +1,5 @@
 ---
-texto: "¿Pues qué más se me da hacer por mi hija lo mismo que hiciera por los demás?"
+texto: "¿Pues qué más se me da\nhacer por mi hija lo mismo\nque hiciera por los demás?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-que-mas-se-me-da-hacer"
 procedencia:

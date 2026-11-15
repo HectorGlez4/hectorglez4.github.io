@@ -1,5 +1,5 @@
 ---
-texto: "Y mientras que huyo el riesgo a su ejercicio, viva en la corte el que aguantarle sabe, y el que de embrollos gusta y de bullicio, viva en la corte, y que la corte alabe."
+texto: "Y mientras que huyo el riesgo a su ejercicio,\nviva en la corte el que aguantarle sabe,\ny el que de embrollos gusta y de bullicio,\nviva en la corte, y que la corte alabe."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-y-mientras-que-huyo-el-riesgo-a"
 procedencia:

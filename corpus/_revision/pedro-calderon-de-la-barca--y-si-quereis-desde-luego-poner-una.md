@@ -1,5 +1,5 @@
 ---
-texto: "Y si queréis desde luego poner una S y un clavo hoy a los dos y vendernos, será aquesta cantidad más del dote que os ofrezco."
+texto: "Y si queréis desde luego\nponer una S y un clavo\nhoy a los dos y vendernos,\nserá aquesta cantidad\nmás del dote que os ofrezco."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-si-quereis-desde-luego-poner-una"
 procedencia:

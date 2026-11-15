@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Toda la justicia vuestra es sólo un cuerpo no más; si éste tiene muchas manos, decid, ¿qué más se me da matar con aquesta un hombre que esta otra había de matar?"
+texto: "CRESPO: Toda la justicia vuestra\nes sólo un cuerpo no más;\nsi éste tiene muchas manos,\ndecid, ¿qué más se me da\nmatar con aquesta un hombre\nque esta otra había de matar?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-toda-la-justicia-vuestra-es-solo"
 procedencia:

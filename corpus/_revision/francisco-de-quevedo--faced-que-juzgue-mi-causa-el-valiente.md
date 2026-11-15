@@ -1,5 +1,5 @@
 ---
-texto: "Faced que juzgue mi causa el valiente, no el dotil: que entre plumas y tinteros aun Christo vino a morir."
+texto: "Faced que juzgue mi causa\nel valiente, no el dotil:\nque entre plumas y tinteros\naun Christo vino a morir."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-faced-que-juzgue-mi-causa-el-valiente"
 procedencia:

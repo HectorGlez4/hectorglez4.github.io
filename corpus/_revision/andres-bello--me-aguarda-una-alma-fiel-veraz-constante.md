@@ -1,5 +1,5 @@
 ---
-texto: "Me aguarda una alma fiel, veraz, constante, que al verme sentirá más alegría de la que me descubra en el semblante."
+texto: "Me aguarda una alma fiel, veraz, constante,\nque al verme sentirá más alegría\nde la que me descubra en el semblante."
 autor: "andres-bello"
 slug: "andres-bello-me-aguarda-una-alma-fiel-veraz-constante"
 procedencia:

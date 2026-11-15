@@ -125,8 +125,14 @@ const RUTAS_DEL_FILTRO = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras
 /** Historia 27.2 — el fichero del `<script>` de `Busqueda.astro`, sin su resumen, y la página que lo pide. */
 const FICHERO_DE_LA_BUSQUEDA = 'Busqueda.astro_astro_type_script_index_0_lang';
 const RUTA_DE_LA_BUSQUEDA = '/buscar/';
+/**
+ * Historia 32.5 — el fichero del `<script>` de `CopiarReferencia.astro`, sin su resumen, y las
+ * páginas que lo piden en este sitio: la página 1 de cada Obra (nunca sus 2+).
+ */
+const FICHERO_DE_COPIAR_REFERENCIA = 'CopiarReferencia.astro_astro_type_script_index_0_lang';
+const RUTAS_DE_COPIAR_REFERENCIA = ['/obra/seneca/cartas-a-lucilio/', '/obra/seneca/sobre-la-brevedad-de-la-vida/'];
 /** Las páginas que piden un guion empaquetado, con o sin punto final de medición. */
-const RUTAS_EMPAQUETADAS = [...RUTAS_DEL_FILTRO, RUTA_DE_LA_BUSQUEDA];
+const RUTAS_EMPAQUETADAS = [...RUTAS_DEL_FILTRO, RUTA_DE_LA_BUSQUEDA, ...RUTAS_DE_COPIAR_REFERENCIA];
 
 /** Espacios colapsados: Vitest y el build transforman `anunciar` con el mismo esbuild. */
 const colapsado = (texto: string) => texto.replace(/\s+/g, ' ').trim();
@@ -184,7 +190,8 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
      * para ampliarla es el punto: los cuatro primeros son de la v1 y los dos de
      * compartición los añadió la Historia 10.4, y `vista-de-superficie` la 20.1. La 23.2 trae
      * los cuatro de la v8 —`lectura`, `salida-interna`, `busqueda` y `vista-de-obra`— al
-     * vocabulario, antes de que nadie los envíe.
+     * vocabulario, antes de que nadie los envíe. La 30.5, los dos de citar —`copiado-de-referencia`
+     * y `copiado-de-fragmento`—, retenidos en su fase A y sueltos en la B, tras desplegar el receptor.
      */
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
       [
@@ -193,6 +200,8 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
         'comparticion-de-enlace',
         'comparticion-de-imagen',
         'copiado',
+        'copiado-de-fragmento',
+        'copiado-de-referencia',
         'descarga-de-imagen',
         'lectura',
         'salida-interna',
@@ -1791,7 +1800,7 @@ describe('Historia 23.1 — la versión del fichero sale de su contenido', () =>
 
 describe('Historia 23.1 — la lista cerrada de guiones externos', () => {
   it('cada entrada tiene un tope entero positivo y un nombre propio', () => {
-    expect(GUIONES_EXTERNOS.map((g) => g.id).sort()).toEqual(['busqueda', 'filtro', 'imagen', 'medicion', 'pagefind']);
+    expect(GUIONES_EXTERNOS.map((g) => g.id).sort()).toEqual(['busqueda', 'copiar-referencia', 'filtro', 'imagen', 'medicion', 'pagefind']);
     for (const guion of GUIONES_EXTERNOS) {
       expect(Number.isInteger(guion.tope) && guion.tope > 0, `${guion.id}: ${guion.tope}`).toBe(true);
       expect(guion.reconoce.global, guion.id).toBe(false);
@@ -1810,6 +1819,9 @@ describe('Historia 23.1 — la lista cerrada de guiones externos', () => {
     // Historia 27.2 — la búsqueda, igual. Un trozo compartido no lo pide ninguna página: solo se
     // reconoce como descargado, porque lo importa el fichero de una entrada.
     expect(guionExternoDe(`/_astro/${FICHERO_DE_LA_BUSQUEDA}.uFiLpMg3.js`)?.id).toBe('busqueda');
+    // Historia 32.5 — la isla de copiar la Referencia de la Página de Obra, igual.
+    expect(guionExternoDe(`/_astro/${FICHERO_DE_COPIAR_REFERENCIA}.Dq3_x-9a.js`)?.id).toBe('copiar-referencia');
+    expect(guionExternoDe(`/_astro/${FICHERO_DE_COPIAR_REFERENCIA}.js`)).toBeUndefined();
     expect(guionExternoDe('/_astro/recuentos.BGxwaxf_.js')).toBeUndefined();
     expect(['filtro', 'busqueda']).toContain(entradaDeLoDescargado('/_astro/recuentos.BGxwaxf_.js')?.id);
     for (const ajeno of ['/_astro/recuentos.js', '/_astro/a/b.X.js', '/_astro/_slug_.Cwmuv9Wk.js', '/islas/recuentos.X.js']) {
@@ -2313,7 +2325,7 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
       // Salvo los guiones empaquetados —el filtro de los Directorios (26.6) y la búsqueda
       // (27.2)—, que no son medición y van con o sin punto final, y solo en sus páginas.
       const ajenasALosEmpaquetados = etiquetasDeGuionExterno(html).filter(
-        (e) => !['filtro', 'busqueda'].includes(guionExternoDe(e.src)?.id ?? ''),
+        (e) => !['filtro', 'busqueda', 'copiar-referencia'].includes(guionExternoDe(e.src)?.id ?? ''),
       );
       expect(ajenasALosEmpaquetados, ruta).toEqual([]);
       if (!RUTAS_EMPAQUETADAS.includes(ruta)) expect(etiquetasDeGuionExterno(html), ruta).toEqual([]);
@@ -2412,6 +2424,24 @@ describe('Historia 26.6 — el filtro de los Directorios es un fichero, y solo e
       }
     }
     expect(paginas).toBeGreaterThan(SLUGS.length);
+  }, 240_000);
+
+  it('la página 1 de cada Obra, y ninguna otra página, pide la isla de copiar la Referencia una vez con `<script type="module" src>` (Historia 32.5)', async () => {
+    for (const proyecto of [await sitioMedido(), await sitioSinMedir()]) {
+      const paginas = paginasDe(proyecto);
+      for (const ruta of RUTAS_DE_COPIAR_REFERENCIA) expect(paginas.has(ruta), ruta).toBe(true);
+      for (const [ruta, html] of paginas) {
+        const deCopiar = etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'copiar-referencia');
+        if (!RUTAS_DE_COPIAR_REFERENCIA.includes(ruta)) {
+          expect(deCopiar, ruta).toEqual([]);
+          continue;
+        }
+        expect(deCopiar, ruta).toHaveLength(1);
+        expect(deCopiar[0].etiqueta, ruta).toMatch(/\btype="module"/);
+        expect(deCopiar[0].src, ruta).toMatch(new RegExp(`^/_astro/${FICHERO_DE_COPIAR_REFERENCIA}\\.`));
+        expect(existsSync(join(proyecto, 'dist', deCopiar[0].src)), deCopiar[0].src).toBe(true);
+      }
+    }
   }, 240_000);
 
   it('`/autores/` y `/obras/`, y ninguna otra página, piden el filtro una vez con `<script type="module" src>`', async () => {
@@ -2578,6 +2608,97 @@ describe('Historia 23.1 — ningún guion en línea lleva contenido', () => {
       }
     }
     expect(mirados).toBeGreaterThan(SLUGS_DE_CITA.length);
+  }, 240_000);
+});
+
+describe('Historia 30.5 — Copiar pide las acciones de citar, con su nombre del vocabulario', () => {
+  it('el guion de Copiar lleva las dos constantes y pide la del bloque tras una copia buena, fuera del `try`', async () => {
+    const html = await leerMedida(CITA);
+    const [copiar, ...otros] = guionesEnLinea(html).filter((g) => g.includes("'[data-copiar]'"));
+    expect(otros).toEqual([]);
+    // Los nombres viajan como constantes, con los valores de `EVENTOS`, y nunca como literal fuera de ellas.
+    const declaraciones = {
+      EVENTO_REFERENCIA: EVENTOS.copiadoDeReferencia,
+      EVENTO_FRAGMENTO: EVENTOS.copiadoDeFragmento,
+    };
+    for (const [nombre, evento] of Object.entries(declaraciones)) {
+      const declaracion = `const ${nombre} = ${JSON.stringify(evento)};`;
+      expect(copiar, nombre).toContain(declaracion);
+      expect(copiar.split(JSON.stringify(evento)).length - 1, `${evento}, una sola vez`).toBe(1);
+      expect(copiar, evento).not.toContain(`'${evento}'`);
+    }
+    // En el manejador de los bloques: tras el `catch { return; }` del portapapeles, a secas, y
+    // decidido por la identidad del bloque.
+    const bloques = copiar.slice(copiar.indexOf('const citar ='));
+    const rechazo = bloques.indexOf('catch { return; }');
+    // El evento sale de la identidad del bloque, por sus dos atributos: lo que no es ninguno no pide nada.
+    expect(bloques).toContain(
+      "const c = k.hasAttribute('data-inserta-esta-cita') ? EVENTO_FRAGMENTO : k.hasAttribute('data-como-citar') ? EVENTO_REFERENCIA : '';",
+    );
+    const pide = bloques.indexOf('if (c) __medir(c);');
+    expect(rechazo).toBeGreaterThan(0);
+    expect(pide).toBeGreaterThan(rechazo);
+    expect(bloques.slice(rechazo, pide)).toContain('anunciar(r,');
+    // Copiar la cita sigue pidiendo `copiado`, y nada más pide un evento en la isla.
+    expect([...copiar.matchAll(/__medir\(/g)]).toHaveLength(2);
+    expect(copiar).toContain('__medir(EVENTO_COPIADO);');
+    console.log(`Historia 30.5 — guion en línea de la Página de Cita con Imagen: ${bytesDeGuionEnLinea(html)} de ${MAX_BYTES_DE_GUION} bytes`);
+  }, 240_000);
+
+  it('los bloques copiables solo están en la Página de Cita, y cada uno con una identidad que el guion conoce', async () => {
+    // El guion elige el evento por `data-inserta-esta-cita` y `data-como-citar`: si un componente
+    // renombra su atributo, o un bloque copiable aparece en otra superficie (la portada, el 404, el
+    // Kit), esto lo para en `npm test`, que no corre el navegador.
+    const identidades = ['data-inserta-esta-cita', 'data-como-citar'];
+    const bloquesDe = (html: string) => [...html.matchAll(/<[a-z][a-z0-9-]*\s[^<>]*\bdata-copiables\b[^<>]*>/g)].map((m) => m[0]);
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      const bloques = bloquesDe(html);
+      // Historia 32.5 — la página 1 de Obra lleva un bloque, «Cómo citar», que atiende su isla.
+      if (RUTAS_DE_COPIAR_REFERENCIA.includes(ruta)) {
+        expect(bloques, ruta).toHaveLength(1);
+        expect(bloques[0], ruta).toMatch(/\sdata-como-citar(?=[\s=>])/);
+        expect(bloques[0], ruta).not.toMatch(/\sdata-inserta-esta-cita(?=[\s=>])/);
+        continue;
+      }
+      if (!ruta.startsWith('/cita/')) {
+        expect(bloques, ruta).toEqual([]);
+        continue;
+      }
+      for (const bloque of bloques) {
+        expect(identidades.filter((a) => new RegExp(`\\s${a}(?=[\\s=>])`).test(bloque)), `${ruta}: ${bloque}`).toHaveLength(1);
+      }
+    }
+    const enLaCita = bloquesDe(await leerMedida(CITA));
+    for (const a of identidades) expect(enLaCita.some((b) => b.includes(a)), a).toBe(true);
+  }, 240_000);
+});
+
+describe('Historia 32.5 — la isla de copiar la Referencia pide `copiado-de-referencia`, con su nombre del vocabulario', () => {
+  it('su fichero de entrada pide el evento a secas, una vez, tras la copia buena, y no nombra ningún otro evento ni dato de contenido', async () => {
+    const ficheros = [...((await ficherosDescargados()).get('copiar-referencia') ?? new Map<string, string>()).entries()];
+    const entradas = ficheros.filter(([ruta]) => ruta.startsWith(`/_astro/${FICHERO_DE_COPIAR_REFERENCIA}.`));
+    expect(entradas, 'nadie pide la entrada copiar-referencia').toHaveLength(1);
+    const [, codigo] = entradas[0];
+    const todo = ficheros.map(([, c]) => c).join('\n');
+    // El valor de `EVENTOS`, una sola vez y en ninguna otra forma.
+    const nombrado = (evento: string) => ['"', "'", '`'].reduce((n, c) => n + codigo.split(`${c}${evento}${c}`).length - 1, 0);
+    expect(nombrado(EVENTOS.copiadoDeReferencia)).toBe(1);
+    expect([...codigo.matchAll(/__medir\(/g)]).toHaveLength(1);
+    expect(codigo).toMatch(/(^|[^.\w$])__medir\(/);
+    expect(codigo).not.toMatch(/window\.__medir|__medir\s*=(?!=)/);
+    // El evento va tras el portapapeles; un rechazo sale antes con `return`.
+    expect(codigo.indexOf('writeText')).toBeGreaterThan(-1);
+    expect(codigo.indexOf('__medir(')).toBeGreaterThan(codigo.indexOf('writeText'));
+    // Ni lo que descarga nombra otro evento del vocabulario —tampoco la tabla entera—. Salvo
+    // `copiado`, que es además el valor de `data-estado` del botón (el trato de `ComoCitar.astro`):
+    // que no se pide lo dice la única llamada a `__medir`, arriba.
+    const otros = Object.values(EVENTOS).filter((e) => e !== EVENTOS.copiadoDeReferencia && e !== EVENTOS.copiado);
+    expect(otros.length).toBeGreaterThan(5);
+    for (const otro of otros) {
+      for (const comillas of ['"', "'", '`']) expect(todo, otro).not.toContain(`${comillas}${otro}${comillas}`);
+    }
+    // Sin contenido: ni slugs, ni Obra, ni Autor.
+    for (const dato of ['seneca', 'Séneca', 'Lucilio', 'brevedad']) expect(todo, dato).not.toContain(dato);
   }, 240_000);
 });
 
@@ -3109,6 +3230,11 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
      */
     for (const ruta of [...PAGINAS_2, OBRAS[2], '/buscar/', '/404']) expect([...sinLectura], ruta).toContain(ruta);
     for (const ruta of [OBRAS[0], OBRAS[1]]) expect([...sinLectura], ruta).not.toContain(ruta);
+    // Historia 28.3 — y la portada lleva las Obras con su cierre (la Obra indexable del corpus): sus
+    // enlaces están entre los juzgados, no fuera por un bloque vacío.
+    const portada = await leerMedida('/');
+    expect(portada).toMatch(/<li class="fila-de-bloque" data-zona="obras-de-portada"[^>]*><a href="\/obra\//);
+    expect(portada).toMatch(/<p data-zona="obras-de-portada"[^>]*><a href="\/obras\/"/);
   }, 240_000);
 
   /**
@@ -3129,6 +3255,8 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
   const COLOCACION: readonly (readonly [ruta: string, enlace: string | RegExp, esperadas: readonly Declaracion[]])[] = [
     ['/', CITA, [{ zona: 'cita-del-dia' }]],
     ['/', '/autor/seneca/', [{ zona: 'atribucion' }, { zona: 'autores-de-portada' }]],
+    // Historia 28.4 — el cierre «Los {m} autores, de la A a la Z ›» lleva la zona de los destacados.
+    ['/', '/autores/', [{ zona: 'autores-de-portada' }]],
     ['/', '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
     ['/', '/tema/el-tiempo/', [{ zona: 'chip-de-tema' }]],
     ['/', '/coleccion/frases-cortas/', [{ zona: 'colecciones' }]],
@@ -3273,7 +3401,7 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
       const enlaces = enlacesDe(await leerMedida(ruta)).filter((e) => e.enMain);
       const declaracionesDe = (href: string) => enlaces.filter((e) => e.href === href).map((e) => e.declaracion);
       expect(declaracionesDe(CITA), ruta).toEqual([{ zona: 'cita-del-dia' }]);
-      // En la portada, el Autor también sale de la lista de Autores.
+      // En la portada, el Autor también sale de los Autores destacados (28.4).
       expect(declaracionesDe('/autor/seneca/'), ruta).toContainEqual({ zona: 'atribucion' });
     }
   }, 240_000);
@@ -3339,6 +3467,17 @@ describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
      */
     const anunciaLaTanda = busquedaAnuncia && fuenteDeLaBusqueda.includes('[data-fallo-de-la-tanda]');
     expect(anunciaLaTanda, 'el fichero de la búsqueda no anuncia por la región de la tanda').toBe(true);
+    /*
+     * Historia 32.5 — la isla de copiar la Referencia de la Página de Obra, un fichero empaquetado,
+     * anuncia «Copiado.» con `anunciar` por la región de cada «Cómo citar» que recorre
+     * (`[data-como-citar]`): cuenta como anunciante de cada uno, si el fichero anuncia.
+     */
+    const fuenteDeCopiarReferencia = [...((await ficherosDescargados()).get('copiar-referencia')?.values() ?? [])].join('\n');
+    const copiarReferenciaAnuncia =
+      fuenteDeCopiarReferencia.includes('[data-como-citar]') &&
+      fuenteDeCopiarReferencia.includes('[role=status][data-anuncio]') &&
+      fuenteDeCopiarReferencia.includes('requestAnimationFrame');
+    expect(copiarReferenciaAnuncia, 'el fichero de copiar la Referencia no anuncia por su región').toBe(true);
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       const regiones = (html.match(/\brole\s*=\s*["']?status\b/gi) ?? []).length;
       const delFiltro = filtroAnuncia
@@ -3347,11 +3486,20 @@ describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
       const deLaBusqueda = busquedaAnuncia
         ? etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'busqueda').length * (anunciaLaTanda ? 2 : 1)
         : 0;
-      const anunciantes =
-        delFiltro +
-        deLaBusqueda +
-        guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)))
-          .length;
+      /*
+       * Historia 30.3 — la isla de Copiar anuncia además por la región de cada bloque que recorre
+       * («Cómo citar» y, desde la 30.4, «Inserta esta cita», los dos `data-copiables`): el guion en
+       * línea que los recorre cuenta como anunciante de cada bloque.
+       */
+      const enLinea = guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)));
+      const deComoCitar = enLinea.some((g) => g.includes('[data-copiables]'))
+        ? (html.match(/<div\b[^>]*\bdata-copiables\b/g) ?? []).length
+        : 0;
+      const deCopiarReferencia =
+        etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'copiar-referencia').length > 0
+          ? (html.match(/<div\b[^>]*\bdata-como-citar\b/g) ?? []).length
+          : 0;
+      const anunciantes = delFiltro + deLaBusqueda + enLinea.length + deComoCitar + deCopiarReferencia;
       regionesVistas += regiones;
       expect(anunciantes, `${ruta}: ${regiones} regiones de estado y ${anunciantes} guiones con anunciar`).toBeGreaterThanOrEqual(
         regiones,

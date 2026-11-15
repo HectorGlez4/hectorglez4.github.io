@@ -1,5 +1,5 @@
 ---
-texto: "Los pájaros como Aurora, Las trompetas como á Palas, Y las flores como á Flora; Porque sois, burlando el dia Que ya la noche destierra, Aurora en el alegría, Flora en paz."
+texto: "Los pájaros como Aurora,\nLas trompetas como á Palas,\nY las flores como á Flora;\nPorque sois, burlando el dia\nQue ya la noche destierra,\nAurora en el alegría,\nFlora en paz."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-los-pajaros-como-aurora-las-trompetas-como"
 procedencia:

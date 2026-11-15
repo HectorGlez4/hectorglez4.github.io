@@ -1,5 +1,5 @@
 ---
-texto: "Quien prefiere lo vivo a lo pintado es el hombre que piensa, canta o sueña."
+texto: "Quien prefiere lo vivo a lo pintado\nes el hombre que piensa, canta o sueña."
 autor: "antonio-machado"
 temas:
   - "la-vida"

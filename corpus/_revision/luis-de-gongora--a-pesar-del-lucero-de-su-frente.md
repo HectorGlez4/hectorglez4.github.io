@@ -1,5 +1,5 @@
 ---
-texto: "A pesar del lucero de su frente, le hacen oscuro, y él en dos razones, que en dos truenos libró de su Occidente:"
+texto: "A pesar del lucero de su frente,\nle hacen oscuro, y él en dos razones,\nque en dos truenos libró de su Occidente:"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-a-pesar-del-lucero-de-su-frente"
 procedencia:

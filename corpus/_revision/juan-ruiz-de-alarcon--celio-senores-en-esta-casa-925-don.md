@@ -1,5 +1,5 @@
 ---
-texto: "CELIO ¿Señores, en esta casa? 925 DON IUAN A despedirnos de vos hemos venido los dos."
+texto: "CELIO\n¿Señores, en esta casa? 925\nDON IUAN\nA despedirnos de vos\nhemos venido los dos."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-celio-senores-en-esta-casa-925-don"
 procedencia:

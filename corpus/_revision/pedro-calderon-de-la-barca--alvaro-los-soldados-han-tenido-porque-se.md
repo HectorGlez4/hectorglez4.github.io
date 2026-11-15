@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Los soldados han tenido, porque se estaban holgando en esta calle cantando sin alboroto y rüido, una pendencia, y yo soy quien los está deteniendo."
+texto: "ÁLVARO: Los soldados han tenido,\nporque se estaban holgando\nen esta calle cantando\nsin alboroto y rüido,\nuna pendencia, y yo soy\nquien los está deteniendo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-los-soldados-han-tenido-porque-se"
 procedencia:

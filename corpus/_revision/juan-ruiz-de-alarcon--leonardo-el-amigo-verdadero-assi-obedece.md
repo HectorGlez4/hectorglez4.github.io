@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO El amigo verdadero assi obedece."
+texto: "LEONARDO\nEl amigo verdadero\nassi obedece."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-el-amigo-verdadero-assi-obedece"
 procedencia:

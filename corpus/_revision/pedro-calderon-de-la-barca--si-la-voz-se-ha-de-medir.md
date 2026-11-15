@@ -1,5 +1,5 @@
 ---
-texto: "Si la voz se ha de medir Con las acciones humanas."
+texto: "Si la voz se ha de medir\nCon las acciones humanas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-la-voz-se-ha-de-medir"
 procedencia:

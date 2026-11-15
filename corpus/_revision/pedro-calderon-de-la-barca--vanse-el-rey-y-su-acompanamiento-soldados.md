@@ -1,5 +1,5 @@
 ---
-texto: "Vanse el REY [y su acompañamiento, soldados, y labradores] LOPE: Agradeced al buen tiempo que llegó Su Majestad."
+texto: "Vanse el REY [y su acompañamiento, soldados,\ny labradores]\nLOPE: Agradeced al buen tiempo\nque llegó Su Majestad."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vanse-el-rey-y-su-acompanamiento-soldados"
 procedencia:

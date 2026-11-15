@@ -1,5 +1,5 @@
 ---
-texto: "No hables mal de las mujeres; la más humilde, te digo, que es digna de estimación; porque al fin de ellas nacimos."
+texto: "No hables mal de las mujeres;\nla más humilde, te digo,\nque es digna de estimación;\nporque al fin de ellas nacimos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-hables-mal-de-las-mujeres-la"
 procedencia:

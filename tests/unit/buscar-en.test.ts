@@ -21,6 +21,16 @@ import {
   rotuloBuscarEnAutor,
 } from '../../src/lib/busqueda.ts';
 import { ARRANQUE_DE_MEDICION, ATRIBUTO_SIN_ZONA } from '../../src/lib/medicion.ts';
+import { guionExternoDe } from '../../src/lib/guiones.ts';
+
+/**
+ * Historia 32.4 — de la Cabecera al listado no hay nada más que, en la página 1, el contenedor de
+ * los desplegables con «Dónde leer esta obra» (el único en estos fixtures, sin incipit; «Cómo
+ * citar» va al pie desde la decisión 1b): ninguna línea que nombre el orden ni el formulario de
+ * «Buscar en esta obra».
+ */
+const CABECERA_Y_LISTADO_1 =
+  /<\/header>\s*<div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Dónde leer esta obra<(?:(?!<\/details>)[\s\S])*<\/details><\/div>\s*<ul class="listado"/;
 
 /**
  * Historia 27.8 — «Buscar en esta obra», «Buscar en {Autor}» y «Buscar en este tema», sobre `dist/`.
@@ -201,7 +211,10 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
       expect(segunda, ruta).not.toContain('class="buscar-en');
       const primera = await html(ruta.replace(/2\/$/, ''));
       expect(guionesEnLinea(primera), ruta).toEqual(guionesEnLinea(segunda));
-      expect(guionesExternosDe(primera), ruta).toEqual(guionesExternosDe(segunda));
+      // Salvo la isla de copiar la Referencia (32.5), que solo pide la página 1 de Obra: la 2+ no
+      // lleva «Cómo citar».
+      const sinCopiarReferencia = (guiones: string[]) => guiones.filter((g) => guionExternoDe(g)?.id !== 'copiar-referencia');
+      expect(sinCopiarReferencia(guionesExternosDe(primera)), ruta).toEqual(guionesExternosDe(segunda));
     }
   });
 
@@ -214,12 +227,12 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
     }
   });
 
-  it('en la Obra va debajo: tras el listado y su paginación, antes de Temas y de «Dónde leer» (UX v8.4)', async () => {
+  it('en la Obra va debajo: tras el listado y su paginación, antes de Temas y de «Cómo citar» (UX v8.4)', async () => {
     for (const ruta of [BREVEDAD, CARTAS, IRA]) {
       const pagina = await html(ruta);
       const posicion = (marca: string) => pagina.indexOf(marca);
-      // La Cabecera sigue dando directamente al listado, como sin formulario (24.1, 24.7).
-      expect(pagina, ruta).toMatch(/<\/header>\s*<ul class="listado"/);
+      // La Cabecera sigue dando al listado sin formulario en medio (24.1): solo «Dónde leer» (32.4).
+      expect(pagina, ruta).toMatch(CABECERA_Y_LISTADO_1);
       const formulario = posicion('<form class="buscar-en"');
       expect(formulario, ruta).toBeGreaterThan(posicion('class="listado"'));
       // Justo detrás de la paginación —«Brevedad» pagina— o, sin ella, del cierre del listado.
@@ -232,9 +245,15 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
         expect(pagina, ruta).not.toContain('class="paginacion"');
         expect(antes, ruta).toMatch(/<\/ul>$/);
       }
-      for (const despues of ['class="temas"', 'class="donde-leer"']) {
+      for (const despues of ['class="temas"', 'Cómo citar<span class="glifo"']) {
         expect(posicion(despues), `${ruta}: ${despues}`).toBeGreaterThan(formulario);
       }
+      // Historia 25.6 — el sitio de «Compartir en», sin hueco: lo siguiente al formulario es la
+      // sección de Temas (o, sin Temas, el contenedor de «Cómo citar»; decisión 1b).
+      const fin = pagina.indexOf('</form>', formulario) + '</form>'.length;
+      expect(pagina.slice(fin).trimStart(), ruta).toMatch(
+        /^(?:<section class="temas"|<div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Cómo citar<)/,
+      );
     }
   });
 
@@ -291,6 +310,24 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
       expect(pagina, ruta).toContain('class="campo-de-busqueda');
       expect(pagina, ruta).not.toMatch(/<button\b[^>]*\btype="submit"/);
       expect(pagina, ruta).not.toMatch(/\benterkeyhint=/);
+    }
+  });
+
+  it('Historia 34.3 — todo campo de búsqueda de `dist/` es el Campo de búsqueda: ningún uso pinta uno propio', async () => {
+    const conCampo = new Set<string>();
+    for (const { ruta, fichero } of await paginasDe(join(proyecto, 'dist'))) {
+      const pagina = await readFile(fichero, 'utf8');
+      recorrerElementos(pagina, (elemento, antepasados) => {
+        if (elemento.etiqueta !== 'input' || elemento.atributos.get('type') !== 'search') return;
+        const dentro = antepasados.some((a) => (a.atributos.get('class') ?? '').split(/\s+/).includes('campo-de-busqueda'));
+        expect(dentro, `${ruta}: <input type="search" id="${elemento.atributos.get('id') ?? ''}"> fuera de .campo-de-busqueda`).toBe(true);
+        // El trato es del `<style>` del componente: ningún uso lo estiliza en línea.
+        expect(elemento.atributos.has('style'), `${ruta}: <input type="search"> con style`).toBe(false);
+        conCampo.add(ruta);
+      });
+    }
+    for (const ruta of ['/buscar/', '/404', '/autores/', '/obras/', TEMA, AUTOR, CARTAS, BREVEDAD, IRA]) {
+      expect(conCampo.has(ruta), `${ruta} sin Campo de búsqueda`).toBe(true);
     }
   });
 });

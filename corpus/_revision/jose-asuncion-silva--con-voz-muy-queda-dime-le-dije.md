@@ -1,5 +1,5 @@
 ---
-texto: "Con voz muy queda dime, le dije, ¡te cansas! alzó la hermosa cabeza, se iluminó su mirada y murmuró."
+texto: "Con voz muy queda\ndime, le dije, ¡te cansas!\nalzó la hermosa cabeza,\nse iluminó su mirada\ny murmuró."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-con-voz-muy-queda-dime-le-dije"
 procedencia:

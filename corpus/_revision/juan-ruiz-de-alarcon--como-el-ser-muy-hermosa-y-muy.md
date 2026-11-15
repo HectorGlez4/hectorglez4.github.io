@@ -1,5 +1,5 @@
 ---
-texto: "Como el ser muy hermosa, y muy gallarda 270 el trato se llegò; de amor el fuego en abrasar mi pecho poco tarda."
+texto: "Como el ser muy hermosa, y muy gallarda 270\nel trato se llegò; de amor el fuego\nen abrasar mi pecho poco tarda."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-como-el-ser-muy-hermosa-y-muy"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Pues en esto, di, ¿quien pierde? quien lleua la cuchillada, o los palos, o el destierro, que quien lo pagò, antes gana, 170 pues quedando vitorioso, compra el gusto y la vengança."
+texto: "Pues en esto, di, ¿quien pierde?\nquien lleua la cuchillada,\no los palos, o el destierro,\nque quien lo pagò, antes gana, 170\npues quedando vitorioso,\ncompra el gusto y la vengança."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-pues-en-esto-di-quien-pierde-quien"
 procedencia:

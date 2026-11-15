@@ -1,5 +1,5 @@
 ---
-texto: "ni halló jamás cabida la perjura fe, la codicia o la ambición tirana, que nacida al imperio se figura;"
+texto: "ni halló jamás cabida la perjura\nfe, la codicia o la ambición tirana,\nque nacida al imperio se figura;"
 autor: "andres-bello"
 slug: "andres-bello-ni-hallo-jamas-cabida-la-perjura-fe"
 procedencia:

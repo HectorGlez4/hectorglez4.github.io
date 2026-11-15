@@ -1,5 +1,5 @@
 ---
-texto: "Todos quantos vevimos que en piedes andamos, Siquiere en preson, o en lecho iagamos, Todos somos romeos que camino andamos: San Peidro lo diz esto, por él vos lo probamos."
+texto: "Todos quantos vevimos que en piedes andamos,\nSiquiere en preson, o en lecho iagamos,\nTodos somos romeos que camino andamos:\nSan Peidro lo diz esto, por él vos lo probamos."
 autor: "gonzalo-de-berceo"
 temas:
   - "la-vida"

@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: ¿No decías que villanas nunca tenían belleza?"
+texto: "SARGENTO: ¿No decías que villanas\nnunca tenían belleza?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-no-decias-que-villanas-nunca-tenian"
 procedencia:

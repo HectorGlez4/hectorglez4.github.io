@@ -1,0 +1,59 @@
+---
+/**
+ * La línea de Ficha técnica — Historia 32.2, UX-DR126, AD-31.
+ *
+ * Bajo «de {Autor} · {año}» de la Cabecera de Obra, solo en la página 1: «Novela · 1605 · Escrita
+ * en español · Traducción de X · Datos: Wikidata, CC0». Las partes las compone
+ * `partesDeFichaTecnica` de `src/lib/atribucion.ts` (orden fijo, solo las que constan); el
+ * traductor llega de `traductorDeLaEdicionQueEncabeza` de `src/lib/obras.ts`, nunca de la entidad.
+ * Sin Ficha técnica, o sin género, año ni lengua, no pinta nada: ni rótulo ni hueco.
+ *
+ * El punto medio es decoración: el lector de pantalla oye una coma (el patrón de `p.de`). El
+ * enlace va al permanente de la revisión (`enlace`, de `enlacePermanenteDeWikidata`), en la misma
+ * pestaña, en siena y subrayado siempre; inline, así que está exento de la zona de toque, y sin
+ * `data-zona` ni `data-sin-zona`, porque es externo y la escucha de la medición no lo mira.
+ *
+ * Fuera de Pagefind con `data-pagefind-ignore="all"` (lección de la 26.2: «novela» no puede casar
+ * con toda Obra) y fuera del JSON-LD. No recibe nada de `src/lib/ingreso.ts`.
+ *
+ * ── Sin bloque `<style>` ──
+ * Por lo mismo que `Sostener.astro`: Astro emite los estilos de un componente por el grafo de
+ * importaciones aunque no se pinte, y con el Corpus real —ninguna ficha atada— la hoja de toda
+ * Página de Obra cambiaría. La presentación va en atributos `style`, con tokens.
+ */
+import { partesDeFichaTecnica, TEXTO_DATOS_DE_WIKIDATA } from '../lib/atribucion.ts';
+import type { ObraResuelta } from '../lib/obras.ts';
+
+interface Props {
+  obra: Pick<ObraResuelta, 'fichaTecnica'>;
+  /** El traductor de la edición que encabeza, o `undefined`: obligatoria, cada uso lo declara. */
+  traductor: string | undefined;
+}
+
+const { obra, traductor } = Astro.props;
+const ficha = obra.fichaTecnica;
+const partes = ficha === undefined ? undefined : partesDeFichaTecnica(ficha, traductor);
+
+/** `{typography.caption}` en Inter y tinta apagada, a `--unidad` de `p.de`. */
+const DE_LA_LINEA = [
+  'margin: var(--unidad) 0 0',
+  'font-family: var(--sans)',
+  'font-size: var(--pie)',
+  'line-height: var(--interlineado-pie)',
+  'color: var(--tinta-apagada)',
+  'overflow-wrap: anywhere',
+].join('; ');
+
+/** Siena (la regla global de `a`) y subrayado siempre, con el grosor del filete. */
+const DEL_ENLACE = ['text-decoration-line: underline', 'text-decoration-thickness: var(--grosor-filete)'].join('; ');
+---
+
+{
+  ficha !== undefined && partes !== undefined && (
+    <p class="ficha-tecnica" data-pagefind-ignore="all" style={DE_LA_LINEA}>
+      {partes.map((parte) => (
+        <>{parte}<span aria-hidden="true"> · </span><span class="solo-para-lectores">, </span></>
+      ))}<a href={ficha.enlace} style={DEL_ENLACE}>{TEXTO_DATOS_DE_WIKIDATA}</a>
+    </p>
+  )
+}

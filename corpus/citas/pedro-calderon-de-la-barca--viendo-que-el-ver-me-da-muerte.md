@@ -1,5 +1,5 @@
 ---
-texto: "Viendo que el ver me da muerte, Estoy muriendo por ver."
+texto: "Viendo que el ver me da muerte,\nEstoy muriendo por ver."
 autor: "pedro-calderon-de-la-barca"
 temas:
   - "el-amor"

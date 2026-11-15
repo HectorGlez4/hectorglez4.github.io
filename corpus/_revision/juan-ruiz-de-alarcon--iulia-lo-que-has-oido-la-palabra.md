@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Lo que has oido: La palabra te cogi, esta me coge tu a mi. 815 LEONARDO Ha cruel, ¿que te ha mouido a fingir esta mudança?"
+texto: "IULIA\nLo que has oido:\nLa palabra te cogi,\nesta me coge tu a mi. 815\nLEONARDO\nHa cruel, ¿que te ha mouido\na fingir esta mudança?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-lo-que-has-oido-la-palabra"
 procedencia:

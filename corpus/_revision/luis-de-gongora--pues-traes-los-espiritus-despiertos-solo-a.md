@@ -1,5 +1,5 @@
 ---
-texto: "pues traes los espíritus despiertos sólo a representarme el grave ceño del rostro dulcemente zahareño (gloriosa suspensión de mis tormentos),"
+texto: "pues traes los espíritus despiertos\nsólo a representarme el grave ceño\ndel rostro dulcemente zahareño\n(gloriosa suspensión de mis tormentos),"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-pues-traes-los-espiritus-despiertos-solo-a"
 procedencia:

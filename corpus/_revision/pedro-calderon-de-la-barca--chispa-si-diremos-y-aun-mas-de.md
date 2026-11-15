@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: Sí, diremos y aún más de los que sabemos; que peor será morir."
+texto: "CHISPA: Sí, diremos\ny aún más de los que sabemos;\nque peor será morir."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-si-diremos-y-aun-mas-de"
 procedencia:

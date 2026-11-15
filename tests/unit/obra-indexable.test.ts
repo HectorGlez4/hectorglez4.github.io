@@ -38,9 +38,11 @@ import { ATRIBUTO_DE_INDEXABLE, EVENTOS } from '../../src/lib/medicion.ts';
 import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
 import {
   desajustesDeIndexables,
+  desajustesDeLasObrasDeLaPortada,
   informeDeCoincidencia,
   informeDeObras,
   nombresCongeladosSinFicha,
+  obrasEnlazadasDesdeLaPortada,
   marcasDePagina,
   rutaDeFicheroHtml,
   rutasDelSitemap,
@@ -334,6 +336,60 @@ describe('la comprobación del build, pura', () => {
     expect(
       desajustesDeIndexables(['/cita/x'], [{ ...pagina('/cita/x', false), vistas: [EVENTOS.vistaDeObra] }]),
     ).toEqual([`${porSeparado}: /cita/x (la vista sin la marca)`]);
+  });
+
+  it('28.3 — una Obra del conjunto del que rotan las de la portada sin página o con `noindex` se nombra', () => {
+    const paginas = [pagina('/obra/a/b', false), pagina('/obra/a/c', true), pagina('/cita/x', false)];
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/a/b/', '/obra/a/c/', '/obra/z/y/', '/obra/a/d/'], paginas, [])).toEqual([
+      '  · Obra de la portada sin página construida: /obra/a/d, /obra/z/y',
+      '  · Obra de la portada con `noindex`: /obra/a/c',
+    ]);
+    // Solo la ausente, o solo la `noindex`: una línea cada vez.
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/q/r/'], paginas, [])).toEqual([
+      '  · Obra de la portada sin página construida: /obra/q/r',
+    ]);
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/a/c/'], paginas, [])).toEqual(['  · Obra de la portada con `noindex`: /obra/a/c']);
+  });
+
+  it('28.3 — una fila de la portada que lleva fuera del conjunto del que rotan se nombra', () => {
+    const paginas = [pagina('/obra/a/b', false), pagina('/obra/a/c', false)];
+    // La instancia de las páginas pintó una Obra que la de la configuración no tenía en el conjunto.
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/a/b/'], paginas, ['/obra/a/b/', '/obra/a/c/', '/obra/a/c'])).toEqual([
+      '  · Obra enlazada desde la portada que no está en el conjunto del que rotan: /obra/a/c',
+    ]);
+  });
+
+  it('28.3 — todas con su página sin `noindex`, o ninguna en el conjunto: nada que decir', () => {
+    const paginas = [pagina('/obra/a/b', false), pagina('/obra/a/c', true)];
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/a/b/', '/obra/a/b'], paginas, ['/obra/a/b'])).toEqual([]);
+    expect(desajustesDeLasObrasDeLaPortada([], paginas, [])).toEqual([]);
+  });
+
+  it('28.3 — las filas de Obras de la portada se leen por su zona en el `li`; el cierre del `p`, no', () => {
+    const html = [
+      '<html><body><main>',
+      '<section class="del-dia" data-jornada data-pagefind-ignore="all"><p class="ir" data-zona="cita-del-dia"><a href="/cita/x/">Ver esta cita</a></p></section>',
+      '<section aria-labelledby="obras"><h2 id="obras">Obras</h2><div data-jornada data-pagefind-ignore="all"><ul class="obras">',
+      '<li class="fila-de-bloque" data-zona="obras-de-portada"><a href="/obra/a/b/"><span>B</span></a></li>',
+      '<li class="fila-de-bloque" data-zona="obras-de-portada"><a href="/obra/z/y/"><span>Y</span></a></li>',
+      '</ul></div><p data-zona="obras-de-portada"><a href="/obras/">Las 2 obras<span aria-hidden="true">&nbsp;›</span></a></p></section>',
+      '</main></body></html>',
+    ].join('');
+    expect(obrasEnlazadasDesdeLaPortada(html)).toEqual(['/obra/a/b', '/obra/z/y']);
+    expect(obrasEnlazadasDesdeLaPortada('<main><p><a href="/obra/a/b/">x</a></p></main>')).toEqual([]);
+  });
+
+  it('28.3 — el titular dice solo el diagnóstico de los desajustes que hubo', () => {
+    const deIndexables = titularDeDesajustes(1);
+    expect(deIndexables).toMatch(/\(1 desajuste\)/);
+    expect(deIndexables).toContain('consecuenciasDe');
+    expect(deIndexables).not.toContain('Obras de la portada');
+    const deLaPortada = titularDeDesajustes(0, 2);
+    expect(deLaPortada).toMatch(/^Las Obras de la portada no se sostienen en lo construido \(2 desajustes;/);
+    expect(deLaPortada).not.toContain('consecuenciasDe');
+    const ambos = titularDeDesajustes(1, 1);
+    expect(ambos).toContain('consecuenciasDe');
+    expect(ambos).toContain('Obras de la portada');
   });
 
   it('23.9 — una página no declarada no se juzga, lleve o no la marca', () => {

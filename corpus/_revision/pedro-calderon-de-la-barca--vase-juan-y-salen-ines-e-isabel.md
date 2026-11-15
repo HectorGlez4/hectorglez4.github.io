@@ -1,5 +1,5 @@
 ---
-texto: "Vase [JUAN] y salen INÉS e ISABEL ISABEL: ¿Y es bien iros sin despediros de quien tanto desea serviros?"
+texto: "Vase [JUAN] y salen INÉS e ISABEL\nISABEL: ¿Y es bien iros\nsin despediros de quien\ntanto desea serviros?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vase-juan-y-salen-ines-e-isabel"
 procedencia:

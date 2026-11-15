@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { paginasDeTema, temaBajoUmbral } from './ayuda/corpus.ts';
+import { citasPorTema, paginasDeTema, temaBajoUmbral } from './ayuda/corpus.ts';
+import { ROTULO_BUSCAR_EN_ESTE_TEMA } from '../../src/lib/busqueda.ts';
 import { comprobarNombresDeTarjetas } from './ayuda/tarjetas.ts';
 
 /**
@@ -125,6 +126,38 @@ test.describe('Historia 24.3 — la Tarjeta de Cita del Tema', () => {
       expect(hueco.derecha, `tarjeta ${i}`).toBeLessThanOrEqual(medida.ancho);
     }
     expect(medida.desborde).toBe(0);
+  });
+
+  /*
+   * Historia 34.3, FR-6 — el Campo con contorno no cambia dónde va «Buscar en este tema»: bajo el
+   * título, sobre el listado, y la primera Cita sigue empezando en la primera pantalla a 360 × 640.
+   */
+  test('a 360 × 640, «Buscar en este tema» va sobre la primera Cita, y esa Cita empieza en la primera pantalla', async ({
+    page,
+  }) => {
+    test.skip(!citasPorTema().has('la-vida'), '«La vida» no tiene hoy Citas en el Corpus');
+    await page.setViewportSize({ width: 360, height: 640 });
+    const respuesta = await page.goto(`${PUBLICADO}/`);
+    test.skip(respuesta?.status() === 404, '«La vida» no tiene hoy página en el Corpus');
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    const formulario = page.locator('form.buscar-en[role="search"]');
+    await expect(formulario).toHaveCount(1);
+    await expect(formulario.locator('label')).toHaveText(ROTULO_BUSCAR_EN_ESTE_TEMA);
+    const medida = await page.evaluate(() => {
+      const caja = (e: Element | null) => e?.getBoundingClientRect();
+      return {
+        h1: caja(document.querySelector('main h1'))?.bottom,
+        formulario: caja(document.querySelector('form.buscar-en')),
+        tarjeta: caja(document.querySelector('.listado li'))?.top,
+      };
+    });
+    expect(medida.h1).toBeDefined();
+    expect(medida.tarjeta, 'el Tema no lista ninguna Tarjeta').toBeDefined();
+    expect(medida.formulario!.top).toBeGreaterThanOrEqual(medida.h1!);
+    expect(medida.formulario!.bottom).toBeLessThanOrEqual(medida.tarjeta!);
+    expect(medida.tarjeta!).toBeLessThan(640);
   });
 });
 

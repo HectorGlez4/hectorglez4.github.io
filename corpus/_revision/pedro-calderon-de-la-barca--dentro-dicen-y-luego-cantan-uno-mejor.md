@@ -1,5 +1,5 @@
 ---
-texto: "Dentro [dicen y luego cantan] UNO: Mejor se cantará aquí."
+texto: "Dentro [dicen y luego cantan]\nUNO: Mejor se cantará aquí."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-dentro-dicen-y-luego-cantan-uno-mejor"
 procedencia:

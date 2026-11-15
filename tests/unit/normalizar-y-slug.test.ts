@@ -10,6 +10,8 @@ import {
   palabras,
 } from '../../src/lib/normalizar.js';
 import { slugDeAutor, slugDeCita, slugDeObra, slugDeTema, slugLibre } from '../../src/lib/slug.js';
+import { huellaDeTexto } from '../../tools/lib/cotejo.ts';
+import { tramoDe } from '../../src/lib/tramos.ts';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 
@@ -220,5 +222,17 @@ describe('Historia 26.1 — la hermana de normalizar: inicial y orden de una cla
   it('no usa localeCompare: compara por unidades de código, igual en cualquier máquina', () => {
     const fuente = readFileSync(join(RAIZ, 'src/lib/normalizar.ts'), 'utf8');
     expect(fuente).not.toMatch(/localeCompare\(/);
+  });
+});
+
+describe('Historia 29.1 — el salto de verso no mueve slug, forma canónica ni tramo (AD-4, AD-29)', () => {
+  const VERSOS = 'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+  const EN_UNA_LINEA = VERSOS.replace(/\n/gu, ' ');
+
+  it('normalizar, slugDeCita, huellaDeTexto y tramoDe coinciden con y sin saltos', () => {
+    expect(normalizar(VERSOS)).toBe(normalizar(EN_UNA_LINEA));
+    expect(slugDeCita('jose-marti', VERSOS)).toBe(slugDeCita('jose-marti', EN_UNA_LINEA));
+    expect(huellaDeTexto(VERSOS)).toBe(huellaDeTexto(EN_UNA_LINEA));
+    expect(tramoDe(VERSOS)).toEqual(tramoDe(EN_UNA_LINEA));
   });
 });

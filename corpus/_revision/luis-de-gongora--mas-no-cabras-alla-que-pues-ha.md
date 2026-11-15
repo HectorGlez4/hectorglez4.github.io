@@ -1,5 +1,5 @@
 ---
-texto: "mas no cabrás allá, que pues ha tanto que comes de ti mesmo y no te acabas, mayor debes de ser que el mismo infierno."
+texto: "mas no cabrás allá, que pues ha tanto\nque comes de ti mesmo y no te acabas,\nmayor debes de ser que el mismo infierno."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-mas-no-cabras-alla-que-pues-ha"
 procedencia:

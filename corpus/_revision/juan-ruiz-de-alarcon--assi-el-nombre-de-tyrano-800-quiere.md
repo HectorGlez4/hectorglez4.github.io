@@ -1,5 +1,5 @@
 ---
-texto: "Assi el nombre de tyrano 800 quiere borrar?"
+texto: "Assi el nombre de tyrano 800\nquiere borrar?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-assi-el-nombre-de-tyrano-800-quiere"
 procedencia:

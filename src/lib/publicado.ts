@@ -31,8 +31,10 @@ import {
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia, tradicion } from './admision.ts';
 import { cuentaParaElSuelo } from './huecos.ts';
+import { milesEnEspañol } from './formato.ts';
 import { compararPorClave } from './normalizar.ts';
 import {
+  aparicionQueCuenta,
   colgarObras,
   congelacionVigente,
   esObraIndexable,
@@ -42,8 +44,11 @@ import {
   type AparicionDeCita,
   type CitaParaObra,
   type FichaDeObra,
+  type FichaTecnicaDeObra,
+  type IncipitDeObra,
   type ObraResuelta,
   type IndicesDeObras,
+  type PasajeDeAparicion,
   type PosicionesDeCitas,
 } from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
@@ -115,6 +120,12 @@ export interface Autor {
    */
   ordenAlfabetico?: string;
   /**
+   * La jornada en que una persona revisó la clave — Historia 26.1. Viaja desde la 30.3 porque
+   * decide el nombre invertido de «Cómo citar» (`partesDelNombre` de `src/lib/atribucion.ts`):
+   * sin revisar, la Referencia lleva el `nombre` tal cual. Sin valor se omite.
+   */
+  ordenRevisado?: string;
+  /**
    * La tradición del Autor — Historia 27.6, §6.1 del PRD: con el tipo del esquema (`tradicion` de
    * `src/lib/admision.ts`), opcional como allí y omitida sin valor. La lee `autoresDestacados`
    * para el suelo latinoamericano de FR-8; ninguna superficie la pinta.
@@ -168,7 +179,7 @@ export interface ConjuntoPublicable {
  * no tiene página accesible ni indexable, y esta función es la que lo decide para todas
  * las superficies a la vez.
  */
-export function autoresPublicados(autores: Autor[], citas: Cita[]): Autor[] {
+export function autoresPublicados(autores: readonly Autor[], citas: readonly Cita[]): Autor[] {
   const conCitas = new Set(citas.map((c) => c.autor));
   return autores
     .filter((a) => conCitas.has(a.slug))
@@ -267,6 +278,42 @@ export function temasPublicados(temas: Tema[], citas: Cita[]): Tema[] {
  */
 export function esCitaDocumentada(cita: Cita): boolean {
   return cita.fuente !== undefined;
+}
+
+/**
+ * La línea de cifras con la que abre la portada — Historia 28.1, AD-11, UX-DR56.
+ *
+ * Es la **única** redactora de la línea: ni la página la compone ni `tools/lib/cifras.ts` cuenta
+ * por ella. n son las Citas publicadas, m los Autores publicados (`autoresPublicados`, la misma
+ * regla que las páginas de Autor) y k las Citas documentadas (`esCitaDocumentada`).
+ *
+ * **Si queda censo se decide sin leer el fichero del censo de pendientes.** La puerta de la
+ * Historia 11.2 —`cotejoDeCitas()`, la integración enganchada en `astro.config.mjs`— rompe el
+ * build si una Cita publicada sin `fuente` no está censada, si una censada declara `fuente` o si
+ * un slug censado no es una Cita publicada: en todo build que llega aquí, «queda censo» es
+ * exactamente «k < n». Mientras quede, la línea da k y **nunca** dice «cada una»; con el censo
+ * vacío, todas están cotejadas y lo dice así.
+ *
+ * La redacción es la de la UX v8.2 (UX-DR56), que manda: «cada una cotejada con el texto de su
+ * fuente», y con censo la forma con «;». AD-11 de la espina dice todavía «cada una con su fuente»;
+ * el desfase está anotado como pendiente de Héctor (bmad-architecture) en el spec de la 28.1.
+ *
+ * Concuerda en número: «1 cita», «de 1 autor», «1 cotejada» (solo se ve en Corpus de prueba). Los
+ * números, con punto de millar (`milesEnEspañol`). Sin ninguna Cita publicada no hay línea.
+ * Depende solo del Corpus del commit, nunca de la jornada: no rota y no da `lastmod` a la portada.
+ */
+export function lineaDeCifras(citas: readonly Cita[], autores: readonly Autor[]): string | undefined {
+  const n = citas.length;
+  if (n === 0) return undefined;
+  const m = autoresPublicados(autores, citas).length;
+  const k = citas.filter(esCitaDocumentada).length;
+  const deCitas = `${milesEnEspañol(n)} ${n === 1 ? 'cita' : 'citas'}`;
+  const deAutores = `de ${milesEnEspañol(m)} ${m === 1 ? 'autor' : 'autores'}`;
+  if (k < n) {
+    return `${deCitas} ${deAutores}; ${milesEnEspañol(k)} ${k === 1 ? 'cotejada' : 'cotejadas'} con el texto de su fuente.`;
+  }
+  if (n === 1) return `${deCitas} ${deAutores}, cotejada con el texto de su fuente.`;
+  return `${deCitas} ${deAutores}, cada una cotejada con el texto de su fuente.`;
 }
 
 /** Cuántas Citas publicadas de un Autor están documentadas — ver `esCitaDocumentada`. */
@@ -871,6 +918,27 @@ export function citasPorObra<C extends Pick<Cita, 'slug' | 'fuente' | 'obra'>>(
   return new Map([...porObra].map(([nombre, suyas]) => [nombre, ordenDelLibro(suyas, posiciones, indices)]));
 }
 
+/**
+ * El pasaje de cada Cita, por su slug — Historia 31.1, AD-30.
+ *
+ * Pura. Toda Cita, con Obra o sin ella, toma el pasaje de **su aparición que cuenta**
+ * (`aparicionQueCuenta`), la misma que la sitúa en el orden del libro; si esa aparición no lo
+ * trae, la Cita no está en el mapa —no se busca en otra—. Lo que las páginas lean del pasaje
+ * sale de aquí (la 31.2), nunca de una elección propia.
+ */
+export function pasajesDeCitas(
+  citas: readonly Pick<Cita, 'slug'>[],
+  posiciones: PosicionesDeCitas,
+  indices: IndicesDeObras,
+): Map<string, PasajeDeAparicion> {
+  const pasajes = new Map<string, PasajeDeAparicion>();
+  for (const cita of citas) {
+    const pasaje = aparicionQueCuenta(posiciones.get(cita.slug) ?? [], indices)?.pasaje;
+    if (pasaje !== undefined) pasajes.set(cita.slug, pasaje);
+  }
+  return pasajes;
+}
+
 /** Las Obras con página: las que resuelve alguna Cita publicada de un Autor publicado. */
 export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores'>): ObraResuelta[] {
   return obrasDelConjunto(conjunto.citas, conjunto.autores).publicadas;
@@ -1174,10 +1242,10 @@ export function superficiesInalcanzables(
  *   · la página 1 de un Autor → sus Obras (la Lista de Obras va solo en la página 1);
  *   · `/autores/` → todo Autor publicado; `/obras/` → toda Obra publicada.
  *
- * **Ni la portada → los Autores** —la lista de la portada se va en la Épica 28, y esta historia
- * existe para que quitarla no deje nada fuera sin verse— **ni Cita → Cita**: las Rutas de salida
- * de una Cita dependen de sus vecinas y no las promete ninguna enumeración. Lo que el sitio
- * enlace de más no estorba: el modelo es lo que **tiene** que estar.
+ * **Ni la portada → los Autores destacados** —los ocho de la portada (Historia 28.4) cambian con
+ * los recuentos, y una orden que retira no puede apoyarse en que un Autor siga entre ellos— **ni
+ * Cita → Cita**: las Rutas de salida de una Cita dependen de sus vecinas y no las promete ninguna
+ * enumeración. Lo que el sitio enlace de más no estorba: el modelo es lo que **tiene** que estar.
  *
  * Pura (AD-5): las Citas de cada Obra llegan ya ordenadas (`citasPorObra`), por nombre de ficha.
  */
@@ -1348,15 +1416,17 @@ export function aplanarCita(entrada: EntradaCita): Cita {
  * `resolverAtribuciones`.
  */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, tradicion } = entrada.data;
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, ordenRevisado, tradicion } = entrada.data;
   return {
     slug: entrada.id,
     nombre,
     semblanza,
     ...(añoNacimiento !== undefined ? { añoNacimiento } : {}),
     añoFallecimiento,
-    // Historia 26.3 — la clave viaja para el Directorio; `ordenRevisado` no, que no lo pinta nadie.
+    // Historia 26.3 — la clave viaja para el Directorio; desde la 30.3 también su revisión, que
+    // decide si «Cómo citar» invierte el nombre (`partesDelNombre`).
     ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
+    ...(ordenRevisado !== undefined ? { ordenRevisado } : {}),
     // Historia 27.6 — la tradición viaja para el suelo de los destacados; sin declarar, se omite.
     ...(tradicion !== undefined ? { tradicion } : {}),
   };
@@ -1442,6 +1512,8 @@ export function aplanarFichaDeObra(entrada: EntradaObra): FichaDeObra {
     ...(entrada.data.ediciones !== undefined
       ? { ediciones: entrada.data.ediciones.map((edicion) => ({ ...edicion })) }
       : {}),
+    ...(entrada.data.wikidata !== undefined ? { wikidata: { ...entrada.data.wikidata } } : {}),
+    ...(entrada.data.incipit !== undefined ? { incipit: { ...entrada.data.incipit } } : {}),
   };
 }
 
@@ -1502,6 +1574,43 @@ export function avisoDeDesajustes(
   ].join('\n');
 }
 
+/**
+ * Las posiciones y el orden de los índices, de las colecciones `posiciones` e `indices` (los dos
+ * cargadores de `src/content.config.ts`). Es la lectura común de `citasDeLasObras` y de
+ * `pasajesDeLasCitas`.
+ */
+async function posicionesEIndices(): Promise<{ posiciones: PosicionesDeCitas; indices: IndicesDeObras }> {
+  const { getCollection } = await import('astro:content');
+  const posiciones = new Map<string, readonly AparicionDeCita[]>(
+    (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
+  );
+  // Una sola entrada, siempre presente aunque no haya ningún índice: ver el cargador.
+  const indices: IndicesDeObras = new Map(
+    (await getCollection('indices')).flatMap((entrada) => Object.entries(entrada.data.porObra)),
+  );
+  return { posiciones, indices };
+}
+
+/**
+ * Memoriza por conjunto un cálculo que pide cada página, como `rutasIndexables`. Un fallo no se
+ * memoriza: la siguiente página que lo pida vuelve a intentarlo, como `conjuntoPublicable`, que
+ * solo guarda lo que terminó bien.
+ */
+function memorizadoPorConjunto<T>(
+  memoria: WeakMap<ConjuntoPublicable, Promise<T>>,
+  conjunto: ConjuntoPublicable,
+  calcular: () => Promise<T>,
+): Promise<T> {
+  const memorizada = memoria.get(conjunto);
+  if (memorizada !== undefined) return memorizada;
+  const calculo = calcular();
+  memoria.set(conjunto, calculo);
+  calculo.catch(() => {
+    if (memoria.get(conjunto) === calculo) memoria.delete(conjunto);
+  });
+  return calculo;
+}
+
 const citasDeLasObrasPorConjunto = new WeakMap<ConjuntoPublicable, Promise<ReadonlyMap<string, Cita[]>>>();
 
 /**
@@ -1513,27 +1622,50 @@ const citasDeLasObrasPorConjunto = new WeakMap<ConjuntoPublicable, Promise<Reado
  * página que la pida comparte el mismo. Sin ninguna Cita con Obra no consulta las colecciones.
  */
 export function citasDeLasObras(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, Cita[]>> {
-  const memorizada = citasDeLasObrasPorConjunto.get(conjunto);
-  if (memorizada !== undefined) return memorizada;
-  const calculo = (async (): Promise<ReadonlyMap<string, Cita[]>> => {
+  return memorizadoPorConjunto(citasDeLasObrasPorConjunto, conjunto, async () => {
     if (!conjunto.citas.some((cita) => cita.obra !== undefined)) return new Map();
-    const { getCollection } = await import('astro:content');
-    const posiciones = new Map<string, readonly AparicionDeCita[]>(
-      (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
-    );
-    // Una sola entrada, siempre presente aunque no haya ningún índice: ver el cargador.
-    const indices: IndicesDeObras = new Map(
-      (await getCollection('indices')).flatMap((entrada) => Object.entries(entrada.data.porObra)),
-    );
+    const { posiciones, indices } = await posicionesEIndices();
     return citasPorObra(conjunto.citas, posiciones, indices);
-  })();
-  citasDeLasObrasPorConjunto.set(conjunto, calculo);
-  // Un fallo no se memoriza: la siguiente página que la pida vuelve a intentarlo, como
-  // `conjuntoPublicable`, que solo guarda lo que terminó bien.
-  calculo.catch(() => {
-    if (citasDeLasObrasPorConjunto.get(conjunto) === calculo) citasDeLasObrasPorConjunto.delete(conjunto);
   });
-  return calculo;
+}
+
+const pasajesPorConjunto = new WeakMap<ConjuntoPublicable, Promise<ReadonlyMap<string, PasajeDeAparicion>>>();
+
+/**
+ * El pasaje de cada Cita del conjunto, por su slug — Historia 31.1. Es la fachada de
+ * `pasajesDeCitas`, con la misma lectura y la misma memoria que `citasDeLasObras`. Sin ninguna
+ * Cita no consulta las colecciones.
+ */
+export function pasajesDeLasCitas(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, PasajeDeAparicion>> {
+  return memorizadoPorConjunto(pasajesPorConjunto, conjunto, async () => {
+    if (conjunto.citas.length === 0) return new Map();
+    const { posiciones, indices } = await posicionesEIndices();
+    return pasajesDeCitas(conjunto.citas, posiciones, indices);
+  });
+}
+
+let incipitsMemorizados: Promise<ReadonlyMap<string, IncipitDeObra>> | undefined;
+
+/**
+ * El incipit de cada Obra que lo ofrece, por nombre de ficha — Historia 32.3, AD-30. Lo lee de
+ * la colección `incipits` (su cargador solo cablea `tools/lib/posiciones.ts`), que guarda una sola
+ * entrada `porFicha`, siempre presente: se consulta sin guarda. Una ficha sin incipit, o cuyo
+ * incipit no se ofrece (`ofreceIncipit`: sin tope, la primera unidad no cabe), no está.
+ */
+export function incipitsDeLasObras(): Promise<ReadonlyMap<string, IncipitDeObra>> {
+  if (incipitsMemorizados !== undefined) return incipitsMemorizados;
+  const leidos = (async () => {
+    const { getCollection } = await import('astro:content');
+    return new Map<string, IncipitDeObra>(
+      (await getCollection('incipits')).flatMap((entrada) => Object.entries(entrada.data.porFicha)),
+    );
+  })();
+  // Un fallo no se memoriza: la siguiente página vuelve a intentarlo.
+  incipitsMemorizados = leidos.catch((fallo: unknown) => {
+    incipitsMemorizados = undefined;
+    throw fallo;
+  });
+  return incipitsMemorizados;
 }
 
 let memoria: ConjuntoPublicable | undefined;
@@ -1555,7 +1687,18 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
    * antes de que se construya ninguna página.
    */
   const fichas = (await getCollection('obras')).map(aplanarFichaDeObra);
-  const citas: Cita[] = colgarObras((await getCollection('citas')).map(aplanarCita), fichas);
+  /*
+   * Historia 32.2 — la Ficha técnica de las Obras atadas a Wikidata, por nombre de ficha. La
+   * colección solo se consulta si alguna ficha declara `wikidata`: vacía, `getCollection`
+   * avisaría de una colección vacía en cada construcción.
+   */
+  const fichasTecnicas = new Map<string, FichaTecnicaDeObra>();
+  if (fichas.some((f) => f.wikidata !== undefined)) {
+    for (const entrada of await getCollection('fichasTecnicas')) {
+      fichasTecnicas.set(entrada.id, entrada.data);
+    }
+  }
+  const citas: Cita[] = colgarObras((await getCollection('citas')).map(aplanarCita), fichas, fichasTecnicas);
   /*
    * Las Colecciones **declaradas** viven en esta variable local y no salen de aquí.
    *

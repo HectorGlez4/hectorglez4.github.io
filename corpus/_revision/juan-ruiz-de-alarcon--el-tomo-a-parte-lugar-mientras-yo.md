@@ -1,5 +1,5 @@
 ---
-texto: "El tomò a parte lugar, mientras yo hablaua a mi amor lo que el discreto lector 525 podra allà considerar."
+texto: "El tomò a parte lugar,\nmientras yo hablaua a mi amor\nlo que el discreto lector 525\npodra allà considerar."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-el-tomo-a-parte-lugar-mientras-yo"
 procedencia:

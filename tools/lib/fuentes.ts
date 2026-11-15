@@ -99,8 +99,10 @@ function rutaLegible(url: URL): string | undefined {
  * ellas. Un `direction=` tampoco: pide la revisión **siguiente o anterior** a ese `oldid`, no
  * esa. Ni vale un `oldid` que no sea una revisión exacta: «más o menos esa revisión» es la
  * dirección viva con otro nombre.
+ *
+ * Wikidata es MediaWiki y la reutiliza (32.1), sin entrar en `FUENTES`: no es Fuente de texto.
  */
-function revisionDeMediaWiki(url: string): number | undefined {
+export function revisionDeMediaWiki(url: string): number | undefined {
   let analizada: URL;
   try {
     analizada = new URL(url);
@@ -120,8 +122,11 @@ function revisionDeMediaWiki(url: string): number | undefined {
   return revisionExacta(valores[0]);
 }
 
-/** El título tecleado en una dirección de MediaWiki, con los guiones bajos como espacios. */
-function tituloDeMediaWiki(url: string): string | undefined {
+/**
+ * El título tecleado en una dirección de MediaWiki, con los guiones bajos como espacios. Lo
+ * reutiliza la rama de Wikidata de `tools/recuperar.ts` (32.1): un solo analizador de revisión.
+ */
+export function tituloDeMediaWiki(url: string): string | undefined {
   let analizada: URL;
   try {
     analizada = new URL(url);

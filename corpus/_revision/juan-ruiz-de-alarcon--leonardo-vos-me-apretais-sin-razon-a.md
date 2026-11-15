@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Vos me apretais sin razon, a no acudir a lo justo."
+texto: "LEONARDO\nVos me apretais sin razon,\na no acudir a lo justo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-vos-me-apretais-sin-razon-a"
 procedencia:

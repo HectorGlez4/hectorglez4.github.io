@@ -1,5 +1,5 @@
 ---
-texto: "NUÑO: Pues, ¿qué tienes más armas, señor, que aquellas que están en un azulejo sobre elmarco de la puerta?"
+texto: "NUÑO: Pues, ¿qué tienes\nmás armas, señor, que aquellas\nque están en un azulejo\nsobre elmarco de la puerta?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-nuno-pues-que-tienes-mas-armas-senor"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "que ni es lícito hablar, donde intratable pone a la lengua una mordaza el miedo, y ¡ay del primero que rompiéndola hable!"
+texto: "que ni es lícito hablar, donde intratable\npone a la lengua una mordaza el miedo,\ny ¡ay del primero que rompiéndola hable!"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-que-ni-es-licito-hablar-donde-intratable"
 procedencia:

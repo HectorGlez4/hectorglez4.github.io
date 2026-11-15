@@ -1,5 +1,5 @@
 ---
-texto: "Dale [a NUÑO] un bofetón NUÑO: A ti te dé mal de muelas, que me has quebrado dos dientes."
+texto: "Dale [a NUÑO] un bofetón\nNUÑO: A ti te dé mal de muelas,\nque me has quebrado dos dientes."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-dale-a-nuno-un-bofeton-nuno-a"
 procedencia:

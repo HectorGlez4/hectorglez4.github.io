@@ -1,5 +1,5 @@
 ---
-texto: "Pues si todos están presos, Sobre mi mucha lealtad Llueva cárceles mi cielo Diez años sin escampar."
+texto: "Pues si todos están presos,\nSobre mi mucha lealtad\nLlueva cárceles mi cielo\nDiez años sin escampar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-pues-si-todos-estan-presos-sobre-mi"
 procedencia:

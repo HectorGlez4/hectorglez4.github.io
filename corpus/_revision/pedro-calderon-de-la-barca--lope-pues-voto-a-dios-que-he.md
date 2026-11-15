@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Pues, ¡voto a Dios!, que he de ver si me dan el preso o no."
+texto: "LOPE: Pues, ¡voto a Dios!, que he de ver\nsi me dan el preso o no."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-pues-voto-a-dios-que-he"
 procedencia:

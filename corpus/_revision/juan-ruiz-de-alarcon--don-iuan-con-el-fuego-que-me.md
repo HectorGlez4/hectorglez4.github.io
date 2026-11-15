@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN ¡Con el fuego que me quema, 465 mas leyendo viene, cielos!"
+texto: "DON IUAN\n¡Con el fuego que me quema, 465\nmas leyendo viene, cielos!"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-con-el-fuego-que-me"
 procedencia:

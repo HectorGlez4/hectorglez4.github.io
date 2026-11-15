@@ -1,5 +1,5 @@
 ---
-texto: "Fuera de que, si ahora atiendo a que dijo que á vengarse Viene de un agravio, hombre que está agraviado, es infame. — No es mi hijo, no es mi hijo, ni tiene mi noble sangre."
+texto: "Fuera de que, si ahora atiendo a que dijo que á vengarse\nViene de un agravio, hombre que está agraviado, es infame.\n— No es mi hijo, no es mi hijo, ni tiene mi noble sangre."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-fuera-de-que-si-ahora-atiendo-a"
 procedencia:

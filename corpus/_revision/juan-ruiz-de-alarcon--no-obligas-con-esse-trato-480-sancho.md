@@ -1,5 +1,5 @@
 ---
-texto: "No obligas con esse trato. 480 SANCHO Enamora como gato, a gritos y mordiscones."
+texto: "No obligas con esse trato. 480\nSANCHO\nEnamora como gato,\na gritos y mordiscones."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-no-obligas-con-esse-trato-480-sancho"
 procedencia:

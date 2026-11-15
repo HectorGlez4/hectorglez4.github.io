@@ -29,6 +29,8 @@ import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
  * esa ruta dan cada par «peso | interlineado/cuerpo». Lo que rota con la jornada —el Bloque de
  * Cita dentro de `data-jornada`, en la portada y el 404— no entra: su tramo cambia con el día; es
  * el mismo componente que la Página de Cita, que sí se mide en los tramos `xl`, `lg` y `md`. El
+ * resto de `data-jornada` —las Obras de hoy de la portada (28.3)— sí entra, pero sin recuento: cada
+ * par cuenta 1, porque cuántas Obras de hoy traen año cambia con el día y no con el CSS. El
  * tramo `sm` no se mide porque ninguna Cita del Corpus pasa hoy de 240 caracteres; su cuerpo y su
  * interlineado (`--cita-sm`) son los del tramo `md` en móvil, que sí se miden. Las páginas se
  * derivan del Corpus (`tests/e2e/ayuda/corpus.ts`), así que una siembra que cambie lo que listan
@@ -129,7 +131,10 @@ async function tipografiaCalculada(page: Page): Promise<Record<string, Record<st
       const clave = ruta(el);
       const pares = porRuta.get(clave) ?? new Map<string, number>();
       const par = `${estilo.fontWeight} | ${interlineado}`;
-      pares.set(par, (pares.get(par) ?? 0) + 1);
+      // Dentro de lo que rota, cuántos elementos dan el par depende del día (las Obras de la portada
+      // de hoy, con año o sin él, Historia 28.3): ahí se mide que el par está, no cuántas veces.
+      const rota = el.closest('[data-jornada]') !== null;
+      pares.set(par, rota ? 1 : (pares.get(par) ?? 0) + 1);
       porRuta.set(clave, pares);
     }
     return Object.fromEntries(

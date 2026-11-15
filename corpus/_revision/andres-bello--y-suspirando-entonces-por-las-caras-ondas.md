@@ -1,5 +1,5 @@
 ---
-texto: "Y suspirando entonces por las caras ondas del Guayas (Guayaquil un día, antes que al héroe de Junín cantaras),"
+texto: "Y suspirando entonces por las caras\nondas del Guayas (Guayaquil un día,\nantes que al héroe de Junín cantaras),"
 autor: "andres-bello"
 slug: "andres-bello-y-suspirando-entonces-por-las-caras-ondas"
 procedencia:

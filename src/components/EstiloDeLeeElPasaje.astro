@@ -1,0 +1,51 @@
+---
+/**
+ * La presentación de «Lee el pasaje» — Historia 31.2, UX de la Épica 31.
+ *
+ * Un `<style is:inline>` que `src/pages/cita/[slug].astro` pone en la cabeza (`slot="cabeza"`)
+ * **solo en la Página de Cita que pinta un pasaje**. No es un bloque `<style>` de
+ * `LeeElPasaje.astro` porque Astro emite esos por el grafo de importaciones: entraría en la hoja de
+ * toda Página de Cita aunque ninguna lo pintara, y con el tope en `undefined` el HTML de todas
+ * cambiaría por el nombre de la hoja. Así, sin pasaje, la página es byte a byte la de antes.
+ *
+ * Solo tokens de `tokens.css`, también peso e interlineado (Historia 26.12): el pasaje en
+ * `body-md`, la sans y tinta apagada; las palabras de la Cita en la serif, al mismo cuerpo, en
+ * tinta, sin fondo y con el peso del párrafo —nunca el 600 del navegador—; la línea de la Fuente a
+ * 2 × unidad, en `caption`, con el enlace en siena. Las reglas van bajo `.pasaje`, la clase del
+ * contenedor de `LeeElPasaje.astro`, porque un `is:inline` no lleva ámbito. Sin comentarios dentro
+ * del `<style>`: viajarían al visitante.
+ */
+---
+
+<style is:inline>
+.pasaje .parrafo {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--cuerpo-md);
+  font-weight: var(--peso-regular);
+  line-height: var(--interlineado-cuerpo-md);
+  color: var(--tinta-apagada);
+}
+.pasaje .parrafo + .parrafo {
+  margin-top: var(--unidad);
+}
+.pasaje mark {
+  font-family: var(--serif);
+  font-size: var(--cuerpo-md);
+  font-weight: var(--peso-regular);
+  line-height: var(--interlineado-cuerpo-md);
+  color: var(--tinta);
+  background: transparent;
+}
+.pasaje .fuente-del-pasaje {
+  margin: calc(var(--unidad) * 2) 0 0;
+  font-family: var(--sans);
+  font-size: var(--pie);
+  line-height: var(--interlineado-pie);
+  color: var(--tinta-apagada);
+}
+.pasaje .fuente-del-pasaje a {
+  color: var(--siena);
+  text-underline-offset: 0.2em;
+}
+</style>

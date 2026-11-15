@@ -1,5 +1,5 @@
 ---
-texto: "donde no es otro mérito atendido que el oro; donde al mísero atropella el coche de un bribón vano y henchido; donde en millones nada, por su estrella, quien al pueblo los roba desangrado en un destino que le dio una bella;"
+texto: "donde no es otro mérito atendido\nque el oro; donde al mísero atropella\nel coche de un bribón vano y henchido;\ndonde en millones nada, por su estrella,\nquien al pueblo los roba desangrado\nen un destino que le dio una bella;"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-donde-no-es-otro-merito-atendido-que"
 procedencia:

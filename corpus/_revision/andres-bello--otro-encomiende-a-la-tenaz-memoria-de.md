@@ -1,5 +1,5 @@
 ---
-texto: "Otro encomiende a la tenaz memoria de antiguos y modernos la doctrina, de absurdos y verdades pepitoria;"
+texto: "Otro encomiende a la tenaz memoria\nde antiguos y modernos la doctrina,\nde absurdos y verdades pepitoria;"
 autor: "andres-bello"
 slug: "andres-bello-otro-encomiende-a-la-tenaz-memoria-de"
 procedencia:

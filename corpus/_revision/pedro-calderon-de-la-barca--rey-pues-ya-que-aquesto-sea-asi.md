@@ -1,5 +1,5 @@
 ---
-texto: "REY: Pues ya que aquesto sea así, ¿por qué, como a capitán y caballero, no hicisteis degollarle?"
+texto: "REY: Pues ya que aquesto sea así,\n¿por qué, como a capitán\ny caballero, no hicisteis\ndegollarle?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rey-pues-ya-que-aquesto-sea-asi"
 procedencia:

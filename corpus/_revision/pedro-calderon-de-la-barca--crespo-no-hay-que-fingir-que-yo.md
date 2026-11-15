@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: No hay que fingir; que yo he salido a reñir por haceros compañía."
+texto: "CRESPO: No hay que fingir;\nque yo he salido a reñir\npor haceros compañía."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-no-hay-que-fingir-que-yo"
 procedencia:

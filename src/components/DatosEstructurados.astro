@@ -13,6 +13,7 @@
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeAutor } from '../lib/superficies.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
+import { enUnaLinea } from '../lib/verso.ts';
 
 interface Props {
   cita: Cita;
@@ -33,7 +34,7 @@ const datos: Record<string, unknown> = {
   '@type': 'Quotation',
   '@id': canonica,
   url: canonica,
-  text: cita.texto,
+  text: enUnaLinea(cita.texto),
   inLanguage: 'es',
   creator: {
     '@type': 'Person',

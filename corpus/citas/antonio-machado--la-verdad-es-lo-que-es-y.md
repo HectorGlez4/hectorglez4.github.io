@@ -1,5 +1,5 @@
 ---
-texto: "La verdad es lo que es, y sigue siendo verdad aunque se piense al revés."
+texto: "La verdad es lo que es,\ny sigue siendo verdad\naunque se piense al revés."
 autor: "antonio-machado"
 temas:
   - "el-saber"

@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO ¿Para esso no era mejor echalle otro pretendiente?"
+texto: "LEONARDO\n¿Para esso no era mejor\nechalle otro pretendiente?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-para-esso-no-era-mejor-echalle"
 procedencia:

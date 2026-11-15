@@ -1,5 +1,5 @@
 ---
-texto: "Y si se pone en defensa el lugar, todo el lugar."
+texto: "Y si se pone en defensa\nel lugar, todo el lugar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-si-se-pone-en-defensa-el"
 procedencia:

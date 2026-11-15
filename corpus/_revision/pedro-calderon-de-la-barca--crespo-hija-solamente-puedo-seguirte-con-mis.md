@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Hija, solamente puedo seguirte con mis suspiros."
+texto: "CRESPO: Hija, solamente puedo\nseguirte con mis suspiros."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-hija-solamente-puedo-seguirte-con-mis"
 procedencia:

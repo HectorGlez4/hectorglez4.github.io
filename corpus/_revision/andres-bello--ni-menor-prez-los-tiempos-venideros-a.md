@@ -1,5 +1,5 @@
 ---
-texto: "Ni menor prez los tiempos venideros a la virtud darán de Cartagena."
+texto: "Ni menor prez los tiempos venideros\na la virtud darán de Cartagena."
 autor: "andres-bello"
 slug: "andres-bello-ni-menor-prez-los-tiempos-venideros-a"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "«Y en todos sus oráculos proclama que al Magdalena y al Rimac turbioso ya sobre el Tíber y el Garona ama»."
+texto: "«Y en todos sus oráculos proclama\nque al Magdalena y al Rimac turbioso\nya sobre el Tíber y el Garona ama»."
 autor: "andres-bello"
 slug: "andres-bello-y-en-todos-sus-oraculos-proclama-que"
 procedencia:

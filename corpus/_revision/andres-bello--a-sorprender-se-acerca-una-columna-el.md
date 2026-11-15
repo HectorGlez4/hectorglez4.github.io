@@ -1,5 +1,5 @@
 ---
-texto: "A sorprender se acerca una columna el almacén que con Ricaurte guarda escasa tropa; él, dando de los suyos a la salud lo que a la propia niega, aléjalos de sí; con ledo rostro su intento oculta."
+texto: "A sorprender se acerca una columna\nel almacén que con Ricaurte guarda\nescasa tropa; él, dando de los suyos\na la salud lo que a la propia niega,\naléjalos de sí; con ledo rostro\nsu intento oculta."
 autor: "andres-bello"
 slug: "andres-bello-a-sorprender-se-acerca-una-columna-el"
 procedencia:

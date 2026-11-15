@@ -1,5 +1,5 @@
 ---
-texto: "Vanse [don MENDO y NUÑO] ÁLVARO: ¡Que en una villana haya tan hidalga resistencia, que no me haya respondido una palabra siquiera apacible!"
+texto: "Vanse [don MENDO y NUÑO]\nÁLVARO: ¡Que en una villana haya\ntan hidalga resistencia,\nque no me haya respondido\nuna palabra siquiera\napacible!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vanse-don-mendo-y-nuno-alvaro-que"
 procedencia:

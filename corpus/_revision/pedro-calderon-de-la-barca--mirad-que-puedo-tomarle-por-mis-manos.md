@@ -1,5 +1,5 @@
 ---
-texto: "Mirad, que puedo tomarle por mis manos, y no quiero, sino que vos me los deis."
+texto: "Mirad, que puedo tomarle\npor mis manos, y no quiero,\nsino que vos me los deis."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mirad-que-puedo-tomarle-por-mis-manos"
 procedencia:

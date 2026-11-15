@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO ¿Que Iulia me llame agora? yo vengo fuera de mi."
+texto: "LEONARDO\n¿Que Iulia me llame agora?\nyo vengo fuera de mi."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-que-iulia-me-llame-agora-yo"
 procedencia:

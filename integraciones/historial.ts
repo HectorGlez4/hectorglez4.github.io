@@ -96,6 +96,7 @@ import {
 } from '../tools/lib/cambios.ts';
 import { FAMILIAS_DE_FICHERO, type FamiliaDeFichero } from '../tools/lib/avisar.ts';
 import { obraDeIndice } from '../tools/lib/indice.ts';
+import { documentoDeLaCarpeta, entidadesQuePinta, nombreDeDocumentoDeWikidata } from '../tools/lib/wikidata.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -429,9 +430,16 @@ async function documentosEnDisco(directorio: string): Promise<string[]> {
  */
 export async function corpusParaFechar(
   raiz: string,
-  opciones: { documentos?: readonly string[] } = {},
+  opciones: {
+    documentos?: readonly string[];
+    /**
+     * Historia 29.2 — la raíz del Corpus, si no es `{raiz}/corpus`: la de `--corpus` de quien
+     * cuenta las fechas que movería una orden.
+     */
+    corpus?: string;
+  } = {},
 ): Promise<CorpusParaFechar> {
-  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  const rutas = rutasDelCorpus(opciones.corpus ?? join(raiz, 'corpus'));
   const [leidas, autores, temas, colecciones, fichas, documentos] = await Promise.all([
     leerCitas(rutas.citas),
     leerAutores(rutas),
@@ -442,6 +450,25 @@ export async function corpusParaFechar(
   ]);
   // Historia 22.4 — la Obra de cada Cita, resuelta como la resuelve el sitio.
   const citas = colgarObras(leidas, fichas);
+  /*
+   * Historia 32.2 — de cada ficha atada a Wikidata, su documento y las entidades que pinta su
+   * línea de Ficha técnica. Leer para fechar nunca lanza por esto: un documento que no se deja
+   * leer deja `pinta` ausente, y la relación compone entonces `vigentes.yml` con cualquier cambio.
+   */
+  const deWikidata = new Map<string, { documento: string; pinta?: readonly string[] }>();
+  for (const ficha of fichas) {
+    if (ficha.wikidata === undefined) continue;
+    const { entidad, revision } = ficha.wikidata;
+    const documento = resolve(rutas.wikidata, nombreDeDocumentoDeWikidata(entidad, revision));
+    let pinta: readonly string[] | undefined;
+    try {
+      const lectura = await documentoDeLaCarpeta(rutas.wikidata, entidad, revision);
+      if (lectura.ok) pinta = entidadesQuePinta(lectura.documento.datos);
+    } catch {
+      pinta = undefined;
+    }
+    deWikidata.set(ficha.nombre, { documento, ...(pinta === undefined ? {} : { pinta }) });
+  }
 
   return {
     citas: citas.map((cita) => {
@@ -470,9 +497,14 @@ export async function corpusParaFechar(
       nombre: ficha.nombre,
       autor: ficha.autor,
       formas: ficha.formas,
+      ...(deWikidata.has(ficha.nombre) ? { wikidata: deWikidata.get(ficha.nombre) } : {}),
+      // Historia 32.3 — el documento de su incipit compone su página aunque no sea de sus Citas.
+      ...(ficha.incipit !== undefined ? { incipit: ficha.incipit.documento } : {}),
       ruta: resolve(ficha.ruta),
     })),
     documentos: documentos.map((documento) => resolve(documento)),
+    // Solo con alguna ficha atada: sin ninguna, `vigentes.yml` no compone ninguna superficie.
+    ...(deWikidata.size > 0 ? { vigentesDeWikidata: resolve(rutas.vigentesDeWikidata) } : {}),
   };
 }
 

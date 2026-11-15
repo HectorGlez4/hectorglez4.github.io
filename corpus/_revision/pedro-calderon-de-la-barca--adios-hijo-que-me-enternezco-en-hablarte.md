@@ -1,5 +1,5 @@
 ---
-texto: "Adiós, hijo; que me enternezco en hablarte."
+texto: "Adiós, hijo;\nque me enternezco en hablarte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-adios-hijo-que-me-enternezco-en-hablarte"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Pero es preciso al informe que de mis sucesos hago —aunque pase la modestia la vergüenza de contarlo—, para que entiendas la historia, presuponer asentado que mi discreción la causa fue principal de mi daño."
+texto: "Pero es preciso al informe\nque de mis sucesos hago\n—aunque pase la modestia\nla vergüenza de contarlo—,\npara que entiendas la historia,\npresuponer asentado\nque mi discreción la causa\nfue principal de mi daño."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-pero-es-preciso-al-informe-que-de"
 procedencia:

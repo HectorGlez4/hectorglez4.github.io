@@ -43,8 +43,40 @@
  * copias del Kit y `document.currentScript` sigue siendo el guion. Se inserta con `set:html`.
  * El texto del guion no lleva comentarios: viajarían al visitante y contarían en
  * `MAX_BYTES_DE_GUION`.
+ *
+ * Historia 30.3 — **la única isla de copiar de la página** atiende también «Cómo citar»
+ * (`ComoCitar.astro`), que va después en el marcado. Por eso espera al documento analizado
+ * (`DOMContentLoaded` si aún se está leyendo) y entonces recorre cada bloque `[data-copiables]` (hasta la 30.4, `[data-como-citar]`)
+ * que no esté marcado (`data-listo`, para que las dos copias del Kit o la Cita del Día no lo
+ * hagan dos veces): escribe en cada marcador la fecha de consulta de hoy —y la vuelve a escribir en
+ * cada pulsación, para que una página abierta desde ayer no copie la fecha de ayer—, con
+ * `fechaDeConsulta` de `src/lib/atribucion.ts` —que viaja por su texto, como `anunciar`, y usa el
+ * calendario del visitante; el build no escribe ninguna jornada—, quita las líneas «Sin fecha…»
+ * y enseña los botones. Cada botón copia el `textContent` de su Referencia, dice «Copiado.» dos
+ * segundos y lo anuncia por la región del bloque, dentro del `<details>`. La región la comparten los
+ * tres botones, así que el bloque recuerda cuál anunció lo último (`d`) y solo ese la vacía al
+ * volver: el temporizador de «Copiar APA» no borra el «Copiado.» de un «Copiar MLA» posterior. Si el portapapeles
+ * rechaza, nada: ni «Copiado.» ni error, y la Referencia sigue a la vista y seleccionable. El
+ * guion sigue sin contenido —nada de la Cita, todo en el marcado— e idéntico en toda Página de
+ * Cita, y copiar la Cita copia lo mismo que antes. Donde no hay «Cómo citar» (portada, 404, Kit), el recorrido no
+ * encuentra nada.
+ *
+ * Historia 30.4 — el recorrido atiende «Cómo citar» **e** «Inserta esta cita» por atributos
+ * neutros, sin un segundo guion: cada bloque `[data-copiables]`, cada botón `[data-copiar-texto]`,
+ * y lo que copia es el `textContent` del `[data-copiable]` de al lado (una Referencia, o el campo
+ * del Fragmento, cuyo `textContent` es su valor). En «Inserta esta cita» no hay marcador de fecha
+ * ni línea «Sin fecha…», así que esa parte no encuentra nada.
+ *
+ * Historia 30.5 — tras una copia buena de un bloque, y fuera del `try` como la de copiar la Cita,
+ * la isla pide su evento con `__medir(…)` a secas: `copiado-de-fragmento` si el bloque es «Inserta
+ * esta cita» (`data-inserta-esta-cita`) y `copiado-de-referencia` si es «Cómo citar»
+ * (`data-como-citar`; los tres estilos son el mismo evento). Un bloque `[data-copiables]` que no
+ * sea ninguno de los dos copia y no pide nada: su evento lo declara la historia que lo traiga,
+ * nunca se cuenta como Referencia por omisión. Los nombres llegan como constantes por `guionQueAnuncia`
+ * (`EVENTO_REFERENCIA`, `EVENTO_FRAGMENTO`), nunca como literal. Si el portapapeles rechaza, no se
+ * pide nada. El fichero de medición los envía desde la fase B de la 30.5, que no tocó la isla.
  */
-import { textoParaCopiar } from '../lib/atribucion.ts';
+import { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta, textoParaCopiar } from '../lib/atribucion.ts';
 import { guionQueAnuncia } from '../lib/anuncio.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
@@ -84,8 +116,14 @@ const instancia = cita.slug;
 const ROTULO = 'Copiar la cita';
 
 const guion = guionQueAnuncia(
-  { EVENTO_COPIADO: EVENTOS.copiado },
-  `const isla = document.currentScript.previousElementSibling;
+  {
+    EVENTO_COPIADO: EVENTOS.copiado,
+    EVENTO_REFERENCIA: EVENTOS.copiadoDeReferencia,
+    EVENTO_FRAGMENTO: EVENTOS.copiadoDeFragmento,
+    MARCADOR: MARCADOR_DE_FECHA_DE_CONSULTA,
+  },
+  `const fechaDeConsulta = ${String(fechaDeConsulta)};
+const isla = document.currentScript.previousElementSibling;
 const boton = isla.querySelector('[data-copiar]');
 const etiqueta = boton.querySelector('[data-etiqueta]');
 const anuncio = isla.querySelector('[data-anuncio]');
@@ -116,6 +154,35 @@ boton.addEventListener('click', async () => {
   temporizador = setTimeout(volver, 2000);
   __medir(EVENTO_COPIADO);
 });
+
+const citar = () => {
+for (const k of document.querySelectorAll('[data-copiables]:not([data-listo])')) {
+k.setAttribute('data-listo', '');
+const r = k.querySelector('[data-anuncio]');
+const c = k.hasAttribute('data-inserta-esta-cita') ? EVENTO_FRAGMENTO : k.hasAttribute('data-como-citar') ? EVENTO_REFERENCIA : '';
+const w = () => { const hoy = new Date(); for (const m of k.querySelectorAll('[' + MARCADOR + ']')) m.textContent = fechaDeConsulta(m.getAttribute(MARCADOR), hoy); };
+w();
+for (const l of k.querySelectorAll('[data-sin-fecha]')) l.remove();
+for (const b of k.querySelectorAll('[data-copiar-texto]')) {
+const e = b.querySelector('[data-etiqueta]'), t = e.textContent;
+let s;
+const v = () => { clearTimeout(s); e.textContent = t; if (k.d === b) r.textContent = ''; b.removeAttribute('data-estado'); };
+b.hidden = false;
+b.onclick = async () => {
+v();
+w();
+try { await navigator.clipboard.writeText(b.parentNode.querySelector('[data-copiable]').textContent); } catch { return; }
+e.textContent = 'Copiado.';
+b.setAttribute('data-estado', 'copiado');
+k.d = b;
+anunciar(r, 'Copiado.');
+s = setTimeout(v, 2000);
+if (c) __medir(c);
+};
+}
+}
+};
+document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', citar) : citar();
 `,
 );
 ---
@@ -142,6 +209,45 @@ boton.addEventListener('click', async () => {
 <style>
   .isla {
     margin-top: calc(var(--unidad) * 4);
+  }
+
+  /*
+   * Historia 30.2 — dentro de la Fila de acciones de la Página de Cita la isla no tiene caja:
+   * el botón y el respaldo son elementos de la fila, y el respaldo baja tras Imagen, a lo ancho,
+   * en vez de quedar entre los dos botones. El marcado y el guion no cambian —el guion sigue
+   * buscando el respaldo dentro de su isla—, y fuera de la fila (el Kit) todo sigue igual.
+   * La región de estado es `position: absolute` y no ocupa sitio en la fila.
+   */
+  :global(.fila-de-acciones) > .isla {
+    display: contents;
+  }
+
+  /*
+   * En la fila, «Copiado.» —más corto que el rótulo— encogería el botón dos segundos y correría
+   * Imagen bajo el puntero. El botón reserva el ancho del rótulo: su `aria-label` (que es el
+   * rótulo) en una copia invisible, en la misma celda que la etiqueta. `visibility: hidden` la
+   * deja fuera del árbol de accesibilidad, y el nombre accesible sigue siendo el `aria-label`.
+   */
+  :global(.fila-de-acciones) > .isla > .copiar {
+    display: inline-grid;
+    justify-items: center;
+    align-items: center;
+  }
+
+  :global(.fila-de-acciones) > .isla > .copiar > [data-etiqueta],
+  :global(.fila-de-acciones) > .isla > .copiar::after {
+    grid-area: 1 / 1;
+  }
+
+  :global(.fila-de-acciones) > .isla > .copiar::after {
+    content: attr(aria-label);
+    visibility: hidden;
+  }
+
+  :global(.fila-de-acciones) > .isla > .respaldo {
+    order: 1;
+    flex-basis: 100%;
+    margin-top: 0;
   }
 
   /* UX-DR9 — secundario: texto en siena con filete, altura mínima de 44px. */

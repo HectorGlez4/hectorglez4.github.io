@@ -1,5 +1,5 @@
 ---
-texto: "¿A qué provincia el premio de alabanza, o a qué varón tributarás primero?"
+texto: "¿A qué provincia el premio de alabanza,\no a qué varón tributarás primero?"
 autor: "andres-bello"
 slug: "andres-bello-a-que-provincia-el-premio-de-alabanza"
 procedencia:

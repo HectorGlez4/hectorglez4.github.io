@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Que de noche haya salido, me pesa a mí."
+texto: "ISABEL: Que de noche haya salido,\nme pesa a mí."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-que-de-noche-haya-salido-me"
 procedencia:

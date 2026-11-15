@@ -1,5 +1,5 @@
 ---
-texto: "Vanse [el ESCRIBANO, los soldados, y los labradores] CRESPO: Ya que yo, como justicia, me valí de su respeto, para obligaros a oírme, la vara a esta parte dejo, y como un hombre no más deciros mis penas quiero."
+texto: "Vanse [el ESCRIBANO, los soldados, y los\nlabradores]\nCRESPO: Ya que yo, como justicia,\nme valí de su respeto,\npara obligaros a oírme,\nla vara a esta parte dejo,\ny como un hombre no más\ndeciros mis penas quiero."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vanse-el-escribano-los-soldados-y-los"
 procedencia:

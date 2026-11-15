@@ -1,5 +1,5 @@
 ---
-texto: "Un hombre honrado que, deprisa y corriendo, con la moza se casó de un señor encopetado; a quien, en vez de darle una coroza, un destino le dieron, y se mama dos mil duros, y gajes, y carroza."
+texto: "Un hombre honrado\nque, deprisa y corriendo, con la moza\nse casó de un señor encopetado;\na quien, en vez de darle una coroza,\nun destino le dieron, y se mama\ndos mil duros, y gajes, y carroza."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-un-hombre-honrado-que-deprisa-y-corriendo"
 procedencia:

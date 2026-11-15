@@ -1,5 +1,5 @@
 ---
-texto: "¿He de alabar a un necio que se traga como agua la alabanza no adquirida, aunque el papel destroce o lo deshaga?"
+texto: "¿He de alabar a un necio que se traga\ncomo agua la alabanza no adquirida,\naunque el papel destroce o lo deshaga?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-he-de-alabar-a-un-necio-que"
 procedencia:

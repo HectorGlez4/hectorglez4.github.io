@@ -1,5 +1,5 @@
 ---
-texto: "No se de qual de los dos mas ofendida me hallo; del Rey en imaginallo, o en dezirmelo de vos. 815 (Vase.)"
+texto: "No se de qual de los dos\nmas ofendida me hallo;\ndel Rey en imaginallo,\no en dezirmelo de vos. 815\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-no-se-de-qual-de-los-dos"
 procedencia:

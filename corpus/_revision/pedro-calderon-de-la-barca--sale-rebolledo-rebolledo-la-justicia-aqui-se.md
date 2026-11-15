@@ -1,5 +1,5 @@
 ---
-texto: "Sale REBOLLEDO REBOLLEDO: La justicia aquí se ha entrado."
+texto: "Sale REBOLLEDO\nREBOLLEDO: La justicia aquí se ha entrado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sale-rebolledo-rebolledo-la-justicia-aqui-se"
 procedencia:

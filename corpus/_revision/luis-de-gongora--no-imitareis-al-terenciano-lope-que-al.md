@@ -1,5 +1,5 @@
 ---
-texto: "¿No imitaréis al terenciano Lope, que al de Belerofonte cada día sobre zuecos de cómica poesía se calza espuelas, y le da un galope?"
+texto: "¿No imitaréis al terenciano Lope,\nque al de Belerofonte cada día\nsobre zuecos de cómica poesía\nse calza espuelas, y le da un galope?"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-no-imitareis-al-terenciano-lope-que-al"
 procedencia:

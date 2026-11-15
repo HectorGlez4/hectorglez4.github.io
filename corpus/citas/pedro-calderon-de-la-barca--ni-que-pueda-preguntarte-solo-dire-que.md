@@ -1,5 +1,5 @@
 ---
-texto: "Ni qué pueda preguntarte: Solo diré que á esta parte Hoy el cielo me ha guiado Para haberme consolado, Si consuelo puede ser Del que es desdichado, ver Otro que es más desdichado."
+texto: "Ni qué pueda preguntarte:\nSolo diré que á esta parte\nHoy el cielo me ha guiado\nPara haberme consolado,\nSi consuelo puede ser\nDel que es desdichado, ver\nOtro que es más desdichado."
 autor: "pedro-calderon-de-la-barca"
 temas:
   - "la-adversidad"

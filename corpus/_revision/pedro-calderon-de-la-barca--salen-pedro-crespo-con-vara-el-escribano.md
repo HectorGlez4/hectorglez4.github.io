@@ -1,5 +1,5 @@
 ---
-texto: "Salen Pedro CRESPO con vara, el ESCRIBANO, y los que puedan ÁLVARO: Pues, ¿cómo así entráis?"
+texto: "Salen Pedro CRESPO con vara, el ESCRIBANO, y los\nque puedan\nÁLVARO: Pues, ¿cómo así\nentráis?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-pedro-crespo-con-vara-el-escribano"
 procedencia:

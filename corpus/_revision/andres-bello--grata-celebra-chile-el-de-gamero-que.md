@@ -1,5 +1,5 @@
 ---
-texto: "Grata celebra Chile el de Gamero, que, vencedor de cien sangrientas lides, muriendo, el suelo consagró de Talca; y la memoria eternizar desea de aquellos granaderos de a caballo que mandó en Chacabuco Necochea."
+texto: "Grata celebra Chile el de Gamero,\nque, vencedor de cien sangrientas lides,\nmuriendo, el suelo consagró de Talca;\ny la memoria eternizar desea\nde aquellos granaderos de a caballo\nque mandó en Chacabuco Necochea."
 autor: "andres-bello"
 slug: "andres-bello-grata-celebra-chile-el-de-gamero-que"
 procedencia:

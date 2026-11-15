@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Digo, que hasta aquí ha llegado."
+texto: "REBOLLEDO: Digo,\nque hasta aquí ha llegado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-digo-que-hasta-aqui-ha-llegado"
 procedencia:

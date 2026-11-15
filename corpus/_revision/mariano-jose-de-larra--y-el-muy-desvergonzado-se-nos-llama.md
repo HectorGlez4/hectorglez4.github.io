@@ -1,5 +1,5 @@
 ---
-texto: "Y el muy desvergonzado se nos llama padre de un hijo que nació a seis meses de haber casado con la honesta dama."
+texto: "Y el muy desvergonzado se nos llama\npadre de un hijo que nació a seis meses\nde haber casado con la honesta dama."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-y-el-muy-desvergonzado-se-nos-llama"
 procedencia:

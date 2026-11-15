@@ -1,5 +1,5 @@
 ---
-texto: "Lloverlas puede si quiere Con el peine y con mirar, Y hacerme en su Peralvillo Aljaba de la Hermandad."
+texto: "Lloverlas puede si quiere\nCon el peine y con mirar,\nY hacerme en su Peralvillo\nAljaba de la Hermandad."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-lloverlas-puede-si-quiere-con-el-peine"
 procedencia:

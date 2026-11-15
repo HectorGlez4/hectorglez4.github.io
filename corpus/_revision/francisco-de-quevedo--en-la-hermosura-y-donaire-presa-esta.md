@@ -1,5 +1,5 @@
 ---
-texto: "En la hermosura y donaire Presa está la libertad, En la vergüenza los gustos, Todo el valor en la paz."
+texto: "En la hermosura y donaire\nPresa está la libertad,\nEn la vergüenza los gustos,\nTodo el valor en la paz."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-en-la-hermosura-y-donaire-presa-esta"
 procedencia:

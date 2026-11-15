@@ -1,5 +1,5 @@
 ---
-texto: "Mira si con estas prendas, con otras más que te callo, quedaría, en la más cuerda, defensa para el recato."
+texto: "Mira si con estas prendas,\ncon otras más que te callo,\nquedaría, en la más cuerda,\ndefensa para el recato."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-mira-si-con-estas-prendas-con-otras"
 procedencia:

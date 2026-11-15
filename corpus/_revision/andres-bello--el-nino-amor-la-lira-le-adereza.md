@@ -1,5 +1,5 @@
 ---
-texto: "El Niño Amor la lira le adereza; y díctanle cantares inocentes virtud, humanidad, naturaleza."
+texto: "El Niño Amor la lira le adereza;\ny díctanle cantares inocentes\nvirtud, humanidad, naturaleza."
 autor: "andres-bello"
 slug: "andres-bello-el-nino-amor-la-lira-le-adereza"
 procedencia:

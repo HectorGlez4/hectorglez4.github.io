@@ -1,5 +1,5 @@
 ---
-texto: "Juntaos todos esta noche, mas de suerte que no entiendan que yo lo mando."
+texto: "Juntaos todos esta noche,\nmas de suerte que no entiendan\nque yo lo mando."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juntaos-todos-esta-noche-mas-de-suerte"
 procedencia:

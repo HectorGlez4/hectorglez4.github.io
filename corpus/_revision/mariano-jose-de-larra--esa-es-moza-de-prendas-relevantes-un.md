@@ -1,5 +1,5 @@
 ---
-texto: "Ésa es moza de prendas relevantes: un intendente, aunque la ves soltera, sostiene a la maldita y sus amantes."
+texto: "Ésa es moza de prendas relevantes:\nun intendente, aunque la ves soltera,\nsostiene a la maldita y sus amantes."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-esa-es-moza-de-prendas-relevantes-un"
 procedencia:

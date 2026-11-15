@@ -1,5 +1,5 @@
 ---
-texto: "Yo lo mismo a su padre, que es mi tio, le escriuo, y en lugar de mi retrato 325 el de don Diego con la carta embio."
+texto: "Yo lo mismo a su padre, que es mi tio,\nle escriuo, y en lugar de mi retrato 325\nel de don Diego con la carta embio."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-yo-lo-mismo-a-su-padre-que"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: Las plantas, señor, me dad; que a ser vuestro esclavo iré."
+texto: "JUAN: Las plantas, señor, me dad;\nque a ser vuestro esclavo iré."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-las-plantas-senor-me-dad-que"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Yo estimo que te conozca mi primo, y que escriuirte le importe. 490 DOÑA ANA Necio, mira el sobreescrito."
+texto: "DON IUAN\nYo estimo\nque te conozca mi primo,\ny que escriuirte le importe. 490\nDOÑA ANA\nNecio, mira el sobreescrito."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-yo-estimo-que-te-conozca"
 procedencia:

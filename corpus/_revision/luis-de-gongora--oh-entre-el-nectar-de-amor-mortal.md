@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh entre el néctar de Amor mortal veneno, que en vaso de cristal quitas la vida!"
+texto: "¡Oh entre el néctar de Amor mortal veneno,\nque en vaso de cristal quitas la vida!"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-oh-entre-el-nectar-de-amor-mortal"
 procedencia:

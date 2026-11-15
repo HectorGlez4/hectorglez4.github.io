@@ -1,5 +1,5 @@
 ---
-texto: "Pero quando loco amor, los gustos das mas firmes?"
+texto: "Pero quando\nloco amor, los gustos das\nmas firmes?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-pero-quando-loco-amor-los-gustos-das"
 procedencia:

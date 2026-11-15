@@ -1,5 +1,5 @@
 ---
-texto: "El codo y la lezna son agudos, que es cosa brava; y las llaves y los reyes tienen de continuo guardas."
+texto: "El codo y la lezna son\nagudos, que es cosa brava;\ny las llaves y los reyes\ntienen de continuo guardas."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-el-codo-y-la-lezna-son-agudos"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¿Que no habíais, no dijisteis, de salir?"
+texto: "¿Que no habíais, no dijisteis,\nde salir?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-no-habiais-no-dijisteis-de-salir"
 procedencia:

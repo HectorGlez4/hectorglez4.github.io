@@ -1,5 +1,5 @@
 ---
-texto: "Cobrareis esta herencia, y porque vano no nos salga el intento, daros oso 355 en blanco muchas firmas de mi mano."
+texto: "Cobrareis esta herencia, y porque vano\nno nos salga el intento, daros oso 355\nen blanco muchas firmas de mi mano."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-cobrareis-esta-herencia-y-porque-vano-no"
 procedencia:

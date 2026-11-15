@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Otros tienen dos mil faltas, y yo tengo esta no mas."
+texto: "SANCHO\nOtros tienen dos mil faltas,\ny yo tengo esta no mas."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-otros-tienen-dos-mil-faltas-y"
 procedencia:

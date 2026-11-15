@@ -1,5 +1,5 @@
 ---
-texto: "Sólo si viene un corazón al mundo rebosa el vaso humano y se hincha el mar."
+texto: "Sólo si viene un corazón al mundo\nrebosa el vaso humano y se hincha el mar."
 autor: "antonio-machado"
 temas:
   - "la-vida"

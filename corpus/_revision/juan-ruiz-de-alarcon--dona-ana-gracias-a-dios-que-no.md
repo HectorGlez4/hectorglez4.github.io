@@ -1,5 +1,5 @@
 ---
-texto: "DOÑA ANA Gracias a Dios, que no hize en leerla algun delito, Don Iuan, para sospechar 495 qualquier indicio disculpa, pero sabete que es culpa reñir sin aueriguar."
+texto: "DOÑA ANA\nGracias a Dios, que no hize\nen leerla algun delito,\nDon Iuan, para sospechar 495\nqualquier indicio disculpa,\npero sabete que es culpa\nreñir sin aueriguar."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dona-ana-gracias-a-dios-que-no"
 procedencia:

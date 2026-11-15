@@ -1,5 +1,5 @@
 ---
-texto: "Pisó las calles de Madrid el fiero monóculo galán de Galatea, y cual suele tejer bárbara aldea soga de gozques contra forastero,"
+texto: "Pisó las calles de Madrid el fiero\nmonóculo galán de Galatea,\ny cual suele tejer bárbara aldea\nsoga de gozques contra forastero,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-piso-las-calles-de-madrid-el-fiero"
 procedencia:

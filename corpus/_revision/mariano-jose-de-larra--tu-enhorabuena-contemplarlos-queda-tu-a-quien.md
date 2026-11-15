@@ -1,5 +1,5 @@
 ---
-texto: "Tú enhorabuena contemplarlos queda, tú, a quien fortuna próspera o contraria salir de entre ellos para siempre veda."
+texto: "Tú enhorabuena contemplarlos queda,\ntú, a quien fortuna próspera o contraria\nsalir de entre ellos para siempre veda."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-tu-enhorabuena-contemplarlos-queda-tu-a-quien"
 procedencia:

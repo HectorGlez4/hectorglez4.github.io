@@ -1,5 +1,5 @@
 ---
-texto: "¿Y don Diego le embiò a su padre tu retrato por suyo?"
+texto: "¿Y don Diego le embiò\na su padre tu retrato\npor suyo?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-don-diego-le-embio-a-su"
 procedencia:

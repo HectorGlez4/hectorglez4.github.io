@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Quede assi, y haz lo que digo, Turpin, que importa el cuydado. 570 TURPIN Entrar puedes confiado, pues a tenello me obligo. (A parte."
+texto: "FILIPO\nQuede assi, y haz lo que digo,\nTurpin, que importa el cuydado. 570\nTURPIN\nEntrar puedes confiado,\npues a tenello me obligo.\n(A parte."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-quede-assi-y-haz-lo-que"
 procedencia:

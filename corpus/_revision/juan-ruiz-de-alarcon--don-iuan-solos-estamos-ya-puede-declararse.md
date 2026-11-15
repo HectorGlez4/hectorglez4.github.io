@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Solos estamos, ya puede declararse vuestro intento. 950 LEONARDO Quien ama porque me ausento, no amarà quando me quede."
+texto: "DON IUAN\nSolos estamos, ya puede\ndeclararse vuestro intento. 950\nLEONARDO\nQuien ama porque me ausento,\nno amarà quando me quede."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-solos-estamos-ya-puede-declararse"
 procedencia:

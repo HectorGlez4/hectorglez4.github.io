@@ -1,5 +1,6 @@
 /**
- * Dónde cae cada Cita en sus documentos de Fuente — Historia 24.1, AD-23.
+ * Dónde cae cada Cita en sus documentos de Fuente, y su pasaje — Historias 24.1 y 31.1, AD-23,
+ * AD-30.
  *
  * La Página de Obra lista sus Citas en el orden del libro, y ese orden necesita saber en qué
  * documento y en qué posición aparece el texto de cada una. Ese dato no se guarda en ninguna
@@ -9,22 +10,43 @@
  * otros, una Cita podría estar cotejada y no tener sitio en su libro.
  *
  * Aquí no se ordena ni se elige: se entrega, por el `slug` del frontmatter de cada Cita, una
- * aparición por documento de su obra en que aparece su texto, sin el texto. Quien ordena es
- * `src/lib/obras.ts` (`ordenDelLibro`), que recibe esto por parámetro. Quien lo cablea al build
- * es el cargador `posiciones` de `src/content.config.ts`, que no hace nada más.
+ * aparición por documento de su obra en que aparece su texto. Desde la 31.1 cada aparición
+ * trae además, si lo hay, su **pasaje** —el párrafo literal del documento y el tramo de la
+ * Cita en él—, que calcula `tools/lib/pasaje.ts` desde esa misma posición: es el único texto de
+ * `corpus/fuentes/` que entra en el almacén de contenido (AD-30), y solo cuando
+ * `MAX_CARACTERES_DEL_PASAJE` tiene valor. Quien ordena y elige la aparición que cuenta es
+ * `src/lib/obras.ts` (`ordenDelLibro`, `aparicionQueCuenta`), que recibe esto por parámetro.
+ * Quien lo cablea al build es el cargador `posiciones` de `src/content.config.ts`, que no hace
+ * nada más.
+ *
+ * Desde la 32.3 entrega también el **incipit** de cada Ficha de Obra que lo declara
+ * (`leerIncipitsDelCorpus`), el otro texto de `corpus/fuentes/` que se publica, cortado por
+ * `tools/lib/pasaje.ts`; lo cablea el cargador `incipits`.
  *
  * Sin red (AD-22) y sin escribir nada en `corpus/`.
  */
 
-import type { AparicionDeCita } from '../../src/lib/obras.ts';
+import type { AparicionDeCita, IncipitDeObra } from '../../src/lib/obras.ts';
+import { MAX_CARACTERES_DEL_INCIPIT, MAX_CARACTERES_DEL_PASAJE } from '../../src/lib/umbrales.ts';
 import {
   colapsarEspacios,
   documentoDeCita,
   documentosDeCita,
   localizar,
+  type Colapsado,
   type DocumentosDeFuente,
 } from './cotejo.ts';
-import { leerCitas, leerDocumentosDeFuente, leerOrdenDeLosIndices, rutasDelCorpus } from './corpus.ts';
+import {
+  leerCitas,
+  leerDocumentoDeFuente,
+  leerDocumentosParaElCotejo,
+  leerFichasDeObra,
+  leerOrdenDeLosIndices,
+  rutasDelCorpus,
+} from './corpus.ts';
+import { fuenteDe as fuenteDeclarada } from './fuentes.ts';
+import { formaDeLasLineas, FORMAS_DE_LINEAS, type FormaDeLineas } from './lineas.ts';
+import { incipitDe, pasajeDeAparicion, type MotivoSinIncipit } from './pasaje.ts';
 
 /**
  * Lo que de una Cita hace falta para situarla, tal y como sale del frontmatter. Los campos se
@@ -54,19 +76,34 @@ function obraDe(cita: CitaParaSituar): string | undefined {
     : undefined;
 }
 
+/** Lo que el pasaje necesita además de las Citas y los documentos. */
+export interface OpcionesDelPasaje {
+  /** `MAX_CARACTERES_DEL_PASAJE`; sin él —o en `undefined`— ninguna aparición trae pasaje. */
+  tope?: number | undefined;
+  /** La `lineas:` que declara la cabecera de cada documento, en crudo (`leerDocumentosParaElCotejo`). */
+  lineasDeclaradas?: ReadonlyMap<string, string>;
+}
+
 /**
  * Las apariciones de cada Cita en los documentos de su obra, por el `slug` de su frontmatter.
  *
  * Pura. Una Cita sin documento —la del censo, sin Fuente u obra—, con el texto vacío o que no
  * aparece queda con la lista vacía; un documento ilegible (`null`) o una biografía mal colocada
  * no entra, como en el cotejo. Las Citas se agrupan por el documento corto de su obra
- * (`documentoDeCita`), que es lo único de lo que depende `documentosDeCita`: así cada cuerpo se
- * colapsa una sola vez por grupo, y se suelta en cuanto el grupo termina.
+ * (`documentoDeCita`), que es lo único de lo que depende `documentosDeCita`, y dentro del grupo
+ * se recorre documento a documento: así cada cuerpo se colapsa una sola vez, su forma se juzga
+ * una vez y la correspondencia con el crudo de `tramoEnCrudo` se calcula una vez. Las
+ * apariciones de cada Cita salen en el orden de `documentosDeCita`.
+ *
+ * Con `opciones.tope`, la aparición cuyo pasaje ofrece `tools/lib/pasaje.ts` lo trae; la que no,
+ * no lleva la clave.
  */
 export function posicionesDeCitas(
   citas: readonly CitaParaSituar[],
   documentos: DocumentosDeFuente,
+  opciones: OpcionesDelPasaje = {},
 ): Map<string, AparicionDeCita[]> {
+  const { tope, lineasDeclaradas } = opciones;
   const posiciones = new Map<string, AparicionDeCita[]>();
   const porGrupo = new Map<string, { fuente: { id: string }; obra: string; citas: CitaParaSituar[] }>();
 
@@ -83,19 +120,26 @@ export function posicionesDeCitas(
   }
 
   for (const { fuente, obra, citas: delGrupo } of porGrupo.values()) {
-    const cuerpos = documentosDeCita(fuente, obra, documentos).flatMap((nombre) => {
-      const cuerpo = documentos.get(nombre);
-      return typeof cuerpo === 'string' ? [{ nombre, cuerpo: colapsarEspacios(cuerpo) }] : [];
+    const buscadas = delGrupo.map((cita) => {
+      const texto = typeof cita.texto === 'string' ? cita.texto : '';
+      return { slug: cita.slug as string, texto, buscado: colapsarEspacios(texto) };
     });
-    for (const cita of delGrupo) {
-      const buscado = colapsarEspacios(typeof cita.texto === 'string' ? cita.texto : '');
-      const apariciones: AparicionDeCita[] = [];
-      for (const { nombre, cuerpo } of cuerpos) {
+    const apariciones = buscadas.map((): AparicionDeCita[] => []);
+    for (const nombre of documentosDeCita(fuente, obra, documentos)) {
+      const crudo = documentos.get(nombre);
+      if (typeof crudo !== 'string') continue;
+      const cuerpo = colapsarEspacios(crudo);
+      const forma = formaDeLasLineas({ cuerpo: crudo, lineas: lineasDeclaradas?.get(nombre) });
+      buscadas.forEach(({ texto, buscado }, i) => {
         const posicion = localizar(buscado, cuerpo);
-        if (posicion !== -1) apariciones.push({ documento: nombre, posicion });
-      }
-      posiciones.set(cita.slug as string, apariciones);
+        if (posicion === -1) return;
+        const resultado = pasajeDeAparicion({ crudo, forma, posicion, buscado, textoDeCita: texto, tope });
+        apariciones[i].push(
+          'pasaje' in resultado ? { documento: nombre, posicion, pasaje: resultado.pasaje } : { documento: nombre, posicion },
+        );
+      });
     }
+    buscadas.forEach(({ slug }, i) => posiciones.set(slug, apariciones[i]));
   }
 
   return posiciones;
@@ -104,14 +148,20 @@ export function posicionesDeCitas(
 /**
  * Las posiciones de las Citas publicadas de un Corpus en disco: `corpus/citas/` y
  * `corpus/fuentes/`, con los lectores del cotejo. Lanza, nombrando el fichero, ante un
- * frontmatter que no se deja analizar, igual que el cotejo.
+ * frontmatter que no se deja analizar, igual que el cotejo. El tope del pasaje es, si no se
+ * dice otro, `MAX_CARACTERES_DEL_PASAJE`.
  */
 export async function leerPosicionesDelCorpus(
   raizDelCorpus: string,
+  opciones: { tope?: number | undefined } = {},
 ): Promise<Map<string, AparicionDeCita[]>> {
+  const tope = 'tope' in opciones ? opciones.tope : MAX_CARACTERES_DEL_PASAJE;
   const rutas = rutasDelCorpus(raizDelCorpus);
-  const [citas, documentos] = await Promise.all([leerCitas(rutas.citas), leerDocumentosDeFuente(rutas)]);
-  return posicionesDeCitas(citas, documentos);
+  const [citas, { documentos, lineasDeclaradas }] = await Promise.all([
+    leerCitas(rutas.citas),
+    leerDocumentosParaElCotejo(rutas),
+  ]);
+  return posicionesDeCitas(citas, documentos, { tope, lineasDeclaradas });
 }
 
 /**
@@ -143,6 +193,166 @@ export async function guardarOrdenDeLosIndices(opciones: {
   const { leer, analizar, almacen } = opciones;
   const id = ENTRADA_DEL_ORDEN_DE_LOS_INDICES;
   const data = await analizar({ id, data: { porObra: Object.fromEntries(await leer()) } });
+  almacen.clear();
+  almacen.set({ id, data });
+}
+
+/** Por qué un incipit declarado no se sostiene en su documento. */
+export type FalloDelIncipit = 'forma-indeterminada' | 'no-se-localiza';
+
+/** Por qué la Fuente que declara la cabecera del documento no puede firmar un incipit. */
+export type FalloDeLaFuenteDelIncipit = 'fuente-desconocida' | 'fuente-sin-reutilizacion' | 'fuente-mutable' | 'url-no-web';
+
+/** La Fuente con que se firma un incipit en la página: su nombre, su licencia y la dirección. */
+export interface FuenteDelIncipit {
+  nombre: string;
+  licencia: string;
+  url: string;
+}
+
+/**
+ * La Fuente que firma el incipit, de la cabecera de su documento — Historia 32.3. La comprueban,
+ * con la misma función, la orden y el cargador: el `fuente:` es una de `FUENTES`
+ * (`tools/lib/fuentes.ts`), cuya licencia permite reutilizar el texto y que no es mutable (una
+ * biografía no da el comienzo de una Obra), y el `url:` es una dirección `http(s)`: va tal cual al
+ * `href` de la página, y otro esquema —`javascript:`, `data:`— no se pinta nunca.
+ */
+export function fuenteDelIncipit(cabecera: {
+  fuente: string;
+  url: string;
+}): { ok: true; fuente: FuenteDelIncipit } | { ok: false; fallo: FalloDeLaFuenteDelIncipit } {
+  const fuente = fuenteDeclarada(cabecera.fuente);
+  if (fuente === undefined) return { ok: false, fallo: 'fuente-desconocida' };
+  if (!fuente.permiteReutilizacion) return { ok: false, fallo: 'fuente-sin-reutilizacion' };
+  if (fuente.mutable === true) return { ok: false, fallo: 'fuente-mutable' };
+  let protocolo: string;
+  try {
+    protocolo = new URL(cabecera.url).protocol;
+  } catch {
+    return { ok: false, fallo: 'url-no-web' };
+  }
+  if (protocolo !== 'https:' && protocolo !== 'http:') return { ok: false, fallo: 'url-no-web' };
+  return { ok: true, fuente: { nombre: fuente.nombre, licencia: fuente.licencia, url: cabecera.url } };
+}
+
+/**
+ * Sitúa el `desde` de un incipit declarado en su documento y lo corta — Historia 32.3. Es lo que
+ * comprueban, con la misma función, la orden que lo escribe (`npm run obra -- incipit`) y el
+ * cargador que lo repite en cada build (`leerIncipitsDelCorpus`, aquí): que la forma de las líneas
+ * —`formaDeLasLineas` con la `lineas:` de su cabecera— no sea `indeterminada` y que `desde`,
+ * colapsado, se localice en el cuerpo con `localizar` —el mismo localizador que sitúa las Citas: el
+ * corte de `tools/lib/pasaje.ts` no localiza—. Si se sostiene, da la forma, el corte de `incipitDe`
+ * (que puede no ofrecerse: sin tope, o con la primera unidad demasiado larga) y si `desde` aparece
+ * más de una vez: se ancla en la primera, y la orden lo avisa para que quien declara elija uno que
+ * no se repita.
+ */
+export function incipitDelDocumento(opciones: {
+  cuerpo: string;
+  lineas?: string;
+  desde: string;
+  tope: number | undefined;
+}):
+  | { ok: false; fallo: FalloDelIncipit }
+  | {
+      ok: true;
+      forma: FormaDeLineas;
+      repetido: boolean;
+      corte: { incipit: string } | { motivo: MotivoSinIncipit };
+    } {
+  const { cuerpo, lineas, desde, tope } = opciones;
+  const forma = formaDeLasLineas({ cuerpo, ...(lineas !== undefined ? { lineas } : {}) });
+  if (forma === FORMAS_DE_LINEAS[4]) return { ok: false, fallo: 'forma-indeterminada' };
+  const buscado = colapsarEspacios(desde);
+  const colapsado = colapsarEspacios(cuerpo);
+  const posicion = localizar(buscado, colapsado);
+  if (posicion === -1) return { ok: false, fallo: 'no-se-localiza' };
+  // El resto de un texto colapsado sigue colapsado por dentro: basta para saber si hay otra aparición.
+  const repetido = localizar(buscado, colapsado.slice(posicion + 1) as Colapsado) !== -1;
+  return { ok: true, forma, repetido, corte: incipitDe({ crudo: cuerpo, forma, posicion, desde: buscado, tope }) };
+}
+
+/** El identificador de la única entrada de la colección `incipits`. */
+export const ENTRADA_DE_LOS_INCIPITS = 'incipits';
+
+/** Lo que el build dice de un incipit declarado que no se sostiene, por qué falla. */
+const FALLO_DEL_INCIPIT = {
+  falta: 'su documento no está en corpus/fuentes/',
+  ambiguo: 'hay más de un documento con ese nombre en las subcarpetas de corpus/fuentes/',
+  ilegible: 'su documento no se deja analizar',
+  biografia: 'su documento es una biografía, no un documento de Fuente',
+  'forma-indeterminada': 'la forma de las líneas de su documento es indeterminada: no se sabe dónde acaba una frase ni un verso',
+  'no-se-localiza': 'su «desde» ya no se localiza en el documento',
+  'fuente-desconocida': 'la Fuente que declara su cabecera no es ninguna de FUENTES',
+  'fuente-sin-reutilizacion': 'la licencia de la Fuente que declara su cabecera no permite reutilizar el texto',
+  'fuente-mutable': 'la Fuente que declara su cabecera es mutable: no da el comienzo de ninguna Obra',
+  'url-no-web': 'el «url:» de su cabecera no es una dirección http(s)',
+} as const;
+
+/**
+ * El incipit de cada Ficha de Obra que lo declara y lo ofrece, por nombre de ficha — Historia
+ * 32.3, AD-30. Es el cuerpo del cargador `incipits` de `src/content.config.ts`.
+ *
+ * Lee las fichas activas y, solo de las que declaran `incipit`, **su** documento: sin ninguna, no
+ * abre ningún documento. Por cada una repite lo que comprobó la orden que lo escribió —que el
+ * documento esté, se deje analizar y no sea una biografía, que su forma no sea `indeterminada` y que
+ * `desde` se localice (`incipitDelDocumento`, aquí)— y **lanza**, con «Regla
+ * incumplida: …» y nombrando cada ficha, si algo no se sostiene. No repite el casado con las
+ * Citas: retirar la última Cita de ese documento no puede romper la construcción siguiente. El
+ * tope es, si no se dice otro, `MAX_CARACTERES_DEL_INCIPIT`; un incipit que no se ofrece (sin
+ * tope, o con la primera unidad demasiado larga) no entra.
+ */
+export async function leerIncipitsDelCorpus(
+  raizDelCorpus: string,
+  opciones: { tope?: number | undefined } = {},
+): Promise<Map<string, IncipitDeObra>> {
+  const tope = 'tope' in opciones ? opciones.tope : MAX_CARACTERES_DEL_INCIPIT;
+  const rutas = rutasDelCorpus(raizDelCorpus);
+  const incipits = new Map<string, IncipitDeObra>();
+  const problemas: string[] = [];
+  for (const ficha of await leerFichasDeObra(rutas)) {
+    if (ficha.incipit === undefined) continue;
+    const { documento, desde } = ficha.incipit;
+    const leido = await leerDocumentoDeFuente(rutas, documento);
+    if (leido.estado !== 'legible') {
+      problemas.push(`${ficha.ruta} declara el incipit de «${documento}»: ${FALLO_DEL_INCIPIT[leido.estado]}.`);
+      continue;
+    }
+    const situado = incipitDelDocumento({ cuerpo: leido.cuerpo, lineas: leido.cabecera.lineas, desde, tope });
+    if (!situado.ok) {
+      problemas.push(`${ficha.ruta} declara el incipit de «${documento}»: ${FALLO_DEL_INCIPIT[situado.fallo]}.`);
+      continue;
+    }
+    const firmada = fuenteDelIncipit(leido.cabecera);
+    if (!firmada.ok) {
+      problemas.push(`${ficha.ruta} declara el incipit de «${documento}»: ${FALLO_DEL_INCIPIT[firmada.fallo]}.`);
+      continue;
+    }
+    if (!('incipit' in situado.corte)) continue;
+    incipits.set(ficha.nombre, { documento, texto: situado.corte.incipit, fuente: firmada.fuente });
+  }
+  if (problemas.length > 0) {
+    throw new Error(
+      `Regla incumplida: el incipit de una Ficha de Obra no se sostiene (AD-30). Lo declara ` +
+        `«npm run obra -- incipit»:\n${problemas.map((p) => `  · ${p}`).join('\n')}`,
+    );
+  }
+  return incipits;
+}
+
+/**
+ * Lleva los incipits al almacén de la colección `incipits` — Historia 32.3, con el patrón de
+ * `guardarOrdenDeLosIndices`: lee y analiza todo antes de tocar el almacén, y guarda **una sola
+ * entrada**, `{ porFicha }`, siempre presente aunque ninguna ficha declare incipit: así la
+ * colección nunca está vacía y se consulta sin guarda.
+ */
+export async function guardarIncipits(opciones: {
+  leer: () => Promise<Map<string, IncipitDeObra>>;
+  analizar: (entrada: EntradaDePosiciones) => Promise<Record<string, unknown>>;
+  almacen: AlmacenDePosiciones;
+}): Promise<void> {
+  const { leer, analizar, almacen } = opciones;
+  const id = ENTRADA_DE_LOS_INCIPITS;
+  const data = await analizar({ id, data: { porFicha: Object.fromEntries(await leer()) } });
   almacen.clear();
   almacen.set({ id, data });
 }

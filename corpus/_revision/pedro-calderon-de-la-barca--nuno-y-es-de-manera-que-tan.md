@@ -1,5 +1,5 @@
 ---
-texto: "NUÑO: Y es de manera, que tan poco humo en su casa él hace, como en la nuestra nosotros."
+texto: "NUÑO: Y es de manera,\nque tan poco humo en su casa\nél hace, como en la nuestra\nnosotros."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-nuno-y-es-de-manera-que-tan"
 procedencia:

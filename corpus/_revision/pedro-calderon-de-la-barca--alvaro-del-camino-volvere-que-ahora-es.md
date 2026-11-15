@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Del camino volveré; que ahora es razón que acuda a la gente, que se ve ya marchar."
+texto: "ÁLVARO: Del camino volveré;\nque ahora es razón que acuda\na la gente, que se ve\nya marchar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-del-camino-volvere-que-ahora-es"
 procedencia:

@@ -35,8 +35,9 @@ export const ETIQUETAS_DE_RESULTADO = {
   // 27.1 la Cita lleva también su Autor debajo (`TIPOS_CON_LINEA_DE_AUTOR`).
   obra: 'Obra',
   // Historia 26.2 — los Directorios (`/autores/` y `/obras/`, desde la 26.3) y la portada. La
-  // portada responde solo por su `h1`, que es `MARCA` (`src/lib/marca.ts`): el rótulo no la
-  // repite, y su título en el índice sale de ese `h1`, no de esta tabla.
+  // portada responde solo por su título, que es `MARCA` (`src/lib/marca.ts`): desde la 28.1 lo
+  // declara `Armazon.astro` con `data-pagefind-meta="title:…"`, porque el `h1` de la marca está en
+  // la cabecera y no en `main`. El rótulo no lo repite, y su título en el índice no sale de esta tabla.
   directorio: 'Directorio',
   portada: 'Portada',
 } as const satisfies Record<Familia | 'portada', string>;

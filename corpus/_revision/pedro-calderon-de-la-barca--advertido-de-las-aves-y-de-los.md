@@ -1,5 +1,5 @@
 ---
-texto: "Advertido de las aves, Y de los astros suaves Los círculos he medido: Tú solo, tú, has suspendido La pasión á mis enojos."
+texto: "Advertido de las aves,\nY de los astros suaves\nLos círculos he medido:\nTú solo, tú, has suspendido\nLa pasión á mis enojos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-advertido-de-las-aves-y-de-los"
 procedencia:

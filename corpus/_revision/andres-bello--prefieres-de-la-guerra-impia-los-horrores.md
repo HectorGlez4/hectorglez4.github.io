@@ -1,5 +1,5 @@
 ---
-texto: "¿prefieres de la guerra impía los horrores decir, y al son del parche que los maternos pechos estremece, pintar las huestes que furiosas corren a destrucción, y el suelo hinchen de luto?"
+texto: "¿prefieres de la guerra impía\nlos horrores decir, y al son del parche\nque los maternos pechos estremece,\npintar las huestes que furiosas corren\na destrucción, y el suelo hinchen de luto?"
 autor: "andres-bello"
 slug: "andres-bello-prefieres-de-la-guerra-impia-los-horrores"
 procedencia:

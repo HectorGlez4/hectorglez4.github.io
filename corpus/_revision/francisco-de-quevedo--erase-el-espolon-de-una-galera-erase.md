@@ -1,5 +1,5 @@
 ---
-texto: "Érase el espolón de una galera, érase una pirámide de Egipto, las doce tribus de narices era."
+texto: "Érase el espolón de una galera,\nérase una pirámide de Egipto,\nlas doce tribus de narices era."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-erase-el-espolon-de-una-galera-erase"
 procedencia:

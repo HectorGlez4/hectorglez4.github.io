@@ -31,7 +31,7 @@ import {
   type TransicionFechada,
   type Version,
 } from '../../tools/lib/cambios.ts';
-import { FAMILIAS, rutaNormalizada } from '../../src/lib/superficies.ts';
+import { FAMILIAS, rutaDeCita, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { esObraIndexable } from '../../src/lib/obras.ts';
 
 /**
@@ -153,6 +153,8 @@ describe('las familias del Corpus', () => {
       ['corpus/colecciones', 'coleccion'],
       ['corpus/obras', 'obra'],
       ['corpus/fuentes', 'documento'],
+      // Historia 32.2 — y los de Wikidata, que componen la línea de Ficha técnica de la Obra.
+      ['corpus/wikidata', 'wikidata'],
     ]);
     for (const [directorio, familia] of FAMILIAS_DE_FICHERO) {
       expect(familiaDeFichero(`${directorio}/ejemplo.md`)).toBe(familia);
@@ -170,9 +172,9 @@ describe('las familias del Corpus', () => {
     // Historia 26.7 — no las declara el aviso: son las de `src/lib/superficies.ts`, su único dueño.
     expect(FAMILIAS_DE_RUTA).toBe(FAMILIAS);
     // Las de fichero son las cinco con directorio en el Corpus —el Directorio no tiene fichero—
-    // más `documento`, que no es familia de ruta.
+    // más `documento` y `wikidata` (32.2), que no son familias de ruta.
     const deFichero = FAMILIAS_DE_FICHERO.map(([, familia]) => familia);
-    expect(deFichero.filter((f) => f !== 'documento')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
+    expect(deFichero.filter((f) => f !== 'documento' && f !== 'wikidata')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
     const familias = new Set([...relacionDeSuperficies(corpusDeEjemplo()).values()].map((s) => s.familia));
     expect([...familias].sort()).toEqual([...FAMILIAS_DE_RUTA].sort());
   });
@@ -280,8 +282,13 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
       const familia = familiaDeFichero(fichero);
       if (familia === undefined) throw new Error(`${fichero} sin familia`);
       const campos = new Set([
+        // Un campo derivado —el nombre de «Cómo citar», 30.3— se recorre por las claves de que sale.
         ...Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((c) =>
-          c === CUALQUIER_CAMBIO ? [] : [...(c as readonly string[])],
+          c === CUALQUIER_CAMBIO
+            ? []
+            : (c as readonly (string | { de: readonly string[] })[]).flatMap((campo) =>
+                typeof campo === 'string' ? [campo] : [...campo.de],
+              ),
         ),
         ...(noFechan[familia] ?? []),
       ]);
@@ -601,7 +608,7 @@ describe('Historia 24.8 — el aviso lee la relación por campos', () => {
     expect(rutas).toEqual(['/']);
   });
 
-  it('un documento nuevo avisa su Obra y no la portada', () => {
+  it('un documento nuevo avisa su Obra y, desde la 31.2, sus Páginas de Cita —su pasaje sale de él—, y no la portada', () => {
     const corpus: CorpusParaFechar = {
       ...corpusDeEjemplo(),
       citas: corpusDeEjemplo().citas.map((c) =>
@@ -618,7 +625,9 @@ describe('Historia 24.8 — el aviso lee la relación por campos', () => {
       indexablesAntes: indexables(corpus),
       indexablesDespues: indexables(corpus),
     });
-    expect(rutas).toEqual([NIEBLA]);
+    const deNiebla = corpus.citas.filter((c) => c.obra === 'unamuno--niebla').map((c) => rutaDeCita(c.slug));
+    expect(deNiebla.length).toBeGreaterThan(0);
+    expect([...rutas].sort()).toEqual([NIEBLA, ...deNiebla].sort());
   });
 
   it('inversas: lo avisado de después, más lo de antes que sigue vivo, es exactamente lo que el commit refecha', () => {

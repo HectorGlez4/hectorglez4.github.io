@@ -1,5 +1,5 @@
 ---
-texto: "NUÑO: Vamos, sin que el capitán no sienta."
+texto: "NUÑO: Vamos,\nsin que el capitán no sienta."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-nuno-vamos-sin-que-el-capitan-no"
 procedencia:

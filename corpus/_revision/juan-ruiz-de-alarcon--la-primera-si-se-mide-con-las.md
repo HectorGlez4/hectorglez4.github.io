@@ -1,5 +1,5 @@
 ---
-texto: "La primera, si se mide con las antiguas, por tres puede valer."
+texto: "La primera, si se mide\ncon las antiguas, por tres\npuede valer."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-la-primera-si-se-mide-con-las"
 procedencia:

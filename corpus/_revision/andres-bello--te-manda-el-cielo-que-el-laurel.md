@@ -1,5 +1,5 @@
 ---
-texto: "Te manda el cielo que el laurel del Pindo trasplantes a los climas de occidente, do crece el ananás y el tamarindo;"
+texto: "Te manda el cielo que el laurel del Pindo\ntrasplantes a los climas de occidente,\ndo crece el ananás y el tamarindo;"
 autor: "andres-bello"
 slug: "andres-bello-te-manda-el-cielo-que-el-laurel"
 procedencia:

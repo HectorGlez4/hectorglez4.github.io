@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Y aun aquesa confianza me mató; porque el que piensa que va a un pelligro, ya va, prevenido a la defensa; quien va a una seguridad es el que más riesgo lleva, por la novedad que halla siacaso un peligro encuentra."
+texto: "ÁLVARO: Y aun aquesa confianza\nme mató; porque el que piensa\nque va a un pelligro, ya va,\nprevenido a la defensa;\nquien va a una seguridad\nes el que más riesgo lleva,\npor la novedad que halla\nsiacaso un peligro encuentra."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-y-aun-aquesa-confianza-me-mato"
 procedencia:

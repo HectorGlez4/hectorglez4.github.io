@@ -1,5 +1,5 @@
 ---
-texto: "Mirad, Híncase de rodillas que a vuestros pies os lo ruego de rodillas y llorando sobre estas canas que el pecho, viendo nieve y agua, piensa, que se me estás derritiendo."
+texto: "Mirad,\nHíncase de rodillas\nque a vuestros pies os lo ruego\nde rodillas y llorando\nsobre estas canas que el pecho,\nviendo nieve y agua, piensa,\nque se me estás derritiendo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mirad-hincase-de-rodillas-que-a-vuestros"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "rígido un bachiller, otro severo, (crítica turba al fin, si no pigmea) su diente afila y su veneno emplea en el disforme cíclope cabrero."
+texto: "rígido un bachiller, otro severo,\n(crítica turba al fin, si no pigmea)\nsu diente afila y su veneno emplea\nen el disforme cíclope cabrero."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-rigido-un-bachiller-otro-severo-critica-turba"
 procedencia:

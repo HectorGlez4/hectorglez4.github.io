@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Idos, si no queréis que la muerte sea el último castigo."
+texto: "REBOLLEDO: Idos,\nsi no queréis que la muerte\nsea el último castigo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-idos-si-no-quereis-que-la"
 procedencia:

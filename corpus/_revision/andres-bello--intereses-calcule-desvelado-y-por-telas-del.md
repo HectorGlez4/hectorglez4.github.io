@@ -1,5 +1,5 @@
 ---
-texto: "intereses calcule desvelado, y por telas del Támesis o el indo, cambie el metal de nuestro suelo amado."
+texto: "intereses calcule desvelado,\ny por telas del Támesis o el indo,\ncambie el metal de nuestro suelo amado."
 autor: "andres-bello"
 slug: "andres-bello-intereses-calcule-desvelado-y-por-telas-del"
 procedencia:

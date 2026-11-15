@@ -126,9 +126,54 @@ export const slug = z
     'Regla incumplida: el slug solo admite minúsculas, dígitos y guiones, sin diacríticos.',
   );
 
+/**
+ * AD-29 (Historia 29.1) — el salto de verso se guarda como un único U+000A dentro del `texto`,
+ * y solo así. Cada forma que no es esa se rechaza con su regla: un retorno de carro, dos saltos
+ * seguidos (la estrofa no se guarda), un salto al principio o al final, cualquier otro
+ * separador de línea (U+2028, U+2029, U+0085, `\v`, `\f`), un espacio de cualquier clase pegado a
+ * un salto, y las dos maneras de fingir un verso en una línea —`<br` y « / »—. Quién
+ * escribe el salto, y de qué documento sale, lo decide `textoConSaltos` de `tools/lib/lineas.ts`;
+ * aquí solo vive la forma.
+ */
+/**
+ * Los invisibles que `colapsarEspacios` retira al comparar con el documento. Las reglas que miran
+ * lo que rodea a un salto se juzgan sin ellos: un U+FEFF entre dos saltos no separa la estrofa
+ * («verso\n\ufeff\notro» son dos saltos seguidos), ni uno entre el salto y el borde lo aparta
+ * del borde. No es una segunda lectura del espacio, solo lo que este esquema no debe dejar pasar.
+ */
+const INVISIBLES_JUNTO_AL_SALTO = /[\u00ad\u200b\u200c\u200d\u2060\ufeff]/gu;
+
+const FORMAS_DEL_SALTO_RECHAZADAS: readonly { prueba: RegExp; regla: string; sinInvisibles?: true }[] = [
+  { prueba: /\r/u, regla: 'el texto no admite retornos de carro (U+000D): el salto de verso es un único U+000A.' },
+  {
+    prueba: /\n\n/u,
+    regla: 'el texto no admite dos saltos seguidos: entre estrofas va un solo U+000A.',
+    sinInvisibles: true,
+  },
+  { prueba: /^\n|\n$/u, regla: 'el texto no admite un salto al principio ni al final.', sinInvisibles: true },
+  {
+    prueba: /[\u2028\u2029\u0085\v\f]/u,
+    regla:
+      'el texto no admite otro separador de línea (U+2028, U+2029, U+0085, tabulador vertical ni salto de página): el salto de verso es un único U+000A.',
+  },
+  // U+FEFF casa con `\s`, pero es un invisible que el escritor conserva junto al salto.
+  {
+    prueba: /[^\S\n\ufeff]\n|\n[^\S\n\ufeff]/u,
+    regla: 'el texto no admite un espacio (tampoco duro ni fino) ni un tabulador pegados a un salto.',
+  },
+  { prueba: /<br/iu, regla: 'el texto no admite «<br»: el salto de verso es un U+000A.' },
+  { prueba: / \/ /u, regla: 'el texto no admite « / » como salto de verso: el salto es un U+000A.' },
+];
+
 export const texto = z
   .string({ message: 'Regla incumplida: falta el texto de la Cita.' })
-  .min(1, 'Regla incumplida: el texto de la Cita no puede estar vacío.');
+  .min(1, 'Regla incumplida: el texto de la Cita no puede estar vacío.')
+  .superRefine((valor, ctx) => {
+    const sinInvisibles = valor.replace(INVISIBLES_JUNTO_AL_SALTO, '');
+    for (const { prueba, regla, sinInvisibles: juzgarSinInvisibles } of FORMAS_DEL_SALTO_RECHAZADAS) {
+      if (prueba.test(juzgarSinInvisibles ? sinInvisibles : valor)) ctx.addIssue({ code: 'custom', message: `Regla incumplida: ${regla}` });
+    }
+  });
 
 /** AD-1 — el único estado de derechos admisible. Cualquier otro rompe el build. */
 export const estadoDerechos = z.literal('dominio-público', {
@@ -649,15 +694,86 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
           })
           .min(1, 'Regla incumplida: «ediciones» sin ninguna edición se omite; no se escribe vacía.')
           .optional(),
+        /*
+         * Historia 32.1 (AD-31): la entidad de Wikidata y la revisión fija de la que salen el
+         * género, la lengua y el año de la Ficha técnica. Solo la escribe `npm run obra --
+         * wikidata`, que coteja el Autor; el build lo repite desde el cargador de
+         * `src/content.config.ts`. Aquí solo se juzga la forma.
+         */
+        wikidata: z
+          .object(
+            {
+              entidad: z
+                .string({ message: 'Regla incumplida: la entidad de Wikidata es una cadena «Q…».' })
+                .regex(
+                  /^Q[1-9]\d*$/u,
+                  'Regla incumplida: la entidad de Wikidata de una Ficha de Obra es «Q» seguida ' +
+                    'de su número, sin ceros a la izquierda.',
+                ),
+              revision: z
+                .number({ message: 'Regla incumplida: la revisión de Wikidata es un número.' })
+                .int('Regla incumplida: la revisión de Wikidata es un entero.')
+                .positive('Regla incumplida: la revisión de Wikidata es un entero positivo.'),
+            },
+            {
+              error: (problema) =>
+                problema.code === 'unrecognized_keys'
+                  ? 'Regla incumplida: «wikidata» no reconoce ' +
+                    `«${problema.keys.join('», «')}». Sus campos son entidad y revision.`
+                  : 'Regla incumplida: «wikidata» es un objeto con entidad y revision.',
+            },
+          )
+          .strict()
+          .optional(),
+        /*
+         * Historia 32.3 (AD-30): el incipit, el comienzo de la Obra que declara una persona —un
+         * documento de `corpus/fuentes/` y el texto desde el que empieza—. Solo lo escribe
+         * `npm run obra -- incipit`, que comprueba el casado, la forma y que `desde` se localice;
+         * el build repite la forma y la localización desde el cargador `incipits`. Aquí solo se
+         * juzga la forma del campo.
+         */
+        incipit: z
+          .object(
+            {
+              documento: z
+                .string({ message: 'Regla incumplida: el documento del incipit es una cadena.' })
+                // El nombre de un documento de `corpus/fuentes/` tiene forma de slug: sin carpeta, sin
+                // extensión, sin espacios ni `..` ni barras de ningún tipo.
+                .refine((documento) => /^[a-z0-9][a-z0-9-]*$/u.test(documento), {
+                  message:
+                    'Regla incumplida: el documento del incipit es el nombre de un documento de ' +
+                    'corpus/fuentes/ sin carpeta ni extensión (minúsculas, cifras y guiones).',
+                }),
+              desde: z
+                .string({ message: 'Regla incumplida: el «desde» del incipit es una cadena.' })
+                .refine((desde) => !/[\p{Cc}\p{Zl}\p{Zp}]/u.test(desde), {
+                  message:
+                    'Regla incumplida: el «desde» del incipit es una sola línea: sin saltos de ' +
+                    'línea, tabuladores ni caracteres de control.',
+                })
+                .refine((desde) => /\S/u.test(desde), {
+                  message: 'Regla incumplida: el «desde» del incipit no puede estar vacío ni ser solo espacios.',
+                }),
+            },
+            {
+              error: (problema) =>
+                problema.code === 'unrecognized_keys'
+                  ? 'Regla incumplida: «incipit» no reconoce ' +
+                    `«${problema.keys.join('», «')}». Sus campos son documento y desde.`
+                  : 'Regla incumplida: «incipit» es un objeto con documento y desde.',
+            },
+          )
+          .strict()
+          .optional(),
       },
       {
         error: (problema) =>
           problema.code === 'unrecognized_keys'
             ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
               `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas, ` +
-              'distintaDe, nota y ediciones.'
+              'distintaDe, nota, ediciones, wikidata e incipit.'
             : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
-              'opcionalmente distintaDe, nota y ediciones.',
+              'opcionalmente distintaDe, nota, ediciones, wikidata e incipit.',
       },
     )
     .strict()

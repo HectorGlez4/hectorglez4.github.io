@@ -1,5 +1,5 @@
 ---
-texto: "Salen don ÁLVARO, el SARGENTO, REBOLLEDO, la CHISPA y soldados ÁLVARO: Pisad sin rüido."
+texto: "Salen don ÁLVARO, el SARGENTO, REBOLLEDO, la\nCHISPA y soldados\nÁLVARO: Pisad sin rüido."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-don-alvaro-el-sargento-rebolledo-la"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Campos de destrucción que al orbe espanta, miseria y luto y orfandad llorosa, que en vano al cielo su clamor levanta?"
+texto: "Campos de destrucción que al orbe espanta,\nmiseria y luto y orfandad llorosa,\nque en vano al cielo su clamor levanta?"
 autor: "andres-bello"
 slug: "andres-bello-campos-de-destruccion-que-al-orbe-espanta"
 procedencia:

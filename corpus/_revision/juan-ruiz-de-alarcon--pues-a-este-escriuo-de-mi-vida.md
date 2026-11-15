@@ -1,5 +1,5 @@
 ---
-texto: "Pues a este escriuo de mi vida amarga el estado, el, no deudo, sino amigo, de mi remedio hasta morir se encarga. 305 Bueluole yo a escriuir, y al fin le digo el engaño que traço, con que entiendo executar esta intencion que sigo."
+texto: "Pues a este escriuo de mi vida amarga\nel estado, el, no deudo, sino amigo,\nde mi remedio hasta morir se encarga. 305\nBueluole yo a escriuir, y al fin le digo\nel engaño que traço, con que entiendo\nexecutar esta intencion que sigo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-pues-a-este-escriuo-de-mi-vida"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Romance fue el cantado, y que no pudo dejarle de entender, si el muy discreto no era sordo, o el músico era mudo."
+texto: "Romance fue el cantado, y que no pudo\ndejarle de entender, si el muy discreto\nno era sordo, o el músico era mudo."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-romance-fue-el-cantado-y-que-no"
 procedencia:

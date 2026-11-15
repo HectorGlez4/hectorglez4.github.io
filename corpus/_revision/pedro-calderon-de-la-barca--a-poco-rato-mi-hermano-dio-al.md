@@ -1,5 +1,5 @@
 ---
-texto: "A poco rato mi hermano dio al capitán una herida."
+texto: "A poco rato mi hermano\ndio al capitán una herida."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-a-poco-rato-mi-hermano-dio-al"
 procedencia:

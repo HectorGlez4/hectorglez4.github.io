@@ -429,7 +429,8 @@ test.describe('Historia 7.3 — el receptor caído no rompe el sitio', () => {
  * compartidos que importa (AD-6; la 3.1 enmendada: «y en `/buscar/`, desde la Épica 27, el
  * empaquetado de la búsqueda»). Su fila lo declara por el `id` de la entrada, y la exigencia sigue
  * entera: el fichero de medición una vez, cada entrada declarada una vez, sus trozos y nada más
- * —Pagefind, que se pide al usarla, no está en la fila—.
+ * —Pagefind, que se pide al usarla, no está en la fila—. Desde la Historia 32.5, la página 1 de
+ * toda Obra carga igual la isla de copiar la Referencia de «Cómo citar» (`copiar-referencia`).
  */
 const OBRA_NO_INDEXABLE = rutaDeObra('seneca', 'sobre-la-brevedad-de-la-vida');
 /** Historia 23.9 — la Obra que se indexa: dos de las tres Citas del sitio. */
@@ -441,8 +442,9 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
     ['la Página de Cita', RUTA_CITA, []],
     ['la portada', '/', []],
     ['la Página de Autor', rutaDeAutor('seneca'), []],
-    ['la Obra que se indexa', OBRA_INDEXABLE, []],
-    ['la Obra que no se indexa', OBRA_NO_INDEXABLE, []],
+    // Historia 32.5 — la página 1 de toda Obra, se indexe o no, carga la isla de «Cómo citar».
+    ['la Obra que se indexa', OBRA_INDEXABLE, ['copiar-referencia']],
+    ['la Obra que no se indexa', OBRA_NO_INDEXABLE, ['copiar-referencia']],
     ['la búsqueda', RUTA_BUSCAR, ['busqueda']],
     ['una ruta que no existe (404)', '/no-existe-esta-ruta/', []],
   ];

@@ -1,5 +1,5 @@
 ---
-texto: "Son los siglos como un sueño: eran nada y se hacen nada,- nada mismo, olvido mismo: noche y paz."
+texto: "Son los siglos como un sueño:\neran nada y se hacen nada,-\nnada mismo, olvido mismo: noche y paz."
 autor: "pedro-bonifacio-palacios"
 slug: "pedro-bonifacio-palacios-son-los-siglos-como-un-sueno-eran"
 procedencia:

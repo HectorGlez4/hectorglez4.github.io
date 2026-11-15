@@ -1,5 +1,5 @@
 ---
-texto: "Inclinéme a los estudios desde mis primeros años con tan ardientes desvelos con tan ansiosos cuidados, que reduje a tiempo breve fatigas de mucho espacio."
+texto: "Inclinéme a los estudios\ndesde mis primeros años\ncon tan ardientes desvelos\ncon tan ansiosos cuidados,\nque reduje a tiempo breve\nfatigas de mucho espacio."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-inclineme-a-los-estudios-desde-mis-primeros"
 procedencia:

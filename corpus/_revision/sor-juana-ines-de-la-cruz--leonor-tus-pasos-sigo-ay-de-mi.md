@@ -1,5 +1,5 @@
 ---
-texto: "Leonor: Tus pasos, sigo, ¡ay de mí!, pues es fuerza obedecer a los hados."
+texto: "Leonor: Tus pasos,\nsigo, ¡ay de mí!, pues es fuerza\nobedecer a los hados."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-leonor-tus-pasos-sigo-ay-de-mi"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Llega; háblale de honor; con los Meneses se dice emparentado y los Quincoces, y segundo de casa de Marqueses."
+texto: "Llega; háblale de honor; con los Meneses\nse dice emparentado y los Quincoces,\ny segundo de casa de Marqueses."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-llega-hablale-de-honor-con-los-meneses"
 procedencia:

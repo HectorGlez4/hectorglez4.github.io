@@ -1,5 +1,5 @@
 ---
-texto: "¿No es, decidme, muy mal hecho, que tanto una pierna duela?"
+texto: "¿No es, decidme, muy mal hecho,\nque tanto una pierna duela?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-es-decidme-muy-mal-hecho-que"
 procedencia:

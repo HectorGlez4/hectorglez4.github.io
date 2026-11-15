@@ -1,5 +1,5 @@
 ---
-texto: "REY Filipo, no ay mal que yguale al que padeciendo estoy; perdido, Filipo, soy, si tu ingenio no me vale."
+texto: "REY\nFilipo, no ay mal que yguale\nal que padeciendo estoy;\nperdido, Filipo, soy,\nsi tu ingenio no me vale."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-rey-filipo-no-ay-mal-que-yguale"
 procedencia:

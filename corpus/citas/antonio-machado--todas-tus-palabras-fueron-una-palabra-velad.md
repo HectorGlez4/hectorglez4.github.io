@@ -1,5 +1,5 @@
 ---
-texto: "Todas tus palabras fueron una palabra: Velad."
+texto: "Todas tus palabras fueron\nuna palabra: Velad."
 autor: "antonio-machado"
 temas:
   - "la-palabra"

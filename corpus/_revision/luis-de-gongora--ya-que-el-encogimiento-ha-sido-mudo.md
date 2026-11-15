@@ -1,5 +1,5 @@
 ---
-texto: "Ya que el encogimiento ha sido mudo, los números, Señor, deste soneto lenguas sean y lágrimas no en vano."
+texto: "Ya que el encogimiento ha sido mudo,\nlos números, Señor, deste soneto\nlenguas sean y lágrimas no en vano."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-ya-que-el-encogimiento-ha-sido-mudo"
 procedencia:

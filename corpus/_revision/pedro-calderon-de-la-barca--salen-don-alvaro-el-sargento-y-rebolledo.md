@@ -1,5 +1,5 @@
 ---
-texto: "Salen don ÁLVARO, el SARGENTO y REBOLLEDO MENDO: Escucharé retirado."
+texto: "Salen don ÁLVARO, el SARGENTO y\nREBOLLEDO\nMENDO: Escucharé retirado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-don-alvaro-el-sargento-y-rebolledo"
 procedencia:

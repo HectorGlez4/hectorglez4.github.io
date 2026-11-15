@@ -34,6 +34,10 @@ import {
  * cinco familias con carpeta propia en `corpus/` —la familia `directorio` no tiene ficheros y
  * entra por sus páginas— más `documento`, que no es familia de ruta. `src/lib/umbrales.ts` también llega al
  * aviso, pero sin familia: mueve listas de Obras indexables, no ficheros.
+ *
+ * Desde la Historia 32.2, `corpus/wikidata/` es la familia `wikidata` (tampoco de ruta): sus
+ * documentos y `vigentes.yml` componen la línea de Ficha técnica de la Página de Obra, y solo
+ * esa página. Como un documento de Fuente, no avisa la portada.
  */
 export const FAMILIAS_DE_FICHERO = [
   ['corpus/citas', 'cita'],
@@ -42,7 +46,8 @@ export const FAMILIAS_DE_FICHERO = [
   ['corpus/colecciones', 'coleccion'],
   ['corpus/obras', 'obra'],
   ['corpus/fuentes', 'documento'],
-] as const satisfies readonly (readonly [string, Exclude<Familia, 'directorio'> | 'documento'])[];
+  ['corpus/wikidata', 'wikidata'],
+] as const satisfies readonly (readonly [string, Exclude<Familia, 'directorio'> | 'documento' | 'wikidata'])[];
 
 export type FamiliaDeFichero = (typeof FAMILIAS_DE_FICHERO)[number][1];
 
@@ -132,7 +137,8 @@ export interface AvisoCompuesto {
 /**
  * Compone las rutas que hay que avisar por un rango de cambios.
  *
- * La portada va siempre que cambie algo del Corpus que no sea un documento —también un campo que
+ * La portada va siempre que cambie algo del Corpus que no sea un documento —de Fuente o de
+ * Wikidata (32.2)—, también un campo que
  * no fecha nada, como `aptaParaPortada`, que es justo lo que decide su rotación—: enumera
  * Autores, Temas y Colecciones y cambia con la jornada. Lo demás es la lectura inversa de la
  * relación, por campos, sobre el Corpus de antes y el de después, con una sola excepción, que es
@@ -179,9 +185,12 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
     return entrada.relacionAntes === undefined ? undefined : 'noindex';
   };
 
-  // La portada, con cualquier cambio del Corpus que no sea un documento: un documento solo
-  // compone la Página de Obra, y la portada no pinta ninguno.
-  const portada = entrada.cambios.some((cambio) => familiaDeFichero(cambio.fichero) !== 'documento');
+  // La portada, con cualquier cambio del Corpus que no sea un documento de Fuente o de Wikidata:
+  // los dos solo componen la Página de Obra, y la portada no pinta ninguno (24.8, 32.2).
+  const portada = entrada.cambios.some((cambio) => {
+    const familia = familiaDeFichero(cambio.fichero);
+    return familia !== 'documento' && familia !== 'wikidata';
+  });
   const rutas = new Set<string>(portada ? ['/'] : []);
   const tocadas = new Set<string>([
     ...rutasAvisadasPor(entrada.cambios, entrada.relacionDespues),

@@ -1,5 +1,5 @@
 ---
-texto: "Alas nacer vi en los hombros De las mujeres hermosas: Y salir de los escombros, Volando las mariposas."
+texto: "Alas nacer vi en los hombros\nDe las mujeres hermosas:\nY salir de los escombros,\nVolando las mariposas."
 autor: "jose-marti"
 slug: "jose-marti-alas-nacer-vi-en-los-hombros-de"
 procedencia:

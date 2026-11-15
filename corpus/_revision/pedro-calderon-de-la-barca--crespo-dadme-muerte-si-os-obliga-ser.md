@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Dadme muerte, si os obliga ser piadosos."
+texto: "CRESPO: Dadme muerte, si os obliga\nser piadosos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-dadme-muerte-si-os-obliga-ser"
 procedencia:

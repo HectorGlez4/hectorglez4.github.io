@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Mirad que echado en el suelo mi honor a voces os pido."
+texto: "CRESPO: Mirad que echado en el suelo\nmi honor a voces os pido."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-mirad-que-echado-en-el-suelo"
 procedencia:

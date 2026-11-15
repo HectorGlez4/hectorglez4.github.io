@@ -1,5 +1,5 @@
 ---
-texto: "no solo en plata o víola troncada se vuelva, mas tú y ello juntamente en tierra, en humo, en polvo, en sombra, en nada."
+texto: "no solo en plata o víola troncada\nse vuelva, mas tú y ello juntamente\nen tierra, en humo, en polvo, en sombra, en nada."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-no-solo-en-plata-o-viola-troncada"
 procedencia:

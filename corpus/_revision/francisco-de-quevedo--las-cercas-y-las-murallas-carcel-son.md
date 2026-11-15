@@ -1,5 +1,5 @@
 ---
-texto: "Las cercas y las murallas Cárcel son de la ciudad; El cuerpo es cárcel del Alma, Y de la tierra la mar."
+texto: "Las cercas y las murallas\nCárcel son de la ciudad;\nEl cuerpo es cárcel del Alma,\nY de la tierra la mar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-las-cercas-y-las-murallas-carcel-son"
 procedencia:

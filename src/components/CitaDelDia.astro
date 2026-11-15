@@ -6,18 +6,18 @@
  * Cita y «Ver esta cita». La **selección** sigue en cada página —la jornada la leen ellas, y
  * así lo vigila la guarda de `tests/unit/peso.test.ts`—; aquí solo se pinta lo seleccionado.
  *
- * **Es el único emisor de `data-jornada`** (atributo sin valor). Lo que cuelga de ese elemento
- * cambia de un día a otro sin ningún commit, así que no puede sostener ninguna garantía del
- * sitio: el grafo de enlaces con el que el build comprueba NFR-5 (`integraciones/alcance.ts`)
- * y el de los veredictos se saltan su subárbol entero, y la prueba de dos jornadas
- * (`tests/unit/dos-jornadas.test.ts`) exige que la portada y el 404 solo difieran ahí. Un
- * segundo emisor de la marca dejaría que algo fuera de este bloque rotara a escondidas, y por
- * eso `tests/unit/alcance-construido.test.ts` exige que ningún otro fichero de `src/` la nombre.
+ * Lo que pinta cambia de un día a otro sin ningún commit, así que va dentro de `LoQueRota.astro`,
+ * el único emisor de la marca de lo que rota (Historia 28.3): el grafo de NFR-5 y la prueba de dos
+ * jornadas se saltan ese subárbol, y la portada y el 404 solo pueden diferir ahí. Hasta la 28.3 la
+ * marca la ponía este componente; desde que las Obras de la portada también rotan, la pone uno sin
+ * otro trabajo, que usan los dos bloques, y este no la nombra (lo exige
+ * `tests/unit/alcance-construido.test.ts`).
  *
- * `data-pagefind-ignore="all"`: la Cita del Día ya tiene su página en el índice propio. El
- * margen sobre el bloque lo pone cada página, que es quien sabe qué tiene encima.
+ * Fuera de Pagefind, por `LoQueRota.astro`: la Cita del Día ya tiene su página en el índice propio.
+ * El margen sobre el bloque lo pone cada página, que es quien sabe qué tiene encima.
  */
 import BloqueDeCita from './BloqueDeCita.astro';
+import LoQueRota from './LoQueRota.astro';
 import type { Autor, Cita } from '../lib/publicado.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
 
@@ -29,14 +29,14 @@ interface Props {
 const { cita, autor } = Astro.props;
 ---
 
-<section class="del-dia" data-jornada data-pagefind-ignore="all">
+<LoQueRota como="section" class="del-dia">
   <h2>La cita de hoy</h2>
   <BloqueDeCita cita={cita} autor={autor} />
   {/* Historia 23.7 — la Zona de salida interna va en el contenedor del enlace. */}
   <p class="ir" data-zona="cita-del-dia">
     <a href={rutaDeCita(cita.slug)}>Ver esta cita</a>
   </p>
-</section>
+</LoQueRota>
 
 <style>
   h2 {

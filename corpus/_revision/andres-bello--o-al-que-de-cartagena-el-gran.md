@@ -1,5 +1,5 @@
 ---
-texto: "¿O al que de Cartagena el gran baluarte hizo que de Colombia otra vez fuera?"
+texto: "¿O al que de Cartagena el gran baluarte\nhizo que de Colombia otra vez fuera?"
 autor: "andres-bello"
 slug: "andres-bello-o-al-que-de-cartagena-el-gran"
 procedencia:

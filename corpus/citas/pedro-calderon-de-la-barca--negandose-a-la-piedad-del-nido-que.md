@@ -1,5 +1,5 @@
 ---
-texto: "Negándose á la piedad Del nido que deja en calma: ¿Y teniendo yo más alma, Tengo menos libertad?"
+texto: "Negándose á la piedad\nDel nido que deja en calma:\n¿Y teniendo yo más alma,\nTengo menos libertad?"
 autor: "pedro-calderon-de-la-barca"
 temas:
   - "la-libertad"

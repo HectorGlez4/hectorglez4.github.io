@@ -1,5 +1,5 @@
 ---
-texto: "Tú pintarás de Chamberlén el triste pero glorioso fin."
+texto: "Tú pintarás de Chamberlén el triste\npero glorioso fin."
 autor: "andres-bello"
 slug: "andres-bello-tu-pintaras-de-chamberlen-el-triste-pero"
 procedencia:

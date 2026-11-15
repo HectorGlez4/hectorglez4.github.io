@@ -1,5 +1,5 @@
 ---
-texto: "¡Romped la cárcel, llegad, romped la puerta!"
+texto: "¡Romped la cárcel, llegad,\nromped la puerta!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-romped-la-carcel-llegad-romped-la-puerta"
 procedencia:

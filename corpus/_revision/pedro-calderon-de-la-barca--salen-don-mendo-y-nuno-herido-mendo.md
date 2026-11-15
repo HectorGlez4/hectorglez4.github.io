@@ -1,5 +1,5 @@
 ---
-texto: "Salen don MENDO y NUÑO herido MENDO: ¿Es algo, Nuño, la herida?"
+texto: "Salen don MENDO y NUÑO\nherido\nMENDO: ¿Es algo, Nuño, la herida?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-don-mendo-y-nuno-herido-mendo"
 procedencia:

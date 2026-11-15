@@ -1,5 +1,5 @@
 ---
-texto: "¡Ah, cuando yo era niño soñaba con los héroes de la Iliada!"
+texto: "¡Ah, cuando yo era niño\nsoñaba con los héroes de la Iliada!"
 autor: "antonio-machado"
 temas:
   - "la-vida"

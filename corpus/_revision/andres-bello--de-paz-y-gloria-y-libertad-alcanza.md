@@ -1,5 +1,5 @@
 ---
-texto: "de paz y gloria y libertad alcanza, la ilusión se deshace en un momento, y ve que es un delirio su esperanza;"
+texto: "de paz y gloria y libertad alcanza,\nla ilusión se deshace en un momento,\ny ve que es un delirio su esperanza;"
 autor: "andres-bello"
 slug: "andres-bello-de-paz-y-gloria-y-libertad-alcanza"
 procedencia:

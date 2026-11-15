@@ -59,9 +59,33 @@ import {
   conReintentos,
   fuenteDeUrl,
   mismoTitulo,
+  revisionDeMediaWiki,
+  tituloDeMediaWiki,
   type DireccionamientoPorRevision,
   type Fuente,
 } from './lib/fuentes.ts';
+import {
+  anadirVigentes,
+  componerDocumentoDeWikidata,
+  direccionDeLaDeclaracion,
+  direccionDeLaRevisionActual,
+  direccionDeLosDatos,
+  documentoDeLaCarpeta,
+  documentosDeLaRevision,
+  enlacePermanenteDeWikidata,
+  entidadesReferidas,
+  entidadServida,
+  esDireccionDeWikidata,
+  leerDocumentoDeWikidata,
+  leerVigentes,
+  LICENCIA_DE_WIKIDATA,
+  nombreDeDocumentoDeWikidata,
+  NOMBRE_DE_WIKIDATA,
+  FUENTE_WIKIDATA,
+  revisionActual,
+  revisionDeclarada as revisionDeclaradaDeWikidata,
+  type DocumentoDeWikidata,
+} from './lib/wikidata.ts';
 import {
   analizarDocumento,
   autorDelIndice,
@@ -90,6 +114,7 @@ import {
   tituloDeDireccion,
 } from './lib/indice.ts';
 import { compararDocumentos } from '../src/lib/obras.ts';
+import { formaDeLasLineas } from './lib/lineas.ts';
 
 /** La única llamada de red del proyecto no puede colgarse ni tragarse una biblioteca. */
 const TIEMPO_MAXIMO_MS = 30_000;
@@ -140,13 +165,24 @@ const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
 if (url === undefined || sobrantes.length > 0) {
   process.stderr.write(
     'Uso: npx tsx tools/recuperar.ts <url> [--corpus corpus]\n' +
-      '     npx tsx tools/recuperar.ts --indice <url de la página de la obra> [--ensayo] [--corpus corpus]\n',
+      '     npx tsx tools/recuperar.ts --indice <url de la página de la obra> [--ensayo] [--corpus corpus]\n' +
+      '     npx tsx tools/recuperar.ts "https://www.wikidata.org/w/index.php?title=<Q>&oldid=<N>" [--corpus corpus]\n',
   );
   process.exit(2);
 }
 if (argumentos.includes('--ensayo') && !argumentos.includes('--indice')) {
   process.stderr.write('--ensayo solo acompaña a --indice: un documento no se recupera en seco.\n');
   process.exit(2);
+}
+
+// ── Wikidata entra por revisión, a su propio espacio (Historia 32.1) ─────────
+
+if (esDireccionDeWikidata(url)) {
+  if (argumentos.includes('--indice')) {
+    process.stderr.write('--indice no acompaña a una dirección de Wikidata: una entidad no tiene subpáginas.\n');
+    process.exit(2);
+  }
+  await recuperarDeWikidata(url);
 }
 
 // ── El conjunto cerrado se comprueba antes de pedir nada ─────────────────────
@@ -432,6 +468,8 @@ await writeFile(
       ...(derivado.traductor !== undefined && derivado.añoDeTraduccion !== undefined
         ? { añoDeTraduccion: derivado.añoDeTraduccion }
         : {}),
+      // Historia 29.1 — la forma de las líneas, juzgada sobre lo mismo que se escribe.
+      lineas: formaDeLasLineas({ cuerpo: derivado.cuerpo.trim() }),
       url: descarga.url,
       // Solo cuando hubo redirección: si no, sería la misma línea dos veces.
       ...(descarga.url !== url ? { pedido: url } : {}),
@@ -723,6 +761,268 @@ async function indiceConTitulo(titulo: string, carpeta: string): Promise<string 
     if (indice !== undefined && tituloDeDireccion(indice.url) === titulo) return ruta;
   }
   return undefined;
+}
+
+/**
+ * Pide un JSON a Wikidata con las guardas de siempre y el reintento de los 5xx. Wikidata no es
+ * una Fuente de `FUENTES`: `descargar` la revalida con su reconocedor. (Sin constante de módulo:
+ * la orden corre arriba, antes de que se inicialice ninguna de aquí abajo.)
+ */
+function pedirAWikidata(direccion: string): Promise<Descarga> {
+  return conReintentos(
+    () =>
+      descargar(direccion, { id: FUENTE_WIKIDATA, nombre: NOMBRE_DE_WIKIDATA }, {
+        tipos: TIPOS_DE_DECLARACION,
+        acepta: 'application/json',
+        reconocer: esDireccionDeWikidata,
+      }),
+    (r) => r.ok || !esPasajero(r),
+  );
+}
+
+type Versionado = { ok: true; ruta: string; datos: Record<string, unknown> } | { ok: false; motivos: string[] };
+
+/**
+ * Descarga la entidad tal como era en esa revisión y la versiona, sin sobrescribir nunca. Lo que
+ * sirve `Special:EntityData` tiene que ser esa entidad y esa revisión, o no se escribe nada.
+ */
+async function versionarDeWikidata(
+  entidad: string,
+  revision: number,
+  fecha: string,
+  pedida?: string,
+): Promise<Versionado> {
+  const descarga = await pedirAWikidata(direccionDeLosDatos(entidad, revision));
+  if (!descarga.ok) return { ok: false, motivos: descarga.motivos };
+  const servida = entidadServida(descarga.contenido, entidad, revision);
+  if (!servida.ok) return { ok: false, motivos: [servida.motivo] };
+
+  const url = enlacePermanenteDeWikidata(entidad, revision);
+  const destino = join(rutas.wikidata, nombreDeDocumentoDeWikidata(entidad, revision));
+  await mkdir(rutas.wikidata, { recursive: true });
+  try {
+    // `wx`: un documento por (entidad, revisión), nunca sobrescrito.
+    await writeFile(
+      destino,
+      componerDocumentoDeWikidata({
+        entidad,
+        revision,
+        fechaDeRevision: fecha,
+        url,
+        ...(pedida !== undefined && pedida !== url ? { pedido: pedida } : {}),
+        recuperado: new Date().toISOString().slice(0, 10),
+        datos: servida.datos,
+      }),
+      { encoding: 'utf8', flag: 'wx' },
+    );
+  } catch (fallo) {
+    const codigo = (fallo as { code?: string }).code;
+    return {
+      ok: false,
+      motivos: [
+        codigo === 'EEXIST'
+          ? `${destino} ya existe y no se ha sobrescrito: revíselo antes de volver a recuperar.`
+          : `No se pudo escribir ${destino}: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+      ],
+    };
+  }
+  return { ok: true, ruta: destino, datos: servida.datos };
+}
+
+/**
+ * La rama de Wikidata — Historia 32.1, AD-31. Termina el proceso siempre.
+ *
+ * El patrón es el de las biografías: sin `oldid` no se pide nada; la entidad y la fecha de la
+ * revisión las **declara Wikidata** por su API, y si la dirección teclea otra entidad se niega
+ * nombrando las dos; se descarga solo `Special:EntityData` de esa revisión, nunca la entidad
+ * viva. Después, las entidades a las que remite (autor, género, lengua) que no tengan su revisión
+ * vigente en `vigentes.yml` se recuperan en su revisión de hoy y se añaden —solo se añade—; una
+ * vigente sin documento se recupera en su revisión vigente. Nada en cadena: solo las referidas de
+ * la entidad pedida. Si una referida falla, se escribe lo logrado y se nombra lo que falta:
+ * repetir la orden lo completa.
+ */
+async function recuperarDeWikidata(pedida: string): Promise<never> {
+  const revision = revisionDeMediaWiki(pedida);
+  if (revision === undefined) {
+    terminar({
+      ok: false,
+      motivos: [
+        `«${pedida}» no pide ninguna revisión, y Wikidata cambia cada día: la entidad viva no es ` +
+          'un documento. No se ha pedido nada.',
+        'Use el enlace permanente de la revisión, con «oldid=N»: en la entidad, «Herramientas → ' +
+          'Enlace permanente», o una fila del «Ver historial». Por ejemplo: ' +
+          'https://www.wikidata.org/w/index.php?title=Q480&oldid=123456789',
+      ],
+    });
+  }
+  const tecleado = tituloDeMediaWiki(pedida);
+  const otraEntidad = (declarada: string, deDonde: string): never =>
+    terminar({
+      ok: false,
+      motivos: [
+        `La dirección nombra «${tecleado}» y la revisión ${revision} es de «${declarada}», según ` +
+          `${deDonde}. No son la misma entidad: no se ha versionado nada.`,
+        'Copie el enlace permanente desde la propia entidad, o pida la revisión sin título.',
+      ],
+    });
+
+  // `vigentes.yml` se lee antes de pedir nada: si no se deja leer, no se sabría qué falta.
+  let vigentes: Map<string, number>;
+  try {
+    vigentes = await leerVigentes(rutas.vigentesDeWikidata);
+  } catch (fallo) {
+    terminar({
+      ok: false,
+      motivos: [fallo instanceof Error ? fallo.message : String(fallo), 'No se ha pedido nada.'],
+    });
+  }
+
+  const parte: string[] = [];
+  let datos: Record<string, unknown>;
+  let documento: Pick<DocumentoDeWikidata, 'entidad' | 'revision' | 'fechaDeRevision'>;
+
+  const yaVersionados = await documentosDeLaRevision(rutas.wikidata, revision);
+  if (yaVersionados.length > 0) {
+    const nombre = yaVersionados[0];
+    const ruta = join(rutas.wikidata, nombre);
+    let texto: string;
+    try {
+      texto = await readFile(ruta, 'utf8');
+    } catch (fallo) {
+      terminar({
+        ok: false,
+        motivos: [`No se puede leer ${ruta}: ${fallo instanceof Error ? fallo.message : String(fallo)}`, 'No se ha pedido nada.'],
+      });
+    }
+    const lectura = leerDocumentoDeWikidata(nombre, texto);
+    if (!lectura.ok) {
+      terminar({ ok: false, motivos: [lectura.motivo, `Revise ${ruta}: no se ha pedido nada.`] });
+    }
+    if (tecleado !== undefined && tecleado !== lectura.documento.entidad) {
+      otraEntidad(lectura.documento.entidad, `la cabecera de ${ruta}`);
+    }
+    datos = lectura.documento.datos;
+    documento = lectura.documento;
+    parte.push(`Ya versionado: ${ruta}`, 'La revisión no cambia, así que no se ha vuelto a descargar.');
+  } else {
+    const declaracion = await pedirAWikidata(direccionDeLaDeclaracion(revision));
+    if (!declaracion.ok) terminar({ ok: false, motivos: declaracion.motivos });
+    const declarada = revisionDeclaradaDeWikidata(declaracion.contenido, revision);
+    if (!declarada.ok) terminar({ ok: false, motivos: [declarada.motivo] });
+    if (tecleado !== undefined && tecleado !== declarada.entidad) otraEntidad(declarada.entidad, NOMBRE_DE_WIKIDATA);
+    const versionado = await versionarDeWikidata(declarada.entidad, revision, declarada.fecha, pedida);
+    if (!versionado.ok) terminar({ ok: false, motivos: versionado.motivos });
+    datos = versionado.datos;
+    documento = { entidad: declarada.entidad, revision, fechaDeRevision: declarada.fecha };
+    parte.push(`Documento de Wikidata versionado: ${versionado.ruta}`);
+  }
+  parte.push(
+    `Entidad: ${documento.entidad}`,
+    `Revisión: ${revision}, del ${documento.fechaDeRevision} ` +
+      `(${enlacePermanenteDeWikidata(documento.entidad, revision)})`,
+    `Licencia: ${LICENCIA_DE_WIKIDATA} (${NOMBRE_DE_WIKIDATA})`,
+  );
+
+  // Las entidades referidas: autor, género y lengua.
+  const nuevas = new Map<string, number>();
+  const referidas: string[] = [];
+  const faltan: string[] = [];
+  for (const entidad of entidadesReferidas(datos)) {
+    if (entidad === documento.entidad) continue;
+    const vigente = vigentes.get(entidad);
+    if (vigente !== undefined) {
+      const suyo = await documentoDeLaCarpeta(rutas.wikidata, entidad, vigente);
+      if (suyo.ok) {
+        referidas.push(`  · ${entidad}: ya vigente, revisión ${vigente}`);
+        continue;
+      }
+      if (suyo.ausente !== true) {
+        faltan.push(`  · ${entidad}: ${suyo.motivo}`);
+        continue;
+      }
+      const declaracion = await pedirAWikidata(direccionDeLaDeclaracion(vigente));
+      if (!declaracion.ok) {
+        faltan.push(`  · ${entidad}: ${declaracion.motivos.join(' ')}`);
+        continue;
+      }
+      const declarada = revisionDeclaradaDeWikidata(declaracion.contenido, vigente);
+      if (!declarada.ok) {
+        faltan.push(`  · ${entidad}: ${declarada.motivo}`);
+        continue;
+      }
+      if (declarada.entidad !== entidad) {
+        faltan.push(`  · ${entidad}: su revisión vigente ${vigente} es de ${declarada.entidad} según ${NOMBRE_DE_WIKIDATA}.`);
+        continue;
+      }
+      const versionado = await versionarDeWikidata(entidad, vigente, declarada.fecha);
+      if (!versionado.ok) {
+        faltan.push(`  · ${entidad}: ${versionado.motivos.join(' ')}`);
+        continue;
+      }
+      referidas.push(`  · ${entidad}: vigente sin documento, recuperada su revisión ${vigente}: ${versionado.ruta}`);
+      continue;
+    }
+
+    const actual = await pedirAWikidata(direccionDeLaRevisionActual(entidad));
+    if (!actual.ok) {
+      faltan.push(`  · ${entidad}: ${actual.motivos.join(' ')}`);
+      continue;
+    }
+    const declarada = revisionActual(actual.contenido, entidad);
+    if (!declarada.ok) {
+      faltan.push(`  · ${entidad}: ${declarada.motivo}`);
+      continue;
+    }
+    const suyo = await documentoDeLaCarpeta(rutas.wikidata, entidad, declarada.revision);
+    if (suyo.ok) {
+      nuevas.set(entidad, declarada.revision);
+      referidas.push(`  · ${entidad}: reutilizada su revisión ${declarada.revision}, ya versionada`);
+      continue;
+    }
+    if (suyo.ausente !== true) {
+      faltan.push(`  · ${entidad}: ${suyo.motivo}`);
+      continue;
+    }
+    const versionado = await versionarDeWikidata(entidad, declarada.revision, declarada.fecha);
+    if (!versionado.ok) {
+      faltan.push(`  · ${entidad}: ${versionado.motivos.join(' ')}`);
+      continue;
+    }
+    nuevas.set(entidad, declarada.revision);
+    referidas.push(`  · ${entidad}: recuperada su revisión ${declarada.revision}: ${versionado.ruta}`);
+  }
+
+  let añadidas: string[] = [];
+  if (nuevas.size > 0) {
+    try {
+      añadidas = await anadirVigentes(rutas.vigentesDeWikidata, nuevas);
+    } catch (fallo) {
+      faltan.push(`  · ${rutas.vigentesDeWikidata}: ${fallo instanceof Error ? fallo.message : String(fallo)}`);
+    }
+  }
+
+  parte.push(
+    ...(referidas.length > 0 ? ['Entidades referidas:', ...referidas] : ['Entidades referidas: ninguna.']),
+    añadidas.length > 0
+      ? `Añadidas a ${rutas.vigentesDeWikidata}: ${añadidas.map((q) => `${q}: ${nuevas.get(q)}`).join(', ')}`
+      : `${rutas.vigentesDeWikidata}: sin cambios.`,
+    'El cotejo de Citas no lee corpus/wikidata/: de este documento no sale ninguna Cita.',
+  );
+  if (faltan.length > 0) {
+    terminar({
+      ok: false,
+      motivos: [
+        ...parte,
+        'Faltan estas entidades referidas; repita la misma orden para completarlas:',
+        ...faltan,
+      ],
+    });
+  }
+  terminar({
+    ok: true,
+    ruta: join(rutas.wikidata, nombreDeDocumentoDeWikidata(documento.entidad, revision)),
+    mensaje: parte.join('\n'),
+  });
 }
 
 /**
@@ -1117,17 +1417,19 @@ type Descarga =
  */
 async function descargar(
   inicial: string,
-  fuente: Fuente,
+  fuente: Pick<Fuente, 'id' | 'nombre'>,
   {
     tipos = TIPOS_ADMITIDOS,
     acepta = 'text/html, text/plain',
-  }: { tipos?: string[]; acepta?: string } = {},
+    // Quién revalida cada destino. Por omisión, el conjunto cerrado de Fuentes; Wikidata (32.1),
+    // que no es Fuente de texto, pasa su propio reconocedor.
+    reconocer = (direccion: string) => fuenteDeUrl(direccion)?.id === fuente.id,
+  }: { tipos?: string[]; acepta?: string; reconocer?: (direccion: string) => boolean } = {},
 ): Promise<Descarga> {
   let actual = inicial;
 
   for (let salto = 0; salto <= MAXIMO_DE_REDIRECCIONES; salto += 1) {
-    const destinoAdmitido = fuenteDeUrl(actual);
-    if (destinoAdmitido === undefined || destinoAdmitido.id !== fuente.id) {
+    if (!reconocer(actual)) {
       return {
         ok: false,
         motivos: [
@@ -1177,7 +1479,7 @@ async function descargar(
     }
 
     // `respuesta.url` viene vacía en respuestas sintéticas; cuando viene, manda.
-    if (respuesta.url !== '' && fuenteDeUrl(respuesta.url)?.id !== fuente.id) {
+    if (respuesta.url !== '' && !reconocer(respuesta.url)) {
       return {
         ok: false,
         motivos: [

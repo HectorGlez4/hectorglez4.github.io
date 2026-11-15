@@ -1,5 +1,5 @@
 ---
-texto: "¿No hay quien la llame por las calles a voces... torpe y bruja, ni hay galera en Madrid que la reclame?"
+texto: "¿No hay quien la llame\npor las calles a voces... torpe y bruja,\nni hay galera en Madrid que la reclame?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-no-hay-quien-la-llame-por-las"
 procedencia:

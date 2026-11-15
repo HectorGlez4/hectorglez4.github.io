@@ -617,3 +617,239 @@ describe('Historia 26.8 — aprobar no publica una Cita sin Tema publicado', () 
     });
   });
 });
+
+describe('Historia 29.2 — aprobar publica la candidata con los saltos de su documento de verso', () => {
+  const EN_UNA_LINEA =
+    'Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.';
+  const EN_VERSO =
+    'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+  const DOCUMENTO = 'wikisource-es--versos-sencillos--versos-sencillos-i';
+  const candidata = (texto: string) => ({
+    texto,
+    autor: 'jose-marti',
+    temas: [TEMA_PUBLICADO],
+    slug: 'jose-marti-yo-vengo-de-todas-partes',
+    procedencia: { obra: 'Versos sencillos' },
+    estadoDerechos: 'dominio-público',
+    fuente: {
+      id: 'wikisource-es',
+      nombre: 'Wikisource en español',
+      licencia: 'CC BY-SA 4.0',
+      url: 'https://es.wikisource.org/wiki/Versos_sencillos/I',
+    },
+  });
+
+  async function conElDocumento(texto: string): Promise<Rutas> {
+    const rutas = await corpusCon([candidata(texto)]);
+    await mkdir(rutas.fuentes, { recursive: true });
+    await writeFile(
+      join(rutas.fuentes, `${DOCUMENTO}.txt`),
+      await readFile(join(import.meta.dirname, 'ayuda/lineas', `${DOCUMENTO}.txt`), 'utf8'),
+      'utf8',
+    );
+    return rutas;
+  }
+
+  const publicada = async (rutas: Rutas) =>
+    readFile(join(rutas.citas, `${nombreDeFicheroDeCita('jose-marti', 'jose-marti-yo-vengo-de-todas-partes')}.md`), 'utf8');
+
+  it('una candidata en una línea sale publicada en verso, cambiando solo su línea «texto:», y lo dice', async () => {
+    const rutas = await conElDocumento(EN_UNA_LINEA);
+    const antes = ficheroDeCita(candidata(EN_UNA_LINEA));
+    const resultado = await aprobar(rutas, ['jose-marti-yo-vengo-de-todas-partes']);
+    expect(resultado.publicadas).toEqual(['jose-marti-yo-vengo-de-todas-partes']);
+    expect(resultado.conSaltos).toEqual([{ slug: 'jose-marti-yo-vengo-de-todas-partes', documento: DOCUMENTO }]);
+    const [citada] = (await leerCitas(rutas.citas)).filter((c) => c.slug === 'jose-marti-yo-vengo-de-todas-partes');
+    expect(citada.texto).toBe(EN_VERSO);
+    expect(await publicada(rutas)).toBe(
+      antes.replace(`texto: ${JSON.stringify(EN_UNA_LINEA)}`, `texto: ${JSON.stringify(EN_VERSO)}`),
+    );
+  });
+
+  it('una que ya trae sus saltos se publica tal cual, sin anotarla', async () => {
+    const rutas = await conElDocumento(EN_VERSO);
+    const resultado = await aprobar(rutas, ['jose-marti-yo-vengo-de-todas-partes']);
+    expect(resultado.publicadas).toEqual(['jose-marti-yo-vengo-de-todas-partes']);
+    expect(resultado.conSaltos).toEqual([]);
+    const [citada] = (await leerCitas(rutas.citas)).filter((c) => c.slug === 'jose-marti-yo-vengo-de-todas-partes');
+    expect(citada.texto).toBe(EN_VERSO);
+    expect(await readFile(citada.ruta, 'utf8')).toBe(ficheroDeCita(candidata(EN_VERSO)));
+  });
+});
+
+describe('Historia 29.4 — la contenida y la casi igual se señalan al revisar', () => {
+  const LARGA = {
+    ...CANDIDATA_COMPLETA,
+    slug: 'seneca-ya-publicada-larga',
+    texto: 'No es que tengamos poco tiempo, es que perdemos mucho, y la vida es larga si sabes usarla.',
+  };
+
+  async function conFicha(rutas: Rutas): Promise<void> {
+    await mkdir(rutas.obras, { recursive: true });
+    await writeFile(
+      join(rutas.obras, 'seneca--sobre-la-brevedad-de-la-vida.yml'),
+      'autor: "seneca"\ntitulo: "Sobre la brevedad de la vida"\nformas:\n  - "sobre la brevedad de la vida"\n',
+      'utf8',
+    );
+  }
+
+  it('una candidata contenida en una publicada lleva el aviso, y se aprueba igual con él en el resultado', async () => {
+    const rutas = await corpusCon([CANDIDATA_COMPLETA], [LARGA]);
+    await conFicha(rutas);
+
+    const [candidata] = await loteEnRevision(rutas);
+    expect(candidata.duplicaA).toBeUndefined();
+    expect(candidata.parecidas).toEqual([
+      expect.objectContaining({ slug: LARGA.slug, donde: 'publicadas', clase: 'contenida', sentido: 'contenida-en' }),
+    ]);
+    const { formatearLote } = await import('../../tools/lib/revision.ts');
+    expect(formatearLote([candidata])).toContain(`⚠ Contenida en ${LARGA.slug} (publicadas; contenida`);
+
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect(resultado.avisos).toEqual([
+      { slug: CANDIDATA_COMPLETA.slug, parecidas: candidata.parecidas },
+    ]);
+  });
+
+  it('una candidata casi igual a una publicada de su misma Obra lleva el aviso con la palabra', async () => {
+    const casi = { ...CANDIDATA_COMPLETA, texto: LARGA.texto.replace('perdemos', 'gastamos') };
+    const rutas = await corpusCon([casi], [LARGA]);
+    await conFicha(rutas);
+
+    const [candidata] = await loteEnRevision(rutas);
+    expect(candidata.parecidas).toEqual([
+      expect.objectContaining({
+        slug: LARGA.slug,
+        donde: 'publicadas',
+        clase: 'casi-iguales',
+        palabra: { a: 'gastamos', b: 'perdemos' },
+      }),
+    ]);
+  });
+
+  it('la casi igual de una publicada de otra Obra no se señala', async () => {
+    const casi = {
+      ...CANDIDATA_COMPLETA,
+      texto: LARGA.texto.replace('perdemos', 'gastamos'),
+      procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+    };
+    const rutas = await corpusCon([casi], [LARGA]);
+    await conFicha(rutas);
+    expect((await loteEnRevision(rutas))[0].parecidas).toBeUndefined();
+  });
+
+  it('dos candidatas, una dentro de la otra: cada una señala a la otra en su sentido', async () => {
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA, larga]);
+    const lote = await loteEnRevision(rutas);
+    const porSlug = new Map(lote.map((c) => [c.slug, c]));
+    expect(porSlug.get(CANDIDATA_COMPLETA.slug)?.parecidas?.[0]).toMatchObject({
+      slug: larga.slug,
+      donde: 'en revisión',
+      sentido: 'contenida-en',
+    });
+    expect(porSlug.get(larga.slug)?.parecidas?.[0]).toMatchObject({
+      slug: CANDIDATA_COMPLETA.slug,
+      donde: 'en revisión',
+      sentido: 'contiene-a',
+    });
+  });
+  it('el listado pinta la casi igual con su cifra y su palabra, y la que contiene a otra en su sentido', async () => {
+    const { formatearLote } = await import('../../tools/lib/revision.ts');
+    const casi = { ...CANDIDATA_COMPLETA, texto: LARGA.texto.replace('perdemos', 'gastamos') };
+    const conCasi = await corpusCon([casi], [LARGA]);
+    await conFicha(conCasi);
+    expect(formatearLote(await loteEnRevision(conCasi))).toMatch(
+      new RegExp(`⚠ Casi igual a ${LARGA.slug} \\(publicadas; casi iguales, 0,\\d\\d; gastamos/perdemos\\)\\. Decide tú\\.`),
+    );
+
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const lote = await loteEnRevision(await corpusCon([CANDIDATA_COMPLETA, larga]));
+    const texto = formatearLote(lote);
+    expect(texto).toContain(`⚠ Contiene a ${CANDIDATA_COMPLETA.slug} (en revisión; contenida, `);
+    expect(texto).toContain(`⚠ Contenida en ${larga.slug} (en revisión; contenida, `);
+  });
+
+  it('aprobar una repetida devuelve su duplicaA en el aviso', async () => {
+    const publicada = { ...CANDIDATA_COMPLETA, slug: 'seneca-ya-publicada' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA], [publicada]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect(resultado.avisos).toEqual([
+      { slug: CANDIDATA_COMPLETA.slug, duplicaA: { slug: 'seneca-ya-publicada', donde: 'publicadas' }, parecidas: [] },
+    ]);
+  });
+
+  it('dos candidatas, una dentro de la otra, aprobadas juntas: el aviso dice que la otra ya está publicada', async () => {
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA, larga]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug, larga.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug, larga.slug]);
+    const porSlug = new Map(resultado.avisos.map((a) => [a.slug, a.parecidas]));
+    expect(porSlug.get(CANDIDATA_COMPLETA.slug)).toEqual([
+      expect.objectContaining({ slug: larga.slug, donde: 'publicadas', sentido: 'contenida-en' }),
+    ]);
+    expect(porSlug.get(larga.slug)).toEqual([
+      expect.objectContaining({ slug: CANDIDATA_COMPLETA.slug, donde: 'publicadas', sentido: 'contiene-a' }),
+    ]);
+  });
+
+  it('una publicada dentro de una candidata más larga, aunque sea de otro Autor: «Contiene a» (publicadas)', async () => {
+    // AD-32: la contenida no filtra por Autor. La publicada es de otro, y la candidata la contiene.
+    const ajena = { ...CANDIDATA_COMPLETA, autor: 'marco-aurelio', slug: 'marco-aurelio-no-es-que-tengamos' };
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const lote = await loteEnRevision(await corpusCon([larga], [ajena]));
+    expect(lote[0].parecidas).toEqual([
+      expect.objectContaining({ slug: ajena.slug, donde: 'publicadas', clase: 'contenida', sentido: 'contiene-a' }),
+    ]);
+  });
+
+  it('varias parecidas: las publicadas primero y luego por slug', async () => {
+    const enRevision = { ...LARGA, slug: 'seneca-aa-larga-en-revision' };
+    const otraPublicada = { ...LARGA, slug: 'seneca-zz-publicada', texto: `${LARGA.texto} Y otra frase más.` };
+    const lote = await loteEnRevision(await corpusCon([CANDIDATA_COMPLETA, enRevision], [otraPublicada, LARGA]));
+    const corta = lote.find((c) => c.slug === CANDIDATA_COMPLETA.slug);
+    expect(corta?.parecidas?.map((p) => [p.donde, p.slug])).toEqual([
+      ['publicadas', LARGA.slug],
+      ['publicadas', otraPublicada.slug],
+      ['en revisión', enRevision.slug],
+    ]);
+  });
+
+  it('el listado dice la repetida con su clase', async () => {
+    const { formatearLote } = await import('../../tools/lib/revision.ts');
+    const publicada = { ...CANDIDATA_COMPLETA, slug: 'seneca-ya-publicada' };
+    const lote = await loteEnRevision(await corpusCon([CANDIDATA_COMPLETA], [publicada]));
+    expect(formatearLote(lote)).toContain('⚠ Duplica a seneca-ya-publicada (publicadas; repetidas). Decide tú.');
+  });
+
+  it('aprobadas juntas, la otra renombrada al publicarse: el aviso la nombra por el slug con que salió', async () => {
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const ocupada = { ...LARGA, slug: larga.slug, texto: 'Otra Cita del mismo nombre, que no tiene nada que ver con esta.' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA, larga], [ocupada]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug, larga.slug]);
+    const renombrada = resultado.renombradas.find((r) => r.de === larga.slug);
+    expect(renombrada).toBeDefined();
+    const aviso = resultado.avisos.find((a) => a.slug === CANDIDATA_COMPLETA.slug);
+    expect(aviso?.parecidas).toEqual([
+      expect.objectContaining({ slug: renombrada?.a, donde: 'publicadas', sentido: 'contenida-en' }),
+    ]);
+  });
+
+  it('una Ficha de Obra ilegible para el listado, nombrando el fichero', async () => {
+    const rutas = await corpusCon([CANDIDATA_COMPLETA]);
+    await mkdir(rutas.obras, { recursive: true });
+    await writeFile(join(rutas.obras, 'seneca--rota.yml'), 'autor: [sin cerrar\n', 'utf8');
+    await expect(loteEnRevision(rutas)).rejects.toThrow(/seneca--rota\.yml/u);
+  });
+
+  it('una candidata que se publica con otro slug lleva el aviso con el slug con que salió', async () => {
+    const ocupada = { ...LARGA, slug: CANDIDATA_COMPLETA.slug, texto: 'Otra Cita del mismo nombre, que no tiene nada que ver con esta.' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA], [ocupada, LARGA]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    const [renombrada] = resultado.renombradas;
+    expect(renombrada.de).toBe(CANDIDATA_COMPLETA.slug);
+    expect(resultado.avisos.map((a) => a.slug)).toEqual([renombrada.a]);
+  });
+});

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: ¿Vos sabéis que me robó a mi hija de mi casa?"
+texto: "CRESPO: ¿Vos sabéis que me robó\na mi hija de mi casa?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-vos-sabeis-que-me-robo-a"
 procedencia:

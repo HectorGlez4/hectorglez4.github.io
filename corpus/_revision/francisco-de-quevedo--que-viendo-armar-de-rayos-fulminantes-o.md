@@ -1,5 +1,5 @@
 ---
-texto: "Que viendo armar de rayos fulminantes, O Júpiter, tu diestra valerosa, Pienso que han vuelto al mundo los Gigantes."
+texto: "Que viendo armar de rayos fulminantes,\nO Júpiter, tu diestra valerosa,\nPienso que han vuelto al mundo los Gigantes."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-que-viendo-armar-de-rayos-fulminantes-o"
 procedencia:

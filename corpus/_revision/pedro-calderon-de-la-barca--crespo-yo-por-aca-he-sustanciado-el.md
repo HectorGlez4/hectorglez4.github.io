@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Yo por acá he sustanciado el proceso."
+texto: "CRESPO: Yo por acá he sustanciado\nel proceso."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-yo-por-aca-he-sustanciado-el"
 procedencia:

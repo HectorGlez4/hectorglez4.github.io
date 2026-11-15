@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Si la amistad os incita, a atropellar vuestro bien, 890 a mi la misma tambien haze que no lo permita."
+texto: "DON IUAN\nSi la amistad os incita,\na atropellar vuestro bien, 890\na mi la misma tambien\nhaze que no lo permita."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-si-la-amistad-os-incita"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Si a éste pago, padece mi deseo; si ruego a áquel, mi pundonor enojo; de entre ambos modos infeliz me veo. Pero yo por mejor partido escojo; de quién no quiero ser violento empleo; que de quien no me quiere, vil despojo."
+texto: "Si a éste pago, padece mi deseo;\nsi ruego a áquel, mi pundonor enojo;\nde entre ambos modos infeliz me veo.\nPero yo por mejor partido escojo;\nde quién no quiero ser violento empleo;\nque de quien no me quiere, vil despojo."
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "el-amor"

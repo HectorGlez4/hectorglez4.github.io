@@ -1,5 +1,5 @@
 ---
-texto: "Al que encuentra en la calle le arremete, y le pide, y le hostiga; y a que al cabo le convide a comer le compromete."
+texto: "Al que encuentra en la calle le arremete,\ny le pide, y le hostiga; y a que al cabo\nle convide a comer le compromete."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-al-que-encuentra-en-la-calle-le"
 procedencia:

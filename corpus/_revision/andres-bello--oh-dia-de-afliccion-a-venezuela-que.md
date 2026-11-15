@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh día de aflicción a Venezuela, que aún hoy, de tanta pérdida preciosa, apenas con sus glorias se consuela!"
+texto: "¡Oh día de aflicción a Venezuela,\nque aún hoy, de tanta pérdida preciosa,\napenas con sus glorias se consuela!"
 autor: "andres-bello"
 slug: "andres-bello-oh-dia-de-afliccion-a-venezuela-que"
 procedencia:

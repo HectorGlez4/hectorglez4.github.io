@@ -278,9 +278,10 @@ describe('Historia 24.8 — el aviso de un rango, por campos', () => {
     expect(avisos).toEqual([]);
   });
 
-  it('un rango que añade un documento avisa solo su Obra', async () => {
+  it('un rango que añade un documento avisa su Obra y, desde la 31.2, sus Páginas de Cita', async () => {
     const { rutas, avisos } = await rango('apta', 'documento', [CARTAS, BREVEDAD]);
-    expect(rutas).toEqual([CARTAS]);
+    // Las Citas vivas de Cartas en ese commit: su pasaje sale de los documentos de su Obra.
+    expect([...rutas].sort()).toEqual(['/cita/seneca-cartas-0/', '/cita/seneca-cartas-2/', CARTAS].sort());
     expect(avisos).toEqual([]);
   });
 
@@ -333,12 +334,12 @@ describe('Historia 24.8 — el aviso de un rango, por campos', () => {
     expect(informe).toMatch(/portada\s+—\s+1/);
   });
 
-  it('el ensayo de un documento: solo la Obra cambia de fecha y se avisa, sin portada', async () => {
+  it('el ensayo de un documento: la Obra y sus Páginas de Cita (31.2) cambian de fecha y se avisan, sin portada', async () => {
     await git(['checkout', '-q', sha['documento']]);
     const ensayo = await ensayoDelRango(raiz, sha['apta'], sha['documento'], { rutas: [CARTAS, BREVEDAD] });
     expect(ensayo.portada).toBe(false);
     expect(ensayo.reparto.obra).toEqual({ cambianDeFecha: 1, seAvisarian: 1 });
-    expect(ensayo.reparto.cita).toEqual({ cambianDeFecha: 0, seAvisarian: 0 });
+    expect(ensayo.reparto.cita).toEqual({ cambianDeFecha: 2, seAvisarian: 2 });
   });
 
   it('el ensayo de una baja: lo que componía cambia de fecha, y la Cita borrada se avisa', async () => {
@@ -393,9 +394,9 @@ describe('Historia 24.8 — lo que la revisión arregló, con git de verdad', ()
     expect(avisos).toEqual([]);
   });
 
-  it('la baja de un documento avisa su Obra, por la relación de antes, y no la portada', async () => {
+  it('la baja de un documento avisa su Obra y sus Páginas de Cita (31.2), por la relación de antes, y no la portada', async () => {
     const { rutas, avisos } = await rango('titulada', 'documento-borrado', [CARTAS, BREVEDAD]);
-    expect(rutas).toEqual([CARTAS]);
+    expect([...rutas].sort()).toEqual(['/cita/seneca-cartas-0/', '/cita/seneca-cartas-2/', CARTAS].sort());
     expect(avisos).toEqual([]);
   });
 
@@ -511,14 +512,16 @@ describe('Historia 22.8 — el `lastmod` de una Obra se mueve con su ficha', () 
       expect(fechas.get('/obra/seneca/brevedad')).toBe('2024-01-02T09:00:00.000Z');
       expect(fechas.get('/cita/seneca-ira-0')).toBe('2024-01-02T09:00:00.000Z');
 
-      // Historia 24.8 — en el camino del sitemap, un documento de Cartas fecha solo su Obra…
+      // Historia 24.8 — en el camino del sitemap, un documento de Cartas fecha su Obra y, desde la
+      // 31.2, sus Páginas de Cita —su pasaje sale de él—, y nada más…
       await mkdir(join(proyecto, 'corpus', 'fuentes'), { recursive: true });
       await writeFile(join(proyecto, 'corpus', 'fuentes', 'wikisource-es--cartas--ii.txt'), 'Otra página.\n', 'utf8');
       await enProyecto(['add', '-A']);
       await enProyecto(['commit', '-q', '-m', 'un documento'], '2024-05-06T09:00:00+0000');
       const conDocumento = await fechasDeLasSuperficies(proyecto, (m) => avisos.push(m));
       expect(conDocumento.get('/obra/seneca/cartas')).toBe('2024-05-06T09:00:00.000Z');
-      expect(conDocumento.get('/cita/seneca-cartas-0')).toBe('2024-01-02T09:00:00.000Z');
+      expect(conDocumento.get('/cita/seneca-cartas-0')).toBe('2024-05-06T09:00:00.000Z');
+      expect(conDocumento.get('/cita/seneca-ira-0')).toBe('2024-01-02T09:00:00.000Z');
       expect(conDocumento.get('/autor/seneca')).toBe(fechas.get('/autor/seneca'));
       // …y la baja de una Cita —movida a `corpus/_revision/`— fecha lo vivo que componía.
       await mkdir(join(proyecto, 'corpus', '_revision'), { recursive: true });
@@ -531,8 +534,8 @@ describe('Historia 22.8 — el `lastmod` de una Obra se mueve con su ficha', () 
       expect(despues.get('/autor/seneca')).toBe('2024-07-08T09:00:00.000Z');
       expect(despues.get('/tema/el-tiempo')).toBe('2024-07-08T09:00:00.000Z');
       expect(despues.has('/cita/seneca-cartas-1')).toBe(false);
-      // Ni el documento ni la baja tocan las Páginas de Cita que quedan ni otra Obra.
-      expect(despues.get('/cita/seneca-cartas-0')).toBe('2024-01-02T09:00:00.000Z');
+      // La baja no toca las Páginas de Cita que quedan —siguen con la fecha del documento— ni otra Obra.
+      expect(despues.get('/cita/seneca-cartas-0')).toBe('2024-05-06T09:00:00.000Z');
       expect(despues.get('/obra/seneca/brevedad')).toBe('2024-01-02T09:00:00.000Z');
     } finally {
       await rm(proyecto, { recursive: true, force: true });

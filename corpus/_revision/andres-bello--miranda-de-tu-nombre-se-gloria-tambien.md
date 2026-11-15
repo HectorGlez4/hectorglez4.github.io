@@ -1,5 +1,5 @@
 ---
-texto: "¡Miranda! de tu nombre se gloria también Colombia; defensor constante de sus derechos; de las santas leyes, de la severa disciplina amante."
+texto: "¡Miranda! de tu nombre se gloria\ntambién Colombia; defensor constante\nde sus derechos; de las santas leyes,\nde la severa disciplina amante."
 autor: "andres-bello"
 slug: "andres-bello-miranda-de-tu-nombre-se-gloria-tambien"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Tu hija, mejor que yo lo sabe."
+texto: "REBOLLEDO: Tu hija, mejor que yo\nlo sabe."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-tu-hija-mejor-que-yo-lo"
 procedencia:

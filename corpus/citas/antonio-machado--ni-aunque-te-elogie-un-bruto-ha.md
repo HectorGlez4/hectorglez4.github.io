@@ -1,5 +1,5 @@
 ---
-texto: "Ni aunque te elogie un bruto ha de tener razón."
+texto: "Ni aunque te elogie un bruto\nha de tener razón."
 autor: "antonio-machado"
 temas:
   - "la-palabra"

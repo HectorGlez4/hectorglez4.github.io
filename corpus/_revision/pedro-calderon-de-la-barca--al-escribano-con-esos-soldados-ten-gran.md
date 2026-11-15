@@ -1,5 +1,5 @@
 ---
-texto: "Al escribano Con esos soldados ten gran cuidado."
+texto: "Al escribano\nCon esos soldados ten\ngran cuidado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-al-escribano-con-esos-soldados-ten-gran"
 procedencia:

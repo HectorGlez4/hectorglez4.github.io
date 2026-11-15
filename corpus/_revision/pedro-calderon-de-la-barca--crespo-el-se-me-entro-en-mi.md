@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Él se me entró en mi opinión sin ser jurisdicción suya."
+texto: "CRESPO: Él se me entró en mi opinión\nsin ser jurisdicción suya."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-el-se-me-entro-en-mi"
 procedencia:

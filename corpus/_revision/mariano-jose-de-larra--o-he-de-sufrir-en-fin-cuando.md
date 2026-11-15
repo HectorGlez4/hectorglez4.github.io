@@ -1,5 +1,5 @@
 ---
-texto: "¿O he de sufrir; en fin, cuando aplaudida mi comedia enriquezca el escenario, que mil reales me den?"
+texto: "¿O he de sufrir; en fin, cuando aplaudida\nmi comedia enriquezca el escenario,\nque mil reales me den?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-o-he-de-sufrir-en-fin-cuando"
 procedencia:

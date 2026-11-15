@@ -1,5 +1,5 @@
 ---
-texto: "POLICIANO Quien goza por su prudencia 95 priuança tan merecida, noble Dion, como vos, claro està que alcançarà quanto pretenda."
+texto: "POLICIANO\nQuien goza por su prudencia 95\npriuança tan merecida,\nnoble Dion, como vos,\nclaro està que alcançarà\nquanto pretenda."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-policiano-quien-goza-por-su-prudencia-95"
 procedencia:

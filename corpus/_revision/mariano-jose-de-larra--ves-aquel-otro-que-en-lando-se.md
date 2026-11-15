@@ -1,5 +1,5 @@
 ---
-texto: "¿Ves aquel otro que en landó se ostenta con lentes, y cadenas y traílla de galgos por detrás, palco, y la renta"
+texto: "¿Ves aquel otro que en landó se ostenta\ncon lentes, y cadenas y traílla\nde galgos por detrás, palco, y la renta"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-ves-aquel-otro-que-en-lando-se"
 procedencia:

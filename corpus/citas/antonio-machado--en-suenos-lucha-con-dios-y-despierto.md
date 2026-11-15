@@ -1,5 +1,5 @@
 ---
-texto: "En sueños lucha con Dios; y despierto, con el mar."
+texto: "En sueños lucha con Dios;\ny despierto, con el mar."
 autor: "antonio-machado"
 temas:
   - "la-vida"

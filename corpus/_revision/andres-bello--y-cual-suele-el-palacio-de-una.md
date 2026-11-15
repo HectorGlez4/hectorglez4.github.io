@@ -1,5 +1,5 @@
 ---
-texto: "Y, cual suele el palacio de una maga, a la virtud de superior conjuro, toda esa pompa en humo se deshaga."
+texto: "Y, cual suele el palacio de una maga,\na la virtud de superior conjuro,\ntoda esa pompa en humo se deshaga."
 autor: "andres-bello"
 slug: "andres-bello-y-cual-suele-el-palacio-de-una"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Mienten todos los gallinas, los bellacos, y bellacas, 130 que ossaren, dezir, que el vino deue dar tributo al agua."
+texto: "SANCHO\nMienten todos los gallinas,\nlos bellacos, y bellacas, 130\nque ossaren, dezir, que el vino\ndeue dar tributo al agua."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-mienten-todos-los-gallinas-los-bellacos"
 procedencia:

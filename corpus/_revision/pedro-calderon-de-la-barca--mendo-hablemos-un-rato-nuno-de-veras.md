@@ -1,5 +1,5 @@
 ---
-texto: "MENDO: Hablemos un rato, Nuño, de veras."
+texto: "MENDO: Hablemos\nun rato, Nuño, de veras."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mendo-hablemos-un-rato-nuno-de-veras"
 procedencia:

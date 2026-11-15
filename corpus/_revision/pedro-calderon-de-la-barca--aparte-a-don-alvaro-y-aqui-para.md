@@ -1,5 +1,5 @@
 ---
-texto: "Aparte a don ÁLVARO Y aquí, para entre los dos si hallo harto paño, en efeto con muchísimo respeto os he de ahorcar, ¡juro a Dios!"
+texto: "Aparte a don ÁLVARO\nY aquí, para entre los dos\nsi hallo harto paño, en efeto\ncon muchísimo respeto\nos he de ahorcar, ¡juro a Dios!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-aparte-a-don-alvaro-y-aqui-para"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "tu musa inspira, vivirá tu fama sin invidiar tu noble patria a Manto, y ornarte ha, en premio de tu dulce canto, no de verde laurel caduca rama,"
+texto: "tu musa inspira, vivirá tu fama\nsin invidiar tu noble patria a Manto,\ny ornarte ha, en premio de tu dulce canto,\nno de verde laurel caduca rama,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-tu-musa-inspira-vivira-tu-fama-sin"
 procedencia:

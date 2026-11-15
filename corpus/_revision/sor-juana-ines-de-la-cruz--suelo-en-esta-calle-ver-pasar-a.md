@@ -1,5 +1,5 @@
 ---
-texto: "Suelo en esta calle ver pasar a un galán mancebo, que si no es el mismo Febo, yo no sé quién pueda ser."
+texto: "Suelo en esta calle ver\npasar a un galán mancebo,\nque si no es el mismo Febo,\nyo no sé quién pueda ser."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-suelo-en-esta-calle-ver-pasar-a"
 procedencia:

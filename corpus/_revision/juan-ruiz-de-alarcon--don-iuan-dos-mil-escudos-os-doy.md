@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Dos mil escudos os doy para la costa."
+texto: "DON IUAN\nDos mil escudos os doy\npara la costa."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-dos-mil-escudos-os-doy"
 procedencia:

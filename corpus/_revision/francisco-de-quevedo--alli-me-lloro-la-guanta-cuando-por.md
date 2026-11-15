@@ -1,5 +1,5 @@
 ---
-texto: "Allí me lloró la Guanta, Cuando por la Salazar, Desporqueroné dos almas Camino de Brañigal."
+texto: "Allí me lloró la Guanta,\nCuando por la Salazar,\nDesporqueroné dos almas\nCamino de Brañigal."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-alli-me-lloro-la-guanta-cuando-por"
 procedencia:

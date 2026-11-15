@@ -12,8 +12,8 @@
  *   3. corre `superficiesInalcanzables` sobre `rutasPublicadas` —también la Obra que no se
  *      indexa— con el tope de siempre, `MAX_SALTOS_DESDE_LA_PORTADA`.
  *
- * Avisa, sin romper, de las Citas que solo la lista de Autores de la portada deja a ≤3 saltos: el
- * modelo no la lleva (la quita la Épica 28), y sin el aviso nadie las vería hasta entonces.
+ * Avisa, sin romper, de las Citas que solo los Autores destacados de la portada dejan a ≤3 saltos:
+ * el modelo no los lleva (cambian con los recuentos, Historia 28.4), y sin el aviso nadie las vería.
  *
  * Si todo se sostiene escribe una línea fija, que no depende de la jornada; si no, el detalle va
  * al registro —cada superficie fuera, con el Tema que cayó bajo su umbral y su recuento, y cada
@@ -80,7 +80,7 @@ export default function alcanceDesdeLaPortada(): AstroIntegration {
 
         const modelo = await modeloDelCorpus(rutasDelCorpus(join(raiz, 'corpus')));
         const veredicto = veredictoDeAlcance(modelo.conjunto, modelo.grafo, construido);
-        // Lo que `dist/` alcanza solo por la lista de Autores de la portada: avisa, no rompe.
+        // Lo que `dist/` alcanza solo por los Autores destacados de la portada: avisa, no rompe.
         const aviso = avisoDeFueraDelModelo(modelo);
         if (aviso !== undefined) logger.warn(aviso);
 

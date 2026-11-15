@@ -1,5 +1,5 @@
 ---
-texto: "Así yo a nuestra patria me figuro que, en pos del bien que imaginó, se lanza, y cuando cree que aquel feliz futuro"
+texto: "Así yo a nuestra patria me figuro\nque, en pos del bien que imaginó, se lanza,\ny cuando cree que aquel feliz futuro"
 autor: "andres-bello"
 slug: "andres-bello-asi-yo-a-nuestra-patria-me-figuro"
 procedencia:
