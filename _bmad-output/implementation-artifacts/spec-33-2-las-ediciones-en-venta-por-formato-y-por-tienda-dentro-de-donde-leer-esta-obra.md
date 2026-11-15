@@ -210,3 +210,14 @@ Verificación de esta pasada, sobre 9a71fe9d17:
 - `npm test` — 186 ficheros, 8.173 pruebas, verde (1.243 s); cubre los cuatro mandatos de vitest de § Verification.
 
 **Riesgos residuales.** El orden por `TIENDAS` es una `[ASSUMPTION]` aceptada por delegación y pendiente de `bmad-ux` (diferido). El CI no corre el barrido e2e: repetirlo el día de encender es de Héctor (AGENTS.md, paso 4).
+
+## Verificación previa a la fusión — 2026-11-15
+
+Puerta de la etapa s-33 (Épica 33, historias 33.1–33.3), sobre la rama `v9/epica-33`.
+
+- **Puesta al día.** `origin/main` (296594d2c8: verificación en vivo de la Épica 32 y `DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO = '2026-11-15'`) no era antepasada de c8be6e0cfa; se fusionó sin conflictos en 49b4a3333f (solo `src/lib/umbrales.ts` y el spec de la 32.4). `npx tsx tools/autor.ts proponer-claves`: «Ninguna clave nueva»; no escribió nada. `package-lock.json` no cambia frente a la principal: sin `npm ci`.
+- **Equivalente del CI** (`.github/workflows/publicar.yml`), sobre 49b4a3333f: `npm run build` verde (5.295 páginas, NFR-5 y peso dentro de los topes); `npx astro check` — 479 ficheros, 0 errores, 0 avisos, 13 sugerencias; `npm test` — 186 ficheros, 8.173 pruebas, verde (1.279 s).
+- **e2e completo** (`npm run test:e2e`, los dos proyectos, receptor local en 8787): 1.471 pasadas, 177 omitidas, ninguna fallida ni inestable (7,9 min). Sin servidores en escucha después.
+- **NFR-7: no aplica.** Con `TIENDAS` vacío y la afiliación apagada, la rama no cambia lo que pintan ni cargan la Página de Cita, la de Obra, la portada ni `/buscar/`. Evidencia: `diff -rq` de los dos `dist/` construidos en árboles separados (la principal en 296594d2c8 y la rama en 49b4a3333f) con `FECHA_JORNADA=2026-11-15` y `MEDICION_ENDPOINT=http://localhost:8787/` — 15.373 ficheros, todo HTML, CSS, JS, PNG, `fragment/` e `index/` de Pagefind idénticos; difieren solo los 4 `pagefind/filter/*.pf_filter`, el `pf_meta` y `pagefind-entry.json`. Los filtros de cada par tienen el mismo tamaño descomprimido y el mismo multiconjunto de bytes (reordenación interna de Pagefind), y el `pf_meta` descomprimido difiere solo en los nombres de esos filtros, que derivan de su contenido. No hay cambio de lo servido que medir con Lighthouse.
+- **Vocabulario:** ni `src/lib/vocabulario.ts` ni `medicion/migrations/` cambian frente a `origin/main`.
+- **Arreglos:** ninguno.
