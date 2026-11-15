@@ -101,8 +101,22 @@ export async function casiDuplicados(rutas: Rutas, fichas: readonly string[] = [
   }
   const pedidas = new Set(fichas);
 
+  // Historia 35.9 — colgar las Obras juzga los derechos de cada una, y lanza ante una ficha cuyo
+  // Autor no está: la orden se niega diciéndolo, no sale por una traza.
+  let colgadas: ReturnType<typeof colgarObras<(typeof citas)[number]>>;
+  try {
+    colgadas = colgarObras(citas, activas, autores);
+  } catch (fallo) {
+    return {
+      ok: false,
+      motivos: [
+        `No se pudieron resolver las Obras: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+        'Sin resolverlas todas no se puede decir qué pares hay.',
+      ],
+    };
+  }
   const porObra = new Map<string, { titulo: string; citas: { slug: string; texto: string }[] }>();
-  for (const cita of colgarObras(citas, activas, autores)) {
+  for (const cita of colgadas) {
     if (cita.obra === undefined) continue;
     if (pedidas.size > 0 && !pedidas.has(cita.obra.nombre)) continue;
     const grupo = porObra.get(cita.obra.nombre) ?? { titulo: cita.obra.titulo, citas: [] };

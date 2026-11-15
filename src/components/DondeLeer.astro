@@ -27,7 +27,7 @@
  * Historia 35.9, FR-70 — en una Obra con derechos vigentes (`resumen.ventaSola`) no hay «Gratis» ni
  * frase de cotejo: dentro del desplegable van solo las ediciones en venta, por formato y por tienda,
  * en su `data-ingreso` y sin el margen que las separa de «Gratis». Sin ellas el desplegable no se
- * pinta: lo decide la página, que solo lo llama si hay alguna.
+ * pinta: lo decide la página, que solo lo llama si hay alguna, y el componente se para si no.
  *
  * Fuera del índice de Pagefind lo pone quien lo usa (el contenedor de los desplegables, con
  * `data-pagefind-ignore="all"`): «Licencia CC BY-SA» no puede ser un resultado de búsqueda en
@@ -56,6 +56,15 @@ interface Props {
 const { lineas, total, ventaSola } = Astro.props.resumen;
 const { enVenta } = Astro.props;
 
+// Historia 35.9 — en la venta sola, sin ediciones que pintar no hay desplegable: un `<summary>`
+// vacío sería el hueco que FR-70 prohíbe. Lo evita la página; si un uso nuevo no lo hace, se para.
+if (ventaSola === true && (enVenta === undefined || enVenta.grupos.length === 0)) {
+  throw new Error(
+    'DondeLeer: la Obra con derechos vigentes solo tiene «Dónde leer esta obra» con ediciones en venta ' +
+      'que pintar; sin ellas no se llama al componente.',
+  );
+}
+
 /** Lo que sigue al nombre de la Fuente, con la puntuación de la plantilla. */
 function resto(linea: LineaDondeLeer): string {
   const repartida = linea.paginas > 1 ? `, repartida en ${linea.paginas} páginas` : '';
@@ -71,10 +80,8 @@ function resto(linea: LineaDondeLeer): string {
 
 <Desplegable rotulo={ROTULO_DE_DONDE_LEER}>
   {
-    ventaSola === true ? (
-      enVenta !== undefined && enVenta.grupos.length > 0 && (
-        <EdicionesEnVenta id={enVenta.id} grupos={enVenta.grupos} sola />
-      )
+    ventaSola === true && enVenta !== undefined ? (
+      <EdicionesEnVenta id={enVenta.id} grupos={enVenta.grupos} sola />
     ) : lineas.length === 0 ? (
       <p class="sin-cotejo">Ninguna de sus citas tiene todavía documento cotejado.</p>
     ) : (

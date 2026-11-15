@@ -906,7 +906,7 @@ publicadas **con edición cotejada** y, desde la Historia 35.9 (FR-62 v9.1), las
 vigentes** —cuyas ediciones van solas (FR-70); también la de un Personaje sin Autor, cuyas Citas
 cuentan por su Personaje, con el filtro de `obrasDelConjunto`—, cuya línea lo dice («con derechos
 vigentes: sus ediciones van solas»); las demás, de dominio público y sin cotejada, se cuentan sin
-listarlas («Fuera por no tener edición cotejada, de dominio público»). Cada una sale con su
+listarlas («Fuera por no tener edición cotejada ni derechos vigentes»). Cada una sale con su
 ficha, su título, su Autor, cuántas ediciones declara y, si alguna lo es, cuántas son de una
 tienda sin marca. La
 regla vive solo en `tools/lib/curarPrimero.ts`, pura y con los efectos inyectados (AD-22). Ordena
@@ -1721,8 +1721,11 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
   de las dos constantes fecha (`integraciones/historial.ts` lee el historial de ese fichero) y avisa
   (`tools/avisar.ts` lo toma como cambio del rango) **solo** las Obras cuyo veredicto cambia con el
   Corpus de hoy y esas Páginas de Cita: la portada no, porque el fichero no tiene familia. Una versión
-  con plazo y sin año cuenta como cambio sin lanzar, y que el fichero no exista es lo mismo que sus
-  constantes sin valor: su creación no fecha nada. La regla de indexables (`reglaCambiada`) no cambia.
+  con plazo y sin año cuenta como cambio sin lanzar, y también una declaración que `versionDeUmbrales`
+  no sabe leer —un decimal, un `as`, una expresión, una declaración en varias líneas; una comentada no
+  cuenta—: nunca se lee en silencio como «sin valor». Que el fichero no exista es lo mismo que sus
+  constantes sin valor: crearlo o borrarlo fecha lo mismo que darles o quitarles ese valor, y nada si
+  no tienen ninguno. La regla de indexables (`reglaCambiada`) no cambia.
 - **Lo que la relación todavía no compone**, y no conviene dar por exhaustivo (diferido en el spec
   de la 24.8): la Página de Obra pinta el nombre de los Temas de sus Citas y no compone sus
   ficheros de Tema —renombrar un Tema no la fecha ni la avisa; decidirlo es de Héctor—; el título

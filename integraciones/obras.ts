@@ -130,8 +130,17 @@ export default function fichasDeObra(): AstroIntegration {
       }
     }
     const rutaDeFicha = new Map(fichas.map((f) => [f.nombre, f.ruta]));
+    /*
+     * Historia 35.9 — `resolverObras` lanza ante una ficha cuyo Autor no está; ese fallo lo nombra
+     * `fallosDeObras` junto a los demás, así que el aviso de la Ficha técnica no se compone entonces:
+     * un `Error` suelto taparía la lista de reglas incumplidas.
+     */
+    const conAutor = new Set(fichasDeAutor.map((a) => a.slug));
+    const todosLosAutores = fichas.every(
+      (f) => f.personaje !== undefined || (f.autor !== undefined && conAutor.has(f.autor)),
+    );
     const avisosDeFichaTecnica =
-      fichasTecnicas.size === 0
+      fichasTecnicas.size === 0 || !todosLosAutores
         ? []
         : avisosDeAñoDeFichaTecnica(
             resolverObras(citas, fichas, fichasDeAutor, fichasTecnicas),

@@ -193,7 +193,7 @@ describe('Historia 35.9 — la Obra con derechos vigentes también se propone', 
     // La de un Personaje sin Autor se nombra por su dueño.
     expect(parte).toContain('batman--el-caballero · Título de batman--el-caballero · batman — sin cifra');
     expect(parte).not.toMatch(/seneca--cartas[^\n]*derechos vigentes/u);
-    expect(parte).toContain('Fuera por no tener edición cotejada, de dominio público: 1 Obra.');
+    expect(parte).toContain('Fuera por no tener edición cotejada ni derechos vigentes: 1 Obra.');
   });
 
   it('congelada, nada: tampoco la de derechos vigentes', () => {
@@ -220,7 +220,7 @@ describe('Historia 33.3 — las candidatas y su orden', () => {
     expect(parte).toContain('No hay orden por demanda que dar');
     expect(parte).toContain('no es de prioridad');
     expect(parte).not.toMatch(/\b0 impresiones|\b0 clics/);
-    expect(parte).toContain('Fuera por no tener edición cotejada, de dominio público: 1 Obra.');
+    expect(parte).toContain('Fuera por no tener edición cotejada ni derechos vigentes: 1 Obra.');
     expect(parte).not.toContain('cervantes--galatea');
     expect(parte).toContain('Miguel de Cervantes');
   });
@@ -413,7 +413,7 @@ describe('Historia 33.3 — npm run obra -- curar-primero sobre disco', () => {
     expect(r.codigo, r.error).toBe(0);
     expect(r.salida).toContain('1. seneca--cartas-a-lucilio · Cartas a Lucilio · Séneca — sin cifra');
     expect(r.salida).toContain('la serie de demanda no tiene ninguna ventana leída');
-    expect(r.salida).toContain('Fuera por no tener edición cotejada, de dominio público: 1 Obra.');
+    expect(r.salida).toContain('Fuera por no tener edición cotejada ni derechos vigentes: 1 Obra.');
     expect(r.salida).not.toContain('brevedad');
     expect(await foto(corpus)).toEqual(antes);
   });
@@ -469,7 +469,7 @@ describe('Historia 33.3 — npm run obra -- curar-primero sobre disco', () => {
     expect(r.salida).toContain('1. batman--el-caballero · El caballero · batman — 30 impresiones, 3 clics');
     expect(r.salida).toMatch(/batman--el-caballero[^\n]*con derechos vigentes: sus ediciones van solas/u);
     expect(r.salida).toMatch(/viva--la-obra · La obra · Autora Viva[^\n]*con derechos vigentes/u);
-    expect(r.salida).toContain('Fuera por no tener edición cotejada, de dominio público: 1 Obra.');
+    expect(r.salida).toContain('Fuera por no tener edición cotejada ni derechos vigentes: 1 Obra.');
   });
 
   it('sin el fichero de la serie, igual que la serie vacía', async () => {

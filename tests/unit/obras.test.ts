@@ -1945,10 +1945,13 @@ describe('35.9 — la Obra con derechos vigentes', () => {
   });
 
   it('con derechos vigentes `dondeLeer` no da ninguna línea, y lo dice con `ventaSola`', () => {
-    expect(dondeLeer([{ fuente: FUENTE }, {}], { derechosVigentes: true })).toEqual({
+    // El recuento sin documento es el real: la de siempre con Fuente no cuenta; la atribuida, sí.
+    expect(
+      dondeLeer([{ fuente: FUENTE }, {}, { fuente: FUENTE, clase: 'atribuida' }], { derechosVigentes: true }),
+    ).toEqual({
       lineas: [],
       citasSinDocumento: 2,
-      total: 2,
+      total: 3,
       ventaSola: true,
     });
     expect(dondeLeer([{ fuente: FUENTE }], { derechosVigentes: false })).not.toHaveProperty('ventaSola');

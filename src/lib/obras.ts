@@ -1823,7 +1823,9 @@ export function dondeLeer(
   opciones: { derechosVigentes?: boolean } = {},
 ): ResumenDondeLeer {
   if (opciones.derechosVigentes === true) {
-    return { lineas: [], citasSinDocumento: citas.length, total: citas.length, ventaSola: true };
+    // El recuento es el real —las que no tienen Fuente cotejada—, aunque la venta sola no lo pinte.
+    const citasSinDocumento = citas.filter((cita) => fuenteCotejada(cita) === undefined).length;
+    return { lineas: [], citasSinDocumento, total: citas.length, ventaSola: true };
   }
   const grupos = new Map<
     string,

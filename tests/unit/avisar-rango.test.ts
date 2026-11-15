@@ -104,6 +104,19 @@ function citaDeBatman(i: number): string {
   });
 }
 
+const PLAZO_SIN_VALOR = 'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;';
+const AÑO_SIN_VALOR = 'export const AÑO_DE_REFERENCIA: number | undefined = undefined;';
+/** Historia 35.9 — `umbrales.ts` con el plazo y el año dados, solo en la copia. */
+function conPlazo(plazo: string, año: string): string {
+  if (!UMBRALES.includes(PLAZO_SIN_VALOR) || !UMBRALES.includes(AÑO_SIN_VALOR)) {
+    throw new Error('umbrales.ts no declara el plazo y el año sin valor como espera la prueba');
+  }
+  return UMBRALES.replace(PLAZO_SIN_VALOR, PLAZO_SIN_VALOR.replace('= undefined;', `= ${plazo};`)).replace(
+    AÑO_SIN_VALOR,
+    AÑO_SIN_VALOR.replace('= undefined;', `= ${año};`),
+  );
+}
+
 const ficha = (titulo: string) => `autor: seneca\ntitulo: ${titulo}\nformas:\n  - ${formaDeObra(titulo)}\n`;
 
 let raiz = '';
@@ -230,6 +243,14 @@ beforeAll(async () => {
   await commit('umbral-de-personaje-subido');
   await escribir('src/lib/umbrales.ts', UMBRALES);
   await commit('umbral-de-personaje-restituido');
+
+  /*
+   * Historia 35.9 — un commit que solo da valor al plazo y al año (en la copia: en el árbol los
+   * fija Héctor). Con 1970 años de plazo, Séneca (†65) tendría derechos vigentes en 2026: el
+   * veredicto de sus tres Obras cambia, y nada más del Corpus.
+   */
+  await escribir('src/lib/umbrales.ts', conPlazo('1970', '2026'));
+  await commit('plazo-dado');
 }, 60_000);
 
 afterAll(async () => {
@@ -496,6 +517,27 @@ describe('Historia 35.3b — el Personaje en el aviso de un rango, con git de ve
       `MIN_CITAS_POR_PERSONAJE cambió en el rango (${MIN_CITAS_POR_PERSONAJE + 1} → ${MIN_CITAS_POR_PERSONAJE}): ` +
         'la lista de Personajes indexables',
     );
+  });
+});
+
+describe('Historia 35.9 — el plazo de los derechos en el aviso de un rango, con git de verdad', () => {
+  it('un commit que solo da valor al plazo y al año avisa las Obras cuyo veredicto cambia, sin portada', async () => {
+    const { rutas, avisos } = await rango('umbral-de-personaje-restituido', 'plazo-dado', [CARTAS, BREVEDAD]);
+    // Ira cambia de veredicto también, pero no se indexa ni antes ni después: no se avisa.
+    expect([...rutas].sort()).toEqual([BREVEDAD, CARTAS].sort());
+    expect(avisos).toEqual([]);
+  });
+
+  it('el ensayo de ese commit fecha las tres Obras de Séneca y nada más', async () => {
+    await git(['checkout', '-q', sha['plazo-dado']]);
+    const ensayo = await ensayoDelRango(raiz, sha['umbral-de-personaje-restituido'], sha['plazo-dado'], {
+      rutas: [CARTAS, BREVEDAD],
+    });
+    expect(ensayo.portada).toBe(false);
+    expect(ensayo.reparto.obra).toEqual({ cambianDeFecha: 3, seAvisarian: 2 });
+    for (const familia of ['cita', 'autor', 'tema', 'coleccion', 'directorio', 'personaje'] as const) {
+      expect(ensayo.reparto[familia], familia).toEqual({ cambianDeFecha: 0, seAvisarian: 0 });
+    }
   });
 });
 

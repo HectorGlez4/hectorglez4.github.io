@@ -207,7 +207,7 @@ export type InformeDeCuracion =
       congelada: false;
       candidatas: CandidataDeCuracion[];
       /**
-       * Obras publicadas que no se proponen: de dominio público y sin edición cotejada, donde la
+       * Obras publicadas que no se proponen: sin derechos vigentes y sin edición cotejada, donde la
        * edición en venta iría sola.
        */
       fuera: number;
@@ -326,7 +326,7 @@ export function lineasDeCuracion(informe: InformeDeCuracion): string[] {
     lineas.push(`${i + 1}. ${c.ficha} · ${c.titulo} · ${c.autor} — ${demanda} · ${ediciones}${vigentes}`);
   });
   lineas.push(
-    `Fuera por no tener edición cotejada, de dominio público: ${plural(informe.fuera, 'Obra', 'Obras')}.`,
+    `Fuera por no tener edición cotejada ni derechos vigentes: ${plural(informe.fuera, 'Obra', 'Obras')}.`,
   );
   if (ventana.conCifra) {
     lineas.push(
@@ -396,12 +396,20 @@ export async function curarPrimero(
   const delSitio = new Set(autores.map((a) => a.slug));
   // Historia 35.9 — el filtro de `obrasDelConjunto`: la Cita de un Personaje sin Autor cuenta por
   // su Personaje, para que su Obra, con derechos vigentes, reciba su demanda.
-  const colgadas = colgarObras(citas, fichas, autores).filter((c) =>
-    c.autor === undefined ? c.personaje !== undefined : delSitio.has(c.autor),
-  );
-  // `null`: sin congelación para las indexables, que esta orden no lee; las `publicadas` no
-  // dependen de ella. La congelación de la orden es la de arriba, y corta antes de proponer.
-  const { publicadas } = obrasDeLosDatos({ citas, autores, fichas }, null);
+  // Colgar las Obras juzga sus derechos y lanza ante una ficha cuyo Autor no está, o ante un plazo
+  // sin año: la orden se niega con su resultado, no sale por una traza.
+  let colgadas: ReturnType<typeof colgarObras<CitaEnCorpus>>;
+  let publicadas: ReturnType<typeof obrasDeLosDatos>['publicadas'];
+  try {
+    colgadas = colgarObras(citas, fichas, autores).filter((c) =>
+      c.autor === undefined ? c.personaje !== undefined : delSitio.has(c.autor),
+    );
+    // `null`: sin congelación para las indexables, que esta orden no lee; las `publicadas` no
+    // dependen de ella. La congelación de la orden es la de arriba, y corta antes de proponer.
+    ({ publicadas } = obrasDeLosDatos({ citas, autores, fichas }, null));
+  } catch (error) {
+    return fallo('las fichas de Obra', error);
+  }
 
   const informe = componerCuracion({
     obras: publicadas,

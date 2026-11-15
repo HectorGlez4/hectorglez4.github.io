@@ -241,17 +241,30 @@ export const CONSTANTES_DE_LOS_DERECHOS = ['PLAZO_DE_PROTECCION_AÑOS', 'AÑO_DE
 
 /**
  * Las constantes de los derechos de una versión de `umbrales.ts`, leídas de su texto — Historia
- * 35.9. Una constante en `undefined` o sin declarar se omite; un número es su valor; cualquier otra
- * cosa se guarda tal cual, y el veredicto la cuenta como indeterminable. Nunca lanza: el historial
- * y el aviso la leen de cada commit, también de los anteriores a la constante.
+ * 35.9. Una constante en `undefined` o sin declarar se omite; un entero (también con separadores,
+ * `70_000`) es su valor; cualquier otra cosa —un decimal, un negativo, un `as`, una expresión— se
+ * guarda tal cual, y el veredicto la cuenta como indeterminable. La declaración se busca al
+ * principio de una línea, así que una comentada no cuenta; y si el fichero nombra la constante en
+ * una declaración que esta lectura no reconoce (repartida en varias líneas, por ejemplo), también
+ * es indeterminable: nunca se lee en silencio como «sin valor». Nunca lanza: el historial y el
+ * aviso la leen de cada commit, también de los anteriores a la constante.
  */
 export function versionDeUmbrales(texto: string): Readonly<Record<string, unknown>> {
   const version: Record<string, unknown> = {};
   for (const nombre of CONSTANTES_DE_LOS_DERECHOS) {
-    const m = new RegExp(`export const ${nombre}(?:\\s*:[^=\\n]+)?\\s*=\\s*([^;\\n]+);`, 'u').exec(texto);
+    const m = new RegExp(
+      `^[ \\t]*export const ${nombre}(?:[ \\t]*:[^=\\n]+)?[ \\t]*=[ \\t]*([^;\\n]+?)[ \\t]*;?[ \\t]*(?://.*)?$`,
+      'mu',
+    ).exec(texto);
     const crudo = m?.[1]?.trim();
-    if (crudo === undefined || crudo === 'undefined') continue;
-    version[nombre] = /^\d+(?:\.\d+)?$/u.test(crudo) ? Number(crudo) : crudo;
+    if (crudo === undefined) {
+      if (new RegExp(`^[ \\t]*export const ${nombre}\\b`, 'mu').test(texto)) {
+        version[nombre] = `declaración sin leer de ${nombre}`;
+      }
+      continue;
+    }
+    if (crudo === 'undefined') continue;
+    version[nombre] = /^\d+(?:_\d+)*$/u.test(crudo) ? Number(crudo.replaceAll('_', '')) : crudo;
   }
   return version;
 }

@@ -1950,6 +1950,39 @@ describe('Historia 35.9 — el plazo de los derechos fecha y avisa lo que mueve'
     );
   });
 
+  it('`versionDeUmbrales` reconoce las declaraciones del fichero del árbol cuando tienen valor', () => {
+    const arbol = readFileSync(resolve(import.meta.dirname, '../../src/lib/umbrales.ts'), 'utf8');
+    const plazo = 'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;';
+    const año = 'export const AÑO_DE_REFERENCIA: number | undefined = undefined;';
+    expect(arbol).toContain(plazo);
+    expect(arbol).toContain(año);
+    // Sin valor, se omiten: el árbol no da un veredicto que no sea el de «sin plazo».
+    expect(versionDeUmbrales(arbol)).toEqual({});
+    const conValor = arbol
+      .replace(plazo, plazo.replace('= undefined;', '= 70;'))
+      .replace(año, año.replace('= undefined;', '= 2026;'));
+    expect(versionDeUmbrales(conValor)).toEqual({ PLAZO_DE_PROTECCION_AÑOS: 70, AÑO_DE_REFERENCIA: 2026 });
+  });
+
+  it('`versionDeUmbrales` no lee una declaración comentada ni calla una que no reconoce', () => {
+    // Comentada: no cuenta.
+    expect(versionDeUmbrales('// export const PLAZO_DE_PROTECCION_AÑOS = 70;\n')).toEqual({});
+    // Sin punto y coma, con comentario detrás o con separadores: se lee.
+    expect(versionDeUmbrales('export const PLAZO_DE_PROTECCION_AÑOS = 70\nexport const AÑO_DE_REFERENCIA = 2_026; // el año\n')).toEqual({
+      PLAZO_DE_PROTECCION_AÑOS: 70,
+      AÑO_DE_REFERENCIA: 2026,
+    });
+    // Un decimal, un negativo o un `as`: indeterminables, nunca un plazo.
+    for (const valor of ['70.5', '-1', '70 as number']) {
+      const version = versionDeUmbrales(`export const PLAZO_DE_PROTECCION_AÑOS = ${valor};\nexport const AÑO_DE_REFERENCIA = 2026;\n`);
+      expect(typeof version.PLAZO_DE_PROTECCION_AÑOS, valor).toBe('string');
+      expect(derechosEnLosUmbrales({ tipo: 'autor', añoFallecimiento: 1980 }).valor(version), valor).toBe('¿?');
+    }
+    // Repartida en varias líneas: no se lee como «sin valor», sino como indeterminable.
+    const repartida = versionDeUmbrales('export const PLAZO_DE_PROTECCION_AÑOS:\n  number | undefined =\n  70;\n');
+    expect(typeof repartida.PLAZO_DE_PROTECCION_AÑOS).toBe('string');
+  });
+
   it('el veredicto es el de `derechosVigentes`, y plazo sin año cuenta como cambio sin lanzar', () => {
     const reciente = derechosEnLosUmbrales({ tipo: 'autor', añoFallecimiento: 1980 });
     const larra = derechosEnLosUmbrales({ tipo: 'autor', añoFallecimiento: 1837 });
