@@ -257,3 +257,14 @@ Blocking condition: ninguna.
 - La construcción del Corpus real no cambia: el parche solo toca la lectura del historial ante versiones indeterminables, que el árbol no tiene (`umbrales.ts` con las dos constantes en `undefined`).
 
 **Riesgos residuales.** Los de las pasadas anteriores. El espaciado `sola` sigue pendiente de `bmad-ux`.
+
+## Verificación previa a la fusión — 2026-11-15
+
+Puerta de la etapa s-35 (Épica 35: 35.1, 35.1b, 35.2, 35.3, 35.3b, 35.4–35.11), sobre `v9/epica-35`.
+
+- **Puesta al día.** `origin/main` (b33d61b647, la verificación en vivo de la Épica 33) no era antepasada de la rama: fusión sin conflictos (c1055d872d), un solo fichero de documentación. `npx tsx tools/autor.ts proponer-claves` no escribió nada.
+- **Equivalente del CI** (`publicar.yml`): `npm ci` no hacía falta —`node_modules` ya coincide con `package-lock.json`, `tldts` incluido—; `npm run build` verde (Directorio de Obras 236.231 bytes, `dist/` juzgado 529,2 MiB, filtros y mapa 94,8 KiB); `npx astro check` 0 errores, 0 avisos, 14 sugerencias; `npm test` 208 ficheros, 9033/9033.
+- **Vocabulario.** Ni `src/lib/vocabulario.ts` ni `medicion/migrations/` cambian frente a `origin/main`: la huella no se mueve y `huella.test.ts` pasa.
+- **Punta a punta** (`npm run test:e2e`, los dos proyectos, receptor local en 8787, `FECHA_JORNADA=2026-11-15`): 1469 pasan, 182 se omiten, 3 fallan —`como-citar.spec.ts:186` (movil; el último `copiado-de-referencia` aún no había llegado) y `tipografia-calculada.spec.ts` «buscar-con-resultados» (movil y escritorio; `p.estado` con texto al medir)—, los tres conocidos de la principal y por tiempos. Repetidos los dos ficheros en los dos proyectos: 56/56.
+- **NFR-7.** `dist/` de `origin/main` (árbol aparte bajo `tmp-wt/`, retirado después) y de la rama, los dos con `MEDICION_ENDPOINT=http://localhost:8787/` y `FECHA_JORNADA=2026-11-15`: la portada, las 4424 Páginas de Cita y las 518 páginas 1 de Obra salen idénticas byte a byte; `/buscar/` cambia solo en el guion de `Busqueda.astro` (17.560 → 18.618 bytes) y su trozo `recuentos` (256 → 327), y por eso aplica. Lighthouse 13.5.0 móvil (`simulate`, Chrome sin cabeza), servido con el `tests/servidor.mjs` de la rama, `SERVIDOR_CACHE_CONTROL=max-age=600`, `SERVIDOR_GZIP=1`, receptor 204 en 8787, 10 corridas alternas por página. Medias en ms, principal → rama: Cita LCP 1653 → 1638, FCP 930 → 926; Obra p1 (*Don Quijote*) LCP 1652 → 1652, FCP 845 → 854; portada LCP 1501 → 1502, FCP 769 → 770; `/buscar/` LCP 1652 → 1652, FCP 935 → 951 (+16). Todo dentro de max(100 ms, 5 %) y la Cita bajo 2500 ms: veredicto **no peor**, sin desempate. Registro: `.claude/v9-ralph/logs/s-35/nfr7-gate2/serie-simulate.log`.
+- Nada se arregló en esta puerta, nada se empujó y todos los servidores quedaron parados.
