@@ -1774,25 +1774,12 @@ export interface LecturaRegistrada {
 }
 
 /**
- * Las entradas de una serie ya leída, comprobando que el fichero sea lo que dice ser.
- *
- * Es la misma comprobación que la del registro de sesiones y por el mismo motivo, con una
- * agravante: este escritor **reescribe** el fichero entero en vez de añadir al final. Leer
- * mal lo que había no dejaría una lista huérfana, que es reparable — dejaría la serie
- * anterior fuera del fichero nuevo. Nada se escribe hasta que esto entiende lo que hay.
+ * Las entradas de una serie, sin juzgar ninguna: solo que el fichero sea YAML, que traiga la
+ * clave `lecturas:` en la raíz y que esa clave sea una lista (o esté vacía). Es la parte de
+ * fichero de `analizarSerie`, y la comparte con `leerEntradasDeLaSerieDeDemanda`, que no
+ * juzga las entradas porque para su consumidor una entrada ilegible no es un fichero ilegible.
  */
-function analizarSerie<T = LecturaRegistrada>(
-  nombre: string,
-  contenido: string,
-  /**
-   * La clave por la que la serie reemplaza: `fecha` en la de indexación, `mes` en la de
-   * tráfico (Historia 20.2) y `ventana` —el par `desde`–`hasta`— en la de demanda (20.3).
-   * Es lo único que cambia entre ellas al releerlas.
-   */
-  clave: 'fecha' | 'mes' | 'ventana' = 'fecha',
-): T[] {
-  const campos = clave === 'ventana' ? ['desde', 'hasta'] : [clave];
-  const nombreDeClave = clave === 'ventana' ? '«desde», «hasta»' : `«${clave}»`;
+function entradasDeLaSerie(nombre: string, contenido: string, primerCampo: string): unknown[] {
   let leido: unknown;
   try {
     leido = parsearYaml(contenido);
@@ -1826,9 +1813,34 @@ function analizarSerie<T = LecturaRegistrada>(
     throw new Error(
       `${nombre}: «${CLAVE_DE_LECTURAS}» tiene que ser una lista de lecturas, y es ` +
         `${typeof lecturas}. Escríbala como «${CLAVE_DE_LECTURAS}:» y una entrada ` +
-        `«  - ${campos[0]}: …» por entrada.`,
+        `«  - ${primerCampo}: …» por entrada.`,
     );
   }
+
+  return lecturas;
+}
+
+/**
+ * Las entradas de una serie ya leída, comprobando que el fichero sea lo que dice ser.
+ *
+ * Es la misma comprobación que la del registro de sesiones y por el mismo motivo, con una
+ * agravante: este escritor **reescribe** el fichero entero en vez de añadir al final. Leer
+ * mal lo que había no dejaría una lista huérfana, que es reparable — dejaría la serie
+ * anterior fuera del fichero nuevo. Nada se escribe hasta que esto entiende lo que hay.
+ */
+function analizarSerie<T = LecturaRegistrada>(
+  nombre: string,
+  contenido: string,
+  /**
+   * La clave por la que la serie reemplaza: `fecha` en la de indexación, `mes` en la de
+   * tráfico (Historia 20.2) y `ventana` —el par `desde`–`hasta`— en la de demanda (20.3).
+   * Es lo único que cambia entre ellas al releerlas.
+   */
+  clave: 'fecha' | 'mes' | 'ventana' = 'fecha',
+): T[] {
+  const campos = clave === 'ventana' ? ['desde', 'hasta'] : [clave];
+  const nombreDeClave = clave === 'ventana' ? '«desde», «hasta»' : `«${clave}»`;
+  const lecturas = entradasDeLaSerie(nombre, contenido, campos[0]);
 
   for (const [i, entrada] of lecturas.entries()) {
     if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
@@ -2351,6 +2363,24 @@ export async function leerSerieDeDemanda(rutas: Rutas): Promise<LecturaDeVentana
     `corpus/${FICHERO_DE_DEMANDA}`,
     await readFile(rutas.serieDeDemanda, 'utf8'),
     'ventana',
+  );
+}
+
+/**
+ * Las entradas de la serie de demanda **sin juzgarlas** — Historia 33.3.
+ *
+ * `leerSerieDeDemanda` lanza ante cualquier entrada mal formada, porque quien la usa reescribe
+ * el fichero. `npm run obra -- curar-primero` solo lee, y para ella una entrada ilegible no es
+ * un fichero ilegible: es una ventana «sin cifra», con su motivo. Por eso aquí solo se juzga el
+ * fichero —YAML, la clave `lecturas:`, que sea lista— y cada entrada llega tal cual. Una serie
+ * que no existe se lee como serie vacía.
+ */
+export async function leerEntradasDeLaSerieDeDemanda(rutas: Rutas): Promise<unknown[]> {
+  if (!existsSync(rutas.serieDeDemanda)) return [];
+  return entradasDeLaSerie(
+    `corpus/${FICHERO_DE_DEMANDA}`,
+    await readFile(rutas.serieDeDemanda, 'utf8'),
+    'desde',
   );
 }
 

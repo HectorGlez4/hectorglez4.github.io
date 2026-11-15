@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-15-2026 00:02
+last_updated: 11-15-2026 03:42
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -505,10 +505,10 @@ development_status:
 
   # Épica 33 — afiliación sin reloj. Las tiendas las declara Héctor; ninguna cuenta con
   # plazo de ventas antes de la pregunta 11.
-  epic-33: backlog
-  33-1-una-tienda-se-declara-sin-marca-y-el-modelo-no-se-enciende-c: backlog
-  33-2-las-ediciones-en-venta-por-formato-y-por-tienda-dentro-de-dó: backlog
-  33-3-la-orden-de-qué-obras-curar-primero: backlog
+  epic-33: in-progress
+  33-1-una-tienda-se-declara-sin-marca-y-el-modelo-no-se-enciende-c: review  # v9-ralph 2026-11-08: una tienda se declara sin marca (esMarcaValida, un solo predicado); con el Modelo encendido y una tienda sin marca, el build se para nombrándola; TIENDAS sigue vacío; dos rondas de revisión
+  33-2-las-ediciones-en-venta-por-formato-y-por-tienda-dentro-de-dó: review  # v9-ralph 2026-11-15: ediciones en venta en «Electrónica» e «Impresa» dentro de «Dónde leer esta obra», por tienda en el orden de TIENDAS (supuesto aceptado por delegación de Héctor, 14/11, pendiente de bmad-ux), ocultas con la familia congelada; dos pasadas de revisión; TIENDAS sigue vacío
+  33-3-la-orden-de-qué-obras-curar-primero: review  # v9-ralph 2026-11-08: npm run obra -- curar-primero, solo lectura; dos pasadas de revisión
   epic-33-retrospective: optional
 
   # Épica 34 — listados que se leen. La 34.0 (Desplegable) se funde sola, antes que la 30:

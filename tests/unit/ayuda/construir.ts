@@ -15,6 +15,7 @@ import {
 } from '../../../src/lib/obras.ts';
 import { parse as parsearYaml } from 'yaml';
 import { obraAdmisible } from '../../../src/lib/admision.ts';
+import type { Tienda, TiendaConMarca } from '../../../src/lib/ingreso.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -642,17 +643,35 @@ export const TIENDA_DE_PRUEBA = {
   dominio: 'libreria.example',
   parametro: 'tag',
   marca: 'marca-de-prueba-21',
-} as const;
+} as const satisfies TiendaConMarca;
+
+/**
+ * Una tienda **inventada y sin marca** — Historia 33.1: la que Héctor declara antes de
+ * solicitar la cuenta. Sin el campo `marca`, que es como se declara una tienda sin ella.
+ */
+export const TIENDA_SIN_MARCA_DE_PRUEBA = {
+  clave: 'libreria-sin-marca',
+  nombre: 'Librería sin Marca',
+  dominio: 'sinmarca.example',
+  parametro: 'tag',
+} as const satisfies Tienda;
 
 /** La declaración vacía de `src/lib/ingreso.ts`, tal cual: lo que el parche sustituye. */
 const TIENDAS_VACIAS = 'export const TIENDAS: readonly Tienda[] = [];';
 
 /**
- * `src/lib/ingreso.ts` con `TIENDA_DE_PRUEBA` declarada. Rompe si la declaración vacía no está
+ * `src/lib/ingreso.ts` con las tiendas dadas declaradas —por omisión, `TIENDA_DE_PRUEBA`—, con
+ * la `marca` solo si la traen (Historia 33.1). Rompe si la declaración vacía no está
  * exactamente una vez: el día que el dueño declare la primera tienda, quien use esto tiene que
  * decidir qué mide, en vez de construir en silencio sin la tienda que creía poner.
  */
-export function fuenteConTiendaDePrueba(fuente: string): string {
+export function fuenteConTiendaDePrueba(
+  fuente: string,
+  tiendas: readonly Tienda[] = [TIENDA_DE_PRUEBA],
+): string {
+  if (tiendas.length === 0) {
+    throw new Error('fuenteConTiendaDePrueba declara al menos una tienda: sin ninguna, la fuente ya es la del árbol.');
+  }
   const partes = fuente.split(TIENDAS_VACIAS);
   if (partes.length !== 2) {
     throw new Error(
@@ -660,12 +679,16 @@ export function fuenteConTiendaDePrueba(fuente: string): string {
         'en vez de una: o ya hay tiendas declaradas en el árbol, o la declaración cambió de forma.',
     );
   }
-  const t = TIENDA_DE_PRUEBA;
-  return partes.join(
-    'export const TIENDAS: readonly Tienda[] = [\n' +
-      `  { clave: '${t.clave}', nombre: '${t.nombre}', dominio: '${t.dominio}', ` +
-      `parametro: '${t.parametro}', marca: '${t.marca}' },\n];`,
+  // Cada valor va como literal de JSON, que también lo es de TypeScript: una comilla o una
+  // barra no rompen la fuente. La `marca` se escribe si la tienda tiene el campo —también
+  // `undefined` escrito, la variante que `revisarTiendas` rechaza—, no si vale algo.
+  const literal = (valor: unknown) => JSON.stringify(valor) ?? 'undefined';
+  const declaradas = tiendas.map(
+    (t) =>
+      `  { clave: ${literal(t.clave)}, nombre: ${literal(t.nombre)}, dominio: ${literal(t.dominio)}, ` +
+      `parametro: ${literal(t.parametro)}${Object.hasOwn(t, 'marca') ? `, marca: ${literal(t.marca)}` : ''} },\n`,
   );
+  return partes.join(`export const TIENDAS: readonly Tienda[] = [\n${declaradas.join('')}];`);
 }
 
 // ─── Piezas de corpus válidas, para partir de algo que sí construye ──────────

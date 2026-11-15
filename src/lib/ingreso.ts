@@ -249,23 +249,60 @@ export interface Tienda {
   dominio: string;
   /** El parámetro de consulta que lleva la marca, como `tag`. */
   parametro: string;
-  /** La marca de afiliado. Solo la escribe el dueño de la cuenta. */
-  marca: string;
+  /**
+   * La marca de afiliado. Solo la escribe el dueño de la cuenta, y **es opcional** (Historia
+   * 33.1): una tienda se declara —y sus ediciones se curan— antes de solicitar la cuenta, que
+   * es lo que arranca el plazo de ventas. Sin marca el campo **se omite**: nunca `''` ni
+   * `undefined` escrito. Con alguna tienda sin marca, la afiliación no se enciende
+   * (`revisarDeclaracionDeIngreso`).
+   */
+  marca?: string;
+}
+
+/** Una tienda que ya trae su marca: la única que `urlDeEdicion` acepta por su tipo. */
+export type TiendaConMarca = Tienda & { marca: string };
+
+/**
+ * La única regla de qué es una marca: una cadena no vacía de caracteres no reservados de una
+ * URL —letras y cifras ASCII, `.`, `_`, `~` y `-`—, como «marca-21». Nada de blancos, ni de
+ * `&`, `=`, `#`, `?` o `%`, que partirían o falsearían la consulta del enlace, ni de caracteres
+ * invisibles como U+200B, que darían un `tag=%E2%80%8B` que no atribuye nada. La usan
+ * `tieneMarca`, `urlDeEdicion` y `revisarTiendas`, para que el informe, la puerta del
+ * encendido y el enlace no puedan discrepar (Historia 33.1).
+ */
+export function esMarcaValida(marca: unknown): marca is string {
+  return typeof marca === 'string' && /^[A-Za-z0-9._~-]+$/.test(marca);
+}
+
+/** Si la tienda trae una marca de verdad, por la regla de `esMarcaValida`. */
+export function tieneMarca(tienda: Tienda): tienda is TiendaConMarca {
+  return esMarcaValida(tienda.marca);
+}
+
+/** Cómo se nombra una tienda en un mensaje: su clave y su nombre. */
+function nombreDeTienda(tienda: Pick<Tienda, 'clave' | 'nombre'>): string {
+  return `«${tienda.clave}» (${tienda.nombre})`;
 }
 
 /**
  * Las tiendas declaradas. **Ninguna, y no por descuido.**
  *
- * La primera tienda —con su marca— la declara Héctor, con la cuenta ya solicitada y delante:
- * este repositorio es público y una marca escrita aquí queda a la vista de cualquiera, así que
- * ningún agente escribe una. Mientras el conjunto esté vacío el esquema de la Ficha de Obra
- * rechaza toda edición (no hay tienda que nombrar), y encender la afiliación detiene la
- * construcción: un Modelo de afiliación sin tienda no tiene a dónde llevar a nadie.
+ * Las tiendas las declara Héctor, y ningún agente escribe una: este repositorio es público y
+ * una marca escrita aquí queda a la vista de cualquiera. Mientras el conjunto esté vacío el
+ * esquema de la Ficha de Obra rechaza toda edición (no hay tienda que nombrar), y encender la
+ * afiliación detiene la construcción: un Modelo de afiliación sin tienda no tiene a dónde
+ * llevar a nadie.
  *
- * Declarar la primera es el cambio declarado de FR-35, y se escribe así:
+ * Desde la Historia 33.1 una tienda se declara **sin marca** —para curar sus ediciones sin
+ * haber solicitado la cuenta, que arranca el plazo de ventas— y la marca se le añade el día
+ * que se solicita. Las dos formas, con valores inventados:
  *
- *     { clave: 'amazon-mx', nombre: 'Amazon México', dominio: 'amazon.com.mx',
+ *     { clave: 'libreria-ejemplo', nombre: 'Librería Ejemplo', dominio: 'libreria.example',
+ *       parametro: 'tag' }
+ *     { clave: 'libreria-ejemplo', nombre: 'Librería Ejemplo', dominio: 'libreria.example',
  *       parametro: 'tag', marca: '<la marca de la cuenta>' }
+ *
+ * Con alguna tienda sin marca, la afiliación no se enciende: el build se para nombrándola.
  */
 export const TIENDAS: readonly Tienda[] = [];
 
@@ -301,10 +338,15 @@ export function esDelDominio(anfitrion: string, dominio: string): boolean {
  * traía. La ficha nunca trae la marca (el esquema rechaza la dirección que ya la lleva), así
  * que aquí no hay que decidir entre dos.
  */
-export function urlDeEdicion(
-  edicion: Pick<EdicionDeclarada, 'url'>,
-  tienda: Pick<Tienda, 'parametro' | 'marca'>,
-): string {
+export function urlDeEdicion(edicion: Pick<EdicionDeclarada, 'url'>, tienda: TiendaConMarca): string {
+  // Historia 33.1 — el tipo ya lo impide; esto es para quien llegue con un `as`. Un `tag=`
+  // vacío o `tag=undefined` publicaría un enlace de afiliado que no atribuye nada.
+  if (!esMarcaValida(tienda.marca)) {
+    throw new Error(
+      `La tienda ${nombreDeTienda(tienda)} no tiene marca, y una edición suya no lleva enlace ` +
+        'de afiliado hasta que Héctor declare la marca en TIENDAS de src/lib/ingreso.ts.',
+    );
+  }
   const almohadilla = edicion.url.indexOf('#');
   const sinFragmento = almohadilla === -1 ? edicion.url : edicion.url.slice(0, almohadilla);
   const fragmento = almohadilla === -1 ? '' : edicion.url.slice(almohadilla);
@@ -322,6 +364,7 @@ export function urlDeEdicion(
  */
 export function edicionesEnVenta(
   ediciones: readonly EdicionDeclarada[],
+  ficha: string,
   tiendas: readonly Tienda[] = TIENDAS,
 ): EdicionEnVenta[] {
   return ediciones.map((edicion) => {
@@ -335,10 +378,19 @@ export function edicionesEnVenta(
     if (!(FORMATOS_DE_EDICION as readonly string[]).includes(edicion.formato)) {
       throw new Error(`La edición «${edicion.url}» declara un formato desconocido: «${edicion.formato}».`);
     }
+    // Historia 33.1 — inalcanzable con la puerta del encendido en pie (corta al cargar el
+    // módulo), y por eso es la segunda línea: una edición sin marca no se pinta.
+    if (!tieneMarca(tienda)) {
+      throw new Error(
+        `La ficha «${ficha}» declara una edición de la tienda ${nombreDeTienda(tienda)}, que no ` +
+          'tiene marca: no se pinta hasta que Héctor declare la marca y encienda el Modelo.',
+      );
+    }
     return {
       href: urlDeEdicion(edicion, tienda),
       formato: edicion.formato as FormatoDeEdicion,
       tienda: tienda.nombre,
+      claveDeTienda: tienda.clave,
       ...(edicion.descripcion !== undefined ? { descripcion: edicion.descripcion } : {}),
     };
   });
@@ -371,8 +423,21 @@ export function revisarTiendas(tiendas: readonly Tienda[] = TIENDAS): string[] {
     if (!/^[A-Za-z0-9_-]+$/.test(tienda.parametro)) {
       fallos.push(`${quien} declara el parámetro «${tienda.parametro}», que no es un nombre de parámetro.`);
     }
-    if (tienda.marca.trim() === '' || /\s/.test(tienda.marca)) {
-      fallos.push(`${quien} declara una marca vacía o con espacios: el enlace no la llevaría.`);
+    // Historia 33.1 — sin marca, el campo se omite; presente, tiene que ser una marca.
+    if (Object.hasOwn(tienda, 'marca')) {
+      if (tienda.marca === undefined) {
+        fallos.push(
+          `${quien} escribe la marca sin valor: una tienda sin marca omite el campo, nunca lo ` +
+            'deja en `undefined`.',
+        );
+      } else if (typeof tienda.marca !== 'string') {
+        fallos.push(`${quien} declara una marca que no es texto: una marca se escribe entre comillas.`);
+      } else if (!esMarcaValida(tienda.marca)) {
+        fallos.push(
+          `${quien} declara la marca ${JSON.stringify(tienda.marca)}, que no es una marca: solo ` +
+            'letras y cifras sin tilde, «.», «_», «~» y «-», sin blancos.',
+        );
+      }
     }
   }
   return fallos;
@@ -725,6 +790,17 @@ export function revisarDeclaracionDeIngreso(
             'ninguna edición puede llevar a ninguna parte. Declare la primera tienda con su ' +
             'marca, o vuelva a apagarlo.',
         );
+      } else {
+        // Historia 33.1 — una tienda sin marca daría enlaces de afiliado que no atribuyen.
+        const sinMarca = tiendas.filter((tienda) => !tieneMarca(tienda));
+        if (sinMarca.length > 0) {
+          fallos.push(
+            `«${modelo.nombre}» está encendido y ${sinMarca.length === 1 ? 'una tienda' : `${sinMarca.length} tiendas`} ` +
+              `de TIENDAS no ${sinMarca.length === 1 ? 'tiene' : 'tienen'} marca: ` +
+              `${sinMarca.map(nombreDeTienda).join(', ')}. El Modelo no se enciende mientras ` +
+              'alguna tienda declarada no tenga marca: declárela, o vuelva a apagarlo.',
+          );
+        }
       }
     } else if (modelo.encendido) {
       if (modelo.destino === undefined) {

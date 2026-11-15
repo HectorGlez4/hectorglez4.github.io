@@ -69,7 +69,7 @@ import type { Resultado } from './gestion.ts';
 import { obrasDeLosDatos } from '../../src/lib/publicado.ts';
 import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
 import { esquemaDeObra } from '../../src/lib/admision.ts';
-import { TIENDAS, tiendaDe, type Tienda } from '../../src/lib/ingreso.ts';
+import { TIENDAS, tieneMarca, tiendaDe, type Tienda } from '../../src/lib/ingreso.ts';
 import {
   cotejarAutorDeLaEntidad,
   documentoDeLaCarpeta,
@@ -917,7 +917,8 @@ export async function declararEdicion(
       motivos: [
         `«${edicion.tienda}» no es ninguna tienda declarada en TIENDAS de src/lib/ingreso.ts` +
           (tiendas.length === 0
-            ? ', y hoy no declara ninguna. La primera tienda, con su marca, la declara el dueño de la cuenta.'
+            ? ', y hoy no declara ninguna. La primera tienda la declara Héctor, sin marca o con ella: ' +
+              'la marca se le añade el día que se solicita la cuenta.'
             : `. Las declaradas: ${tiendas.map((t) => `«${t.clave}»`).join(', ')}.`),
         NADA_ESCRITO,
       ],
@@ -976,8 +977,14 @@ export async function declararEdicion(
       `Edición ${formato} en ${tienda.nombre} declarada en «${ficha.nombre}».`,
       `  ${ficha.ruta}`,
       ...lineasDeEdiciones(admitida.data.ediciones ?? [], tiendas),
-      'La marca de afiliado la pone el build desde TIENDAS. La edición solo se pinta con la ' +
-        'afiliación encendida y alguna Cita de la Obra cotejada: nunca va sola (FR-54).',
+      // Historia 33.1 — con una tienda sin marca, la frase general («la pone el build») sería
+      // falsa: se dice lo que queda pendiente en su lugar, no a continuación.
+      tieneMarca(tienda)
+        ? 'La marca de afiliado la pone el build desde TIENDAS. La edición solo se pinta con la ' +
+          'afiliación encendida y alguna Cita de la Obra cotejada: nunca va sola (FR-54).'
+        : `La tienda «${tienda.clave}» (${tienda.nombre}) no tiene marca: la edición queda curada, ` +
+          'pero no se pintará hasta que Héctor declare la marca y encienda el Modelo, y entonces ' +
+          'solo con alguna Cita de la Obra cotejada: nunca va sola (FR-54).',
       ...(await avisoSinCotejada(rutas, { ...ficha, ediciones: admitida.data.ediciones ?? [] })),
     ].join('\n'),
   };

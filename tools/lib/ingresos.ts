@@ -31,6 +31,7 @@ import { escaparAnotacion } from './anotacion.ts';
 import {
   MODELOS,
   TIENDAS,
+  tieneMarca,
   type Modelo,
   type QueDisparaElUmbral,
   type Tienda,
@@ -420,7 +421,12 @@ export function datosDelInforme(
 ) {
   return {
     medida,
-    tiendas: tiendas.map((t) => ({ clave: t.clave, nombre: t.nombre, dominio: t.dominio })),
+    tiendas: tiendas.map((t) => ({
+      clave: t.clave,
+      nombre: t.nombre,
+      dominio: t.dominio,
+      conMarca: tieneMarca(t),
+    })),
     modelos: estados.map((estado) => ({
       id: estado.modelo.id,
       nombre: estado.modelo.nombre,
@@ -439,11 +445,17 @@ export function datosDelInforme(
 /** Las tiendas declaradas, por su nombre; ninguna se dice con todas las letras. */
 export function textoDeTiendas(tiendas: readonly Tienda[] = TIENDAS): string {
   if (tiendas.length === 0) {
-    return 'ninguna tienda declarada (la primera, con su marca, la declara el dueño de la cuenta en TIENDAS de src/lib/ingreso.ts)';
+    return 'ninguna tienda declarada (la primera la declara Héctor en TIENDAS de src/lib/ingreso.ts, sin marca o con ella)';
   }
-  return `${tiendas.length} declarada${tiendas.length === 1 ? '' : 's'}: ${tiendas
-    .map((t) => `${t.nombre} (${t.dominio})`)
-    .join(', ')}`;
+  const sinMarca = tiendas.filter((t) => !tieneMarca(t)).length;
+  return (
+    `${tiendas.length} declarada${tiendas.length === 1 ? '' : 's'}: ${tiendas
+      .map((t) => `${t.nombre} (${t.dominio}${tieneMarca(t) ? '' : ', sin marca'})`)
+      .join(', ')}` +
+    (sinMarca === 0
+      ? ''
+      : `. Con ${sinMarca === 1 ? 'una tienda' : `${sinMarca} tiendas`} sin marca, la afiliación no se enciende`)
+  );
 }
 
 /**

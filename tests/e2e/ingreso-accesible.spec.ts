@@ -588,9 +588,12 @@ test.describe('las ediciones en venta encendidas pasan el barrido de accesibilid
     await irA(page, OBRA);
     await abrirDondeLeer(page);
     await expect(enlaces(page)).toHaveCount(2);
+    // Historia 33.2 — los dos grupos, con el Rótulo de grupo de «Gratis», y sin el rótulo de la 22.9.
+    await expect(bloque(page).locator('p.rotulo-de-grupo')).toHaveText(['Electrónica', 'Impresa']);
+    await expect(bloque(page)).not.toContainText('Ediciones en venta');
     const nombres = [
-      /^Edición impresa en Librería de Prueba \(se abre en una pestaña nueva\)$/,
       /^Edición electrónica en Librería de Prueba \(se abre en una pestaña nueva\)$/,
+      /^Edición impresa en Librería de Prueba \(se abre en una pestaña nueva\)$/,
     ];
     for (const [i, nombre] of nombres.entries()) {
       const enlace = enlaces(page).nth(i);

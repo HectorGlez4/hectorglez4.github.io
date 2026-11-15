@@ -72,6 +72,15 @@
  * un parte: no escribe nada y no decide nada (retirar, conservar o restituir lo decide una
  * persona). Código 1 si una ficha nombrada no existe o el Corpus no se deja leer, sin parte.
  *
+ * Historia 33.3 — qué Obras curar primero:
+ *
+ *   npm run obra -- curar-primero
+ *
+ * Informa de las Obras publicadas con edición cotejada, con sus ediciones declaradas, ordenadas
+ * por la demanda de la ventana de 28 días más reciente de `corpus/serie-de-demanda.yml`; sin
+ * ventana legible, cada una «sin cifra» con su motivo, nunca 0. No escribe nada (AD-24); código 1
+ * si el Corpus, una ficha o la serie no se dejan leer. La regla vive en `tools/lib/curarPrimero.ts`.
+ *
  * Códigos: 2 es la forma de la invocación (falta un argumento, sobra uno, una bandera que no
  * existe); 1 es lo que la invocación dice.
  *
@@ -103,6 +112,7 @@ import {
   separarFichas,
   titularFicha,
 } from './lib/obras.ts';
+import { curarPrimero } from './lib/curarPrimero.ts';
 
 const USO = [
   'Uso:',
@@ -120,6 +130,7 @@ const USO = [
   '  npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]',
   '  npm run obra -- congelar [--corpus corpus]',
   '  npm run obra -- levantar',
+  '  npm run obra -- curar-primero [--corpus corpus]',
   '',
 ].join('\n');
 
@@ -346,6 +357,20 @@ async function principal(): Promise<never> {
           ? await congelarObras(rutas, { ...destino, hoy: fechaLocal(new Date()) })
           : await levantarCongelacion(destino),
       );
+    }
+
+    case 'curar-primero': {
+      const conValor = ['--corpus'];
+      const mal = motivosDeArgumentosNoReconocidos([...resto, ...trasElSeparador], {
+        solas: [],
+        conValor,
+      });
+      if (mal.length > 0) usoMal(mal);
+      const sueltos = [...posicionales(resto, conValor), ...trasElSeparador];
+      if (sueltos.length > 0) {
+        usoMal([`Sobra ${sueltos.map((a) => `«${a}»`).join(', ')}: «curar-primero» no toma argumentos.`]);
+      }
+      return terminar(await curarPrimero(rutas));
     }
 
     default:

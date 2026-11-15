@@ -351,6 +351,33 @@ dada de alta **como propietaria** (`DESPLIEGUE.md` §5). Sin ella no escribe nad
 **código 2**, igual que con una bandera desconocida; sale con **1** si no pudo leer el corpus o
 la serie, si no pudo leer ninguna ventana o si falla la escritura, y entonces no escribe nada.
 
+### Qué Obras curar primero (Historia 33.3)
+
+```
+npm run obra -- curar-primero   # informa. NO escribe nada.
+```
+
+Lee las Citas publicadas, los Autores, las fichas de Obra y esta serie, y lista las Obras
+publicadas **con edición cotejada** —las demás se cuentan, sin listarlas—, cada una con su
+ficha, su título, su Autor, cuántas ediciones declara y, si alguna lo es, cuántas son de una
+tienda sin marca. La
+regla vive solo en `tools/lib/curarPrimero.ts`, pura y con los efectos inyectados (AD-22). Ordena
+por la demanda de la ventana `28-dias` de `hasta` más reciente, nombrada en el parte: impresiones
+y clics de las Citas de esa ventana que resuelven a la Obra (impresiones, clics y nombre de ficha
+para desempatar); las mensuales no se usan y las ventanas no se suman. Esa cifra es
+**provisional** —la serie no cuenta la Página de Obra— y **cota inferior** —lo de `resto` no se
+atribuye—, y el parte dice cuántas Citas de la ventana no cuentan. **Sin ventana de 28 días
+legible** —la serie vacía, como hoy, solo mensuales o una entrada ilegible; y es ilegible también
+la que repite una Cita en sus filas, la `vacia: true` con filas y la misma ventana dos veces— cada
+Obra sale «sin cifra» con ese motivo, nunca 0, y la lista va por nombre de ficha, que no es de prioridad; una
+Obra sin Citas en una ventana leída, o una ventana `vacia: true`, sí da 0, y es una lectura. Con
+la familia Obra congelada lo dice con su jornada y no propone nada. No propone ediciones ni
+tiendas ni sugiere encender o solicitar nada. Códigos: 0 si informó; 1, sin escribir, si el
+Corpus, una ficha o el fichero de la serie no se dejan leer; 2 con una bandera desconocida o un
+argumento de más. Lee la serie con `leerEntradasDeLaSerieDeDemanda`, que no juzga las entradas
+—`leerSerieDeDemanda` lanzaría ante una mal formada—, y tampoco la importa ningún módulo de
+`src/`, `integraciones/` ni `astro.config.mjs` (AD-24).
+
 ## Desplegar el receptor de la medición
 
 El esquema de D1 cambia solo por migraciones aditivas (`medicion/migrations/`, AD-14), y cuando
@@ -1784,14 +1811,24 @@ ficha.
 
 Todo el camino está construido y apagado: el conjunto cerrado de tiendas `TIENDAS` en
 `src/lib/ingreso.ts`, el campo `ediciones` de la Ficha de Obra juzgado por el esquema
-(`src/lib/admision.ts`), `urlDeEdicion`, que añade la marca a la dirección al construir, y el
-bloque «Ediciones en venta» (`src/components/EdicionesEnVenta.astro`) dentro del desplegable
-«Dónde leer esta obra», tras el grupo «Gratis». El repositorio versiona **`TIENDAS` vacío**, y mientras lo
-esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
+(`src/lib/admision.ts`), `urlDeEdicion`, que añade la marca a la dirección al construir, y las
+ediciones en venta (`src/components/EdicionesEnVenta.astro`) dentro del desplegable «Dónde leer
+esta obra», bajo el grupo «Gratis»: desde la 33.2, los grupos «Electrónica» y luego «Impresa»,
+con el mismo Rótulo de grupo que «Gratis», en un único `data-ingreso`, y dentro de cada uno por
+tienda en el orden de `TIENDAS` y, a igual tienda, en el de la ficha. El reparto lo decide solo
+`edicionesPorFormato` de `src/lib/ediciones.ts`; un formato sin ediciones no deja rótulo ni
+hueco, y no hay rótulo de tienda ni «Ediciones en venta». (Que el orden sea el de `TIENDAS` y no
+el de la ficha es la pregunta abierta de la Épica 33, aceptada por delegación de Héctor y
+pendiente de `bmad-ux`.) El repositorio versiona **`TIENDAS` vacío**, y mientras lo esté el
+esquema rechaza toda edición: ninguna ficha puede declarar una.
 
-1. **La primera tienda, con su marca, la declara Héctor** en `TIENDAS`
-   (`{ clave, nombre, dominio, parametro, marca }`). El repositorio es público y la marca queda a
-   la vista: **ningún agente escribe una tienda ni una marca**.
+1. **Las tiendas las declara Héctor** en `TIENDAS`, y **sin marca** (Historia 33.1):
+   `{ clave, nombre, dominio, parametro }`, con el campo `marca` omitido —nunca `''` ni
+   `undefined` escrito—. Así se curan sus ediciones sin haber solicitado la cuenta, que es lo
+   que arranca el plazo de ventas. La `marca` la añade Héctor el día que solicita la cuenta,
+   **nunca un agente**: el repositorio es público y la marca queda a la vista, así que **ningún
+   agente escribe una tienda ni una marca**. `npm run ingreso` dice qué tiendas no tienen marca
+   (y `--json`, `conMarca` por tienda, sin la marca ni el parámetro).
 2. **Las ediciones se declaran con su orden**, nunca escribiendo `ediciones` a mano:
 
    ```
@@ -1803,23 +1840,41 @@ esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
    código 1 y sin escribir si la familia Obra está congelada (`CONGELACION_DE_OBRAS`, SM-11), si
    la tienda no es del conjunto o si el esquema la rechaza (otro dominio, un puerto, el
    parámetro de la marca en cualquier capitalización); con 2, la forma de la invocación. Si la
-   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará.
+   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará. Una tienda
+   sin marca admite ediciones con las mismas reglas, y el parte dice que la edición no se
+   pintará hasta que Héctor declare la marca y encienda el Modelo.
    `quitar-edicion <ficha> <n>` la quita (1 si no hay esa posición).
    Las órdenes que reescriben una ficha conservan sus ediciones; `reunir` no hereda las de la
    absorbida y lo dice.
 3. **Encender es el booleano**, y en lugar del `destino` que exigen los demás Modelos exige
-   **al menos una tienda declarada**: sin ella el build se para. Una edición solo se pinta en
-   una Obra con alguna Cita cotejada —la edición en venta nunca va sola (FR-54)—; si no la hay,
-   el build avisa «Ediciones sin edición cotejada» nombrando la ficha. Apagada, `dist/` es
-   idéntico con ediciones declaradas o sin ellas.
-4. **Barrido de accesibilidad con el Modelo encendido**: el mismo
-   `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`, que ya barre
-   la Página de Obra con dos ediciones de una tienda inventada en la copia.
+   **al menos una tienda declarada** y que **toda** tienda declarada tenga marca: sin tiendas
+   el build se para, y con alguna sin marca también, nombrando cada una por clave y nombre
+   (`revisarDeclaracionDeIngreso`; `urlDeEdicion` solo acepta por su tipo una `TiendaConMarca`).
+   Una edición solo se pinta en una Obra con alguna Cita cotejada —la edición en venta nunca va
+   sola (FR-54)—; si no la hay, el build avisa «Ediciones sin edición cotejada» nombrando la
+   ficha. Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
+   ediciones o sin ellas: lo construye en cuatro variantes `tests/unit/ediciones-en-venta.test.ts`.
+   **Con la familia Obra congelada** (`congelacionVigente()`, SM-11) ninguna Página de Obra pinta
+   ediciones aunque el Modelo esté encendido: la página no las compone, la ficha las conserva y
+   «Dónde leer esta obra» sigue en su sitio (AD-25, Historia 33.2).
+4. **Las dos pruebas de los dos estados, con el Modelo encendido**: la de `dist/`,
+   `npx vitest run tests/unit/ediciones-en-venta.test.ts` —encendida es la apagada más el bloque
+   en cada Página de Obra, fuera de `obra/` los dos `dist/` son idénticos, y congelada ninguna
+   página lleva `data-ingreso` y cada Página de Obra sale igual encendida y apagada—, y el barrido
+   de accesibilidad,
+   `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`, que barre
+   la Página de Obra con dos ediciones de una tienda inventada en la copia y espera los rótulos
+   «Electrónica» e «Impresa».
 
 **Retirar una tienda** de `TIENDAS` exige antes quitar con `quitar-edicion` todas sus ediciones
 de **toda** ficha, activa en `corpus/obras/` o retirada en `corpus/_obras-retiradas/`: el
 esquema rechaza una edición de una tienda que no existe, y eso rompe el build y cualquier orden
 que lea las fichas (y restaurar una ficha retirada que la traiga).
+
+**Quitar la marca de una tienda** —la cuenta de afiliado se cierra, como ya pasó una vez— exige
+**apagar antes el Modelo**: encendido, una tienda sin marca para el build. Apagado, la tienda se
+queda declarada sin marca, con sus ediciones curadas, y `dist/` no cambia; el campo se omite,
+nunca se deja en `''` ni en `undefined`.
 
 **El programa de afiliados puede exigir su propia declaración literal en el sitio** —un texto
 fijo, en un sitio concreto—. La del bloque («Enlace de afiliado: si compras, el sitio recibe una
