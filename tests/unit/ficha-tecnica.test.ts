@@ -10,6 +10,7 @@ import {
   type FichaDeObra,
   type FichaTecnicaDeObra,
 } from '../../src/lib/obras.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /**
  * Historia 32.2 — la línea de Ficha técnica, pura: qué partes dice, de quién es el traductor, cuándo
@@ -136,7 +137,7 @@ describe('avisosDeAñoDeFichaTecnica — FR-60', () => {
 
   it('discrepa: avisa nombrando la ficha y los dos años', () => {
     const tecnicas = new Map([['x--o', ficha({ año: 1605 })]]);
-    const avisos = avisosDeAñoDeFichaTecnica(resolverObras([cita(1604)], fichas, tecnicas), tecnicas, ruta);
+    const avisos = avisosDeAñoDeFichaTecnica(resolverObras([cita(1604)], fichas, CUALQUIER_AUTOR, tecnicas), tecnicas, ruta);
     expect(avisos).toHaveLength(1);
     expect(avisos[0]).toContain('Ficha técnica con año discrepante');
     expect(avisos[0]).toContain('corpus/obras/x--o.yml');
@@ -146,23 +147,23 @@ describe('avisosDeAñoDeFichaTecnica — FR-60', () => {
 
   it('antes de Cristo: el aviso escribe el año como lo pinta la línea, «49 a. C.», nunca «-49»', () => {
     const tecnicas = new Map([['x--o', ficha({ año: -49 })]]);
-    const [aviso] = avisosDeAñoDeFichaTecnica(resolverObras([cita(-50)], fichas, tecnicas), tecnicas, ruta);
+    const [aviso] = avisosDeAñoDeFichaTecnica(resolverObras([cita(-50)], fichas, CUALQUIER_AUTOR, tecnicas), tecnicas, ruta);
     expect(aviso).toContain('Wikidata dice 49 a. C.; sus Citas, 50 a. C.');
     expect(aviso).not.toContain('-49');
   });
 
   it('coincide: no avisa', () => {
     const tecnicas = new Map([['x--o', ficha({ año: 1605 })]]);
-    expect(avisosDeAñoDeFichaTecnica(resolverObras([cita(1605)], fichas, tecnicas), tecnicas, ruta)).toEqual([]);
+    expect(avisosDeAñoDeFichaTecnica(resolverObras([cita(1605)], fichas, CUALQUIER_AUTOR, tecnicas), tecnicas, ruta)).toEqual([]);
   });
 
   it('falta uno de los dos: no hay nada que comparar', () => {
     const sinAñoDeWikidata = new Map([['x--o', ficha()]]);
     expect(
-      avisosDeAñoDeFichaTecnica(resolverObras([cita(1604)], fichas, sinAñoDeWikidata), sinAñoDeWikidata, ruta),
+      avisosDeAñoDeFichaTecnica(resolverObras([cita(1604)], fichas, CUALQUIER_AUTOR, sinAñoDeWikidata), sinAñoDeWikidata, ruta),
     ).toEqual([]);
     const conAño = new Map([['x--o', ficha({ año: 1605 })]]);
-    expect(avisosDeAñoDeFichaTecnica(resolverObras([cita()], fichas, conAño), conAño, ruta)).toEqual([]);
+    expect(avisosDeAñoDeFichaTecnica(resolverObras([cita()], fichas, CUALQUIER_AUTOR, conAño), conAño, ruta)).toEqual([]);
   });
 });
 
@@ -178,13 +179,13 @@ describe('colgarObras — la Ficha técnica viaja por parámetro', () => {
 
   it('con el mapa, la Obra atada lleva su Ficha técnica y la otra no lleva el campo', () => {
     const tecnica = ficha({ generos: ['novela'] });
-    const [a, b] = colgarObras(citas, fichas, new Map([['x--o', tecnica]]));
+    const [a, b] = colgarObras(citas, fichas, CUALQUIER_AUTOR, new Map([['x--o', tecnica]]));
     expect(a.obra?.fichaTecnica).toEqual(tecnica);
     expect(b.obra !== undefined && 'fichaTecnica' in b.obra).toBe(false);
   });
 
   it('sin el mapa, ninguna Obra lleva el campo', () => {
-    for (const cita of colgarObras(citas, fichas)) {
+    for (const cita of colgarObras(citas, fichas, CUALQUIER_AUTOR)) {
       expect(cita.obra !== undefined && 'fichaTecnica' in cita.obra).toBe(false);
     }
   });

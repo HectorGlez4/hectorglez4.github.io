@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   grafoDelModelo,
+  personajePlano,
+  rutasPublicadas,
   superficiesInalcanzables,
   temasBajoUmbralDe,
   type Cita,
@@ -20,6 +22,8 @@ import {
   fueraDeAlcanceTras,
   avisoDeFueraDelModelo,
   modeloDelCorpus,
+  modeloDeLosDatos,
+  type DatosDelCorpus,
   grafoDeDist,
   informeDeAlcance,
   lineaDeFuera,
@@ -44,7 +48,7 @@ import { EN_LA_IRA, SIN_EFECTO, sembrarCorpusAlLimite } from './ayuda/al-limite.
 const CABECERA = ['/', '/autores', '/obras', '/buscar'];
 
 function obra(nombre: string, autor: string, recuento: number, titulo = nombre): ObraResuelta {
-  return { nombre, autor, titulo, recuento, fuentes: [], edicionCotejada: false, temas: [] } as ObraResuelta;
+  return { nombre, dueño: { tipo: 'autor', slug: autor }, autor, titulo, recuento, fuentes: [], edicionCotejada: false, derechosVigentes: false, temas: [] } as ObraResuelta;
 }
 
 function cita(slug: string, autor: string, temas: string[] = [], suObra?: ObraResuelta): Cita {
@@ -93,6 +97,7 @@ function conjuntoDePrueba(): { conjunto: ConjuntoPublicable; porObra: Map<string
       { slug: 'la-ira', nombre: 'La ira' },
     ],
     colecciones: [coleccion],
+    personajes: [],
   };
   // El orden del libro: al revés que el de slug, para que el tramo no sea el de la Página de Autor.
   const porObra = new Map([['seneca--cartas', citas.filter((c) => c.obra !== undefined).reverse()]]);
@@ -310,6 +315,36 @@ describe('Historia 26.8 — contención y veredicto', () => {
     expect(rompeElBuild(veredicto)).toBe(false);
     expect(informeDeAlcance(veredicto)).toMatch(/^NFR-5: \d+ superficies publicadas, todas a 3 saltos o menos/);
     expect(informeDeAlcance(veredicto)).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+  });
+});
+
+describe('Historia 35.3 — el modelo que lee la puerta, con Personajes', () => {
+  it('el Corpus leído de disco cuelga sus Personajes con el aplanado del build, y el grafo pide sus aristas', () => {
+    const personaje = {
+      slug: 'batman',
+      nombre: 'Batman',
+      universo: 'DC Comics',
+      ordenAlfabetico: 'Batman',
+      semblanzaPropia: { texto: 'Un justiciero de prueba.', responde: 'Héctor' },
+    };
+    const datos = {
+      citas: [{ ...cita('seneca-batman', 'seneca', ['el-tiempo']), personaje: 'batman' }],
+      autores: [{ slug: 'seneca', nombre: 'Séneca', semblanza: '', añoFallecimiento: 65 }],
+      temas: [{ slug: 'el-tiempo', nombre: 'El tiempo' }],
+      colecciones: [],
+      fichas: [],
+      personajes: [personaje],
+    } as unknown as DatosDelCorpus;
+    const { conjunto, grafo } = modeloDeLosDatos(datos, new Map(), new Map());
+    expect(conjunto.personajes).toEqual([personajePlano('batman', personaje)]);
+    expect(conjunto.personajes[0]).toMatchObject({ semblanza: 'Un justiciero de prueba.', responde: 'Héctor' });
+    expect(rutasPublicadas(conjunto)).toContain('/personaje/batman/');
+    expect(grafo.get('/cita/seneca-batman')).toContain('/personaje/batman');
+    // Un sitio construido sin la Atribución que enlaza al Personaje: la puerta nombra la arista.
+    const construido = new Map([...grafo].map(([o, d]) => [o, d.filter((x) => x !== '/personaje/batman')]));
+    const veredicto = veredictoDeAlcance(conjunto, grafo, construido);
+    expect(veredicto.aristasQueFaltan).toContain('/cita/seneca-batman → /personaje/batman');
+    expect(rompeElBuild(veredicto)).toBe(true);
   });
 });
 

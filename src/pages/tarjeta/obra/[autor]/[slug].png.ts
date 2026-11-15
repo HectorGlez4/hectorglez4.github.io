@@ -13,7 +13,13 @@
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
 import sharp from 'sharp';
-import { autoresPublicados, conjuntoPublicable, obrasPublicadas } from '../../../../lib/publicado.ts';
+import {
+  autoresPublicados,
+  conjuntoPublicable,
+  obrasPublicadas,
+  mensajeDeDueñoSinPagina,
+  personajesPublicados,
+} from '../../../../lib/publicado.ts';
 import { segmentosDeObra } from '../../../../lib/obras.ts';
 import {
   datosDeTarjetaDeObra,
@@ -23,21 +29,25 @@ import {
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
-  // Los mismos Autores que la Página de Obra: los publicados.
+  // Los mismos dueños que la Página de Obra: los Autores y los Personajes publicados.
   const autores = new Map(
     autoresPublicados(conjunto.autores, conjunto.citas).map((a) => [a.slug, a]),
   );
+  const personajes = new Map(
+    personajesPublicados(conjunto.personajes, conjunto.citas).map((p) => [p.slug, p]),
+  );
 
   return obrasPublicadas(conjunto).map((obra) => {
-    const autor = autores.get(obra.autor);
+    // Historia 35.4 — «{n} citas de {dueño}, {año}»: el Autor de la Obra o su Personaje.
+    const dueño = (obra.dueño.tipo === 'personaje' ? personajes : autores).get(obra.dueño.slug);
     // La Tarjeta firmaría con un hueco: el build se para, como la Página de Obra.
-    if (autor === undefined) {
-      throw new Error(`La Obra «${obra.nombre}» es de «${obra.autor}», que no tiene Página de Autor publicada.`);
+    if (dueño === undefined) {
+      throw new Error(mensajeDeDueñoSinPagina(obra));
     }
     const { autor: segmentoDeAutor, obra: segmentoDeObra } = segmentosDeObra(obra.nombre);
     return {
       params: { autor: segmentoDeAutor, slug: segmentoDeObra },
-      props: { ...datosDeTarjetaDeObra(obra, autor) },
+      props: { ...datosDeTarjetaDeObra(obra, dueño) },
     };
   });
 }) satisfies GetStaticPaths;

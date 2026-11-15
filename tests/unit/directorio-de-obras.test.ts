@@ -17,7 +17,7 @@ import {
   TARJETA_DEL_DIRECTORIO_DE_OBRAS,
   rutaDelDirectorioDeObras,
 } from '../../src/lib/superficies.ts';
-import { obrasDelAutor, ordenDeLaListaDeObras, type Autor, type Cita } from '../../src/lib/publicado.ts';
+import { obrasDelAutor, ordenDeLaListaDeObras, type Autor, type Cita, type Personaje } from '../../src/lib/publicado.ts';
 import type { ObraResuelta } from '../../src/lib/obras.ts';
 import { MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS } from '../../src/lib/umbrales.ts';
 import tamañoDelDirectorioDeObras, {
@@ -62,11 +62,13 @@ const autor = (slug: string, nombre: string, clave: string | undefined): Autor =
 function obra(nombre: string, titulo: string, recuento: number, año?: number): ObraResuelta {
   return {
     nombre,
+    dueño: { tipo: 'autor', slug: nombre.split('--')[0] },
     autor: nombre.split('--')[0],
     titulo,
     ...(año === undefined ? {} : { año }),
     fuentes: [],
     edicionCotejada: false,
+    derechosVigentes: false,
     temas: [],
     recuento,
   };
@@ -87,7 +89,7 @@ const cita = (deAutor: string, deObra?: ObraResuelta): Cita => {
 };
 
 /** `n` Citas de una Obra. */
-const de = (deObra: ObraResuelta) => Array.from({ length: deObra.recuento }, () => cita(deObra.autor, deObra));
+const de = (deObra: ObraResuelta) => Array.from({ length: deObra.recuento }, () => cita(deObra.dueño.slug, deObra));
 
 const BREVEDAD = obra('seneca--sobre-la-brevedad-de-la-vida', 'Sobre la brevedad de la vida', 45, 49);
 const CARTAS = obra('seneca--cartas-a-lucilio', 'Cartas a Lucilio', 3, 64);
@@ -169,9 +171,9 @@ describe('Historia 26.4 — qué lista el Directorio de Obras, y en qué orden',
 
   it('sin ninguna Obra no hay letras ni grupos, y la descripción dice ceros', () => {
     const vacio = directorioDeObras([MACHADO], [cita('antonio-machado')]);
-    expect(vacio).toEqual({ grupos: [], obras: 0, autores: 0, citas: 0 });
+    expect(vacio).toEqual({ grupos: [], obras: 0, autores: 0, citas: 0, personajes: [] });
     expect(descripcionDelDirectorioDeObras(vacio)).toBe('0 obras de 0 autores, con 0 citas publicadas.');
-    expect(directorioDeObras([], [])).toEqual({ grupos: [], obras: 0, autores: 0, citas: 0 });
+    expect(directorioDeObras([], [])).toEqual({ grupos: [], obras: 0, autores: 0, citas: 0, personajes: [] });
   });
 
   it('el ayudante común ordena y agrupa sin mirar el nombre: el de los dos Directorios', () => {
@@ -183,6 +185,76 @@ describe('Historia 26.4 — qué lista el Directorio de Obras, y en qué orden',
       ['B', ['b', 'c']],
       ['Ñ', ['a']],
     ]);
+  });
+});
+
+describe('Historia 35.5 — la sección «Personajes» del Directorio de Obras', () => {
+  const personaje = (slug: string, nombre: string, clave: string | undefined): Personaje => ({
+    slug,
+    nombre,
+    universo: 'DC Comics',
+    ...(clave === undefined ? {} : { ordenAlfabetico: clave }),
+  });
+  const deDueño = (nombre: string, titulo: string, recuento: number, slug: string): ObraResuelta => ({
+    ...obra(nombre, titulo, recuento),
+    dueño: { tipo: 'personaje', slug },
+    autor: undefined,
+  });
+  const dicha = (c: Cita, deAutor: string | undefined, dePersonaje: string): Cita => {
+    const { autor: _fuera, ...resto } = c;
+    return { ...resto, ...(deAutor === undefined ? {} : { autor: deAutor }), personaje: dePersonaje };
+  };
+  const CABALLERO = deDueño('batman--el-caballero', 'El caballero', 2, 'batman');
+  const NOCHE = deDueño('zorro--la-noche', 'La noche', 1, 'zorro');
+  const BATMAN = personaje('batman', 'Batman', 'Batman');
+  const ZORRO = personaje('zorro', 'El Zorro', 'Zorro');
+  // Batman dice dos de «El caballero» (sin Autor) y una de «Cartas a Lucilio» con Séneca; el
+  // Zorro, una de la suya; y una de Batman sin Autor dice también «La noche» del Zorro.
+  const CON_PERSONAJES: Cita[] = [
+    ...de(CARTAS).map((c, i) => (i === 0 ? dicha(c, 'seneca', 'batman') : c)),
+    ...de(CABALLERO).map((c) => dicha(c, undefined, 'batman')),
+    dicha(cita('zorro', NOCHE), undefined, 'zorro'),
+    dicha(cita('batman', NOCHE), undefined, 'batman'),
+  ];
+
+  it('las Obras sin Autor bajo su Personaje, por su clave; la de un Autor sigue solo bajo él', () => {
+    const directorio = directorioDeObras([SENECA], CON_PERSONAJES, [ZORRO, BATMAN]);
+    expect(directorio.grupos.flatMap((g) => g.entradas.map((a) => [a.slug, a.obras.map((o) => o.nombre)]))).toEqual([
+      ['seneca', ['seneca--cartas-a-lucilio']],
+    ]);
+    expect(directorio.personajes.map((g) => [g.inicial, g.ancla])).toEqual([
+      ['B', 'personajes-letra-b'],
+      ['Z', 'personajes-letra-z'],
+    ]);
+    expect(directorio.personajes.flatMap((g) => g.entradas.map((p) => [p.slug, p.ruta, p.obras.map((o) => o.nombre)]))).toEqual([
+      ['batman', '/personaje/batman/', ['batman--el-caballero']],
+      // «La noche» la dice también Batman, pero es del Zorro: va una vez, bajo su dueño.
+      ['zorro', '/personaje/zorro/', ['zorro--la-noche']],
+    ]);
+    // Las cifras son de la A–Z: los Personajes no son Autores.
+    expect(directorio).toMatchObject({ obras: 1, autores: 1, citas: 3 });
+    expect(descripcionDelDirectorioDeObras(directorio)).toBe('1 obra de 1 autor, con 3 citas publicadas.');
+  });
+
+  it('sin Personajes, ni sección ni cambio en lo de siempre', () => {
+    expect(directorioDeObras([MACHADO, SENECA, EPICTETO], CITAS, [BATMAN]).personajes).toEqual([]);
+    expect(directorioDeObras([MACHADO, SENECA, EPICTETO], CITAS, [BATMAN])).toEqual({
+      ...directorioDeObras([MACHADO, SENECA, EPICTETO], CITAS),
+      personajes: [],
+    });
+  });
+
+  it('lanza si una Obra publicada no cae en ninguna sección, o si su Personaje no tiene clave', () => {
+    // El dueño de «La noche» no tiene página: ninguna Cita publicada lo declara.
+    const sinElZorro = CON_PERSONAJES.filter((c) => c.personaje !== 'zorro');
+    expect(() => directorioDeObras([SENECA], sinElZorro, [ZORRO, BATMAN])).toThrow(
+      /«zorro--la-noche».*ninguna sección.*Personaje «zorro», que no tiene página publicada/su,
+    );
+    // Un Autor dueño que no está entre los Autores que se listan: tampoco cae en ninguna.
+    expect(() => directorioDeObras([], de(CARTAS))).toThrow(/«seneca--cartas-a-lucilio».*Autor «seneca»/su);
+    expect(() => directorioDeObras([SENECA], CON_PERSONAJES, [personaje('zorro', 'El Zorro', undefined), BATMAN])).toThrow(
+      /El Personaje «zorro».*Directorio de Obras.*npx tsx tools\/personaje\.ts proponer-claves/su,
+    );
   });
 });
 

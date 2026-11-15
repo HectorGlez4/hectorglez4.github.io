@@ -150,6 +150,12 @@ export function superficieDeLineaBase(superficie: Pick<Superficie, 'nombre' | 'l
 const PAGINA_DE_OBRA = 'obra/[autor]/[slug]/[...page].astro';
 
 /**
+ * El fichero de la Página de Personaje — Historia 35.3: su identidad en la declaración, como la de
+ * la Página de Obra. `src/lib/ingreso.ts` la deja sin ningún Modelo (`SUPERFICIES_SIN_INGRESO`).
+ */
+export const PAGINA_DE_PERSONAJE = 'personaje/[slug]/[...page].astro';
+
+/**
  * Los ficheros de los Directorios — Historias 26.3 y 26.4: su identidad en la declaración, como
  * la de la Página de Obra. Dos, `/autores/` y `/obras/`. De aquí sale el único predicado que dice
  * si una ruta es de un Directorio (`esRutaDeDirectorio`), y `src/lib/ingreso.ts` los deja sin
@@ -187,6 +193,20 @@ export const SUPERFICIES: readonly Superficie[] = [
     // `src/lib/admision.ts` admite un slug enteramente numérico, así que `/autor/1984` es
     // una Página de Autor y no la página 1984 de nada.
     noPublicableEn: /^\/autor\/[^/]+\/\d+$/,
+  },
+  {
+    nombre: 'la Página de Personaje',
+    pagina: PAGINA_DE_PERSONAJE,
+    reconoce: /^\/personaje\/[^/]+(?:\/\d+)?$/,
+    // Historia 35.3 — calca la de Autor: producto con la vista de superficie en su página 1.
+    caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
+    // Que se indexe lo decide el Corpus (la lista de rutas indexables, `personajesIndexables` de
+    // `src/lib/publicado.ts`): el Personaje con al menos `MIN_CITAS_POR_PERSONAJE` Citas (35.3b).
+    // Sin la lista declarada, `caracterDe` rompe ante un Personaje como ante una Obra.
+    indexablePorContenido: true,
+    // Anclada a la ruta entera, como Autor: `/personaje/1984` es un Personaje.
+    noPublicableEn: /^\/personaje\/[^/]+\/\d+$/,
   },
   {
     nombre: 'la Página de Tema',
@@ -294,10 +314,11 @@ export const SUPERFICIES: readonly Superficie[] = [
 ];
 
 /**
- * Las familias del sitio — Historia 26.7, AD-17. Seis, y este es el único sitio que las declara.
+ * Las familias del sitio — Historia 26.7, AD-17. Siete desde la 35.3 (`personaje`), y este es el
+ * único sitio que las declara.
  *
  * Una familia es el grupo de URL publicadas que una serie compara entre jornadas: Cita, Autor,
- * Tema, Colección, Obra y Directorio. **Directorio es una para los dos**, `/autores/` y
+ * Tema, Colección, Obra, Directorio y, desde la 35.3, Personaje. **Directorio es una para los dos**, `/autores/` y
  * `/obras/`: dos URL de índice que, contadas en Autor o en Obra, falsearían el reparto de lo que
  * listan mientras se juzga SM-11. La portada no es de ninguna, y es deliberado: es una URL suelta
  * y meterla en una familia la falsearía sin que nadie lo notara.
@@ -312,7 +333,7 @@ export const SUPERFICIES: readonly Superficie[] = [
  * El orden es el del PRD, con las dos que llegaron después al final: es en el que se nombran
  * y se reparten.
  */
-export const FAMILIAS = ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio'] as const;
+export const FAMILIAS = ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio', 'personaje'] as const;
 
 /** Una familia del sitio. La unión sale de `FAMILIAS` y no se escribe en ningún otro sitio. */
 export type Familia = (typeof FAMILIAS)[number];
@@ -377,6 +398,11 @@ function rutaDeListado(familia: string, slug: string, pagina: number): string {
 
 export function rutaDeAutor(slug: string, pagina = 1): string {
   return rutaDeListado('autor', slug, pagina);
+}
+
+/** La ruta de una Página de Personaje — Historia 35.3: un listado paginado, como la de Autor. */
+export function rutaDePersonaje(slug: string, pagina = 1): string {
+  return rutaDeListado('personaje', slug, pagina);
 }
 
 export function rutaDeTema(slug: string, pagina = 1): string {
@@ -570,6 +596,24 @@ export function esRutaDeObra(rutaOUrl: string): boolean {
 }
 
 /**
+ * Si una ruta es de la Página de Personaje —la 1 o una 2+—, por la declaración y no por el
+ * prefijo — Historia 35.3b. La usa el rastreo para nombrar el umbral del Personaje.
+ */
+export function esRutaDePersonaje(rutaOUrl: string): boolean {
+  return superficieDeclaradaDe(rutaOUrl)?.pagina === PAGINA_DE_PERSONAJE;
+}
+
+/**
+ * Si una ruta es de una superficie cuya indexación depende del Corpus —la que declara
+ * `indexablePorContenido`: la Página de Obra y la de Personaje, la 1 o una 2+— — Historia 35.3b.
+ * Es lo que el aviso de IndexNow (FR-38) juzga por la lista indexable de antes y de después, en
+ * lugar de avisar toda ruta tocada. No necesita la lista declarada: lee solo la declaración.
+ */
+export function dependeDelContenido(rutaOUrl: string): boolean {
+  return superficieDeclaradaDe(rutaOUrl)?.indexablePorContenido === true;
+}
+
+/**
  * Si una ruta es de un Directorio —`/autores/` o `/obras/`—, por la declaración y
  * nunca por el prefijo — Historia 26.3. `/autor/x/` no lo es aunque empiece igual. Lo usan las
  * pruebas; la familia `directorio` de las series no sale de aquí sino del censo
@@ -658,7 +702,8 @@ export type CausaDelServicio = 'forma' | 'contenido';
  *
  *   · `forma` — es una página 2+ de un listado (`noPublicableEn`). Se lee en la ruta.
  *   · `contenido` — es la página 1 de una superficie que depende del contenido y no está en la
- *     lista de rutas indexables: una Obra que repite otra página (FR-52).
+ *     lista de rutas indexables: una Obra que repite otra página (FR-52) o un Personaje bajo
+ *     `MIN_CITAS_POR_PERSONAJE` (35.3b).
  *
  * Una superficie que es `servicio` por declaración —`/buscar`, `/404`— no tiene causa: no es
  * un producto degradado, es lo que es. Rompe, como `caracterDe`, si la ruta no está declarada o
@@ -868,6 +913,11 @@ export type CriterioDeWcag = {
  * `tests/e2e/accesibilidad.spec.ts` que exige que nada fijo tape el contenido al cargar, y eso
  * no es el criterio: el foco puede quedar tapado por algo pequeño o al desplazarse.
  *
+ * *(v9.1)* 3.2.6 pasa de `no-aplica` a `ux` con la Historia 35.8: la línea de retirada es un correo
+ * con destinatario, un mecanismo de ayuda, y la UX la pone en la misma posición relativa en las dos
+ * páginas que la llevan. `EXPERIENCE.md` («Accessibility Floor») sigue diciendo que no aplica:
+ * pendiente de Héctor (bmad-ux).
+ *
  * El 2.5.8 sí es `axe`: `target-size`, que en la 4.14.0 es la única regla de `wcag22aa` y ya
  * no da por solapados dos enlaces con el mismo destino, que es lo que la v8 va a apilar. El
  * sitio pide 44 px por decisión de producto (`EXPERIENCE.md`), muy por encima de los 24 del
@@ -899,8 +949,10 @@ export const CRITERIOS_QUE_AÑADE_WCAG_22: readonly CriterioDeWcag[] = [
     criterio: '3.2.6',
     nivel: 'A',
     nombre: 'Ayuda consistente',
-    comprueba: 'no-aplica',
-    motivo: 'el sitio no ofrece ningún mecanismo de ayuda',
+    comprueba: 'ux',
+    motivo:
+      'el único mecanismo de ayuda es la línea de retirada (Historia 35.8), un solo componente al pie ' +
+      'de la Página de Cita atribuida y de toda página de Personaje, en la misma posición relativa',
   },
   {
     criterio: '3.3.7',

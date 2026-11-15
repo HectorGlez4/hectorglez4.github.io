@@ -71,6 +71,8 @@ const colecciones = conjunto.colecciones;
 const filtros = filtrosDeLaBusqueda(conjunto);
 const opciones = ({ valor, rotulo }: { valor: string; rotulo: string }) => ({ valor, rotulo });
 const autoresDelFiltro = ordenDeAutoresPorNombre(filtros.autores.map(opciones));
+// Historia 35.5 — los Personajes, en el grupo «Personajes» del mismo selector, con el orden de los Autores.
+const personajesDelFiltro = ordenDeAutoresPorNombre(filtros.personajes.map(opciones));
 const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
 ---
 
@@ -82,7 +84,7 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
   <div class="pagina contenedor">
     <h1>Buscar</h1>
 
-    <Busqueda autores={autoresDelFiltro} temas={temasDelFiltro} />
+    <Busqueda autores={autoresDelFiltro} personajes={personajesDelFiltro} temas={temasDelFiltro} />
 
     {/*
       * Historia 22.10 — WCAG 4.1.3: el recuento y la búsqueda sin resultados se anuncian por

@@ -1,0 +1,35 @@
+---
+/**
+ * La línea de retirada — Historia 35.8, FR-69, AD-35, UX-DR139, UX-DR145, UX-DR146.
+ *
+ * El canal para pedir que una Cita atribuida se corrija o se retire, sin cuenta, sin formulario y
+ * sin guion: un `mailto:` a `BUZON_DE_PETICIONES`. Va solo al pie de la Página de Cita atribuida
+ * —tras las Rutas de salida, lo último visible— y de toda página de Personaje —tras el listado y
+ * su paginación—: la misma posición relativa en las dos (WCAG 3.2.6). Nunca junto a la Atribución
+ * ni entre ella y Copiar (UX-DR113). Lo que dice lo compone `lineaDeRetirada` de
+ * `src/lib/atribucion.ts`, que **lanza sin buzón**: la construcción se para antes de publicar una
+ * atribuida sin a dónde pedir.
+ *
+ * El enlace es de salida —en siena, por la regla `a` de `tokens.css`— y en la misma pestaña; va a
+ * mitad de frase, así que queda exento de la zona de toque (UX-DR145). Sin `data-zona` ni
+ * exención: no es enlace interno y la escucha de la salida interna no lo mide (AD-13). Fuera de
+ * Pagefind (`all`), sin filete propio.
+ *
+ * La presentación va en un atributo `style` con los tokens, nunca en un bloque `<style>`: Astro
+ * emite el `<style>` de un componente por el grafo de importaciones, se pinte o no, y uno nuevo
+ * cambiaría el CSS de toda Página de Cita aunque ninguna sea atribuida (precedentes:
+ * `Variante.astro`, `Sostener.astro`).
+ */
+import { BUZON_DE_PETICIONES } from '../lib/dominio.ts';
+import { lineaDeRetirada, type SobreLaRetirada } from '../lib/atribucion.ts';
+
+type Props = SobreLaRetirada;
+
+const linea = lineaDeRetirada(Astro.props, BUZON_DE_PETICIONES);
+---
+
+<p
+  class="linea-de-retirada"
+  data-pagefind-ignore="all"
+  style="font-family: var(--sans); font-size: var(--pie); font-weight: var(--peso-regular); line-height: var(--interlineado-pie); color: var(--tinta-apagada); margin: calc(var(--unidad) * 5) 0 0; max-width: var(--medida-prosa);"
+>{linea.pregunta}<a href={linea.href}>{linea.enlace}</a> ({linea.direccion})</p>

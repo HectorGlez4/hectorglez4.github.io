@@ -876,7 +876,7 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     const obrasDe = (slug: string) => new Set(delAutor(slug).flatMap((c) => (c.obra ? [c.obra.nombre] : [])));
 
     // Un Autor con Citas sin Obra y con Obras —con más de una si lo hay—, el de menos Citas.
-    const conHueco = [...new Set(conjunto.citas.filter((c) => c.obra === undefined).map((c) => c.autor))]
+    const conHueco = [...new Set(conjunto.citas.filter((c) => c.obra === undefined).map((c) => (c.autor ?? '')))]
       .filter((slug) => obrasDe(slug).size > 0)
       .sort(
         (a, b) =>
@@ -1011,10 +1011,10 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     const deAutor = (slug: string) => conjunto.citas.filter((c) => c.autor === slug).length;
     // La del Autor con menos Citas: filtrar por él y pedir sus datos carga pocas páginas.
     const cita = conjunto.citas
-      .filter((c) => c.obra !== undefined && (nombres.get(c.autor) ?? '').length > 3)
-      .sort((a, b) => deAutor(a.autor) - deAutor(b.autor) || porSlug(a.slug, b.slug))[0];
+      .filter((c) => c.obra !== undefined && (nombres.get((c.autor ?? '')) ?? '').length > 3)
+      .sort((a, b) => deAutor((a.autor ?? '')) - deAutor((b.autor ?? '')) || porSlug(a.slug, b.slug))[0];
     expect(cita, 'El Corpus no tiene ninguna Cita con Obra de un Autor con nombre').toBeDefined();
-    const nombre = nombres.get(cita.autor)!;
+    const nombre = nombres.get((cita.autor ?? ''))!;
     await page.goto('/buscar/');
     const indexado = (await page.evaluate(
       async ({ clave, autor, url }) => {

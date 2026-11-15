@@ -12,7 +12,7 @@
  * acertarle a una línea de texto con el pulgar es justo el gesto que UJ-1 no concede. Por eso
  * la Obra es texto y nunca un segundo enlace.
  */
-import type { Cita, Autor } from '../lib/publicado.ts';
+import type { Cita, Autor, Personaje } from '../lib/publicado.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
 import TextoDeCita from './TextoDeCita.astro';
 import { recortarPorPalabra } from '../lib/recorte.ts';
@@ -48,13 +48,20 @@ interface Props {
    */
   autor?: Autor;
   /**
+   * Historia 35.4 — el Personaje que declara la Cita (`undefined` si ninguno), **solo** con
+   * `atribucion="autor-y-obra"`: con él, su nombre va en el sitio del Autor, con el mismo trato, y
+   * el Autor no entra. Con `autor-y-obra` la clave se pasa siempre, y que no case con la Cita
+   * detiene la construcción, como en `Atribucion.astro`; con las otras dos ni se lee ni se pasa.
+   */
+  personaje?: Personaje | undefined;
+  /**
    * La Zona de salida interna de sus enlaces (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
    * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
    */
   zona: Zona;
 }
 
-const { cita, atribucion, autor, zona } = Astro.props;
+const { cita, atribucion, autor, personaje, zona } = Astro.props;
 
 /**
  * Sin valor por omisión también al construir. `astro check` rechaza el uso que no declara
@@ -84,20 +91,34 @@ if (!ATRIBUCIONES.includes(atribucion)) {
  */
 let nombre: string | undefined;
 if (atribucion === 'autor-y-obra') {
-  if (autor === undefined) {
+  if (autor === undefined && cita.autor !== undefined) {
     throw new Error(
       `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
         `atribucion="autor-y-obra" y sin Autor. Ese contexto declara el Autor de cada tarjeta, ` +
         `y la tarjeta no sale sin él: pásale el Autor que declara la Cita, «${cita.autor}».`,
     );
   }
-  if (autor.slug !== cita.autor) {
+  if (autor !== undefined && autor.slug !== cita.autor) {
     throw new Error(
       `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
-        `atribucion="autor-y-obra" y el Autor «${autor.slug}», pero la Cita declara «${cita.autor}».`,
+        `atribucion="autor-y-obra" y el Autor «${autor.slug}», pero la Cita declara «${cita.autor ?? 'ninguno'}».`,
     );
   }
-  nombre = autor.nombre;
+  if (!('personaje' in Astro.props) || personaje?.slug !== cita.personaje) {
+    throw new Error(
+      `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
+        `atribucion="autor-y-obra" y el Personaje «${personaje?.slug ?? 'ninguno'}», pero la Cita declara ` +
+        `«${cita.personaje ?? 'ninguno'}». Ese contexto pasa siempre el Personaje que declara la Cita.`,
+    );
+  }
+  // Historia 35.4 — el Personaje en el sitio del Autor; sin Personaje, el Autor como siempre.
+  nombre = personaje?.nombre ?? autor?.nombre;
+  if (nombre === undefined) {
+    throw new Error(
+      `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
+        'atribucion="autor-y-obra" sin Autor ni Personaje: no hay nombre que poner.',
+    );
+  }
 }
 
 /** El título de su Obra, que la tarjeta no recorta nunca (NFR-12). */

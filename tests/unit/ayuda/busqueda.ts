@@ -128,6 +128,11 @@ export interface OpcionesDeLaIsla {
   oculta?: boolean;
   /** Las opciones de los selectores (sin la primera, «Todos…»). Por omisión, `AUTORES` y `TEMAS`. */
   autores?: OpcionDeSelector[];
+  /**
+   * Historia 35.5 — las del grupo «Personajes» del selector de Autor, en un `optgroup` tras los
+   * Autores, como las pinta el build. Por omisión, ninguna: sin grupo.
+   */
+  personajes?: OpcionDeSelector[];
   temas?: OpcionDeSelector[];
   /** Historia 27.3 — lo que da el `fetch` del mapa de rótulos, como JSON. Por omisión, `{}`. */
   mapa?: unknown;
@@ -300,17 +305,29 @@ function despachar(oyentes: Oyente[], tipo: string, evento: Record<string, unkno
  */
 const IMPORTACION = /import\(\s*(['"`])\/pagefind\/pagefind\.js\1/u;
 
-/** Un `<select>` de mentira: su valor es el de la opción elegida, y escribirlo elige otra. */
-function selector(id: string, primera: string, opciones: OpcionDeSelector[]) {
+/**
+ * Un `<select>` de mentira: su valor es el de la opción elegida, y escribirlo elige otra. Historia
+ * 35.5 — con `grupo`, esas opciones van detrás en un `optgroup` «Personajes» (su `parentElement`).
+ */
+function selector(id: string, primera: string, opciones: OpcionDeSelector[], grupo: OpcionDeSelector[] = []) {
   const elemento = new Elemento('select');
   elemento.dataset.selector = id;
-  const todas = [{ valor: '', rotulo: primera }, ...opciones].map(({ valor, rotulo }) => {
-    const opcion = new Elemento('option');
-    opcion.value = valor;
-    opcion.textContent = rotulo;
-    return opcion;
-  });
-  elemento.append(...todas);
+  const opcion = ({ valor, rotulo }: OpcionDeSelector) => {
+    const nueva = new Elemento('option');
+    nueva.value = valor;
+    nueva.textContent = rotulo;
+    return nueva;
+  };
+  const sueltas = [{ valor: '', rotulo: primera }, ...opciones].map(opcion);
+  const agrupadas = grupo.map(opcion);
+  const todas = [...sueltas, ...agrupadas];
+  elemento.append(...sueltas);
+  if (agrupadas.length > 0) {
+    const optgroup = new Elemento('optgroup');
+    optgroup.setAttribute('label', 'Personajes');
+    optgroup.append(...agrupadas);
+    elemento.append(optgroup);
+  }
   let elegida = 0;
   Object.defineProperty(elemento, 'options', { get: () => todas });
   Object.defineProperty(elemento, 'selectedIndex', {
@@ -445,7 +462,7 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   const formulario = new Elemento('form');
   // Historia 27.4 — el `action` del formulario es la ruta de la dirección (`rutaDeLaBusqueda()`).
   formulario.setAttribute('action', '/buscar/');
-  const autor = selector('autor', 'Todos los autores', opciones.autores ?? AUTORES);
+  const autor = selector('autor', 'Todos los autores', opciones.autores ?? AUTORES, opciones.personajes ?? []);
   const obra = selectorDinamico('obra', 'Todas sus obras');
   const tema = selector('tema', 'Todos los temas', opciones.temas ?? TEMAS);
   const quitar = new Elemento('button');

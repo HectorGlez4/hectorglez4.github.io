@@ -195,7 +195,9 @@ switch (orden) {
         a.ordenAlfabetico === undefined
           ? 'sin clave'
           : `«${a.ordenAlfabetico}»\t${a.ordenRevisado === undefined ? 'sin revisar' : `revisada el ${a.ordenRevisado}`}`;
-      process.stdout.write(`${a.slug}\t${a.nombre}\t†${a.añoFallecimiento}\t${tradicion}\t${clave}\n`);
+      // Historia 35.1 — un Autor vivo no tiene †: se dice «vivo».
+      const años = a.vivo === true ? 'vivo' : `†${a.añoFallecimiento}`;
+      process.stdout.write(`${a.slug}\t${a.nombre}\t${años}\t${tradicion}\t${clave}\n`);
     }
     const sinClave = autores.filter((a) => a.ordenAlfabetico === undefined).length;
     const sinRevisar = autores.filter((a) => a.ordenAlfabetico !== undefined && a.ordenRevisado === undefined).length;

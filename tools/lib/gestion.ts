@@ -11,10 +11,11 @@
  *     porque ese hueco bloquea después la publicación de todas sus Citas.
  */
 
+import { esAtribuida } from '../../src/lib/clase.ts';
 import { mkdir, rename, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { analizarDocumento, CLASE_BIOGRAFIA, nombreDeBiografia } from './documento.ts';
+import { analizarDocumento, CLASE_BIOGRAFIA, nombreDeBiografia, type CabeceraDeBiografia } from './documento.ts';
 import { fuenteDe } from './fuentes.ts';
 import {
   REGLA_DE_CLAVE_DE_ORDEN,
@@ -23,7 +24,15 @@ import {
   ordenAlfabetico,
   tradicion,
 } from '../../src/lib/admision.ts';
-import { ORDEN_PROPONER_CLAVES, ordenFijarClave, proponerClave, type PropuestaDeClave } from './claves.ts';
+import {
+  ORDEN_PROPONER_CLAVES,
+  ORDENES_DE_AUTOR,
+  ORDENES_DE_PERSONAJE,
+  ordenFijarClave,
+  proponerClave,
+  type OrdenesDeClave,
+  type PropuestaDeClave,
+} from './claves.ts';
 import { slugDeAutor, slugDeTema } from '../../src/lib/slug.ts';
 import {
   FICHERO_DE_CANDIDATOS,
@@ -34,6 +43,7 @@ import {
   fechaLocal,
   fijarCamposDeAutor,
   leerAutores,
+  leerPersonajes,
   leerCandidatosPorEpoca,
   leerCitas,
   leerColecciones,
@@ -48,7 +58,7 @@ import {
   type AutorEnCorpus,
   type Rutas,
 } from './corpus.ts';
-import { autorPorPrefijo } from './autoria.ts';
+import { dueñoPorPrefijo } from './autoria.ts';
 import { leerColeccionesRetiradas } from './curacion.ts';
 import { descartesPorCandidato, slugsSembrados } from './epocas.ts';
 import { readFile } from 'node:fs/promises';
@@ -113,6 +123,22 @@ export async function crearAutor(rutas: Rutas, datos: DatosDeAutor): Promise<Res
   const slug = slugDeAutor(validado.data.nombre);
   if (existsSync(join(rutas.autores, `${slug}.yml`))) {
     return { ok: false, motivos: [`El Autor «${slug}» ya existe. Use «editar» para cambiarlo.`] };
+  }
+  /*
+   * Historia 35.2 — un solo espacio de slugs: un Autor no puede llamarse como un Personaje,
+   * porque el prefijo de una Cita diría de quién es y no se sabría.
+   */
+  const personaje = [join(rutas.personajes, `${slug}.yml`), join(rutas.personajes, `${slug}.yaml`)].find((r) =>
+    existsSync(r),
+  );
+  if (personaje !== undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `«${slug}» ya es el slug de un Personaje (${personaje}). Autores y Personajes comparten un ` +
+          'solo espacio de slugs: el prefijo de una Cita dice de quién es. No se ha escrito nada.',
+      ],
+    };
   }
 
   /*
@@ -186,6 +212,10 @@ export async function editarAutor(
   const enFichero: Record<string, unknown> = { ...actual };
   delete enFichero.slug;
   delete enFichero.ruta;
+  // Historia 35.1 — el año de fallecimiento de un Autor vivo registra su muerte: deja de ser
+  // `vivo`. Sin esto, la orden no podría escribirlo (el esquema rechaza los dos a la vez) y
+  // solo quedaría editar la ficha a mano.
+  if (cambios.añoFallecimiento !== undefined) delete enFichero.vivo;
 
   // Solo pisa lo que la orden trae con valor: una bandera ausente llega como `undefined`.
   const fusion = {
@@ -234,9 +264,57 @@ export async function editarAutor(
  * no sabe proponer, con la orden con que una persona los fija.
  */
 export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
-  let leidos: Awaited<ReturnType<typeof leerAutores>>;
+  return proponerClavesDe(rutas, CLAVES_DE_AUTOR);
+}
+
+/**
+ * Lo que distingue a los Autores de los Personajes al proponer y fijar claves — Historia 35.2.
+ * El núcleo es uno (`proponerClavesDe`, `fijarClaveDe`), y lo comparten `tools/autor.ts` y
+ * `tools/personaje.ts`: dos copias de la regla divergirían a la primera corrección.
+ */
+export interface EntidadConClave {
+  /** «Autor» o «Personaje», como lo nombran los partes. */
+  singular: string;
+  plural: string;
+  /** La orden de una persona, sin slug: `npx tsx tools/autor.ts clave`. */
+  ordenClave: string;
+  ordenes: OrdenesDeClave;
+  leer: (rutas: Rutas) => Promise<FicheroConClave[]>;
+  directorio: (rutas: Rutas) => string;
+}
+
+/** Lo que de un Autor o un Personaje leen las órdenes de clave. */
+export interface FicheroConClave {
+  slug: string;
+  ruta: string;
+  nombre?: unknown;
+  ordenAlfabetico?: string;
+  ordenRevisado?: string;
+}
+
+export const CLAVES_DE_AUTOR: EntidadConClave = {
+  singular: 'Autor',
+  plural: 'Autores',
+  ordenClave: 'npx tsx tools/autor.ts clave',
+  ordenes: ORDENES_DE_AUTOR,
+  leer: leerAutores,
+  directorio: (rutas) => rutas.autores,
+};
+
+export const CLAVES_DE_PERSONAJE: EntidadConClave = {
+  singular: 'Personaje',
+  plural: 'Personajes',
+  ordenClave: 'npx tsx tools/personaje.ts clave',
+  ordenes: ORDENES_DE_PERSONAJE,
+  leer: leerPersonajes,
+  directorio: (rutas) => rutas.personajes,
+};
+
+export async function proponerClavesDe(rutas: Rutas, entidad: EntidadConClave): Promise<Resultado> {
+  const ordenFijarClave = entidad.ordenes.fijar;
+  let leidos: FicheroConClave[];
   try {
-    leidos = await leerAutores(rutas);
+    leidos = await entidad.leer(rutas);
   } catch (error) {
     // Un Corpus ilegible se dice con 1 y sin escribir nada, no con una traza.
     return { ok: false, motivos: [error instanceof Error ? error.message : String(error)] };
@@ -306,7 +384,7 @@ export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
       ? 'Ninguna clave nueva: no falta ninguna que la regla sepa proponer.'
       : `${escritas.length} ${escritas.length === 1 ? 'clave escrita' : 'claves escritas'}, sin revisar.`,
     ...lineas,
-    `Sin revisar: ${sinRevisar} de ${autores.length}. Se confirman o corrigen con npx tsx tools/autor.ts clave <slug> ["<clave>"].`,
+    `Sin revisar: ${sinRevisar} de ${autores.length}. Se confirman o corrigen con ${entidad.ordenClave} <slug> ["<clave>"].`,
   ];
   if (marcadas.length > 0) {
     parte.push(`Nombres de tres palabras o más, sin revisar (mírelos primero): ${marcadas.length}.`, ...marcadas);
@@ -322,12 +400,12 @@ export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
       ok: false,
       motivos: [
         ...parte,
-        `No se pudo escribir la clave de ${fallidas.length} ${fallidas.length === 1 ? 'Autor' : 'Autores'}:`,
+        `No se pudo escribir la clave de ${fallidas.length} ${fallidas.length === 1 ? entidad.singular : entidad.plural}:`,
         ...fallidas,
       ],
     };
   }
-  return { ok: true, ruta: rutas.autores, mensaje: parte.join('\n') };
+  return { ok: true, ruta: entidad.directorio(rutas), mensaje: parte.join('\n') };
 }
 
 /**
@@ -343,14 +421,26 @@ export async function fijarClave(
   clave: string | undefined,
   hoy: string,
 ): Promise<Resultado> {
-  let autores: Awaited<ReturnType<typeof leerAutores>>;
+  return fijarClaveDe(rutas, CLAVES_DE_AUTOR, slug, clave, hoy);
+}
+
+export async function fijarClaveDe(
+  rutas: Rutas,
+  entidad: EntidadConClave,
+  slug: string,
+  clave: string | undefined,
+  hoy: string,
+): Promise<Resultado> {
+  const ordenFijarClave = entidad.ordenes.fijar;
+  const ORDEN_PROPONER_CLAVES = entidad.ordenes.proponer;
+  let autores: FicheroConClave[];
   try {
-    autores = await leerAutores(rutas);
+    autores = await entidad.leer(rutas);
   } catch (error) {
     return { ok: false, motivos: [error instanceof Error ? error.message : String(error)] };
   }
   const autor = autores.find((a) => a.slug === slug);
-  if (!autor) return { ok: false, motivos: [`El Autor «${slug}» no existe en el corpus.`] };
+  if (!autor) return { ok: false, motivos: [`El ${entidad.singular} «${slug}» no existe en el corpus.`] };
 
   const definitiva = clave ?? autor.ordenAlfabetico;
   if (definitiva === undefined) {
@@ -397,11 +487,49 @@ export async function declararBiografia(
   slug: string,
   documento: string,
 ): Promise<Resultado> {
-  const nombre = basename(documento).replace(/\.txt$/u, '');
   const autores = await leerAutores(rutas);
   const actual = autores.find((a) => a.slug === slug);
   if (!actual) return { ok: false, motivos: [`El Autor «${slug}» no existe en el corpus.`] };
 
+  const leida = await biografiaDeclarable(rutas, documento);
+  if (!leida.ok) return leida;
+  const { nombre, cabecera } = leida;
+
+  const enFichero: Record<string, unknown> = { ...actual };
+  delete enFichero.slug;
+  delete enFichero.ruta;
+  const fusion = { ...enFichero, biografia: { documento: nombre, revision: cabecera.revision } };
+
+  const validado = autorAdmisible.safeParse(fusion);
+  if (!validado.success) {
+    return {
+      ok: false,
+      motivos: validado.error.issues.map((i) =>
+        i.path.length > 0 ? `${i.path.join('.')}: ${i.message}` : i.message,
+      ),
+    };
+  }
+
+  const escrita = await escribirAutor(rutas, slug, fusion);
+  return {
+    ok: true,
+    ruta: escrita,
+    mensaje:
+      `Autor «${slug}»: biografía ${nombre} (${cabecera.titulo}, revisión ${cabecera.revision}, ` +
+      `${cabecera.licencia}).`,
+  };
+}
+
+/**
+ * El documento de `corpus/biografias/` que se puede declarar como biografía, o por qué no —
+ * el núcleo de `declararBiografia`, que comparte `tools/personaje.ts biografia` (Historia 35.2).
+ * La revisión se **lee** de su cabecera: nadie la teclea.
+ */
+export async function biografiaDeclarable(
+  rutas: Rutas,
+  documento: string,
+): Promise<{ ok: true; nombre: string; cabecera: CabeceraDeBiografia } | { ok: false; motivos: string[] }> {
+  const nombre = basename(documento).replace(/\.txt$/u, '');
   const ruta = join(rutas.biografias, `${nombre}.txt`);
   if (!existsSync(ruta)) {
     return {
@@ -433,30 +561,7 @@ export async function declararBiografia(
       ],
     };
   }
-
-  const enFichero: Record<string, unknown> = { ...actual };
-  delete enFichero.slug;
-  delete enFichero.ruta;
-  const fusion = { ...enFichero, biografia: { documento: nombre, revision: cabecera.revision } };
-
-  const validado = autorAdmisible.safeParse(fusion);
-  if (!validado.success) {
-    return {
-      ok: false,
-      motivos: validado.error.issues.map((i) =>
-        i.path.length > 0 ? `${i.path.join('.')}: ${i.message}` : i.message,
-      ),
-    };
-  }
-
-  const escrita = await escribirAutor(rutas, slug, fusion);
-  return {
-    ok: true,
-    ruta: escrita,
-    mensaje:
-      `Autor «${slug}»: biografía ${nombre} (${cabecera.titulo}, revisión ${cabecera.revision}, ` +
-      `${cabecera.licencia}).`,
-  };
+  return { ok: true, nombre, cabecera };
 }
 
 export async function crearTema(rutas: Rutas, nombre: string): Promise<Resultado> {
@@ -530,6 +635,14 @@ export async function marcarAptaParaPortada(
         `La Cita «${slugCita}» no está publicada. Solo se marca lo publicado: una Cita ` +
           'en revisión no puede salir en portada.',
       ],
+    };
+  }
+
+  // Historia 35.1b — una atribuida no es apta para portada (pregunta 22): no se marca.
+  if (apta && esAtribuida(cita)) {
+    return {
+      ok: false,
+      motivos: [`La Cita «${slugCita}» es atribuida, y una atribuida no es apta para portada (pregunta 22).`],
     };
   }
 
@@ -799,12 +912,9 @@ export async function retirarFuente(rutas: Rutas, fichero: string): Promise<Resu
 
   await mkdir(rutas.fuentesRetiradas, { recursive: true });
   await rename(origen, join(rutas.fuentesRetiradas, fichero));
-  for (const candidata of suyas) {
-    await rm(
-      join(rutas.revision, `${nombreDeFicheroDeCita(candidata.autor, candidata.slug)}.md`),
-      { force: true },
-    );
-  }
+  // Su propio fichero, tal como se leyó: el prefijo del nombre es el del dueño **al darla de
+  // alta** y no se recalcula (Historia 35.2: saber después el Autor no cambia el slug).
+  for (const candidata of suyas) await rm(candidata.ruta, { force: true });
 
   return {
     ok: true,
@@ -836,12 +946,15 @@ function listaCorta(slugs: readonly string[]): string[] {
 function esDelAutor(
   slugCita: string,
   slugAutor: string,
-  autorDeCita: ReadonlyMap<string, string>,
-  slugsDeAutores: readonly string[],
+  /** Por slug de cada Cita que existe, su Autor declarado; `undefined` si no declara ninguno. */
+  autorDeCita: ReadonlyMap<string, string | undefined>,
+  dueños: { autores: readonly string[]; personajes: readonly string[] },
 ): boolean {
-  const declarado = autorDeCita.get(slugCita);
-  if (declarado !== undefined) return declarado === slugAutor;
-  return autorPorPrefijo(slugCita, slugsDeAutores) === slugAutor;
+  // Lo que resuelve a una Cita se juzga por lo que ella declara: sin Autor, no es de ninguno.
+  if (autorDeCita.has(slugCita)) return autorDeCita.get(slugCita) === slugAutor;
+  // Historia 35.2 — el prefijo se busca en la unión: `bruce-wayne-…` es del Personaje, no de `bruce`.
+  const dueño = dueñoPorPrefijo(slugCita, dueños);
+  return dueño?.tipo === 'autor' && dueño.slug === slugAutor;
 }
 
 /**
@@ -954,8 +1067,11 @@ export async function retirarAutor(
   const candidatas = await leerCitas(rutas.revision);
   const retirados = await leerAutores({ ...rutas, autores: rutas.autoresRetirados });
   const autorDeCita = new Map([...publicadas, ...candidatas].map((c) => [c.slug, c.autor]));
-  const slugsDeAutores = [...autores, ...retirados].map((a) => a.slug);
-  const suya = (slugCita: string) => esDelAutor(slugCita, slug, autorDeCita, slugsDeAutores);
+  const dueños = {
+    autores: [...autores, ...retirados].map((a) => a.slug),
+    personajes: (await leerPersonajes(rutas)).map((p) => p.slug),
+  };
+  const suya = (slugCita: string) => esDelAutor(slugCita, slug, autorDeCita, dueños);
 
   const motivos: string[] = [];
   const cuenta = (n: number, singular: string, plural: string) =>

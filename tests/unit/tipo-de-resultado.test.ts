@@ -49,7 +49,7 @@ const sinComentarios = (fuente: string) =>
 const META_CON_TIPO = /data-pagefind-meta\s*=\s*(?:"[^"]*\btipo\b[^"]*"|'[^']*\btipo\b[^']*'|\{[^}]*\btipo\b[^}]*\})/u;
 
 describe('Historia 26.2 — la tabla de tipos de resultado', () => {
-  it('son las seis familias más la portada, con sus rótulos', () => {
+  it('son las siete familias más la portada, con sus rótulos', () => {
     expect(ETIQUETAS_DE_RESULTADO).toEqual({
       cita: 'Cita',
       autor: 'Autor',
@@ -57,6 +57,8 @@ describe('Historia 26.2 — la tabla de tipos de resultado', () => {
       coleccion: 'Colección',
       obra: 'Obra',
       directorio: 'Directorio',
+      // Historia 35.3 — la Página de Personaje: título en la serif y sin línea de Autor.
+      personaje: 'Personaje',
       portada: 'Portada',
     });
     expect(TIPO_POR_OMISION).toBe('cita');
@@ -168,13 +170,15 @@ describe('Historia 27.1 — `FiltrosDeLaCita` solo lo usa la Página de Cita', (
   });
 
   it('los nombres de los filtros y de la clave, y los tipos con línea de Autor, tienen un solo dueño', async () => {
-    expect(FILTROS_DE_CITA).toEqual({ autor: 'autor', obra: 'obra', tema: 'tema' });
+    // Historia 35.5 — y el del Personaje, que va donde va el Autor (AD-33).
+    expect(FILTROS_DE_CITA).toEqual({ autor: 'autor', personaje: 'personaje', obra: 'obra', tema: 'tema' });
     expect(ORDEN_DE_CITA).toBe('orden');
     expect([...TIPOS_CON_LINEA_DE_AUTOR].sort()).toEqual(['cita', 'obra']);
     // El metadato que pinta la línea pesa 0: lo declara `OPCIONES_DE_PAGEFIND`, no otra entrada.
     expect(OPCIONES_DE_PAGEFIND.ranking.metaWeights).toEqual({ autor: 0 });
     const componente = sinComentarios(await readFile(join(RAIZ, 'src/components/FiltrosDeLaCita.astro'), 'utf8'));
     expect(componente).toContain('FILTROS_DE_CITA.autor');
+    expect(componente).toContain('FILTROS_DE_CITA.personaje');
     expect(componente).toContain('ORDEN_DE_CITA');
     const busqueda = sinComentarios(await readFile(join(RAIZ, 'src/components/Busqueda.astro'), 'utf8'));
     expect(busqueda).toContain('TIPOS_CON_LINEA_DE_AUTOR.includes(tipo)');

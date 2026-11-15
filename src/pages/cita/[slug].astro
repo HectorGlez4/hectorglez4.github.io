@@ -13,6 +13,7 @@
 import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
 import Fuente from '../../components/Fuente.astro';
+import Variante from '../../components/Variante.astro';
 import TarjetaDeObra from '../../components/TarjetaDeObra.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
@@ -31,6 +32,7 @@ import {
   citasDeLasObras,
   citasDeTema,
   conjuntoPublicable,
+  dueñoDeLaRuta,
   filtrosDeLaBusqueda,
   pasajesDeLasCitas,
   rutasDeSalidaDeCita,
@@ -44,10 +46,18 @@ import { clavesDeOrden } from '../../lib/obras.ts';
 import { enUnaLinea } from '../../lib/verso.ts';
 import { recortarPorPalabra } from '../../lib/recorte.ts';
 import { MAX_CARACTERES_DE_TITULO_Y_META } from '../../lib/umbrales.ts';
+/*
+ * Historia 35.8 — la línea de retirada, la última importación a propósito: el orden de las hojas de
+ * estilo de la página sigue el de las importaciones, y en medio movía el de los Desplegables.
+ */
+import LineaDeRetirada from '../../components/LineaDeRetirada.astro';
+import { esAtribuida } from '../../lib/clase.ts';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
   const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+  // Historia 35.3 — el Personaje que dice la Cita, para su Atribución.
+  const personajes = new Map(conjunto.personajes.map((p) => [p.slug, p]));
   const publicados = temasPublicados(conjunto.temas, conjunto.citas);
   /*
    * Historia 24.5 — «Siguiente…» de la Tarjeta de Obra. Lo decide `siguienteCita`, con los
@@ -64,7 +74,8 @@ export const getStaticPaths = (async () => {
    * (`porObra`) que pinta la Página de Obra. Una clave que no cabe rompe aquí el build.
    */
   const { porCita } = filtrosDeLaBusqueda(conjunto);
-  const claves = clavesDeOrden(conjunto.autores, conjunto.citas, porObra);
+  // Historia 35.4 — Autores y Personajes, un solo espacio de slugs: la Cita va con su dueño.
+  const claves = clavesDeOrden([...conjunto.autores, ...conjunto.personajes], conjunto.citas, porObra);
   /*
    * Historia 31.2 — el pasaje de cada Cita, de la aparición que cuenta (`aparicionQueCuenta`, la
    * misma que la ordena en el libro), calculado una vez para todas. Esta página es la única que
@@ -82,11 +93,26 @@ export const getStaticPaths = (async () => {
           'filtrosDeLaBusqueda y clavesDeOrden tienen que cubrir todas las Citas publicadas (Historia 27.1).',
       );
     }
+    const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
+    const personaje = cita.personaje === undefined ? undefined : personajes.get(cita.personaje);
+    /*
+     * Historia 35.4 — los dos dueños, con su nombre: el de la Obra para la Tarjeta de Obra
+     * (`obra.dueño`: su Autor o su Personaje) y el de las Rutas de salida (`dueñoDeLaRuta`: el
+     * Personaje si lo hay). La integridad del conjunto garantiza que existen.
+     */
+    const nombreDe = (dueño: { tipo: 'autor' | 'personaje'; slug: string }) => {
+      const quien = (dueño.tipo === 'personaje' ? personajes : autores).get(dueño.slug);
+      if (quien === undefined) throw new Error(`La Cita «${cita.slug}» nombra a «${dueño.slug}», que no está en el Corpus.`);
+      return { ...dueño, nombre: quien.nombre };
+    };
     return {
       params: { slug: cita.slug },
       props: {
         cita,
-        autor: autores.get(cita.autor)!,
+        autor,
+        personaje,
+        dueñoDeLaObra: cita.obra === undefined ? undefined : nombreDe(cita.obra.dueño),
+        dueñoDeLasRutas: nombreDe(dueñoDeLaRuta(cita)),
         siguiente,
         /*
          * Historia 24.6 — las Rutas de salida del pie: «De la misma obra», «Más de {Autor}» y
@@ -102,7 +128,7 @@ export const getStaticPaths = (async () => {
   });
 }) satisfies GetStaticPaths;
 
-const { cita, autor, siguiente, rutas, filtros, clave, pasaje } = Astro.props;
+const { cita, autor, personaje, dueñoDeLaObra, dueñoDeLasRutas, siguiente, rutas, filtros, clave, pasaje } = Astro.props;
 
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
@@ -118,22 +144,39 @@ const { cita, autor, siguiente, rutas, filtros, clave, pasaje } = Astro.props;
  * llevan el texto íntegro (NFR-12).
  */
 const recorte = enUnaLinea(recortarPorPalabra(cita.texto, MAX_CARACTERES_DE_TITULO_Y_META));
-const titulo = tituloDe(`«${recorte}» — ${autor.nombre}`);
+// Historia 35.4 — el Autor si lo hay; si no, el Personaje.
+const quienFirma = autor?.nombre ?? personaje?.nombre;
+if (quienFirma === undefined) {
+  throw new Error(`La Cita «${cita.slug}» no tiene ni Autor ni Personaje que nombrar en su título y su meta.`);
+}
+const titulo = tituloDe(`«${recorte}» — ${quienFirma}`);
 const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
+/*
+ * «Cómo citar» lo decide solo `citaTieneComoCitar` (FR-65, Historia 35.4). La que lo lleva es la
+ * de siempre, que el esquema obliga a declarar Autor: si llegara sin él, se para aquí en vez de
+ * esconder el desplegable en silencio.
+ */
+const comoCitar = (() => {
+  if (!citaTieneComoCitar(cita)) return undefined;
+  if (autor === undefined) {
+    throw new Error(`La Cita «${cita.slug}» lleva «Cómo citar» y no tiene Autor: la de siempre declara uno.`);
+  }
+  return referenciasDeCita(cita, autor, canonica);
+})();
 ---
 
 <Armazon
   titulo={titulo}
-  descripcion={`${recorte} — ${autor.nombre}.`}
+  descripcion={`${recorte} — ${quienFirma}.`}
   ruta={rutaDeCita(cita.slug)}
   tarjeta={`/tarjeta/${cita.slug}.png`}
   tipo="cita"
 >
-  <DatosEstructurados slot="cabeza" cita={cita} autor={autor} canonica={canonica} />
+  <DatosEstructurados slot="cabeza" cita={cita} autor={autor} personaje={personaje} canonica={canonica} />
   {/* Historia 31.2 — la presentación del pasaje, solo donde se pinta: sin él, ni un byte más. */}
   {pasaje !== undefined && <EstiloDeLeeElPasaje slot="cabeza" />}
   <article class="pagina contenedor">
-    <BloqueDeCita cita={cita} autor={autor} comoTitulo />
+    <BloqueDeCita cita={cita} autor={autor} personaje={personaje} comoTitulo />
     {/*
       * Va aquí y no dentro de `BloqueDeCita` a propósito: ese bloque lo comparten la
       * portada y esta página, y la Cita del Día no es una superficie de comprobación —el
@@ -142,6 +185,8 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * verificar una atribución.
       */}
     <Fuente cita={cita} />
+    {/* Historia 35.6 — la Variante de la atribuida, si la declara; sin ella, nada. */}
+    <Variante cita={cita} />
     {/*
       * Historia 30.1 — nada se intercala entre la Atribución —con su Línea de la Fuente— y
       * Copiar: a 360 × 640 la Tarjeta de Obra empujaba Copiar entre 661 y 756 px, fuera de la
@@ -152,10 +197,10 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * en» queda fuera, detrás, en su bloque propio.
       */}
     <FilaDeAcciones>
-      <CopiarCita cita={cita} autor={autor} />
-      <ImagenDeCita cita={cita} autor={autor} />
+      <CopiarCita cita={cita} autor={autor} personaje={personaje} />
+      <ImagenDeCita cita={cita} autor={autor} personaje={personaje} />
     </FilaDeAcciones>
-    <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
+    <CompartirEnlace cita={cita} autor={autor} personaje={personaje} canonica={canonica} />
     {/*
       * Historia 24.4, movida tras compartir por la 30.1 — la Obra de la que sale la Cita. Aquí
       * y no en `BloqueDeCita` por lo mismo que la Fuente: la portada y el 404 no cambian (la Cita
@@ -163,11 +208,12 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * siguen a compartir. Desde la 24.5 lleva además «Siguiente…» cuando hay a dónde ir
       * (`siguiente`, decidido arriba).
       */}
-    <TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />
+    <TarjetaDeObra cita={cita} dueño={dueñoDeLaObra} nivel={2} siguiente={siguiente} />
     {/*
       * Historia 30.3 — el bloque de desplegables, tras la Tarjeta de Obra —o tras compartir, sin
       * Obra— y antes de las Rutas de salida (UX-DR119). Es **un solo sitio** a propósito: la
-      * palanca de SM-C5 es un diff de aquí. Lleva «Cómo citar» —si la Cita lo tiene— y, el último,
+      * palanca de SM-C5 es un diff de aquí. Lleva «Cómo citar» —si la Cita lo tiene: la atribuida no
+      * (FR-65, Historia 35.4), ni pasaje— y, el último,
       * «Inserta esta cita» (30.4). Delante va «Lee el pasaje» (31.2), solo si la Cita tiene
       * pasaje y sin hueco reservado si no. Desde la 30.4 el bloque se pinta siempre: el Fragmento
       * existe para toda Cita. Fuera de Pagefind (`all`): el pasaje, las Referencias y el Fragmento
@@ -179,22 +225,27 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       {pasaje !== undefined && (
         <Desplegable rotulo="Lee el pasaje"><LeeElPasaje pasaje={pasaje} fuente={cita.fuente} slug={cita.slug} /></Desplegable>
       )}
-      {citaTieneComoCitar(cita) && (
-        <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeCita(cita, autor, canonica)} /></Desplegable>
+      {comoCitar !== undefined && (
+        <Desplegable rotulo="Cómo citar"><ComoCitar referencias={comoCitar} /></Desplegable>
       )}
-      <Desplegable rotulo="Inserta esta cita"><InsertaEstaCita fragmento={fragmentoParaInsertar(cita, autor, canonica)} /></Desplegable>
+      <Desplegable rotulo="Inserta esta cita"><InsertaEstaCita fragmento={fragmentoParaInsertar(cita, autor, canonica, personaje)} conPersonaje={personaje !== undefined} /></Desplegable>
     </div>
     {/*
       * Historia 24.6 — tras las acciones, los tres grupos del pie. Un grupo sin Citas no pinta
       * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
       */}
-    <RutasDeSalida autor={autor} rutas={rutas} zona="rutas-de-salida" />
+    <RutasDeSalida dueño={dueñoDeLasRutas} autorDeLaCita={cita.autor} rutas={rutas} zona="rutas-de-salida" />
+    {/*
+      * Historia 35.8 — en la Cita atribuida, la línea de retirada: lo último visible de la página,
+      * tras las Rutas de salida o, sin ellas, tras los desplegables. La de siempre no la lleva.
+      */}
+    {esAtribuida(cita) && <LineaDeRetirada sobre="cita" slug={cita.slug} />}
     {/*
       * Historia 27.1 — lo que la Cita declara a Pagefind: sus filtros, su metadato `autor` y su
       * clave de orden. El último hijo de `<article>`, fuera de todo bloque que se repite en otra
       * página; lo escribe solo este componente.
       */}
-    <FiltrosDeLaCita filtros={filtros} clave={clave} nombreDelAutor={autor.nombre} />
+    <FiltrosDeLaCita filtros={filtros} clave={clave} nombreDelAutor={personaje?.nombre ?? autor?.nombre} />
   </article>
 </Armazon>
 

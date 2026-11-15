@@ -23,14 +23,26 @@
 import type { AtribucionDeSemblanza } from '../lib/biografia.ts';
 
 interface Props {
-  atribucion: AtribucionDeSemblanza;
+  /**
+   * La de una biografía, o —Historia 35.3— quién responde de la semblanza propia de un
+   * Personaje: «Semblanza de {responde}.», con los mismos tokens y sin enlace.
+   */
+  atribucion: AtribucionDeSemblanza | { responde: string };
 }
 
 const { atribucion } = Astro.props;
 ---
 
-<p style="margin: var(--unidad) 0 0; font-family: var(--sans); font-size: var(--pie); color: var(--tinta-apagada);">
-  Semblanza tomada de <a href={atribucion.url} rel="noopener nofollow"
-    >«{atribucion.titulo}» en {atribucion.fuente}, revisión {atribucion.revision}</a
-  > · <a href={atribucion.urlDeLicencia} rel="noopener license">{atribucion.licencia}</a>
-</p>
+{
+  'responde' in atribucion ? (
+    <p style="margin: var(--unidad) 0 0; font-family: var(--sans); font-size: var(--pie); color: var(--tinta-apagada);">
+      Semblanza de {atribucion.responde}.
+    </p>
+  ) : (
+    <p style="margin: var(--unidad) 0 0; font-family: var(--sans); font-size: var(--pie); color: var(--tinta-apagada);">
+      Semblanza tomada de <a href={atribucion.url} rel="noopener nofollow"
+        >«{atribucion.titulo}» en {atribucion.fuente}, revisión {atribucion.revision}</a
+      > · <a href={atribucion.urlDeLicencia} rel="noopener license">{atribucion.licencia}</a>
+    </p>
+  )
+}

@@ -13,7 +13,8 @@
  *     Cita pasa `2`; la portada pasará `3`, bajo «La cita de hoy» (28.2).
  *   · El título de su Ficha de Obra, sin enlace —ya enlaza en la Atribución, y aquí lo hace la
  *     fila— y sin recortar nunca (NFR-12).
- *   · «{Autor} · {año} · {n} citas»: lo compone `contenidoDeTarjetaDeObra`, en
+ *   · «{dueño} · {año} · {n} citas» —el Autor de la Obra o, desde la Historia 35.4, su Personaje
+ *     (`obra.dueño`)—: lo compone `contenidoDeTarjetaDeObra`, en
  *     `src/lib/atribucion.ts`, con el año y el recuento de la Obra resuelta. Aquí no se cuenta
  *     ni se deriva nada (AD-11).
  *   · Una o dos Filas de bloque, apiladas (UX-DR65):
@@ -42,15 +43,19 @@
  */
 import Rotulo from './Rotulo.astro';
 import FilaDeBloque from './FilaDeBloque.astro';
-import type { Cita, Autor, SiguienteCita } from '../lib/publicado.ts';
+import type { Cita, SiguienteCita } from '../lib/publicado.ts';
+import type { Dueño } from '../lib/obras.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 import { contenidoDeTarjetaDeObra, textoDeSiguiente } from '../lib/atribucion.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
-  /** El Autor de la Cita: el que declara `cita.autor`, y ningún otro. */
-  autor: Autor;
+  /**
+   * El dueño de la Obra de la Cita, con su nombre —su Autor o su Personaje, el de `obra.dueño`, y
+   * ningún otro (Historia 35.4)—, o `undefined` si la Cita no tiene Obra.
+   */
+  dueño: (Dueño & { nombre: string }) | undefined;
   /**
    * El nivel del rótulo «De la obra». Obligatorio y sin valor por omisión: depende de bajo qué
    * encabezado cuelga la tarjeta, y eso solo lo sabe quien la usa.
@@ -64,22 +69,28 @@ interface Props {
   siguiente: SiguienteCita | undefined;
 }
 
-const { cita, autor, nivel, siguiente } = Astro.props;
+const { cita, dueño, nivel, siguiente } = Astro.props;
+
+const obra = cita.obra;
 
 /*
- * Que la Tarjeta nombre al Autor de otro sería atribuirle la Obra a quien no la firma. La
- * integridad del conjunto publicable garantiza que toda Cita resuelve su Autor, así que esto es
- * un uso roto, no un caso que pintar: detiene la construcción.
+ * Que la Tarjeta nombre a otro dueño sería atribuirle la Obra a quien no la firma. La integridad
+ * del conjunto publicable garantiza que toda Obra resuelve su dueño, así que esto es un uso roto,
+ * no un caso que pintar: detiene la construcción.
  */
-if (autor.slug !== cita.autor) {
+if (
+  obra === undefined
+    ? dueño !== undefined
+    : dueño === undefined || dueño.tipo !== obra.dueño.tipo || dueño.slug !== obra.dueño.slug
+) {
   throw new Error(
-    `TarjetaDeObra: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con el Autor ` +
-      `«${autor.slug}», pero la Cita declara «${cita.autor}».`,
+    `TarjetaDeObra: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con el dueño ` +
+      `${dueño === undefined ? '«ninguno»' : `${dueño.tipo} «${dueño.slug}»`}, pero su Obra es de ` +
+      `${obra === undefined ? '«nadie: no tiene Obra»' : `${obra.dueño.tipo} «${obra.dueño.slug}»`}.`,
   );
 }
 
-const obra = cita.obra;
-const contenido = obra === undefined ? undefined : contenidoDeTarjetaDeObra(autor, obra);
+const contenido = obra === undefined || dueño === undefined ? undefined : contenidoDeTarjetaDeObra(dueño, obra);
 
 /*
  * Historia 24.5 — «Siguiente…» lo decide `siguienteCita`, que nunca devuelve la propia Cita, por

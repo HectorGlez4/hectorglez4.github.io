@@ -20,7 +20,7 @@ import { datosDeTarjetaDelDirectorioDeAutores, svgDeTarjetaDeListado } from '../
 
 export const GET: APIRoute = async () => {
   const conjunto = await conjuntoPublicable();
-  const { autores } = directorioDeAutores(conjunto.autores, conjunto.citas);
+  const { autores } = directorioDeAutores(conjunto.autores, conjunto.citas, conjunto.personajes);
   const svg = svgDeTarjetaDeListado(datosDeTarjetaDelDirectorioDeAutores(autores));
   const png = await sharp(Buffer.from(svg)).png().toBuffer();
 

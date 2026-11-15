@@ -888,9 +888,11 @@ describe('Historia 22.4 — lo que rompe el build', () => {
      */
     const original = await readFile(join(RAIZ, 'integraciones/indexables.ts'), 'utf8');
     const parcheada = original.replace(
-      'declararRutasIndexables(indexables.map((obra) => rutaDeLaObra(obra)));',
-      'declararRutasIndexables(publicadas.map((obra) => rutaDeLaObra(obra)));',
+      '...indexables.map((obra) => rutaDeLaObra(obra)),',
+      '...publicadas.map((obra) => rutaDeLaObra(obra)),',
     );
+    // Un fragmento que ya no está dejaría la copia sin parchear y la prueba, vacua.
+    expect(parcheada).not.toBe(original);
     const resultado = await construirConCorpus(
       {
         'autores/seneca.yml': AUTOR_VALIDO,

@@ -26,7 +26,7 @@
  * Sin red (AD-22) y sin escribir nada en `corpus/`.
  */
 
-import type { AparicionDeCita, IncipitDeObra } from '../../src/lib/obras.ts';
+import { derechosDeLaObra, type AparicionDeCita, type IncipitDeObra } from '../../src/lib/obras.ts';
 import { MAX_CARACTERES_DEL_INCIPIT, MAX_CARACTERES_DEL_PASAJE } from '../../src/lib/umbrales.ts';
 import {
   colapsarEspacios,
@@ -37,6 +37,7 @@ import {
   type DocumentosDeFuente,
 } from './cotejo.ts';
 import {
+  leerAutores,
   leerCitas,
   leerDocumentoDeFuente,
   leerDocumentosParaElCotejo,
@@ -44,9 +45,10 @@ import {
   leerOrdenDeLosIndices,
   rutasDelCorpus,
 } from './corpus.ts';
+import { esAtribuida } from '../../src/lib/clase.ts';
 import { fuenteDe as fuenteDeclarada } from './fuentes.ts';
 import { formaDeLasLineas, FORMAS_DE_LINEAS, type FormaDeLineas } from './lineas.ts';
-import { incipitDe, pasajeDeAparicion, type MotivoSinIncipit } from './pasaje.ts';
+import { incipitDe, ofreceIncipit, pasajeDeAparicion, type MotivoSinIncipit } from './pasaje.ts';
 
 /**
  * Lo que de una Cita hace falta para situarla, tal y como sale del frontmatter. Los campos se
@@ -58,6 +60,8 @@ export interface CitaParaSituar {
   texto?: unknown;
   procedencia?: unknown;
   fuente?: unknown;
+  /** Historia 35.2 — la clase: la atribuida no tiene posición (`esAtribuida`, su único lector). */
+  clase?: unknown;
 }
 
 /** La Fuente de una Cita, si declara un identificador. */
@@ -97,6 +101,10 @@ export interface OpcionesDelPasaje {
  *
  * Con `opciones.tope`, la aparición cuyo pasaje ofrece `tools/lib/pasaje.ts` lo trae; la que no,
  * no lleva la clave.
+ *
+ * Historia 35.2 — la atribuida no se sitúa: no sale de su documento, aunque su Obra tenga uno
+ * (la de dominio público con alguna atribuida), así que va con la lista vacía y `ordenDelLibro`
+ * la pone al final, por slug, con las Citas sin aparición.
  */
 export function posicionesDeCitas(
   citas: readonly CitaParaSituar[],
@@ -110,6 +118,7 @@ export function posicionesDeCitas(
   for (const cita of citas) {
     if (typeof cita.slug !== 'string') continue;
     posiciones.set(cita.slug, []);
+    if (esAtribuida(cita)) continue;
     const fuente = fuenteDe(cita);
     const obra = obraDe(cita);
     const grupo = documentoDeCita(fuente, obra);
@@ -122,7 +131,7 @@ export function posicionesDeCitas(
   for (const { fuente, obra, citas: delGrupo } of porGrupo.values()) {
     const buscadas = delGrupo.map((cita) => {
       const texto = typeof cita.texto === 'string' ? cita.texto : '';
-      return { slug: cita.slug as string, texto, buscado: colapsarEspacios(texto) };
+      return { slug: cita.slug as string, texto, buscado: colapsarEspacios(texto), atribuida: esAtribuida(cita) };
     });
     const apariciones = buscadas.map((): AparicionDeCita[] => []);
     for (const nombre of documentosDeCita(fuente, obra, documentos)) {
@@ -130,10 +139,11 @@ export function posicionesDeCitas(
       if (typeof crudo !== 'string') continue;
       const cuerpo = colapsarEspacios(crudo);
       const forma = formaDeLasLineas({ cuerpo: crudo, lineas: lineasDeclaradas?.get(nombre) });
-      buscadas.forEach(({ texto, buscado }, i) => {
+      buscadas.forEach(({ texto, buscado, atribuida }, i) => {
         const posicion = localizar(buscado, cuerpo);
         if (posicion === -1) return;
-        const resultado = pasajeDeAparicion({ crudo, forma, posicion, buscado, textoDeCita: texto, tope });
+        // Historia 35.4 — la clase llega a la única decisión del pasaje, `ofrecePasaje`.
+        const resultado = pasajeDeAparicion({ crudo, forma, posicion, buscado, textoDeCita: texto, tope, atribuida });
         apariciones[i].push(
           'pasaje' in resultado ? { documento: nombre, posicion, pasaje: resultado.pasaje } : { documento: nombre, posicion },
         );
@@ -299,7 +309,9 @@ const FALLO_DEL_INCIPIT = {
  * incumplida: …» y nombrando cada ficha, si algo no se sostiene. No repite el casado con las
  * Citas: retirar la última Cita de ese documento no puede romper la construcción siguiente. El
  * tope es, si no se dice otro, `MAX_CARACTERES_DEL_INCIPIT`; un incipit que no se ofrece (sin
- * tope, o con la primera unidad demasiado larga) no entra.
+ * tope, o con la primera unidad demasiado larga) no entra. Historia 35.9 — tampoco el de una Obra con
+ * derechos vigentes: `ofreceIncipit` lo decide primero, con los derechos de `derechosDeLaObra`, y el
+ * build ya se para ante esa ficha (`fallosDeIncipitConDerechos`); aquí no se lee su documento.
  */
 export async function leerIncipitsDelCorpus(
   raizDelCorpus: string,
@@ -309,8 +321,16 @@ export async function leerIncipitsDelCorpus(
   const rutas = rutasDelCorpus(raizDelCorpus);
   const incipits = new Map<string, IncipitDeObra>();
   const problemas: string[] = [];
-  for (const ficha of await leerFichasDeObra(rutas)) {
+  const fichas = await leerFichasDeObra(rutas);
+  // Los Autores, solo si alguna ficha declara incipit: sin ninguno, no se abre nada más.
+  const autores = fichas.some((f) => f.incipit !== undefined) ? await leerAutores(rutas) : [];
+  const conAutor = new Set(autores.map((a) => a.slug));
+  for (const ficha of fichas) {
     if (ficha.incipit === undefined) continue;
+    // Una ficha cuyo Autor no está no se juzga aquí: la para `fallosDeObras`, nombrándola.
+    const juzgable = ficha.personaje !== undefined || (ficha.autor !== undefined && conAutor.has(ficha.autor));
+    const veto = ofreceIncipit({ tope, primera: '', derechosVigentes: juzgable && derechosDeLaObra(ficha, autores) });
+    if (!veto.ofrece && veto.motivo === 'derechos-vigentes') continue;
     const { documento, desde } = ficha.incipit;
     const leido = await leerDocumentoDeFuente(rutas, documento);
     if (leido.estado !== 'legible') {

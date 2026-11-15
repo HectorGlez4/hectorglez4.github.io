@@ -4,7 +4,8 @@ import { chmod, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
-import { AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida } from './ayuda/construir.js';
+import { ATESTIGUADA, AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida } from './ayuda/construir.js';
+import { MIN_CITAS_POR_PERSONAJE } from '../../src/lib/umbrales.ts';
 import { formaDeObra } from '../../src/lib/obras.ts';
 import { SITIO } from '../../src/lib/dominio.ts';
 import { ensayoDelRango, informeDelEnsayo, obrasDelSitemap, rutasTocadas } from '../../tools/avisar.ts';
@@ -50,6 +51,7 @@ const ENTORNO = {
 };
 
 const CARTAS = '/obra/seneca/cartas/';
+const BATMAN = '/personaje/batman/';
 const BREVEDAD = '/obra/seneca/brevedad/';
 const IRA = '/obra/seneca/ira/';
 
@@ -80,6 +82,39 @@ function ficherosDelCorpus(): Record<string, string> {
   obra('Brevedad', 'brevedad', 5);
   obra('Ira', 'ira', 1);
   return corpus;
+}
+
+/** Historia 35.3b — la Cita n.º `i` de Batman: una atribuida de Séneca, con textos que no se parecen. */
+const TEXTOS_DE_BATMAN = ['La noche guarda a quien vela por la ciudad.', 'El miedo es un arma que se aprende a usar.',
+  'Nadie elige su herida, pero sí lo que hace con ella.', 'Una máscara dice más verdad que muchas caras.'];
+function citaDeBatman(i: number): string {
+  const texto = TEXTOS_DE_BATMAN[i];
+  if (texto === undefined) {
+    throw new Error(`MIN_CITAS_POR_PERSONAJE (${MIN_CITAS_POR_PERSONAJE}) pide más textos de Batman que los ${TEXTOS_DE_BATMAN.length} de la prueba`);
+  }
+  return citaValida({
+    slug: `seneca-batman-${i}`,
+    texto,
+    personaje: 'batman',
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    procedencia: undefined,
+    fuente: undefined,
+    ...ATESTIGUADA,
+  });
+}
+
+const PLAZO_SIN_VALOR = 'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;';
+const AÑO_SIN_VALOR = 'export const AÑO_DE_REFERENCIA: number | undefined = undefined;';
+/** Historia 35.9 — `umbrales.ts` con el plazo y el año dados, solo en la copia. */
+function conPlazo(plazo: string, año: string): string {
+  if (!UMBRALES.includes(PLAZO_SIN_VALOR) || !UMBRALES.includes(AÑO_SIN_VALOR)) {
+    throw new Error('umbrales.ts no declara el plazo y el año sin valor como espera la prueba');
+  }
+  return UMBRALES.replace(PLAZO_SIN_VALOR, PLAZO_SIN_VALOR.replace('= undefined;', `= ${plazo};`)).replace(
+    AÑO_SIN_VALOR,
+    AÑO_SIN_VALOR.replace('= undefined;', `= ${año};`),
+  );
 }
 
 const ficha = (titulo: string) => `autor: seneca\ntitulo: ${titulo}\nformas:\n  - ${formaDeObra(titulo)}\n`;
@@ -189,6 +224,33 @@ beforeAll(async () => {
   await commit('nota-puesta');
   await escribir('corpus/obras/seneca--cartas.yml', ficha('Cartas'));
   await commit('nota-quitada');
+
+  /*
+   * Historia 35.3b — un Personaje que llega a `MIN_CITAS_POR_PERSONAJE` Citas y vuelve a bajar,
+   * y un commit que solo mueve su umbral. Las Citas son atribuidas de Séneca, sin Obra.
+   */
+  await escribir('corpus/personajes/batman.yml', 'nombre: "Batman"\nuniverso: "DC Comics"\nordenAlfabetico: "Batman"\n');
+  for (let i = 0; i < MIN_CITAS_POR_PERSONAJE; i += 1) {
+    await escribir(`corpus/citas/seneca--batman-${i}.md`, citaDeBatman(i));
+  }
+  await commit('personaje-en-el-umbral');
+  await unlink(join(raiz, `corpus/citas/seneca--batman-${MIN_CITAS_POR_PERSONAJE - 1}.md`));
+  await commit('personaje-bajo-el-umbral');
+
+  const umbralDelPersonaje = `MIN_CITAS_POR_PERSONAJE = ${MIN_CITAS_POR_PERSONAJE};`;
+  if (!UMBRALES.includes(umbralDelPersonaje)) throw new Error(`umbrales.ts no declara «${umbralDelPersonaje}»`);
+  await escribir('src/lib/umbrales.ts', UMBRALES.replace(umbralDelPersonaje, `MIN_CITAS_POR_PERSONAJE = ${MIN_CITAS_POR_PERSONAJE + 1};`));
+  await commit('umbral-de-personaje-subido');
+  await escribir('src/lib/umbrales.ts', UMBRALES);
+  await commit('umbral-de-personaje-restituido');
+
+  /*
+   * Historia 35.9 — un commit que solo da valor al plazo y al año (en la copia: en el árbol los
+   * fija Héctor). Con 1970 años de plazo, Séneca (†65) tendría derechos vigentes en 2026: el
+   * veredicto de sus tres Obras cambia, y nada más del Corpus.
+   */
+  await escribir('src/lib/umbrales.ts', conPlazo('1970', '2026'));
+  await commit('plazo-dado');
 }, 60_000);
 
 afterAll(async () => {
@@ -241,7 +303,7 @@ describe('Historia 22.8 — rutasTocadas contra un git de verdad', () => {
     const antes = await copiasDeAviso();
     const { rutas, avisos } = await rango('sin-corpus', 'con-obras', [CARTAS, BREVEDAD]);
     expect(avisos.join('\n')).toMatch(/Sin el Corpus de/);
-    expect(avisos.join('\n')).toMatch(/ninguna Obra hermana/);
+    expect(avisos.join('\n')).toMatch(/ninguna Obra ni ningún Personaje hermano/);
     expect(rutas).toContain('/cita/seneca-cartas-0/');
     expect(await copiasDeAviso()).toBe(antes);
   });
@@ -328,6 +390,8 @@ describe('Historia 24.8 — el aviso de un rango, por campos', () => {
       obra: { cambianDeFecha: 1, seAvisarian: 1 },
       // Historia 26.3 — el rango cambia el texto de una Cita, que el Directorio no pinta.
       directorio: { cambianDeFecha: 0, seAvisarian: 0 },
+      // Historia 35.3 — el Corpus del rango no tiene Personajes.
+      personaje: { cambianDeFecha: 0, seAvisarian: 0 },
     });
     const informe = informeDelEnsayo('a', 'b', ensayo).join('\n');
     expect(informe).toMatch(/Reparto por familia, a\.\.b/);
@@ -424,6 +488,56 @@ describe('Historia 24.8 — lo que la revisión arregló, con git de verdad', ()
     expect(ensayo.portada).toBe(false);
     expect(ensayo.reparto.obra).toEqual({ cambianDeFecha: 1, seAvisarian: 0 });
     expect(ensayo.reparto.cita).toEqual({ cambianDeFecha: 0, seAvisarian: 0 });
+  });
+});
+
+describe('Historia 35.3b — el Personaje en el aviso de un rango, con git de verdad', () => {
+  it('un Personaje que llega al umbral se avisa', async () => {
+    const { rutas } = await rango('nota-quitada', 'personaje-en-el-umbral', [CARTAS, BREVEDAD, BATMAN]);
+    expect(rutas).toContain(BATMAN);
+  });
+
+  it('un Personaje que baja del umbral se avisa por la lista de antes, que lo indexaba', async () => {
+    const { rutas, avisos } = await rango('personaje-en-el-umbral', 'personaje-bajo-el-umbral', [CARTAS, BREVEDAD]);
+    expect(rutas).toContain(BATMAN);
+    expect(avisos).toEqual([]);
+  });
+
+  it('el ensayo de esa bajada cuenta el Personaje en su familia', async () => {
+    await git(['checkout', '-q', sha['personaje-bajo-el-umbral']]);
+    const ensayo = await ensayoDelRango(raiz, sha['personaje-en-el-umbral'], sha['personaje-bajo-el-umbral'], {
+      rutas: [CARTAS, BREVEDAD],
+    });
+    expect(ensayo.reparto.personaje.seAvisarian).toBe(1);
+  });
+
+  it('si el rango cambió MIN_CITAS_POR_PERSONAJE, se dice que la lista de Personajes de antes usa el de hoy', async () => {
+    const { avisos } = await rango('umbral-de-personaje-subido', 'umbral-de-personaje-restituido', [CARTAS, BREVEDAD]);
+    expect(avisos.join('\n')).toContain(
+      `MIN_CITAS_POR_PERSONAJE cambió en el rango (${MIN_CITAS_POR_PERSONAJE + 1} → ${MIN_CITAS_POR_PERSONAJE}): ` +
+        'la lista de Personajes indexables',
+    );
+  });
+});
+
+describe('Historia 35.9 — el plazo de los derechos en el aviso de un rango, con git de verdad', () => {
+  it('un commit que solo da valor al plazo y al año avisa las Obras cuyo veredicto cambia, sin portada', async () => {
+    const { rutas, avisos } = await rango('umbral-de-personaje-restituido', 'plazo-dado', [CARTAS, BREVEDAD]);
+    // Ira cambia de veredicto también, pero no se indexa ni antes ni después: no se avisa.
+    expect([...rutas].sort()).toEqual([BREVEDAD, CARTAS].sort());
+    expect(avisos).toEqual([]);
+  });
+
+  it('el ensayo de ese commit fecha las tres Obras de Séneca y nada más', async () => {
+    await git(['checkout', '-q', sha['plazo-dado']]);
+    const ensayo = await ensayoDelRango(raiz, sha['umbral-de-personaje-restituido'], sha['plazo-dado'], {
+      rutas: [CARTAS, BREVEDAD],
+    });
+    expect(ensayo.portada).toBe(false);
+    expect(ensayo.reparto.obra).toEqual({ cambianDeFecha: 3, seAvisarian: 2 });
+    for (const familia of ['cita', 'autor', 'tema', 'coleccion', 'directorio', 'personaje'] as const) {
+      expect(ensayo.reparto[familia], familia).toEqual({ cambianDeFecha: 0, seAvisarian: 0 });
+    }
   });
 });
 

@@ -29,6 +29,7 @@ import {
   citasPorObra,
   coleccionesPublicadas,
   grafoDelModelo,
+  personajePlano,
   rutasPublicadas,
   superficiesInalcanzables,
   temasBajoUmbralDe,
@@ -48,10 +49,12 @@ import {
   leerDocumentosDeFuente,
   leerFichasDeObra,
   leerOrdenDeLosIndices,
+  leerPersonajes,
   leerTemas,
   type AutorEnCorpus,
   type CitaEnCorpus,
   type ColeccionEnCorpus,
+  type PersonajeEnCorpus,
   type Rutas,
 } from './corpus.ts';
 import { recorrerElementos } from './html.ts';
@@ -78,6 +81,8 @@ export interface DatosDelCorpus {
   colecciones: ColeccionEnCorpus[];
   /** Las Fichas de Obra activas, admitidas por su esquema. */
   fichas: FichaDeObra[];
+  /** Los Personajes de `corpus/personajes/` — Historia 35.3. */
+  personajes: PersonajeEnCorpus[];
 }
 
 /** Lee del disco los datos de `conjuntoDeLosDatos`. Lanza, nombrando el fichero, ante uno ilegible. */
@@ -88,6 +93,7 @@ export async function leerDatosDelCorpus(rutas: Rutas): Promise<DatosDelCorpus> 
     autores: await leerAutores(rutas),
     temas: await leerTemas(rutas),
     colecciones: await leerColecciones(rutas),
+    personajes: await leerPersonajes(rutas),
   };
 }
 
@@ -104,12 +110,14 @@ export function conjuntoDeLosDatos(datos: DatosDelCorpus): ConjuntoPublicable {
    * Historia 22.4 — con su Obra colgada, como en `conjuntoPublicable`: sin ella,
    * `rutasPublicadas` no enumeraría ninguna Página de Obra.
    */
-  const citas = colgarObras(datos.citas as unknown as Cita[], datos.fichas);
+  const citas = colgarObras(datos.citas as unknown as Cita[], datos.fichas, datos.autores);
   return {
     citas,
     autores: datos.autores as unknown as ConjuntoPublicable['autores'],
     temas: datos.temas,
     colecciones: coleccionesPublicadas(datos.colecciones as unknown as Coleccion[], citas),
+    // Historia 35.3 — con el mismo aplanado que `aplanarPersonaje`.
+    personajes: datos.personajes.map((p) => personajePlano(p.slug, p)),
   };
 }
 
@@ -302,7 +310,7 @@ export function veredictoDeAlcance(
 const enNumero = (n: number, singular: string, plural: string) => `${n} ${n === 1 ? singular : plural}`;
 
 /** Lo que se dice de los Temas de una Cita fuera de alcance: los que no se publican, o por qué ninguno. */
-function lineaDeTemas(temas: readonly TemaBajoUmbral[], declarados: number): string {
+export function lineaDeTemas(temas: readonly TemaBajoUmbral[], declarados: number): string {
   if (temas.length === 0) {
     return declarados === 0 ? 'no declara ningún Tema' : 'todos sus Temas se publican';
   }

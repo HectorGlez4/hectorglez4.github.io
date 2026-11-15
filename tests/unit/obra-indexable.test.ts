@@ -48,6 +48,7 @@ import {
   rutasDelSitemap,
   titularDeDesajustes,
 } from '../../tools/lib/indexables.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /**
  * Historia 22.4 — la Obra tiene página, y solo se indexa si no repite otra (FR-52).
@@ -86,7 +87,7 @@ function citasDe(titulo: string, n: number, desde = 0): Cita[] {
 }
 
 function conjunto(citas: Cita[]): ConjuntoPublicable {
-  return { citas: colgarObras(citas, FICHAS), autores: [AUTOR], temas: [], colecciones: [] };
+  return { citas: colgarObras(citas, FICHAS, CUALQUIER_AUTOR), autores: [AUTOR], temas: [], colecciones: [], personajes: [] };
 }
 
 describe('FR-52 — la regla, pura', () => {
@@ -504,10 +505,12 @@ describe('UX-DR49 — pestaña y descripción', () => {
 describe('la Atribución en piezas: el título siempre es el enlace', () => {
   const OBRA = {
     nombre: 'gracian--oraculo',
+    dueño: { tipo: 'autor' as const, slug: 'gracian' },
     autor: 'gracian',
     titulo: 'Oráculo',
     fuentes: [],
     edicionCotejada: false,
+    derechosVigentes: false,
     temas: [],
     recuento: 1,
   };
@@ -531,14 +534,14 @@ describe('la Atribución en piezas: el título siempre es el enlace', () => {
     ['título con signo final', { obra: '¿Qué es?' }, '¿Qué es?', ' Sin año documentado.'],
     ['título distinto de la grafía de la Cita', { obra: 'Oraculo manual', año: 1647 }, 'Oráculo', ', 1647.'],
   ] as const)('%s', (_caso, procedencia, titulo, resto) => {
-    const linea = lineaDeProcedencia(conProcedencia(procedencia as Cita['procedencia'], titulo));
+    const linea = lineaDeProcedencia(conProcedencia(procedencia as Cita['procedencia'], titulo), {});
     expect(linea).toEqual({ titulo, resto });
   });
 
   it('sin Obra no hay título que enlazar, y la ausencia se dice', () => {
-    expect(lineaDeProcedencia(conProcedencia({ año: 1647 }))).toEqual({
+    expect(lineaDeProcedencia(conProcedencia({ año: 1647 }), {})).toEqual({
       resto: 'Sin obra documentada. Año 1647.',
     });
-    expect(lineaDeProcedencia(conProcedencia({}))).toEqual({ resto: 'Sin obra documentada.' });
+    expect(lineaDeProcedencia(conProcedencia({}), {})).toEqual({ resto: 'Sin obra documentada.' });
   });
 });

@@ -10,18 +10,21 @@
  * inventada sería exactamente la procedencia inferida que FR-2 prohíbe, con el agravante
  * de que un buscador se la creería.
  */
-import type { Cita, Autor } from '../lib/publicado.ts';
-import { rutaDeAutor } from '../lib/superficies.ts';
+import type { Cita, Autor, Personaje } from '../lib/publicado.ts';
+import { rutaDeAutor, rutaDePersonaje } from '../lib/superficies.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 import { enUnaLinea } from '../lib/verso.ts';
 
 interface Props {
   cita: Cita;
-  autor: Autor;
+  /** El Autor que declara la Cita, o `undefined` si no declara ninguno (Historia 35.4). */
+  autor: Autor | undefined;
+  /** El Personaje que la dice, si lo declara (Historia 35.4); obligatoria, `undefined` si no. */
+  personaje: Personaje | undefined;
   canonica: string;
 }
 
-const { cita, autor, canonica } = Astro.props;
+const { cita, autor, personaje, canonica } = Astro.props;
 /*
  * Historia 22.3 — `isPartOf` describe la **Obra**, así que lleva su título y su año resueltos:
  * el año solo si todas sus Citas coinciden, y si no, se omite. Nunca el año de esta Cita, que
@@ -36,13 +39,32 @@ const datos: Record<string, unknown> = {
   url: canonica,
   text: enUnaLinea(cita.texto),
   inLanguage: 'es',
-  creator: {
-    '@type': 'Person',
-    name: autor.nombre,
-    url: new URL(rutaDeAutor(autor.slug), canonica).href,
-    ...(autor.añoNacimiento !== undefined ? { birthDate: String(autor.añoNacimiento) } : {}),
-    deathDate: String(autor.añoFallecimiento),
-  },
+  /*
+   * Historia 35.4, AD-33 — el `creator` es el Autor, solo si la Cita lo declara (se conserva el
+   * nombre de siempre; ver el diferido del spec), y quien la dice, el Personaje, va en
+   * `spokenByCharacter` con solo su nombre y su página: sin fechas ni `sameAs`.
+   */
+  ...(autor !== undefined
+    ? {
+        creator: {
+          '@type': 'Person',
+          name: autor.nombre,
+          url: new URL(rutaDeAutor(autor.slug), canonica).href,
+          ...(autor.añoNacimiento !== undefined ? { birthDate: String(autor.añoNacimiento) } : {}),
+          // Historia 35.1 — un Autor vivo no tiene fecha de muerte que declarar.
+          ...(autor.añoFallecimiento !== undefined ? { deathDate: String(autor.añoFallecimiento) } : {}),
+        },
+      }
+    : {}),
+  ...(personaje !== undefined
+    ? {
+        spokenByCharacter: {
+          '@type': 'Person',
+          name: personaje.nombre,
+          url: new URL(rutaDePersonaje(personaje.slug), canonica).href,
+        },
+      }
+    : {}),
 };
 
 /*
@@ -67,8 +89,9 @@ if (cita.fuente !== undefined) {
 if (obra !== undefined) {
   datos.isPartOf = {
     // El mismo tipo que el `about` de la Página de Obra (`DatosDeObra.astro`): con el mismo
-    // `@id`, dos tipos distintos describirían la misma obra de dos maneras.
-    '@type': 'Book',
+    // `@id`, dos tipos distintos describirían la misma obra de dos maneras. La de un Personaje
+    // es una `CreativeWork` (Historia 35.4), como su `about`.
+    '@type': obra.dueño.tipo === 'personaje' ? 'CreativeWork' : 'Book',
     /*
      * Historia 22.4 — el mismo `@id` que el `about` de la Página de Obra: la canónica de su
      * página 1, también si no se indexa. Así las dos declaraciones hablan de la misma obra.

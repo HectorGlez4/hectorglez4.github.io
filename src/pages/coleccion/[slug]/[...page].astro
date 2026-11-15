@@ -72,11 +72,13 @@ import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 export const getStaticPaths = (async ({ paginate }) => {
   const conjunto = await conjuntoPublicable();
   const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+  // Historia 35.4 — el Personaje de cada Cita va en su tarjeta, en el sitio del Autor.
+  const personajes = new Map(conjunto.personajes.map((p) => [p.slug, p]));
 
   return conjunto.colecciones.flatMap((coleccion) =>
     paginate(coleccion.citas, {
       params: { slug: coleccion.slug },
-      props: { coleccion, autores },
+      props: { coleccion, autores, personajes },
       pageSize: CITAS_POR_PAGINA,
     }),
   );
@@ -93,7 +95,7 @@ export const getStaticPaths = (async ({ paginate }) => {
  */
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { autores, page: pagina } = Astro.props;
+const { autores, personajes, page: pagina } = Astro.props;
 
 /*
  * **Anotación, no aserción.** `ColeccionPublicada` se escribe a la izquierda del `=`, así que
@@ -141,7 +143,7 @@ const canonica = new URL(ruta, Astro.site).href;
       */}
     {/* UX-DR25 — los listados son listas reales. */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="autor-y-obra" autor={autores.get(cita.autor)} zona="listado" />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="autor-y-obra" autor={cita.autor === undefined ? undefined : autores.get(cita.autor)} personaje={cita.personaje === undefined ? undefined : personajes.get(cita.personaje)} zona="listado" />)}
     </ul>
 
     <Paginacion pagina={pagina} zona="paginacion" />

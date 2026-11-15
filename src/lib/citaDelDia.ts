@@ -20,6 +20,7 @@ import type { Autor, Cita } from './publicado.ts';
 import { ordenDeLaListaDeObras, type ObraResuelta } from './obras.ts';
 import { compararPorClave } from './normalizar.ts';
 import { OBRAS_DE_LA_PORTADA } from './umbrales.ts';
+import { esAtribuida } from './clase.ts';
 
 /** Una jornada en ISO 8601, `AAAA-MM-DD`. */
 export type Jornada = string;
@@ -94,6 +95,9 @@ export interface SeleccionDeCitaDelDia {
 export function ordenEnRondas(aptas: Cita[]): Cita[] {
   const porAutor = new Map<string, Cita[]>();
   for (const cita of aptas) {
+    // Historia 35.4 — una Cita sin Autor no cuenta para ninguno: la atribuida nunca es apta para
+    // portada, así que no llega aquí; si llegara, no entra en ninguna ronda.
+    if (cita.autor === undefined) continue;
     const suyas = porAutor.get(cita.autor);
     if (suyas) suyas.push(cita);
     else porAutor.set(cita.autor, [cita]);
@@ -144,9 +148,14 @@ export function citaDelDia(
   return { cita: orden[indice], fijada: false };
 }
 
-/** Las Citas marcadas como aptas para portada — FR-15, marcado por `tools/portada.ts`. */
+/**
+ * Las Citas marcadas como aptas para portada — FR-15, marcado por `tools/portada.ts`.
+ *
+ * Historia 35.7 — una atribuida nunca está entre las aptas, aunque una ficha a mano la marcara
+ * (pregunta 22): lo pregunta a `esAtribuida`, el único lector de la clase.
+ */
 export function aptasParaPortada(citas: Cita[]): Cita[] {
-  return citas.filter((c) => c.aptaParaPortada);
+  return citas.filter((c) => c.aptaParaPortada && !esAtribuida(c));
 }
 
 /** El resto de dividir por `divisor` (> 0), siempre entre 0 y `divisor` − 1, también con `n` negativo. */
@@ -187,6 +196,11 @@ function modulo(n: number, divisor: number): number {
  * Autor que no está en `autores` o si ese Autor no tiene clave de orden, como `autoresDestacados`:
  * el build lo para antes, en `integraciones/claves.ts`, y adivinarle un sitio escondería el fallo.
  * Lanza también si la jornada no es una jornada (`esJornada`), en vez de devolver una ventana rota.
+ *
+ * Historia 35.4 — la Obra de un Personaje cuenta por su Autor (`obra.autor`) cuando se sabe, como
+ * en el Directorio de Obras, que la pone bajo ese Autor. La que no tiene Autor no entra en la
+ * ronda: L es la lista de Autores y no tiene dónde ponerla; la alcanza `/obras/`, en su sección
+ * «Personajes» (35.5). Si debe rotar también en la portada lo decide Héctor.
  */
 export function obrasDelDia<O extends Pick<ObraResuelta, 'nombre' | 'autor' | 'titulo' | 'recuento'>>(
   obras: readonly O[],
@@ -195,6 +209,7 @@ export function obrasDelDia<O extends Pick<ObraResuelta, 'nombre' | 'autor' | 't
 ): O[] {
   const porAutor = new Map<string, O[]>();
   for (const obra of obras) {
+    if (obra.autor === undefined) continue;
     const suyas = porAutor.get(obra.autor);
     if (suyas === undefined) porAutor.set(obra.autor, [obra]);
     else suyas.push(obra);

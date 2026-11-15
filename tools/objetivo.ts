@@ -4,6 +4,13 @@
  *   npx tsx tools/objetivo.ts [--corpus corpus] [--json]
  *   npx tsx tools/objetivo.ts --registrar
  *   npx tsx tools/objetivo.ts --anular "<motivo>" [--elegido "<objetivo>"]
+ *   npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida
+ *
+ * Con `--clase-de-cita atribuida` (Historia 35.10, FR-68) se anota una sesión de siembra de la Cita
+ * atribuida: lleva `claseDeCita: atribuida` y su resultado medido —las atribuidas publicadas—, y no
+ * lleva el objetivo, porque la política es de la clase de siempre y no la propone. Las entradas sin
+ * el campo se leen como de la clase de siempre. Un valor distinto, o la bandera sin `--registrar` o
+ * con `--anular`, sale con 2.
  *
  * Sin banderas, **consulta**: propone el objetivo, declara de qué hueco sale y no escribe
  * nada. La propuesta es determinista —el mismo estado del Corpus da la misma frase,
@@ -36,10 +43,12 @@ import {
   type EpocaParaHuecos,
 } from '../src/lib/huecos.ts';
 import { porcentajeEnEspañol } from '../src/lib/formato.ts';
+import { CLASE_ATRIBUIDA } from '../src/lib/clase.ts';
 import { lineasDeObjetivo, objetivoDeSesion } from '../src/lib/objetivo.ts';
 import { temasPublicados, type Cita, type Tema } from '../src/lib/publicado.ts';
 import { auditar, type CitaParaAuditar } from '../src/lib/salud.ts';
 import {
+  claseDeCitaDeLaSesion,
   fechaLocal,
   leerAutores,
   leerCandidatosPorEpoca,
@@ -67,9 +76,39 @@ const USO = [
   '  npx tsx tools/objetivo.ts --anular "<motivo>" [--elegido "<objetivo>"]',
   '      Anota la sesión con el objetivo que el editor eligió en su lugar, y por qué.',
   '',
+  '  npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida',
+  '      Anota una sesión de siembra de la Cita atribuida, sin la política del objetivo.',
+  '',
   'Opciones: --corpus <ruta>, --json, --registrar, --anular <motivo>, --elegido <objetivo>,',
+  '          --clase-de-cita atribuida,',
   '          --ayuda',
 ].join('\n');
+
+/*
+ * Historia 35.10 — la clase de Cita de la sesión. Solo la atribuida: la de siempre es la que no lleva
+ * el campo. Es la forma de la invocación, y sale con 2.
+ */
+const conClaseDeCita = argumentos.includes('--clase-de-cita');
+// Con «--ayuda» gana la ayuda: la clase no se juzga.
+if (conClaseDeCita && !argumentos.includes('--ayuda')) {
+  const dada = opcion(argumentos, '--clase-de-cita');
+  const motivos: string[] = [];
+  if (dada !== CLASE_ATRIBUIDA) {
+    motivos.push(
+      `«--clase-de-cita» admite solo «atribuida»${dada === undefined ? '' : `, no «${dada}»`}: la sesión de la clase de siempre ` +
+        'no lleva el campo.',
+    );
+  }
+  if (!argumentos.includes('--registrar')) motivos.push('«--clase-de-cita» va con «--registrar»: consultar no registra nada.');
+  if (argumentos.includes('--anular') || argumentos.includes('--elegido')) {
+    motivos.push('Una sesión de la atribuida no lleva objetivo que anular: la política es de la clase de siempre.');
+  }
+  if (argumentos.filter((a) => a === '--clase-de-cita').length > 1) motivos.push('«--clase-de-cita» está repetida.');
+  if (motivos.length > 0) {
+    process.stderr.write(`${[...motivos, '', USO].join('\n')}\n`);
+    process.exit(2);
+  }
+}
 
 /*
  * Una bandera que no se reconoce nunca es «lo mismo pero sin ella». `--registar`, con la
@@ -78,7 +117,7 @@ const USO = [
  */
 const sobrantes = motivosDeArgumentosNoReconocidos(argumentos, {
   solas: ['--json', '--registrar', '--ayuda'],
-  conValor: ['--corpus', '--anular', '--elegido'],
+  conValor: ['--corpus', '--anular', '--elegido', '--clase-de-cita'],
 });
 if (sobrantes.length > 0) terminar({ ok: false, motivos: [...sobrantes, '', USO] });
 
@@ -98,6 +137,8 @@ function valor(clave: string): string | undefined {
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
 
 const citas = (await leerCitas(rutas.citas)) as unknown as CitaParaHuecos[];
+
+if (conClaseDeCita) await registrarSesionAtribuida();
 const temas = await leerTemas(rutas);
 /*
  * Una sola lectura de los Autores. `AutorParaHuecos` es la vista recortada del equilibrio de
@@ -232,7 +273,12 @@ if (anula) {
  */
 const salud = auditar(citas as unknown as CitaParaAuditar[]);
 const resultado = {
-  citasPublicadas: salud.publicadas.total,
+  /*
+   * Historia 35.7 — `auditar` cuenta solo la clase de siempre, pero esta clave de la serie ha
+   * contado siempre **todas** las publicadas: se suman las atribuidas para que siga midiendo lo
+   * mismo entre entradas. Solo `procedenciaCompleta` pasa a medirse sobre la clase de siempre.
+   */
+  citasPublicadas: salud.publicadas.total + salud.atribuidas,
   procedenciaCompleta: salud.publicadas.porcentajeCompleta,
   /*
    * Sobre la base del suelo desde la v6 —todos menos los de tradición `otra`—, no sobre el
@@ -346,3 +392,65 @@ const mensaje = quiereJson
     ].join('\n');
 
 terminar({ ok: true, ruta, mensaje });
+
+/**
+ * La sesión de siembra de la Cita atribuida — Historia 35.10: su clase y su resultado medido, sin la
+ * política del objetivo. Un reintento de la misma jornada con el mismo resultado no se anota dos veces.
+ */
+async function registrarSesionAtribuida(): Promise<never> {
+  const medida = auditar(citas as unknown as CitaParaAuditar[]);
+  const resultadoAtribuida = {
+    citasPublicadas: medida.publicadas.total + medida.atribuidas,
+    atribuidasPublicadas: medida.atribuidas,
+  };
+  const ahora = new Date();
+  const hoy = fechaLocal(ahora);
+  let previas;
+  try {
+    previas = await leerSesionesDeSembrado(rutas);
+  } catch (fallo) {
+    terminar({ ok: false, motivos: [fallo instanceof Error ? fallo.message : String(fallo)] });
+  }
+  const repetida = previas.some(
+    (s) =>
+      s.fecha === hoy &&
+      claseDeCitaDeLaSesion(s) === CLASE_ATRIBUIDA &&
+      s.resultado?.citasPublicadas === resultadoAtribuida.citasPublicadas &&
+      s.resultado?.atribuidasPublicadas === resultadoAtribuida.atribuidasPublicadas,
+  );
+  if (repetida) {
+    terminar({
+      ok: false,
+      motivos: [
+        'Hoy ya hay registrada una sesión de la atribuida con este mismo resultado.',
+        'Si es un reintento, no hay nada que anotar: la sesión ya está en el registro.',
+      ],
+    });
+  }
+  let anotada: string;
+  try {
+    anotada = await registrarSesionDeSembrado(rutas, {
+      momento: ahora,
+      claseDeCita: CLASE_ATRIBUIDA,
+      resultado: resultadoAtribuida,
+    });
+  } catch (fallo) {
+    terminar({ ok: false, motivos: [fallo instanceof Error ? fallo.message : String(fallo)] });
+  }
+  terminar({
+    ok: true,
+    ruta: anotada,
+    mensaje: argumentos.includes('--json')
+      ? JSON.stringify({ sesion: { claseDeCita: CLASE_ATRIBUIDA, resultado: resultadoAtribuida }, registro: anotada }, null, 2)
+      : [
+          'Sesión de la Cita atribuida registrada',
+          '──────────────────────────────────────',
+          'La política del objetivo es de la clase de siempre y no la propone.',
+          '',
+          `Citas publicadas:            ${resultadoAtribuida.citasPublicadas}`,
+          `Atribuidas publicadas:       ${resultadoAtribuida.atribuidasPublicadas}`,
+          '',
+          `Registrado en ${anotada}`,
+        ].join('\n'),
+  });
+}

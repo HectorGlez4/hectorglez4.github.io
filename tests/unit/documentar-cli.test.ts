@@ -849,3 +849,59 @@ describe('Historia 29.2 — --restituir-saltos', () => {
     expect(verde.codigo, verde.salida).toBe(0);
   });
 });
+
+describe('Historia 35.6 — documentar no toca una atribuida', () => {
+  const ATRIBUIDA = 'buzz-hasta-el-infinito-y-mas-alla';
+  const FICHERO_ATRIBUIDA = 'citas/buzz--hasta-el-infinito-y-mas-alla.md';
+  const conAtribuida: CorpusDePrueba = {
+    ...CORPUS,
+    'personajes/buzz.yml': 'nombre: "Buzz Lightyear"\nuniverso: "Toy Story"\n',
+    [FICHERO_ATRIBUIDA]: citaValida({
+      slug: ATRIBUIDA,
+      texto: TEXTO,
+      autor: undefined,
+      personaje: 'buzz',
+      clase: 'atribuida',
+      estadoDerechos: undefined,
+      fuente: undefined,
+      procedencia: { año: 1995 },
+      atestiguaciones: [
+        { url: 'https://es.wikiquote.org/wiki/Prueba', consultadaEl: '2026-11-01' },
+        { url: 'https://www.elpais.com/cultura/prueba.html', consultadaEl: '2026-11-02' },
+      ],
+      origen: 'original',
+    }),
+  };
+
+  async function todo(directorio: string): Promise<Record<string, string>> {
+    const salida: Record<string, string> = {};
+    for (const entrada of await readdir(directorio, { recursive: true, withFileTypes: true })) {
+      if (!entrada.isFile()) continue;
+      const ruta = join(entrada.parentPath, entrada.name);
+      salida[ruta] = await readFile(ruta, 'utf8');
+    }
+    return salida;
+  }
+
+  it.each<[string, (corpus: string) => string[]]>([
+    ['documentarla', (corpus) => [ATRIBUIDA, rutaDelDocumento(corpus)]],
+    ['retirarla', () => ['--retirar', ATRIBUIDA, 'no es suya']],
+  ])('%s sale con 1, nombra «npm run atribuida» y no escribe nada', async (_, argumentos) => {
+    const corpus = await enDisco(conAtribuida);
+    const antes = await todo(corpus);
+    const r = await correr(corpus, argumentos(corpus));
+    expect(r.codigo, r.salida).toBe(1);
+    expect(r.error).toMatch(/es una Cita atribuida: documentar no la toca/u);
+    expect(r.error).toContain('npm run atribuida');
+    expect(await todo(corpus)).toEqual(antes);
+  });
+
+  it.each([['--restituir-traduccion'], ['--restituir-saltos']])('%s salta la atribuida y la cuenta en su parte', async (modo) => {
+    const corpus = await enDisco(conAtribuida);
+    const antes = await readFile(join(corpus, FICHERO_ATRIBUIDA), 'utf8');
+    const r = await correr(corpus, [modo]);
+    expect(r.codigo, r.error).toBe(0);
+    expect(r.salida).toContain('Atribuidas saltadas, sin tocar: 1.');
+    expect(await readFile(join(corpus, FICHERO_ATRIBUIDA), 'utf8')).toBe(antes);
+  });
+});

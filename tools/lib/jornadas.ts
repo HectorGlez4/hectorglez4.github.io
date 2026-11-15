@@ -22,6 +22,7 @@
  * AD-22 — aquí no entra la red: esto lee y escribe ficheros del corpus, y nada más.
  */
 
+import { esAtribuida } from '../../src/lib/clase.ts';
 import { esJornada, type Jornada } from '../../src/lib/citaDelDia.ts';
 import { escribirPortada, leerCitas, leerPortada, type Rutas } from './corpus.ts';
 import type { Resultado } from './gestion.ts';
@@ -231,6 +232,15 @@ export async function fijarJornadas(
       continue;
     }
 
+    // Historia 35.1b — una atribuida no sale en portada (pregunta 22): no se fija.
+    if (esAtribuida(porSlug.get(cita)!)) {
+      motivos.push(
+        `La Cita «${cita}» es atribuida, y una atribuida no sale en portada (pregunta 22): ` +
+          'no se fija ninguna jornada con ella.',
+      );
+      continue;
+    }
+
     if (porSlug.get(cita)!.aptaParaPortada !== true) {
       /*
        * La regla que más falta hace que esté aquí. `citaDelDia` busca la Cita fijada
@@ -359,6 +369,11 @@ export interface JornadaFijada {
    * otra Cita, que es lo que `citaDelDia` hace a propósito para no dejar la portada muda.
    */
   apta: boolean;
+  /**
+   * Historia 35.7 — la Cita es atribuida: nunca es apta (pregunta 22), aunque una ficha a mano la
+   * marcara, y la fijación queda muda.
+   */
+  atribuida: boolean;
 }
 
 /**
@@ -391,7 +406,8 @@ export async function inventarioDeJornadas(
         cita,
         pasada: jornada < hoy,
         publicada: porSlug.has(cita),
-        apta: porSlug.get(cita)?.aptaParaPortada === true,
+        apta: porSlug.get(cita)?.aptaParaPortada === true && !esAtribuida(porSlug.get(cita)!),
+        atribuida: porSlug.has(cita) && esAtribuida(porSlug.get(cita)!),
       })),
   };
 }

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { CLASE_ATRIBUIDA } from '../../src/lib/clase.ts';
 import { execFile } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -182,6 +183,25 @@ describe('Historia 9.1 — las candidatas quedan en revisión, no publicadas', (
     }
   });
 
+  it('Historia 35.1b — de un Autor con derechos vigentes salen atribuidas: su clase y sin estadoDerechos', async () => {
+    const { corpus } = await corpusConAutores();
+    await writeFile(
+      join(corpus, 'autores', 'seneca.yml'),
+      fichaDeAutor('seneca').replace('añoFallecimiento: 65', 'vivo: true'),
+      'utf8',
+    );
+    const resultado = await extraer(await documento(corpus), corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+    for (const fichero of ficheros) {
+      const frontmatter = await frontmatterDe(corpus, fichero);
+      expect(frontmatter.clase, fichero).toBe(CLASE_ATRIBUIDA);
+      expect(frontmatter).not.toHaveProperty('estadoDerechos');
+      expect(String(frontmatter.texto)).not.toContain('\n');
+    }
+  });
+
   it('el pasaje en latín no llegó a escribirse', async () => {
     const { corpus } = await corpusConAutores();
     await extraer(await documento(corpus), corpus);
@@ -248,6 +268,29 @@ describe('Retro épica 9 — repetir la extracción no pisa lo anterior', () => 
     for (const fichero of primera) expect(segunda).toContain(fichero);
     // …y no hay una segunda copia de cada una.
     expect(segunda.length).toBe(primera.length);
+  });
+
+  it('Historia 35.2 — una candidata de Personaje sin Autor en revisión no la para, ni deja de contar las suyas', async () => {
+    const { corpus } = await corpusConAutores();
+    const ruta = await documento(corpus);
+    await extraer(ruta, corpus);
+    const primera = await readdir(join(corpus, '_revision'));
+    // La que deja el alta de un Personaje sin Autor: sin `autor`, con su `personaje`.
+    await writeFile(
+      join(corpus, '_revision', 'batman--la-noche-es-larga.md'),
+      '---\nslug: batman-la-noche-es-larga\ntexto: "La noche es larga."\npersonaje: batman\nclase: atribuida\n---\n',
+      'utf8',
+    );
+    // Y una escrita a mano sin Autor ni Personaje, que ningún esquema juzgó todavía.
+    await writeFile(
+      join(corpus, '_revision', 'sin-dueno--una-frase.md'),
+      '---\nslug: sin-dueno-una-frase\ntexto: "Una frase."\n---\n',
+      'utf8',
+    );
+    const segunda = await extraer(ruta, corpus);
+    expect(segunda.codigo, segunda.error).toBe(0);
+    // Las de Séneca siguen contando como «ya estaban»: no se duplican.
+    expect((await readdir(join(corpus, '_revision'))).length).toBe(primera.length + 2);
   });
 
   it('no reutiliza el slug de una Cita ya publicada', async () => {
@@ -1349,6 +1392,24 @@ describe('Historia 29.1 — la candidata conserva el verso de su documento (AD-2
     for (const fichero of await readdir(join(corpus, '_revision'))) {
       const datos = await frontmatterDe(corpus, fichero);
       expect(citaAdmisible.safeParse(datos).success, fichero).toBe(true);
+    }
+  });
+
+  it('Historia 35.1b — de verso, la de un Autor con derechos vigentes sale atribuida y en una línea', async () => {
+    const { corpus } = await corpusConAutores();
+    await writeFile(
+      join(corpus, 'autores', 'seneca.yml'),
+      fichaDeAutor('seneca').replace('añoFallecimiento: 65', 'vivo: true'),
+      'utf8',
+    );
+    const resultado = await extraer(await documento(corpus, CABECERA, { texto: VERSO }), corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+    for (const fichero of ficheros) {
+      const frontmatter = await frontmatterDe(corpus, fichero);
+      expect(frontmatter.clase, fichero).toBe(CLASE_ATRIBUIDA);
+      expect(String(frontmatter.texto), fichero).not.toContain('\n');
     }
   });
 

@@ -53,6 +53,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, extname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { normalizar } from '../src/lib/normalizar.ts';
 import { slugDeCita, slugLibre } from '../src/lib/slug.ts';
+import { dueñoDeCita } from '../src/lib/obras.ts';
+import { CLASE_ATRIBUIDA, claseQueCorresponde, esAtribuida } from '../src/lib/clase.ts';
 import {
   aYaml,
   leerAutores,
@@ -121,7 +123,7 @@ if (!existsSync(rutas.autores)) {
   });
 }
 
-let delCorpus: { slug: string; nombre?: string } | undefined;
+let delCorpus: { slug: string; nombre?: string; vivo?: unknown; añoFallecimiento?: unknown } | undefined;
 try {
   delCorpus = (await leerAutores(rutas)).find((a) => a.slug === autor);
 } catch (fallo) {
@@ -417,7 +419,14 @@ const ocupados = new Set([
  */
 const clave = (autorDeLaCita: string, texto: string) => `${autorDeLaCita} ${normalizar(texto)}`;
 
-const yaEnRevision = new Set(enRevision.map((c) => clave(c.autor, c.texto)));
+/*
+ * El dueño de cada una, sin lanzar: lo que está en `_revision/` no lo ha juzgado ningún esquema, y
+ * una candidata sin Autor ni Personaje no casa con nada antes que tumbar la orden (Historia 35.2).
+ */
+const dueñoDe = (c: { slug: string; autor?: string; personaje?: string }) =>
+  c.autor === undefined && c.personaje === undefined ? '' : dueñoDeCita(c).slug;
+
+const yaEnRevision = new Set(enRevision.map((c) => clave(dueñoDe(c), c.texto)));
 
 /*
  * Y lo que ya **es Cita publicada**, también por texto.
@@ -431,7 +440,7 @@ const yaEnRevision = new Set(enRevision.map((c) => clave(c.autor, c.texto)));
  * Y re-extraer no es raro: es lo que se hace cada vez que entra una puerta nueva y hay que
  * pasar por ella los documentos viejos.
  */
-const yaPublicadas = new Set(publicadas.map((c) => clave(c.autor, c.texto)));
+const yaPublicadas = new Set(publicadas.map((c) => clave(dueñoDe(c), c.texto)));
 
 let repetidas = 0;
 let yaEstaban = 0;
@@ -470,7 +479,15 @@ for (const candidata of resultado.candidatas) {
     escritas += 1;
     continue;
   }
-  const escrito = textoConSaltos(candidata.texto, deEsteDocumento);
+  /*
+   * Historia 35.1b — la clase se deriva del Autor, nunca se teclea: la de un Autor con derechos
+   * vigentes es atribuida, va en una línea y lleva su clase en vez de `estadoDerechos`. Llega a
+   * revisión sin atestiguaciones ni origen, que se declaran antes de aprobarla.
+   */
+  const atribuida = esAtribuida({ clase: claseQueCorresponde({}, delCorpus ?? {}) });
+  const escrito = atribuida
+    ? { texto: candidata.texto, descartados: 0 }
+    : textoConSaltos(candidata.texto, deEsteDocumento);
   saltosDescartados += escrito.descartados;
   await writeFile(
     fichero,
@@ -480,7 +497,7 @@ for (const candidata of resultado.candidatas) {
       temas: [],
       slug,
       procedencia: candidata.procedencia,
-      estadoDerechos: 'dominio-público',
+      ...(atribuida ? { clase: CLASE_ATRIBUIDA } : { estadoDerechos: 'dominio-público' }),
       fuente: candidata.fuente,
     })}---\n`,
     'utf8',

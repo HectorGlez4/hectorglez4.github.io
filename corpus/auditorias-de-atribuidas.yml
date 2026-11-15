@@ -1,0 +1,21 @@
+# Auditorías de SM-C6 — Historia 35.8, Épica 35, AD-32
+#
+# QUÉ REGISTRA. Cada mes de siembra, una muestra con nombre de Citas atribuidas publicadas al
+# cierre del mes se coteja contra una fuente que las documente, y una persona decide cada
+# resultado: bien, mal-atribuida o sin-fuente. Una línea por auditoría: mes, muestra,
+# resultados y la jornada en que se auditó (auditadoEl).
+#
+# LA MUESTRA NO SE ELIGE A MANO. Son las MUESTRA_DE_AUDITORIA_SM_C6 atribuidas publicadas al
+# cierre del mes con menor SHA-256 de «{slug}|{mes}» (src/lib/umbrales.ts, la fija Héctor).
+#
+# SOLO AÑADE. Ninguna entrada se reescribe ni se borra; una segunda auditoría del mismo mes se
+# añade y la consulta lee la última. `npm test` comprueba que el fichero del commit empieza,
+# byte a byte, por el del commit padre.
+#
+# NO SE EDITA A MANO. Lo escribe `npm run peticion -- auditar <AAAA-MM> --resultado <slug>=…`.
+# Ningún agente anota una auditoría que no ha hecho una persona.
+#
+# Lo lee `npm run peticion` para la proporción mal atribuida de SM-C6. No es una colección:
+# ningún módulo de src/ lo lee (AD-24), ningún byte de dist/ sale de él y no fecha ni avisa.
+
+auditorias:

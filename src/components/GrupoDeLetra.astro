@@ -11,21 +11,29 @@
  * la lista a 2 × del rótulo, con filete superior, y «Volver a las letras» a 2 × de la última fila.
  * Lo reutiliza `/obras/` (26.4). El «primer grupo» es el primero **visible**: el filtro de la 26.6
  * aparta grupos con `hidden`, y el que queda primero va a 4 ×, no a 5 ×.
+ *
+ * Historia 35.5 — en la sección «Personajes» de `/autores/` el rótulo de la letra es `h3`, porque
+ * cuelga del `h2` «Personajes» (`nivel`), y «Volver a las letras» lleva a las letras de la sección
+ * (`volver`). Sin ellos, `h2` y `#letras`: los grupos de la A–Z salen como siempre.
  */
 import Rotulo from './Rotulo.astro';
 
 interface Props {
   inicial: string;
   ancla: string;
+  /** El nivel del rótulo de la letra: 2 por omisión; 3 bajo el `h2` «Personajes». */
+  nivel?: 2 | 3;
+  /** El destino de «Volver a las letras»: por omisión, `#letras`. */
+  volver?: string;
 }
 
-const { inicial, ancla } = Astro.props;
+const { inicial, ancla, nivel = 2, volver = '#letras' } = Astro.props;
 ---
 
 <section class="grupo">
-  <Rotulo id={ancla} destino>{inicial}</Rotulo>
+  <Rotulo id={ancla} destino nivel={nivel}>{inicial}</Rotulo>
   <slot />
-  <p class="volver"><a href="#letras">Volver a las letras</a></p>
+  <p class="volver"><a href={volver}>Volver a las letras</a></p>
 </section>
 
 <style>

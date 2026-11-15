@@ -16,7 +16,7 @@
 import { existsSync } from 'node:fs';
 import { colgarObras } from '../../src/lib/obras.ts';
 import { enUnaLinea } from '../../src/lib/verso.ts';
-import { leerCitas, leerFichasDeObra, type Rutas } from './corpus.ts';
+import { leerAutores, leerCitas, leerFichasDeObra, type Rutas } from './corpus.ts';
 import {
   CLASES_DE_COINCIDENCIA,
   cifraDeParecido,
@@ -75,9 +75,12 @@ export async function casiDuplicados(rutas: Rutas, fichas: readonly string[] = [
   }
   let citas: Awaited<ReturnType<typeof leerCitas>>;
   let activas: Awaited<ReturnType<typeof leerFichasDeObra>>;
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
   try {
     citas = await leerCitas(rutas.citas);
     activas = await leerFichasDeObra(rutas);
+    // Historia 35.9 — `colgarObras` resuelve también los derechos de cada Obra, por su dueño.
+    autores = await leerAutores(rutas);
   } catch (fallo) {
     return {
       ok: false,
@@ -98,8 +101,22 @@ export async function casiDuplicados(rutas: Rutas, fichas: readonly string[] = [
   }
   const pedidas = new Set(fichas);
 
+  // Historia 35.9 — colgar las Obras juzga los derechos de cada una, y lanza ante una ficha cuyo
+  // Autor no está: la orden se niega diciéndolo, no sale por una traza.
+  let colgadas: ReturnType<typeof colgarObras<(typeof citas)[number]>>;
+  try {
+    colgadas = colgarObras(citas, activas, autores);
+  } catch (fallo) {
+    return {
+      ok: false,
+      motivos: [
+        `No se pudieron resolver las Obras: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+        'Sin resolverlas todas no se puede decir qué pares hay.',
+      ],
+    };
+  }
   const porObra = new Map<string, { titulo: string; citas: { slug: string; texto: string }[] }>();
-  for (const cita of colgarObras(citas, activas)) {
+  for (const cita of colgadas) {
     if (cita.obra === undefined) continue;
     if (pedidas.size > 0 && !pedidas.has(cita.obra.nombre)) continue;
     const grupo = porObra.get(cita.obra.nombre) ?? { titulo: cita.obra.titulo, citas: [] };

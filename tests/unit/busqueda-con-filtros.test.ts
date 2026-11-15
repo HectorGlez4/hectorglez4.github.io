@@ -30,8 +30,12 @@ import {
   SUGERENCIA_SIN_FILTROS,
   TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
   VOLVER_ATRAS_A_LAS_CITAS,
-  autorDeLaObra,
+  PREFIJO_DE_PERSONAJE,
   avisoDeLaDireccion,
+  claveDelDueño,
+  dueñoDeLaClave,
+  dueñoDeLaObra,
+  ofreceLaObra,
   combinacionDeFiltros,
   direccionDeLaBusqueda,
   entradaConEstado,
@@ -382,13 +386,15 @@ describe('Historia 27.4 — lo puro: la búsqueda en la dirección', () => {
   const RECUENTOS = { 'jose-marti--maestros-ambulantes': 23, 'jose-marti--cartas': 1, 'seneca--cartas': 9 };
   const SITIO = {
     autores: ['jose-marti', 'seneca'],
+    personajes: [] as string[],
     temas: ['el-saber', 'la-prudencia'],
-    autorDeLaObra: (nombre: string) => autorDeLaObra(MAPA, RECUENTOS, nombre),
+    dueñoDeLaObra: (nombre: string) => dueñoDeLaObra(MAPA, RECUENTOS, nombre),
+    ofrece: (clave: string, nombre: string) => ofreceLaObra(MAPA, RECUENTOS, clave, nombre),
   };
 
-  it('compone `?q=&autor=&obra=&tema=` en ese orden, solo los no vacíos, con el texto recortado', () => {
+  it('compone `?q=&autor=&personaje=&obra=&tema=` en ese orden, solo los no vacíos, con el texto recortado', () => {
     expect(RUTA).toBe('/buscar/');
-    expect(Object.values(PARAMETROS_DE_LA_BUSQUEDA)).toEqual(['q', 'autor', 'obra', 'tema']);
+    expect(Object.values(PARAMETROS_DE_LA_BUSQUEDA)).toEqual(['q', 'autor', 'personaje', 'obra', 'tema']);
     expect(direccionDeLaBusqueda(estado({ texto: '  escuela ', autor: 'jose-marti', tema: 'la-prudencia' }), RUTA)).toBe(
       '/buscar/?q=escuela&autor=jose-marti&tema=la-prudencia',
     );
@@ -478,17 +484,17 @@ describe('Historia 27.4 — lo puro: la búsqueda en la dirección', () => {
     }
   });
 
-  it('`autorDeLaObra`: el Autor en cuya lista está y que la ofrece; nunca partiendo el nombre', () => {
-    expect(autorDeLaObra(MAPA, RECUENTOS, 'jose-marti--cartas')).toBe('jose-marti');
-    expect(autorDeLaObra(MAPA, RECUENTOS, 'seneca--cartas')).toBe('seneca');
+  it('`dueñoDeLaObra`: sin Personajes, el Autor en cuya lista está y que la ofrece; nunca partiendo el nombre', () => {
+    expect(dueñoDeLaObra(MAPA, RECUENTOS, 'jose-marti--cartas')).toBe('jose-marti');
+    expect(dueñoDeLaObra(MAPA, RECUENTOS, 'seneca--cartas')).toBe('seneca');
     // Con forma de ser de un Autor, pero en ninguna lista: no tiene Autor.
-    expect(autorDeLaObra(MAPA, RECUENTOS, 'jose-marti--ismaelillo')).toBeNull();
+    expect(dueñoDeLaObra(MAPA, RECUENTOS, 'jose-marti--ismaelillo')).toBeNull();
     // En una lista que no es la de su prefijo: es de quien la lista.
-    expect(autorDeLaObra({ seneca: [['jose-marti--rara', 'Rara']] }, { 'jose-marti--rara': 2 }, 'jose-marti--rara')).toBe('seneca');
+    expect(dueñoDeLaObra({ seneca: [['jose-marti--rara', 'Rara']] }, { 'jose-marti--rara': 2 }, 'jose-marti--rara')).toBe('seneca');
     // Sin Citas en el índice, no es ofrecible.
-    expect(autorDeLaObra(MAPA, { ...RECUENTOS, 'jose-marti--cartas': 0 }, 'jose-marti--cartas')).toBeNull();
-    expect(autorDeLaObra(MAPA, undefined, 'jose-marti--cartas')).toBeNull();
-    expect(autorDeLaObra(MAPA, RECUENTOS, '')).toBeNull();
+    expect(dueñoDeLaObra(MAPA, { ...RECUENTOS, 'jose-marti--cartas': 0 }, 'jose-marti--cartas')).toBeNull();
+    expect(dueñoDeLaObra(MAPA, undefined, 'jose-marti--cartas')).toBeNull();
+    expect(dueñoDeLaObra(MAPA, RECUENTOS, '')).toBeNull();
   });
 
   it('resolución en orden fijo: descartar lo que no existe, la Obra sin Autor toma el suyo, y si no casan se va la Obra', () => {
@@ -534,7 +540,7 @@ describe('Historia 27.4 — lo puro: la búsqueda en la dirección', () => {
     let preguntas = 0;
     resolverEstado(estado({ texto: '  x ', autor: 'seneca' }), {
       ...SITIO,
-      autorDeLaObra: () => {
+      dueñoDeLaObra: () => {
         preguntas++;
         return null;
       },
@@ -565,6 +571,127 @@ describe('Historia 27.4 — lo puro: la búsqueda en la dirección', () => {
         expect(escrituraDelHistorial({ igual: false, control, controlDeLaEntrada: otro }), `${control} tras ${otro}`).toBe('pushState');
       }
     }
+  });
+});
+
+describe('Historia 35.5 — lo puro: el Personaje en el estado de /buscar/', () => {
+  const RUTA = rutaDeLaBusqueda();
+  const estado = (parcial: Partial<EstadoDeLaBusqueda>): EstadoDeLaBusqueda => ({ ...ESTADO_VACIO, ...parcial });
+  // Batman dice «El caballero» (suya, sin Autor) y una Cita de «Obras de Séneca» con Séneca.
+  const MAPA: MapaDeObras = {
+    seneca: [['seneca--obras-de-seneca', 'Obras de Séneca']],
+    'personaje:batman': [
+      ['batman--el-caballero', 'El caballero'],
+      ['seneca--obras-de-seneca', 'Obras de Séneca', 'seneca'],
+    ],
+  };
+  const RECUENTOS = { 'seneca--obras-de-seneca': 3, 'batman--el-caballero': 2 };
+  const SITIO = {
+    autores: ['seneca'],
+    personajes: ['batman', 'homero'],
+    temas: ['la-vida'],
+    dueñoDeLaObra: (nombre: string) => dueñoDeLaObra(MAPA, RECUENTOS, nombre),
+    ofrece: (clave: string, nombre: string) => ofreceLaObra(MAPA, RECUENTOS, clave, nombre),
+  };
+
+  it('la clave del dueño: el slug del Autor, `personaje:{slug}` del Personaje, y de vuelta', () => {
+    expect(PREFIJO_DE_PERSONAJE).toBe('personaje:');
+    expect(claveDelDueño({ autor: 'seneca' })).toBe('seneca');
+    expect(claveDelDueño({ autor: '', personaje: 'batman' })).toBe('personaje:batman');
+    expect(claveDelDueño({ autor: '' })).toBe('');
+    expect(dueñoDeLaClave('personaje:batman')).toEqual({ autor: '', personaje: 'batman' });
+    expect(dueñoDeLaClave('seneca')).toEqual({ autor: 'seneca', personaje: '' });
+  });
+
+  it('`personaje=` va tras `autor` y delante de su `obra`; la Obra va con su Personaje', () => {
+    expect(direccionDeLaBusqueda(estado({ personaje: 'batman' }), RUTA)).toBe('/buscar/?personaje=batman');
+    expect(direccionDeLaBusqueda(estado({ texto: 'x', personaje: 'batman', obra: 'batman--el-caballero', tema: 't' }), RUTA)).toBe(
+      '/buscar/?q=x&personaje=batman&obra=batman--el-caballero&tema=t',
+    );
+    expect(estadoDeLaDireccion('?personaje=batman&de=instagram')).toEqual(estado({ personaje: 'batman' }));
+    expect(mismoEstado(estado({ personaje: 'batman' }), estado({ autor: 'batman' }))).toBe(false);
+    expect(estadoSinNada(estado({ personaje: 'batman' }))).toBe(false);
+    const escrito = entradaConEstado(null, estado({ personaje: 'batman', obra: 'batman--el-caballero' }));
+    expect(escrito).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { personaje: 'batman', obra: 'batman--el-caballero' } });
+    expect(estadoDeLaEntrada(escrito)).toEqual(estado({ personaje: 'batman', obra: 'batman--el-caballero' }));
+  });
+
+  it('con un Personaje: filtro `personaje` de Pagefind, la combinación de un Autor y su propia clave de estado', () => {
+    const elegidos = { autor: '', personaje: 'batman', tema: '' };
+    expect(hayFiltros(elegidos)).toBe(true);
+    expect(filtrosDePagefind(elegidos)).toEqual({ [FILTROS_DE_CITA.personaje]: 'batman' });
+    expect(FILTROS_DE_CITA.personaje).toBe('personaje');
+    expect(combinacionDeFiltros(elegidos)).toBe(combinacionDeFiltros({ autor: 'seneca', tema: '' }));
+    expect(combinacionDeFiltros({ ...elegidos, obra: 'batman--el-caballero' })).toBe('autor-obra');
+    expect(filtrosDePagefind({ ...elegidos, obra: 'batman--el-caballero', tema: 'la-vida' })).toEqual({
+      personaje: 'batman',
+      obra: 'batman--el-caballero',
+      tema: 'la-vida',
+    });
+    expect(valoresDeFiltros(elegidos)).toBe('personaje:batman|');
+    expect(valoresDeFiltros({ autor: 'batman', tema: '' })).toBe('batman|');
+    // El recuento nombra al dueño elegido en el hueco del Autor.
+    expect(fraseDelRecuento({ total: 2, texto: '', autor: 'Batman' })).toBe('2 citas de Batman.');
+  });
+
+  it('el selector de Obra de un Personaje es su lista del mapa; el dueño de una Obra, el de su ficha', () => {
+    expect(opcionesDeObra(MAPA, RECUENTOS, 'personaje:batman').map((o) => o.valor)).toEqual([
+      'batman--el-caballero',
+      'seneca--obras-de-seneca',
+    ]);
+    expect(dueñoDeLaObra(MAPA, RECUENTOS, 'batman--el-caballero')).toBe('personaje:batman');
+    // En la lista de Séneca, que es la primera que la lleva: su dueño es esa lista.
+    expect(dueñoDeLaObra(MAPA, RECUENTOS, 'seneca--obras-de-seneca')).toBe('seneca');
+    // La primera lista que la lleva es la de quien la dice, no la de su ficha: decide el tercer
+    // elemento, nunca la lista en que se encontró.
+    const DICHA_ANTES: MapaDeObras = {
+      'personaje:alfa': [['zeta--x', 'X', 'personaje:zeta']],
+      'personaje:zeta': [['zeta--x', 'X']],
+    };
+    expect(Object.keys(DICHA_ANTES)[0]).toBe('personaje:alfa');
+    expect(dueñoDeLaObra(DICHA_ANTES, { 'zeta--x': 1 }, 'zeta--x')).toBe('personaje:zeta');
+    // Y lo mismo con un Autor que dice la Obra de un Personaje, delante de él en el mapa.
+    const DE_BATMAN_EN_SENECA: MapaDeObras = {
+      seneca: [['batman--el-caballero', 'El caballero', 'personaje:batman']],
+      'personaje:batman': [['batman--el-caballero', 'El caballero']],
+    };
+    expect(dueñoDeLaObra(DE_BATMAN_EN_SENECA, RECUENTOS, 'batman--el-caballero')).toBe('personaje:batman');
+    expect(ofreceLaObra(MAPA, RECUENTOS, 'personaje:batman', 'seneca--obras-de-seneca')).toBe(true);
+    expect(ofreceLaObra(MAPA, RECUENTOS, 'seneca', 'batman--el-caballero')).toBe(false);
+  });
+
+  it('resolución: Personaje inexistente, `obra` sola, dueño que no casa, y `autor` con `personaje`', () => {
+    expect(resolverEstado(estado({ personaje: 'batman' }), SITIO)).toEqual({ estado: estado({ personaje: 'batman' }), noSeUsan: 0 });
+    expect(resolverEstado(estado({ personaje: 'nadie', texto: 'x' }), SITIO)).toEqual({ estado: estado({ texto: 'x' }), noSeUsan: 1 });
+    // `obra` sola: el dueño sale del mapa, con su tipo.
+    expect(resolverEstado(estado({ obra: 'batman--el-caballero' }), SITIO)).toEqual({
+      estado: estado({ personaje: 'batman', obra: 'batman--el-caballero' }),
+      noSeUsan: 0,
+    });
+    expect(resolverEstado(estado({ obra: 'seneca--obras-de-seneca' }), SITIO)).toEqual({
+      estado: estado({ autor: 'seneca', obra: 'seneca--obras-de-seneca' }),
+      noSeUsan: 0,
+    });
+    // No casan: se va la Obra y el Autor no cambia.
+    expect(resolverEstado(estado({ autor: 'seneca', obra: 'batman--el-caballero' }), SITIO)).toEqual({
+      estado: estado({ autor: 'seneca' }),
+      noSeUsan: 1,
+    });
+    // Casan por estar en la lista del dueño elegido, aunque la ficha sea de otro.
+    expect(resolverEstado(estado({ personaje: 'batman', obra: 'seneca--obras-de-seneca' }), SITIO)).toEqual({
+      estado: estado({ personaje: 'batman', obra: 'seneca--obras-de-seneca' }),
+      noSeUsan: 0,
+    });
+    // Los dos a la vez: se descarta `personaje`, un descarte más.
+    expect(resolverEstado(estado({ autor: 'seneca', personaje: 'batman' }), SITIO)).toEqual({
+      estado: estado({ autor: 'seneca' }),
+      noSeUsan: 1,
+    });
+    // Un Personaje cuyo dueño no es opción (datos de otra construcción): su Obra no se ofrece.
+    expect(resolverEstado(estado({ obra: 'batman--el-caballero' }), { ...SITIO, personajes: [] })).toEqual({
+      estado: estado({}),
+      noSeUsan: 1,
+    });
   });
 });
 

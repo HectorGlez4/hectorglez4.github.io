@@ -57,7 +57,11 @@
  *     `corpus/wikidata/vigentes.yml`, solo las claves de las entidades cuya etiqueta pinta
  *     (género P136 y lengua P407; el autor P50 se coteja y no se pinta). Si su documento no se
  *     deja leer, compone `vigentes.yml` entero: antes fechar de más que de menos. Desde la
- *     Historia 32.5, de su Autor también el nombre de «Cómo citar» (`NOMBRE_EN_REFERENCIA`).
+ *     Historia 32.5, de su Autor también el nombre de «Cómo citar» (`NOMBRE_EN_REFERENCIA`). Desde la
+ *     Historia 35.9, si su dueño es un Autor fallecido, **`src/lib/umbrales.ts`**, con un solo campo
+ *     derivado: su veredicto de derechos (`derechosEnLosUmbrales`), que mueven `PLAZO_DE_PROTECCION_AÑOS`
+ *     y `AÑO_DE_REFERENCIA`; con él, también las Páginas de Cita de sus atribuidas. Mover el plazo
+ *     fecha y avisa solo las Obras cuyo veredicto cambia con el Corpus de hoy, nunca la portada.
  *   · **Directorio de Autores** (Historia 26.3) — lo que pinta: de cada Autor con alguna Cita, el
  *     nombre, los años y la clave de orden (`ordenAlfabetico`), que lo ordena y lo agrupa; de cada
  *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
@@ -113,6 +117,7 @@
 
 import {
   rutaDeAutor,
+  rutaDePersonaje,
   rutaDeCita,
   rutaDeColeccion,
   rutaDelDirectorioDeAutores,
@@ -120,8 +125,20 @@ import {
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
-import { formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
+import {
+  fichasDeForma,
+  formaDeObra,
+  indiceDeFichas,
+  rutaDeLaObra,
+  type FichaDeObra,
+} from '../../src/lib/obras.ts';
 import { ESTILOS_DE_REFERENCIA, nombreEnReferencia } from '../../src/lib/atribucion.ts';
+import {
+  derechosVigentes,
+  dueñoAutor,
+  type DueñoDeDerechos,
+  type ReferenciaDeDerechos,
+} from '../../src/lib/clase.ts';
 import { documentoDeCita, documentosDeCita } from './cotejo.ts';
 import { obraDeIndice } from './indice.ts';
 import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
@@ -213,6 +230,88 @@ export const NOMBRE_EN_REFERENCIA: CampoDerivado = {
 };
 
 /**
+ * El fichero que guarda el plazo de protección y el año de referencia — Historia 35.9: fuera del
+ * Corpus y sin familia de fichero (no avisa la portada), compone por su veredicto de derechos la
+ * Página de Obra de un Autor fallecido y las Páginas de Cita de sus atribuidas.
+ */
+export const FICHERO_DE_LOS_UMBRALES = 'src/lib/umbrales.ts';
+
+/** Las dos constantes de `umbrales.ts` de las que sale el veredicto de derechos (`src/lib/clase.ts`). */
+export const CONSTANTES_DE_LOS_DERECHOS = ['PLAZO_DE_PROTECCION_AÑOS', 'AÑO_DE_REFERENCIA'] as const;
+
+/**
+ * Las constantes de los derechos de una versión de `umbrales.ts`, leídas de su texto — Historia
+ * 35.9. Una constante en `undefined` o sin declarar se omite; un entero (también con separadores,
+ * `70_000`) es su valor; cualquier otra cosa —un decimal, un negativo, un `as`, una expresión— se
+ * guarda tal cual, y el veredicto la cuenta como indeterminable. La declaración se busca al
+ * principio de una línea, así que una comentada no cuenta; y si el fichero nombra la constante en
+ * una declaración que esta lectura no reconoce (repartida en varias líneas, por ejemplo), también
+ * es indeterminable: nunca se lee en silencio como «sin valor». Nunca lanza: el historial y el
+ * aviso la leen de cada commit, también de los anteriores a la constante.
+ */
+export function versionDeUmbrales(texto: string): Readonly<Record<string, unknown>> {
+  const version: Record<string, unknown> = {};
+  for (const nombre of CONSTANTES_DE_LOS_DERECHOS) {
+    const m = new RegExp(
+      `^[ \\t]*export const ${nombre}(?:[ \\t]*:[^=\\n]+)?[ \\t]*=[ \\t]*([^;\\n]+?)[ \\t]*;?[ \\t]*(?://.*)?$`,
+      'mu',
+    ).exec(texto);
+    const crudo = m?.[1]?.trim();
+    if (crudo === undefined) {
+      if (new RegExp(`^[ \\t]*export const ${nombre}\\b`, 'mu').test(texto)) {
+        version[nombre] = `declaración sin leer de ${nombre}`;
+      }
+      continue;
+    }
+    if (crudo === 'undefined') continue;
+    version[nombre] = /^\d+(?:_\d+)*$/u.test(crudo) ? Number(crudo.replaceAll('_', '')) : crudo;
+  }
+  return version;
+}
+
+/** La referencia de los derechos de una versión de `umbrales.ts`; lanza ante un valor que no es número. */
+function referenciaDe(version: Readonly<Record<string, unknown>>): ReferenciaDeDerechos {
+  const referencia: ReferenciaDeDerechos = {};
+  const plazo = version.PLAZO_DE_PROTECCION_AÑOS;
+  const año = version.AÑO_DE_REFERENCIA;
+  for (const valor of [plazo, año]) {
+    if (valor !== undefined && typeof valor !== 'number') throw new Error(`${String(valor)} no es un número`);
+  }
+  if (typeof plazo === 'number') referencia.plazo = plazo;
+  if (typeof año === 'number') referencia.año = año;
+  return referencia;
+}
+
+/**
+ * Lo que el veredicto vale cuando no se puede dar —plazo sin año, un valor que no es número—: el
+ * prefijo seguido de lo que se leyó de las dos constantes, para que dos versiones indeterminables
+ * distintas (`70 as number` → `80 as number`) cuenten como cambio entre sí.
+ */
+const VEREDICTO_INDETERMINABLE = '¿?';
+
+/**
+ * El veredicto de derechos de un dueño sobre una versión de `umbrales.ts` — Historia 35.9, AD-27
+ * v9.1: un campo derivado de las dos constantes de los derechos, juzgado con `derechosVigentes`, la
+ * función del sitio. Una versión con plazo y sin año —o con un valor que no es número— da un valor
+ * propio, que cuenta como cambio frente a cualquier veredicto, y nunca lanza. El nombre lleva el
+ * dueño: dos Autores con años distintos son dos campos (la memoria de las fechas los separa).
+ */
+export function derechosEnLosUmbrales(dueño: DueñoDeDerechos): CampoDerivado {
+  return {
+    derivado: `derechosVigentes(${JSON.stringify(dueño)})`,
+    de: CONSTANTES_DE_LOS_DERECHOS,
+    valor: (version) => {
+      try {
+        return derechosVigentes(dueño, referenciaDe(version));
+      } catch {
+        const leido = CONSTANTES_DE_LOS_DERECHOS.map((nombre) => version[nombre] ?? null);
+        return `${VEREDICTO_INDETERMINABLE} ${JSON.stringify(leido)}`;
+      }
+    },
+  };
+}
+
+/**
  * Si una transición cambió alguno de los campos dados — **la** regla de AD-27.
  *
  * Un alta o una baja cambian todos; una versión opaca, también; si no, se comparan los campos
@@ -265,10 +364,13 @@ function ordenado(valor: unknown): unknown {
 // ─── La tabla de campos ──────────────────────────────────────────────────────────────
 
 /** Lo que toda superficie que pinta una Cita afirma de ella: su página, los listados y la Obra. */
-const CAMPOS_DE_CITA = ['texto', 'autor', 'temas', 'procedencia', 'fuente', 'slug'] as const;
+const CAMPOS_DE_CITA = ['texto', 'autor', 'temas', 'procedencia', 'fuente', 'slug', 'personaje'] as const;
 
-/** Lo que pinta de un Autor toda superficie que no es la suya: el nombre y los años. */
-const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento'] as const;
+/**
+ * Lo que pinta de un Autor toda superficie que no es la suya: el nombre y los años. `vivo`
+ * (Historia 35.1) es de los años: con él se escribe «n. 1950» y no hay `deathDate`.
+ */
+const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento', 'vivo'] as const;
 
 /**
  * Las columnas de la tabla de campos — Historia 26.4: una por familia de ruta, salvo la de los
@@ -297,6 +399,8 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  *     Wikidata (32.2), cuya `vigentes.yml` la relación compone por claves, fuera de la tabla;
  *   · el Directorio de Autores (26.3) pinta de un Autor el nombre, los años y su clave de orden,
  *     y de una Cita solo su `autor`: la cuenta por Autor;
+ *   · desde la 35.5, los dos pintan además su sección «Personajes»: de un Personaje el nombre y
+ *     la clave —y en `/autores/` su universo—, y de una Cita su `personaje`;
  *   · el Directorio de Obras (26.4) pinta de un Autor el nombre y la clave —no los años—, de una
  *     Cita su `autor` y, de su Procedencia, solo `procedencia.obra` y `procedencia.año` —su Obra
  *     y el año de la Obra; ni la referencia ni la traducción— y de una ficha el `titulo` y las
@@ -310,13 +414,18 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  */
 export const CAMPOS_QUE_PINTA = {
   cita: {
-    cita: CAMPOS_DE_CITA,
+    // Historia 35.6 — la Variante de una atribuida la pinta solo su Página de Cita. El `origen`
+    // estuvo aquí en la 35.10 y volvió a `CAMPOS_QUE_NO_FECHAN` en la 35.11 (AD-27 v9.2).
+    cita: [...CAMPOS_DE_CITA, 'variante'],
     autor: CAMPOS_DE_CITA,
     tema: CAMPOS_DE_CITA,
     coleccion: CAMPOS_DE_CITA,
     obra: CAMPOS_DE_CITA,
-    directorioDeAutores: ['autor'],
-    directorioDeObras: ['autor', 'procedencia.obra', 'procedencia.año'],
+    // Historia 35.3 — el listado de la Página de Personaje.
+    personaje: CAMPOS_DE_CITA,
+    // Historia 35.5 — y su `personaje`: la cuenta por Personaje de la sección «Personajes».
+    directorioDeAutores: ['autor', 'personaje'],
+    directorioDeObras: ['autor', 'personaje', 'procedencia.obra', 'procedencia.año'],
   },
   autor: {
     cita: [...CAMPOS_DEL_AUTOR_FUERA, NOMBRE_EN_REFERENCIA],
@@ -343,8 +452,27 @@ export const CAMPOS_QUE_PINTA = {
     tema: ['titulo'],
     coleccion: ['titulo'],
     // El incipit (32.3) lo pinta solo la página 1 de su Obra.
-    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones', 'wikidata', 'incipit'],
-    directorioDeObras: ['titulo', 'formas'],
+    obra: ['autor', 'personaje', 'personajes', 'titulo', 'formas', 'nota', 'ediciones', 'wikidata', 'incipit'],
+    // Historia 35.3 — el título de la línea de Obra del listado y de la Lista de Obras.
+    personaje: ['titulo'],
+    directorioDeObras: ['titulo', 'formas', 'personaje', 'personajes'],
+  },
+  /*
+   * Historia 35.2 — el Personaje: el nombre lo pintan la Atribución de su Cita (35.3) y las
+   * superficies que lo nombrarán (35.4), y la clave, los Directorios (35.5). Desde la 35.3 su
+   * página pinta además su universo y su semblanza —propia o de su biografía—. Con el Corpus
+   * real, sin Personajes, la relación no compone ninguno y nada se fecha.
+   */
+  personaje: {
+    personaje: ['nombre', 'universo', 'semblanza', 'semblanzaPropia', 'biografia'],
+    cita: ['nombre'],
+    autor: ['nombre'],
+    tema: ['nombre'],
+    coleccion: ['nombre'],
+    obra: ['nombre'],
+    // Historia 35.5 — la sección «Personajes»: la Fila de Personaje y la cabecera de su grupo.
+    directorioDeAutores: ['nombre', 'universo', 'ordenAlfabetico'],
+    directorioDeObras: ['nombre', 'ordenAlfabetico'],
   },
   documento: {
     // Historia 31.2 — el pasaje de la Página de Cita sale de los documentos de su Obra.
@@ -362,6 +490,8 @@ export const CAMPOS_QUE_PINTA = {
  *   · `aptaParaPortada` decide la rotación de la Cita del Día, que solo la portada pinta, y la
  *     portada se avisa siempre que cambie algo del Corpus;
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
+ *   · `clase` (35.1) decide qué puerta cruza la Cita y no se pinta: lo que la atribuida pinta
+ *     distinto lo pintan sus otros campos (el `personaje`, que sí está en la tabla);
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
  *   · `ordenRevisado` (26.1) estuvo aquí hasta la 30.3: desde entonces decide si la Página de
@@ -373,9 +503,18 @@ export const CAMPOS_QUE_PINTA = {
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
-  cita: ['aptaParaPortada', 'estadoDerechos'],
+  // Historia 35.1b — las atestiguaciones de la atribuida no se pintan (35.4 decide lo que pinta).
+  // Historia 35.11 (AD-27 v9.2) — ninguna superficie pinta el `origen` ni la `partida` de la
+  // traducción propia (UX v9.3): se guardan para auditarla, y un cambio solo de ellos no fecha nada.
+  cita: ['aptaParaPortada', 'estadoDerechos', 'clase', 'atestiguaciones', 'origen', 'partida'],
   autor: ['tradicion'],
   obra: ['distintaDe'],
+  /*
+   * Historia 35.2 — `ordenRevisado` del Personaje no lo pinta nadie: «Cómo citar» invierte solo el
+   * nombre del Autor (30.3). El universo y la
+   * semblanza pasaron a la tabla con la Página de Personaje (35.3).
+   */
+  personaje: ['ordenRevisado'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
 /**
@@ -391,7 +530,10 @@ export const CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS = ['procedencia.o
 /** Una Cita del corpus, con lo justo para saber qué superficies compone. */
 export interface CitaParaFechar {
   slug: string;
-  autor: string;
+  /** Su Autor; opcional desde la Historia 35.2: la de un Personaje puede no tenerlo. */
+  autor?: string;
+  /** Su Personaje, si es atribuida a uno (Historia 35.2). */
+  personaje?: string;
   temas?: readonly string[];
   /**
    * El nombre de la Ficha de Obra que la resuelve, si alguna la resuelve — Historia 22.4. Lo
@@ -402,6 +544,11 @@ export interface CitaParaFechar {
   obraDeclarada?: string;
   /** El identificador de su Fuente: con la obra, nombra sus documentos (`documentosDeCita`). */
   fuente?: string;
+  /**
+   * Historia 35.9 — si es atribuida (`esAtribuida`): su Página de Cita compone `umbrales.ts` con
+   * la Obra de un Autor fallecido, por su veredicto de derechos.
+   */
+  atribuida?: true;
   /** El fichero del que salió, tal como lo nombra quien leyó el corpus. */
   ruta: string;
 }
@@ -409,7 +556,12 @@ export interface CitaParaFechar {
 /** Una Ficha de Obra: su nombre compone la ruta, y su fichero —el título— una fecha. */
 export interface ObraParaFechar {
   nombre: string;
-  autor: string;
+  /** El Autor: dueño en la ficha de un Autor, informativo en la de un Personaje (35.2). */
+  autor?: string;
+  /** El Personaje dueño, en la ficha de un Personaje (35.2). */
+  personaje?: string;
+  /** Los Personajes de la Obra, dueño incluido (35.2): resuelven sus Citas en el segundo paso. */
+  personajes?: readonly string[];
   /** Las formas canónicas que reclama: resuelven las bajas de Cita y las de ficha. */
   formas?: readonly string[];
   /**
@@ -430,6 +582,15 @@ export interface ObraParaFechar {
 export interface EntidadParaFechar {
   slug: string;
   ruta: string;
+}
+
+/**
+ * Un Autor, con lo que decide sus derechos — Historia 35.9: `vivo` o su año de fallecimiento. Sin
+ * ellos no compone `umbrales.ts` con ninguna Obra suya.
+ */
+export interface AutorParaFechar extends EntidadParaFechar {
+  vivo?: true;
+  añoFallecimiento?: number;
 }
 
 /** Una Colección declara a mano los slugs de Cita que agrega. */
@@ -455,7 +616,9 @@ export interface BajasParaFechar {
  */
 export interface CorpusParaFechar {
   citas: readonly CitaParaFechar[];
-  autores: readonly EntidadParaFechar[];
+  autores: readonly AutorParaFechar[];
+  /** Los Personajes — Historia 35.2. Opcional: un corpus sin Personajes no la trae. */
+  personajes?: readonly EntidadParaFechar[];
   temas: readonly EntidadParaFechar[];
   colecciones: readonly ColeccionParaFechar[];
   /** Las Fichas de Obra — Historia 22.4. Opcional: un corpus sin Obras no la trae. */
@@ -464,6 +627,11 @@ export interface CorpusParaFechar {
   documentos?: readonly string[];
   /** La ruta de `corpus/wikidata/vigentes.yml` — Historia 32.2. */
   vigentesDeWikidata?: string;
+  /**
+   * La ruta de `src/lib/umbrales.ts` — Historia 35.9: compone por su veredicto de derechos las
+   * Obras de un Autor fallecido. Sin ella, ninguna.
+   */
+  umbrales?: string;
   /** Las bajas, que salen del historial y no del disco — Historia 24.8. */
   bajas?: BajasParaFechar;
 }
@@ -498,23 +666,34 @@ export type Relacion = ReadonlyMap<string, Superficie>;
  */
 export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Superficie> {
   const ficheroDeAutor = new Map(corpus.autores.map((autor) => [autor.slug, autor.ruta]));
+  const autorPorSlug = new Map(corpus.autores.map((autor) => [autor.slug, autor]));
+  const ficheroDePersonaje = new Map((corpus.personajes ?? []).map((p) => [p.slug, p.ruta]));
+  const deAutor = (slug: string | undefined) => (slug === undefined ? undefined : ficheroDeAutor.get(slug));
+  const dePersonaje = (slug: string | undefined) => (slug === undefined ? undefined : ficheroDePersonaje.get(slug));
   const ficheroDeTema = new Map(corpus.temas.map((tema) => [tema.slug, tema.ruta]));
   const fichas = corpus.obras ?? [];
   const ficheroDeObra = new Map(fichas.map((obra) => [obra.nombre, obra.ruta]));
   const bajas = corpus.bajas ?? {};
   const vivos = new Set(ficherosDelCorpus(corpus));
 
-  /** La ficha viva que reclama (Autor, forma): resuelve la Obra de una Cita que se fue. */
-  const fichaViva = new Map<string, ObraParaFechar>();
-  for (const ficha of fichas) {
-    for (const forma of ficha.formas ?? []) fichaViva.set(clave(ficha.autor, forma), ficha);
-  }
-  /** Las fichas que se fueron, por (Autor, forma): fechan las Citas de hoy que reclamaban. */
-  const fichasDeBaja = new Map<string, string[]>();
-  for (const ficha of bajas.obras ?? []) {
-    if (vivos.has(ficha.ruta)) continue;
-    for (const forma of ficha.formas ?? []) apilar(fichasDeBaja, clave(ficha.autor, forma), ficha.ruta);
-  }
+  /*
+   * Las fichas vivas y las que se fueron, indexadas con la regla de dos pasos de la resolución
+   * (`fichasDeForma`, Historia 35.2): una Cita encuentra su ficha por su Autor —dueño o `autor`
+   * informativo— y, si no, por su Personaje, aquí igual que en el build. La viva resuelve la Obra
+   * de una Cita que se fue; las de baja fechan las Citas de hoy que reclamaban.
+   */
+  const comoFicha = (ficha: ObraParaFechar): FichaDeObra => ({
+    nombre: ficha.nombre,
+    ruta: ficha.ruta,
+    titulo: '',
+    formas: ficha.formas ?? [],
+    ...(ficha.autor !== undefined ? { autor: ficha.autor } : {}),
+    ...(ficha.personaje !== undefined ? { personaje: ficha.personaje } : {}),
+    ...(ficha.personajes !== undefined ? { personajes: ficha.personajes } : {}),
+  });
+  const vivasPorNombre = new Map(fichas.map((ficha) => [ficha.nombre, ficha]));
+  const indiceVivo = indiceDeFichas(fichas.map(comoFicha));
+  const indiceDeBaja = indiceDeFichas((bajas.obras ?? []).filter((ficha) => !vivos.has(ficha.ruta)).map(comoFicha));
   /**
    * Los documentos, de hoy y de baja, por su nombre sin extensión; y aparte, los índices de
    * subpáginas (Historia 24.9), por la Obra de los documentos que ordenan (`{fuente}--{obra}`):
@@ -533,7 +712,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     const forma = formaDe(cita);
     return [
       ...(cita.obra === undefined ? [] : [ficheroDeObra.get(cita.obra)].filter(definido)),
-      ...(forma === undefined ? [] : (fichasDeBaja.get(clave(cita.autor, forma)) ?? [])),
+      ...(forma === undefined ? [] : fichasDeForma(cita, forma, indiceDeBaja).map((ficha) => ficha.ruta)),
     ];
   };
 
@@ -571,7 +750,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   /** Una Cita viva en un listado: ella, su Autor y las fichas de Obra cuyo título pinta. */
   const conLaCita = (ruta: string, cita: CitaParaFechar) => {
     componer(ruta, cita.ruta, 'cita');
-    componer(ruta, ficheroDeAutor.get(cita.autor), 'autor');
+    componer(ruta, deAutor(cita.autor), 'autor');
+    componer(ruta, dePersonaje(cita.personaje), 'personaje');
     for (const ficha of fichasDeLaCita(cita)) componer(ruta, ficha, 'obra');
   };
 
@@ -612,7 +792,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     const ruta = rutaDeCita(cita.slug);
     declarar(ruta, 'cita');
     componer(ruta, cita.ruta, 'cita');
-    componer(ruta, ficheroDeAutor.get(cita.autor), 'autor');
+    componer(ruta, deAutor(cita.autor), 'autor');
+    componer(ruta, dePersonaje(cita.personaje), 'personaje');
     for (const tema of cita.temas ?? []) componer(ruta, ficheroDeTema.get(tema), 'tema');
     for (const ficha of fichasDeLaCita(cita)) componer(ruta, ficha, 'obra');
     const deSusDocumentos =
@@ -624,10 +805,21 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   for (const autor of corpus.autores) declarar(rutaDeAutor(autor.slug), 'autor');
   for (const tema of corpus.temas) declarar(rutaDeTema(tema.slug), 'tema');
   for (const coleccion of corpus.colecciones) declarar(rutaDeColeccion(coleccion.slug), 'coleccion');
+  /*
+   * Historia 35.3 — la Página de Personaje: la de todo Personaje con alguna Cita viva, que la
+   * componen su fichero y sus Citas (cada una con su Autor y su ficha de Obra, como un listado).
+   */
+  const conCitas = new Set(corpus.citas.map((cita) => cita.personaje).filter(definido));
+  for (const personaje of corpus.personajes ?? []) {
+    if (!conCitas.has(personaje.slug)) continue;
+    declarar(rutaDePersonaje(personaje.slug), 'personaje');
+    componer(rutaDePersonaje(personaje.slug), personaje.ruta, 'personaje');
+  }
   for (const autor of corpus.autores) componer(rutaDeAutor(autor.slug), autor.ruta, 'autor');
   for (const tema of corpus.temas) componer(rutaDeTema(tema.slug), tema.ruta, 'tema');
   for (const cita of corpus.citas) {
-    conLaCita(rutaDeAutor(cita.autor), cita);
+    if (cita.autor !== undefined) conLaCita(rutaDeAutor(cita.autor), cita);
+    if (cita.personaje !== undefined) conLaCita(rutaDePersonaje(cita.personaje), cita);
     for (const tema of cita.temas ?? []) conLaCita(rutaDeTema(tema), cita);
   }
   const deCita = new Map(corpus.citas.map((cita) => [cita.slug, cita]));
@@ -650,7 +842,11 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   const directorio = rutaDelDirectorioDeAutores();
   declarar(directorio, 'directorio', 'directorioDeAutores');
   for (const slug of new Set(corpus.citas.map((cita) => cita.autor))) {
-    componer(directorio, ficheroDeAutor.get(slug), 'autor');
+    componer(directorio, deAutor(slug), 'autor');
+  }
+  // Historia 35.2 — todo Personaje con alguna Cita compone los dos Directorios (35.5 los pinta).
+  for (const slug of new Set(corpus.citas.map((cita) => cita.personaje))) {
+    componer(directorio, dePersonaje(slug), 'personaje');
   }
   for (const cita of corpus.citas) componer(directorio, cita.ruta, 'cita');
 
@@ -681,7 +877,10 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     if (!tieneObra(cita)) componerCampos(directorioDeObras, cita.ruta, CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS);
   }
   for (const slug of new Set(conObra.map((cita) => cita.autor))) {
-    componer(directorioDeObras, ficheroDeAutor.get(slug), 'autor');
+    componer(directorioDeObras, deAutor(slug), 'autor');
+  }
+  for (const slug of new Set(conObra.map((cita) => cita.personaje))) {
+    componer(directorioDeObras, dePersonaje(slug), 'personaje');
   }
 
   // La Página de Obra: su ficha, sus Citas, su Autor y sus documentos. Sin Citas no tiene página.
@@ -702,9 +901,25 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
       for (const documento of documentos.get(obra.incipit) ?? []) componer(ruta, documento, 'documento');
     }
     for (const cita of citas) componer(ruta, cita.ruta, 'cita');
-    componer(ruta, ficheroDeAutor.get(obra.autor), 'autor');
+    componer(ruta, deAutor(obra.autor), 'autor');
+    // Historia 35.2 — la Obra de un Personaje la compone su dueño.
+    componer(ruta, dePersonaje(obra.personaje), 'personaje');
     // Sus documentos, con el índice que los ordena (Historia 24.9) como uno de ellos.
     for (const documento of documentosDeObra.get(obra.nombre) ?? []) componer(ruta, documento, 'documento');
+    /*
+     * Historia 35.9 — la Obra de un Autor fallecido tiene derechos vigentes según el plazo y el año
+     * de `umbrales.ts`: los compone por su veredicto, y con ella las Páginas de Cita de sus
+     * atribuidas. Un Personaje o un Autor vivo los tienen siempre, y un Autor sin año de
+     * fallecimiento nunca: ningún plazo los mueve, y no componen el fichero.
+     */
+    const autor = obra.personaje === undefined ? autorPorSlug.get(obra.autor ?? '') : undefined;
+    if (autor !== undefined && autor.vivo !== true && autor.añoFallecimiento !== undefined) {
+      const veredicto = [derechosEnLosUmbrales(dueñoAutor(autor))];
+      componerCampos(ruta, corpus.umbrales, veredicto);
+      for (const cita of citas) {
+        if (cita.atribuida === true) componerCampos(rutaDeCita(cita.slug), corpus.umbrales, veredicto);
+      }
+    }
   }
 
   /*
@@ -718,7 +933,9 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   }
   for (const baja of bajas.citas ?? []) {
     if (vivos.has(baja.ruta)) continue;
-    componer(rutaDeAutor(baja.autor), baja.ruta, 'cita');
+    if (baja.autor !== undefined) componer(rutaDeAutor(baja.autor), baja.ruta, 'cita');
+    // Historia 35.3 — y la página de su Personaje, si sigue viva: su listado la contaba.
+    if (baja.personaje !== undefined) componer(rutaDePersonaje(baja.personaje), baja.ruta, 'cita');
     // El Directorio la contaba en su Autor: la baja mueve el recuento (26.3).
     componer(directorio, baja.ruta, 'cita');
     // Y el de Obras la contaba en su Obra, si declaraba una: la baja mueve su recuento (26.4).
@@ -729,7 +946,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     for (const tema of baja.temas ?? []) componer(rutaDeTema(tema), baja.ruta, 'cita');
     for (const ruta of coleccionesDe.get(baja.slug) ?? []) componer(ruta, baja.ruta, 'cita');
     const forma = formaDe(baja);
-    const obra = forma === undefined ? undefined : fichaViva.get(clave(baja.autor, forma));
+    const resuelta = forma === undefined ? undefined : fichasDeForma(baja, forma, indiceVivo)[0];
+    const obra = resuelta === undefined ? undefined : vivasPorNombre.get(resuelta.nombre);
     if (obra !== undefined) componer(rutaDeLaObra(obra), baja.ruta, 'cita');
   }
 
@@ -789,7 +1007,9 @@ function fechaDelComponente(
 ): FechaDeCambio | undefined {
   // Ordenados: `unir` compone los campos en el orden en que llegan, y el mismo conjunto tiene
   // que dar la misma llave.
-  const llave = `${fichero}\u0000${campos === CUALQUIER_CAMBIO ? '*' : [...campos].sort().join(',')}`;
+  // Un campo derivado entra por su nombre: dos derivados distintos del mismo fichero no comparten llave.
+  const nombres = campos === CUALQUIER_CAMBIO ? [] : campos.map((c) => (typeof c === 'string' ? c : `=${c.derivado}`));
+  const llave = `${fichero}\u0000${campos === CUALQUIER_CAMBIO ? '*' : nombres.sort().join(',')}`;
   if (memoria.has(llave)) return memoria.get(llave);
   let masReciente: FechaDeCambio | undefined;
   for (const transicion of historial.get(fichero) ?? []) {
@@ -866,22 +1086,28 @@ export function bajasDelHistorial(
     const version = ultima.antes;
     if (version === null || version === VERSION_OPACA) continue;
     if (familia === 'cita') {
-      const { slug, autor, temas, procedencia } = version as Record<string, unknown>;
-      if (typeof slug !== 'string' || typeof autor !== 'string') continue;
+      const { slug, autor, personaje, temas, procedencia } = version as Record<string, unknown>;
+      // Historia 35.2 — una Cita tiene dueño: su Autor o, sin él, su Personaje.
+      if (typeof slug !== 'string' || (typeof autor !== 'string' && typeof personaje !== 'string')) continue;
       const obra = (procedencia as { obra?: unknown } | null | undefined)?.obra;
       citas.push({
         slug,
-        autor,
+        ...(typeof autor === 'string' ? { autor } : {}),
+        ...(typeof personaje === 'string' ? { personaje } : {}),
         temas: Array.isArray(temas) ? temas.filter((t): t is string => typeof t === 'string') : [],
         ...(typeof obra === 'string' ? { obraDeclarada: obra } : {}),
         ruta: fichero,
       });
     } else if (familia === 'obra') {
-      const { autor, formas } = version as Record<string, unknown>;
-      if (typeof autor !== 'string' || !Array.isArray(formas)) continue;
+      const { autor, personaje, personajes, formas } = version as Record<string, unknown>;
+      if ((typeof autor !== 'string' && typeof personaje !== 'string') || !Array.isArray(formas)) continue;
       obras.push({
         nombre: nombreDeFicha(fichero),
-        autor,
+        ...(typeof autor === 'string' ? { autor } : {}),
+        ...(typeof personaje === 'string' ? { personaje } : {}),
+        ...(Array.isArray(personajes)
+          ? { personajes: personajes.filter((p): p is string => typeof p === 'string') }
+          : {}),
         formas: formas.filter((f): f is string => typeof f === 'string'),
         ruta: fichero,
       });
@@ -906,6 +1132,7 @@ export function conRutas(corpus: CorpusParaFechar, traducir: (ruta: string) => s
     ...(corpus.obras === undefined ? {} : { obras: corpus.obras.map(obra) }),
     ...(corpus.documentos === undefined ? {} : { documentos: corpus.documentos.map(traducir) }),
     ...(corpus.vigentesDeWikidata === undefined ? {} : { vigentesDeWikidata: traducir(corpus.vigentesDeWikidata) }),
+    ...(corpus.umbrales === undefined ? {} : { umbrales: traducir(corpus.umbrales) }),
     ...(corpus.bajas === undefined
       ? {}
       : {
@@ -924,6 +1151,7 @@ export function ficherosDelCorpus(corpus: CorpusParaFechar): string[] {
     ...new Set([
       ...corpus.citas.map((cita) => cita.ruta),
       ...corpus.autores.map((autor) => autor.ruta),
+      ...(corpus.personajes ?? []).map((personaje) => personaje.ruta),
       ...corpus.temas.map((tema) => tema.ruta),
       ...corpus.colecciones.map((coleccion) => coleccion.ruta),
       ...(corpus.obras ?? []).map((obra) => obra.ruta),
@@ -1005,10 +1233,6 @@ function formaDe(cita: CitaParaFechar): string | undefined {
   if (cita.obraDeclarada === undefined) return undefined;
   const forma = formaDeObra(cita.obraDeclarada);
   return forma === '' ? undefined : forma;
-}
-
-function clave(autor: string, forma: string): string {
-  return `${autor}\u0000${forma}`;
 }
 
 /** El nombre de un fichero sin directorio y, si es un documento, sin su `.txt`. */

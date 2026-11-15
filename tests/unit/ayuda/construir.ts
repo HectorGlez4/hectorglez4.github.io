@@ -1,10 +1,16 @@
 import { execFile } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname, sep } from 'node:path';
 import { promisify } from 'node:util';
-import { aYaml as aYamlDelCorpus, separarFrontmatter } from '../../../tools/lib/corpus.ts';
+import {
+  aYaml as aYamlDelCorpus,
+  CABECERA_DE_CLASES,
+  FICHERO_DE_CLASES,
+  separarFrontmatter,
+} from '../../../tools/lib/corpus.ts';
+import { claseDe } from '../../../src/lib/clase.ts';
 import { FICHERO_DEL_CENSO } from '../../../tools/lib/cotejo.ts';
 import { componerDocumento, nombreDeDocumento } from '../../../tools/lib/documento.ts';
 import {
@@ -165,6 +171,15 @@ export async function construirConCorpus(
      * Las que la miden —una Obra sin ficha— lo apagan.
      */
     sembrarObras?: boolean;
+    /**
+     * `false` para no sembrar el registro de clases — Historia 35.1.
+     *
+     * Por omisión, si el fixture no trae `clases-de-cita.yml`, el andamio lo escribe con una
+     * entrada por Cita de `citas/` y la clase que dice su fichero (`claseDe`), como hace con las
+     * Fichas de Obra: las pruebas que no miden la clase no tienen por qué saber que existe su
+     * puerta. Las que la miden traen el suyo o lo apagan.
+     */
+    sembrarClases?: boolean;
   } = {},
 ): Promise<ResultadoBuild> {
   // Antes de copiar nada: una ficha de prueba ilegible lanza aquí sin dejar un proyecto huérfano.
@@ -186,7 +201,7 @@ export async function construirConCorpus(
   // Las carpetas siempre existen: una colección cuya base no existe emite un aviso que
   // enturbiaría la lectura del fallo que sí importa. `colecciones/` entra en la lista
   // desde la Historia 12.2, por el mismo motivo y no por comodidad.
-  for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras', '_revision', 'fuentes']) {
+  for (const dir of ['citas', 'autores', 'personajes', 'temas', 'colecciones', 'obras', '_revision', 'fuentes']) {
     await mkdir(join(proyecto, 'corpus', dir), { recursive: true });
   }
 
@@ -210,6 +225,10 @@ export async function construirConCorpus(
 
   for (const [ruta, contenido] of Object.entries(fichasSembradas)) {
     await writeFile(join(proyecto, 'corpus', ruta), contenido, 'utf8');
+  }
+
+  if (opciones.sembrarClases !== false && !(FICHERO_DE_CLASES in corpus)) {
+    await writeFile(join(proyecto, 'corpus', FICHERO_DE_CLASES), registroDeClasesDe(corpus), 'utf8');
   }
 
   for (const [ruta, contenido] of Object.entries(opciones.paginas ?? {})) {
@@ -422,6 +441,27 @@ function documentosDeFuenteDe(corpus: CorpusDePrueba): Record<string, string> {
 }
 
 /**
+ * El registro de clases de un fixture — Historia 35.1: una entrada por Cita de `citas/` con la
+ * clase que dice su fichero. Una Cita que no se deja analizar no se anota: la prueba que la trae
+ * mide otra puerta, que la rechazará antes.
+ */
+export function registroDeClasesDe(corpus: CorpusDePrueba): string {
+  const lineas: string[] = [];
+  for (const [ruta, contenido] of Object.entries(corpus)) {
+    if (!ruta.startsWith('citas/') || !ruta.endsWith('.md')) continue;
+    let datos: Record<string, unknown> | null = null;
+    try {
+      datos = separarFrontmatter(contenido);
+    } catch {
+      continue;
+    }
+    if (datos === null || typeof datos.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(datos.slug)) continue;
+    lineas.push(`  - { slug: ${JSON.stringify(datos.slug)}, clase: ${claseDe(datos)}, fecha: "2026-11-07" }\n`);
+  }
+  return `${CABECERA_DE_CLASES}${lineas.join('')}`;
+}
+
+/**
  * Las Fichas de Obra que faltan a las Citas publicadas de un fixture — Historia 22.1.
  *
  * Con las mismas reglas que la siembra real —forma, grafía por omisión y nombre salen de
@@ -477,14 +517,14 @@ function fichasDeObraDe(corpus: CorpusDePrueba): Record<string, string> {
 
   const fichas: Record<string, string> = {};
   for (const obra of obrasDeCitas(citas)) {
-    if (reclamadas.has(`${obra.autor}\u0000${obra.forma}`)) continue;
+    if (reclamadas.has(`${obra.dueño}\u0000${obra.forma}`)) continue;
     const titulo = grafiaPorOmision(obra.grafias);
-    const nombre = nombreDeFichaDeObra(obra.autor, titulo);
+    const nombre = nombreDeFichaDeObra(obra.dueño, titulo);
     if (nombre === undefined) continue;
     const ruta = `obras/${nombre}.yml`;
     if (ruta in corpus || ruta in fichas) continue;
     // Con el mismo serializador que `escribirFichaDeObra`: el fixture es el fichero real.
-    fichas[ruta] = aYamlDelCorpus({ autor: obra.autor, titulo, formas: [obra.forma] });
+    fichas[ruta] = aYamlDelCorpus({ autor: obra.dueño, titulo, formas: [obra.forma] });
   }
   return fichas;
 }
@@ -811,4 +851,71 @@ export function paginaEnDist(dist: string, ruta: string): string {
 /** Lo mismo, desde la raíz del proyecto, que es como lo tienen casi todas las pruebas. */
 export function paginaConstruida(proyecto: string, ruta: string): string {
   return paginaEnDist(join(proyecto, 'dist'), ruta);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La puerta de la atribuida, abierta en la copia — Historia 35.1b
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Las atestiguaciones y el origen de una atribuida de prueba: dos dominios registrables
+ * distintos, ninguno vetado. Se pasan a `citaValida` con lo demás de la atribuida.
+ */
+export const ATESTIGUADA = {
+  atestiguaciones: [
+    { url: 'https://es.wikiquote.org/wiki/Prueba', consultadaEl: '2026-11-01' },
+    { url: 'https://www.elpais.com/cultura/prueba.html', consultadaEl: '2026-11-02' },
+  ],
+  origen: 'original',
+} as const;
+
+/** Los cinco valores con que las pruebas abren la puerta en la copia. Holgados a propósito. */
+export const PUERTA_DE_PRUEBA = {
+  MAX_CARACTERES_DE_ATRIBUIDA: 1000,
+  MAX_ATRIBUIDAS_POR_OBRA: 1000,
+  MAX_ATRIBUIDAS_POR_DUEÑO: 1000,
+  MIN_ATESTIGUACIONES_DE_ATRIBUIDA: 2,
+  BUZON_DE_PETICIONES: 'peticiones@ejemplo.org',
+} as const;
+
+type ValoresDeLaPuerta = { -readonly [K in keyof typeof PUERTA_DE_PRUEBA]?: number | string | undefined };
+
+/**
+ * Los parches de la copia que dan valor a la puerta de la atribuida: `src/lib/umbrales.ts` y
+ * `src/lib/dominio.ts`, sustituyendo **el valor que tengan** —nunca el texto `= undefined;`—, para
+ * que ninguna prueba fije el valor del árbol. Un valor `undefined` en `valores` deja esa constante
+ * sin valor (la puerta, cerrada por ella). Si `ficheros` ya trae uno de los dos, se parchea ese.
+ */
+export function conLaPuertaAbierta(
+  valores: ValoresDeLaPuerta = {},
+  ficheros: Record<string, string> = {},
+): Record<string, string> {
+  const todos: ValoresDeLaPuerta = { ...PUERTA_DE_PRUEBA, ...valores };
+  const resultado = { ...ficheros };
+  // Cada constante tiene que encontrarse en uno de los dos ficheros: si su declaración cambia de
+  // forma y el parche no la casa, la prueba correría con el valor del árbol sin decirlo.
+  const parcheadas = new Set<string>();
+  for (const ruta of ['src/lib/umbrales.ts', 'src/lib/dominio.ts']) {
+    const original = resultado[ruta] ?? readFileSync(join(RAIZ, ruta), 'utf8');
+    let contenido = original;
+    for (const [nombre, valor] of Object.entries(todos)) {
+      const declaracion = new RegExp(`(export const ${nombre}: (?:number|string) \\| undefined = )[^;]*;`, 'u');
+      if (!declaracion.test(contenido)) continue;
+      parcheadas.add(nombre);
+      contenido = contenido.replace(
+        declaracion,
+        `$1${valor === undefined ? 'undefined' : JSON.stringify(valor)};`,
+      );
+    }
+    // Un fichero que no cambia no se parchea: el andamio rechaza el parche idéntico.
+    if (contenido !== original || ruta in ficheros) resultado[ruta] = contenido;
+  }
+  const sinParchear = Object.keys(todos).filter((nombre) => !parcheadas.has(nombre));
+  if (sinParchear.length > 0) {
+    throw new Error(
+      `conLaPuertaAbierta: no se encontró la declaración «export const NOMBRE: number|string | undefined = …;» ` +
+        `de ${sinParchear.join(', ')} en src/lib/umbrales.ts ni en src/lib/dominio.ts.`,
+    );
+  }
+  return resultado;
 }

@@ -13,7 +13,7 @@
  * no toca disco ni red.
  */
 import { SITIO } from '../../src/lib/dominio.ts';
-import { FAMILIAS, esRutaDeObra, rutaNormalizada, type Familia } from '../../src/lib/superficies.ts';
+import { FAMILIAS, dependeDelContenido, rutaNormalizada, type Familia } from '../../src/lib/superficies.ts';
 import {
   cambiaronLosCampos,
   type CambioDeFichero,
@@ -46,8 +46,14 @@ export const FAMILIAS_DE_FICHERO = [
   ['corpus/colecciones', 'coleccion'],
   ['corpus/obras', 'obra'],
   ['corpus/fuentes', 'documento'],
+  /*
+   * Historia 35.2 — los Personajes: familia de fichero antes que de ruta. Componen la Página de
+   * Cita, los listados, la Obra de la que son dueños y los Directorios por su nombre y su clave
+   * (`CAMPOS_QUE_PINTA`); su propia página, y con ella la familia de ruta, llega con la 35.3.
+   */
+  ['corpus/personajes', 'personaje'],
   ['corpus/wikidata', 'wikidata'],
-] as const satisfies readonly (readonly [string, Exclude<Familia, 'directorio'> | 'documento' | 'wikidata'])[];
+] as const satisfies readonly (readonly [string, Exclude<Familia, 'directorio'> | 'documento' | 'personaje' | 'wikidata'])[];
 
 export type FamiliaDeFichero = (typeof FAMILIAS_DE_FICHERO)[number][1];
 
@@ -142,7 +148,8 @@ export interface AvisoCompuesto {
  * no fecha nada, como `aptaParaPortada`, que es justo lo que decide su rotación—: enumera
  * Autores, Temas y Colecciones y cambia con la jornada. Lo demás es la lectura inversa de la
  * relación, por campos, sobre el Corpus de antes y el de después, con una sola excepción, que es
- * de la Obra (FR-38, 22.8).
+ * de las superficies cuya indexación depende del Corpus (`dependeDelContenido`): la Obra (FR-38,
+ * 22.8) y, desde la 35.3b, el Personaje, que se juzgan igual. Lo que sigue dice «Obra» por las dos.
  * Una Obra tiene tres estados —indexable, `noindex` o ausente—, y:
  *
  *   · una Obra cuya ficha, Citas, Autor o documentos cambiaron —en lo que ella pinta— se avisa si su estado cambió en cualquier
@@ -186,10 +193,12 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
   };
 
   // La portada, con cualquier cambio del Corpus que no sea un documento de Fuente o de Wikidata:
-  // los dos solo componen la Página de Obra, y la portada no pinta ninguno (24.8, 32.2).
+  // los dos solo componen la Página de Obra, y la portada no pinta ninguno (24.8, 32.2). Un
+  // fichero sin familia —`src/lib/umbrales.ts`, que desde la 35.9 llega como cambio por su
+  // veredicto de derechos— no es del Corpus y tampoco la avisa.
   const portada = entrada.cambios.some((cambio) => {
     const familia = familiaDeFichero(cambio.fichero);
-    return familia !== 'documento' && familia !== 'wikidata';
+    return familia !== undefined && familia !== 'documento' && familia !== 'wikidata';
   });
   const rutas = new Set<string>(portada ? ['/'] : []);
   const tocadas = new Set<string>([
@@ -201,7 +210,7 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
 
   const obrasSinDecidir: string[] = [];
   for (const ruta of tocadas) {
-    if (!esRutaDeObra(ruta)) {
+    if (!dependeDelContenido(ruta)) {
       rutas.add(ruta);
       continue;
     }
@@ -225,7 +234,7 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
       ...(listaDespues === undefined ? [`después: ${motivoDe(entrada.indexablesDespues)}`] : []),
     ];
     avisos.push(
-      `${obrasSinDecidir.length} Obra(s) tocada(s) sin avisar: no se sabe si se indexan ni si ` +
+      `${obrasSinDecidir.length} Obra(s) o Personaje(s) tocado(s) sin avisar: no se sabe si se indexan ni si ` +
         `se indexaban (${faltan.join('; ')}): ${obrasSinDecidir.join(', ')}.`,
     );
   }
@@ -236,11 +245,11 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
       ...(listaDespues === undefined ? [`después: ${motivoDe(entrada.indexablesDespues)}`] : []),
     ];
     avisos.push(
-      `No se avisa ninguna Obra hermana por cambio de indexabilidad: falta una de las dos ` +
+      `No se avisa ninguna Obra ni ningún Personaje hermano por cambio de indexabilidad: falta una de las dos ` +
         `listas (${motivos.join('; ')}).`,
     );
   } else {
-    // Toda ruta de Obra que entra o sale del conjunto indexable, en cualquier sentido.
+    // Toda ruta de Obra o de Personaje que entra o sale del conjunto indexable, en cualquier sentido.
     for (const [normalizada, ruta] of listaAntes) {
       if (!listaDespues.has(normalizada)) rutas.add(despues.get(normalizada) ?? antes.get(normalizada) ?? ruta);
     }
@@ -260,7 +269,8 @@ function motivoDe(lista: ListaDeObras): string {
 }
 
 /**
- * Las rutas de Obra de un sitemap, canónicas y con su barra final. Solo las del origen del
+ * Las rutas de Obra —y, desde la 35.3b, de Personaje: las que `dependeDelContenido`— de un
+ * sitemap, canónicas y con su barra final. Solo las del origen del
  * sitio: una `<loc>` de otro host —`www.` incluido— no es una página de esta propiedad.
  */
 export function rutasDeObraDelSitemap(xml: string, sitio: string = SITIO): string[] {
@@ -274,7 +284,7 @@ export function rutasDeObraDelSitemap(xml: string, sitio: string = SITIO): strin
       continue;
     }
     if (url.origin !== origen) continue;
-    if (esRutaDeObra(url.pathname)) rutas.push(url.pathname);
+    if (dependeDelContenido(url.pathname)) rutas.push(url.pathname);
   }
   return rutas;
 }

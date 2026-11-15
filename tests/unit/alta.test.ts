@@ -1,11 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { darDeAltaLote, formatearInforme, type EntradaDeLote } from '../../tools/alta.ts';
+import { altaConFallo, darDeAltaLote, formatearInforme, mensajeDeAltaFallida, type EntradaDeLote } from '../../tools/alta.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
-import { separarFrontmatter } from '../../tools/lib/corpus.ts';
-import { rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { CABECERA_DE_CLASES, escribirCita, rutasDelCorpus, separarFrontmatter, type Rutas } from '../../tools/lib/corpus.ts';
+import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from '../../tools/lib/clases.ts';
+import { motivoPuertaCerrada, type ValoresDeLaPuerta } from '../../tools/lib/atribuidas.ts';
+import { leerAprobaciones } from '../../tools/lib/aprobaciones.ts';
 import { CENSO_DE_PARTIDA } from '../../tools/lib/cotejo.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import {
@@ -416,6 +418,362 @@ describe('Historia 26.8 — el alta no publica una Cita sin Tema publicado', () 
     }
     expect(await readdir(rutas.citas)).toHaveLength(MIN_CITAS_POR_TEMA - 1);
     expect(await readdir(rutas.revision)).toEqual([]);
+  });
+});
+
+describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
+  const VIVA = 'nombre: "Ana Ejemplo"\nvivo: true\nañoNacimiento: 1950\nsemblanza: "Escritora."\nordenAlfabetico: "Ejemplo"\n';
+
+  it('la de siempre se publica y se anota «siempre» en un solo añadido', async () => {
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote([COMPLETA, { ...COMPLETA, texto: 'Otra sentencia distinta del Autor.' }], rutas);
+    expect(informe.publicadas).toHaveLength(2);
+    const registro = await readFile(rutas.clasesDeCita, 'utf8');
+    for (const { slug } of informe.publicadas) {
+      expect(registro).toContain(`  - { slug: "${slug}", clase: siempre, fecha: "`);
+    }
+    expect(informe.registroSinAnotar).toBeUndefined();
+  });
+
+  it('la que deriva atribuida —Personaje o Autor vivo— va a revisión con su clase, sin estadoDerechos ni entrada', async () => {
+    const rutas = await corpusDePrueba();
+    await writeFile(join(rutas.autores, 'ana-ejemplo.yml'), VIVA, 'utf8');
+    const informe = await darDeAltaLote(
+      [
+        { ...COMPLETA, autor: 'ana-ejemplo', texto: 'Una frase de una autora viva.' },
+        { ...COMPLETA, personaje: 'sancho-panza', texto: 'Una frase de un personaje.' },
+      ],
+      rutas,
+      { puerta: {} },
+    );
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision).toHaveLength(2);
+    for (const rechazada of informe.enRevision) {
+      expect(rechazada.motivos).toContain(motivoPuertaCerrada({}));
+      const fichero = await readFile(rechazada.ruta!, 'utf8');
+      expect(fichero).toMatch(/^clase: "?atribuida"?$/mu);
+      expect(fichero).not.toContain('estadoDerechos');
+    }
+    const conPersonaje = await Promise.all((await readdir(rutas.revision)).map((f) => readFile(join(rutas.revision, f), 'utf8')));
+    expect(conPersonaje.some((f) => /^personaje: "?sancho-panza"?$/mu.test(f))).toBe(true);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+    await expect(readFile(rutas.clasesDeCita, 'utf8')).rejects.toThrow();
+  });
+
+  it('Historia 35.2 — la de un Personaje sin Autor va a revisión con el prefijo del Personaje y sin autor', async () => {
+    const rutas = await corpusDePrueba();
+    await mkdir(rutas.personajes, { recursive: true });
+    await writeFile(join(rutas.personajes, 'batman.yml'), 'nombre: "Batman"\nuniverso: "DC Comics"\n', 'utf8');
+    const { autor: _autor, ...sinAutor } = COMPLETA;
+    const informe = await darDeAltaLote([{ ...sinAutor, personaje: 'batman', texto: 'La noche es más oscura antes del alba.' }], rutas, { puerta: {} });
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision).toHaveLength(1);
+    expect(informe.enRevision[0].motivos).toContain(motivoPuertaCerrada({}));
+    const ruta = informe.enRevision[0].ruta!;
+    expect(ruta).toMatch(/_revision\/batman--la-noche-es-mas-oscura.*\.md$/u);
+    const fichero = await readFile(ruta, 'utf8');
+    expect(fichero).toMatch(/^slug: "batman-la-noche/mu);
+    expect(fichero).not.toMatch(/^autor:/mu);
+    expect(fichero).toMatch(/^clase: "?atribuida"?$/mu);
+    expect(fichero).toMatch(/^personaje: "?batman"?$/mu);
+  });
+
+  it('Historia 35.2 — sin Autor y con un Personaje que no existe, no se escribe nada', async () => {
+    const rutas = await corpusDePrueba();
+    const { autor: _autor, ...sinAutor } = COMPLETA;
+    const informe = await darDeAltaLote([{ ...sinAutor, personaje: 'joker', texto: 'Por qué tan serio.' }], rutas);
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision).toEqual([]);
+    expect(informe.personajesDesconocidos).toEqual(['joker']);
+    expect(informe.sinDueño).toEqual([{ indice: 0, texto: 'Por qué tan serio.', personaje: 'joker' }]);
+    expect(await readdir(rutas.revision)).toEqual([]);
+    expect(formatearInforme(informe)).toContain('entrada 1 (Personaje «joker»): «Por qué tan serio.»');
+  });
+
+  it('Historia 35.2 — con Autor y un Personaje que no existe, va a revisión y el parte no la da por perdida', async () => {
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote([{ ...COMPLETA, personaje: 'joker', texto: 'Por qué tan serio.' }], rutas);
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision).toHaveLength(1);
+    expect(informe.enRevision[0].motivos.join('\n')).toMatch(/El Personaje «joker» no existe/u);
+    expect(informe.personajesDesconocidos).toEqual(['joker']);
+    expect(informe.sinDueño).toBeUndefined();
+    expect(formatearInforme(informe)).not.toMatch(/no se han escrito/u);
+  });
+
+  describe('Historia 35.1b — con la puerta abierta por parámetro', () => {
+    const ABIERTA: ValoresDeLaPuerta = {
+      maxCaracteres: 200,
+      maxPorObra: 5,
+      maxPorDueño: 5,
+      minAtestiguaciones: 2,
+      buzon: 'peticiones@ejemplo.org',
+    };
+    const deAna = (texto: string, extra: Partial<EntradaDeLote> = {}): EntradaDeLote => ({
+      texto,
+      autor: 'ana-ejemplo',
+      temas: [NOMBRE_DEL_TEMA_PUBLICADO],
+      procedencia: { obra: 'Obras de Ana', año: 2020 },
+      atestiguaciones: [
+        { url: 'https://es.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+        { url: 'https://www.elpais.com/ana', consultadaEl: '2026-11-02' },
+      ],
+      origen: 'original',
+      ...extra,
+    });
+    const conAna = async () => {
+      const rutas = await corpusDePrueba();
+      await writeFile(join(rutas.autores, 'ana-ejemplo.yml'), VIVA, 'utf8');
+      return rutas;
+    };
+
+    it('publica la feliz con sus atestiguaciones y su origen, sin Fuente ni estadoDerechos, y la anota', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote([deAna('Una frase que nadie más ha dicho nunca.')], rutas, { puerta: ABIERTA });
+      expect(informe.enRevision).toEqual([]);
+      expect(informe.publicadas).toHaveLength(1);
+      const fichero = await readFile(informe.publicadas[0].ruta, 'utf8');
+      expect(fichero).toMatch(/^clase: "?atribuida"?$/mu);
+      expect(fichero).toContain('es.wikiquote.org');
+      expect(fichero).toMatch(/^origen: "?original"?$/mu);
+      expect(fichero).not.toContain('estadoDerechos');
+      // La ficha que la misma entrada crea cuenta como Obra de la Autora (pregunta 23).
+      expect(await readdir(rutas.obras)).toContain('ana-ejemplo--obras-de-ana.yml');
+      expect(await readFile(rutas.clasesDeCita, 'utf8')).toMatch(/clase: atribuida/u);
+    });
+
+    describe('Historia 35.11 — la traducción propia la dan de alta dos agentes, y queda anotado', () => {
+      const PARTIDA = { texto: 'A sentence nobody else ever said.', lengua: 'en' };
+      const propia = () => deAna('Una frase que nadie más dijo jamás en ninguna lengua.', { origen: 'traduccion-propia', partida: PARTIDA });
+      const instantanea = async (rutas: Rutas) => {
+        const salida: Record<string, string> = {};
+        for (const e of await readdir(rutas.raiz, { recursive: true, withFileTypes: true })) {
+          if (e.isFile()) salida[join(e.parentPath, e.name)] = await readFile(join(e.parentPath, e.name), 'utf8');
+        }
+        return salida;
+      };
+
+      it('con dos agentes la publica con su partida y anota la aprobación antes que la clase', async () => {
+        const rutas = await conAna();
+        const informe = await darDeAltaLote([propia()], rutas, { puerta: ABIERTA, agentes: { propone: 'agente-a', aprueba: 'agente-b' } });
+        expect(informe.enRevision).toEqual([]);
+        expect(informe.publicadas).toHaveLength(1);
+        const datos = separarFrontmatter(await readFile(informe.publicadas[0].ruta, 'utf8'))!;
+        expect(datos).toMatchObject({ origen: 'traduccion-propia', partida: PARTIDA });
+        const slug = informe.publicadas[0].slug;
+        expect(await leerAprobaciones(rutas)).toEqual([
+          { slug, propone: 'agente-a', aprueba: 'agente-b', fecha: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u) },
+        ]);
+        expect(await readFile(rutas.clasesDeCita, 'utf8')).toContain(slug);
+        expect(altaConFallo(informe)).toBe(false);
+        expect(formatearInforme(informe)).toMatch(/propuesta por «agente-a» y aprobada por «agente-b»/u);
+      });
+
+      it.each<[string, { propone?: string; aprueba?: string } | undefined, boolean, RegExp]>([
+        ['sin agentes', undefined, false, /falta --propone y falta --aprueba/u],
+        ['el mismo agente, en seco', { propone: 'Ana', aprueba: 'ANA' }, true, /dicen el mismo/u],
+        ['sin --propone', { aprueba: 'b' }, false, /falta --propone/u],
+      ])('%s: sale con 1 sin escribir nada', async (_, agentes, seco, motivo) => {
+        const rutas = await conAna();
+        const antes = await instantanea(rutas);
+        const informe = await darDeAltaLote([propia()], rutas, { puerta: ABIERTA, seco, ...(agentes ? { agentes } : {}) });
+        expect(informe.agentesRechazados).toMatch(motivo);
+        expect(altaConFallo(informe)).toBe(true);
+        expect(formatearInforme(informe)).toMatch(/No se ha escrito nada/u);
+        expect(await instantanea(rutas)).toEqual(antes);
+      });
+
+      it('agentes sin ninguna traducción propia en el lote: sale con 1 sin escribir nada', async () => {
+        const rutas = await conAna();
+        const antes = await instantanea(rutas);
+        const informe = await darDeAltaLote([deAna('Una frase que nadie más ha dicho nunca.')], rutas, {
+          puerta: ABIERTA,
+          agentes: { propone: 'a', aprueba: 'b' },
+        });
+        expect(informe.agentesRechazados).toMatch(/solo la traducción propia lleva dos agentes/u);
+        expect(await instantanea(rutas)).toEqual(antes);
+      });
+
+      it('si el registro falla tras escribirla, se mueve a corpus/_revision/ sin anotar su clase, y sale con 1', async () => {
+        const rutas = await conAna();
+        await writeFile(rutas.aprobacionesDeAtribuidas, 'otra: cosa\n', 'utf8');
+        const informe = await darDeAltaLote([propia()], rutas, { puerta: ABIERTA, agentes: { propone: 'a', aprueba: 'b' } });
+        expect(informe.aprobacionesSinAnotar?.motivo).toMatch(/falta la clave «aprobaciones:»/u);
+        const [slug] = informe.aprobacionesSinAnotar!.devueltas;
+        expect(slug).toMatch(/^ana-ejemplo-/u);
+        expect(informe.publicadas).toEqual([]);
+        expect(altaConFallo(informe)).toBe(true);
+        expect((await readdir(rutas.citas)).some((f) => f.includes('nadie-mas-dijo'))).toBe(false);
+        const enRevision = await readdir(rutas.revision);
+        expect(enRevision.some((f) => f.includes('nadie-mas-dijo'))).toBe(true);
+        const clases = await readFile(rutas.clasesDeCita, 'utf8').catch(() => '');
+        expect(clases).not.toContain(slug);
+      });
+    });
+
+    it('un duplicado de una publicada de siempre no se publica, ni con --con-duplicados', async () => {
+      const rutas = await conAna();
+      expect((await darDeAltaLote([COMPLETA], rutas)).publicadas).toHaveLength(1);
+      const informe = await darDeAltaLote([deAna(COMPLETA.texto!)], rutas, { puerta: ABIERTA, conDuplicados: true });
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.enRevision[0].motivos.join('\n')).toMatch(/coincide con «seneca-no-es-que-tengamos-poco-tiempo[^»]*», de la clase siempre/u);
+    });
+
+    it('un duplicado de otra entrada del lote tampoco', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote(
+        [deAna('Una frase que se repite en el mismo lote.'), { ...COMPLETA, texto: 'Una frase que se repite en el mismo lote' }],
+        rutas,
+        { puerta: ABIERTA },
+      );
+      expect(informe.enRevision.map((r) => r.motivos.join(' '))).toEqual([expect.stringMatching(/coincide con «entrada 2 del lote»/u)]);
+    });
+
+    it('el tope del texto y la figura sin Obra la mandan a revisión con su motivo', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote(
+        [deAna(`Larga ${'muy '.repeat(60)}larga.`), deAna('Sin obra no hay atribuida.', { procedencia: { año: 2020 } })],
+        rutas,
+        { puerta: ABIERTA },
+      );
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.enRevision.map((r) => r.motivos.join(' '))).toEqual([
+        expect.stringMatching(/tiene \d+ caracteres y el tope es 200 \(MAX_CARACTERES_DE_ATRIBUIDA\)/u),
+        expect.stringMatching(/«ana-ejemplo», sin Personaje.*pregunta 23/u),
+      ]);
+    });
+
+    it('los topes cuentan lo que la misma pasada publica: la Obra nueva, también en seco, y el dueño', async () => {
+      const dos = [deAna('Primera frase de una obra nueva.'), deAna('Segunda, que ya no tiene sitio en ella.')];
+      for (const seco of [true, false]) {
+        const rutas = await conAna();
+        const informe = await darDeAltaLote(dos, rutas, { puerta: { ...ABIERTA, maxPorObra: 1 }, seco });
+        expect(informe.publicadas).toHaveLength(1);
+        expect(informe.enRevision.map((r) => r.motivos.join(' '))).toEqual([
+          expect.stringMatching(/la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1 \(MAX_ATRIBUIDAS_POR_OBRA\)/u),
+        ]);
+      }
+      const rutas = await conAna();
+      const informe = await darDeAltaLote(dos, rutas, { puerta: { ...ABIERTA, maxPorDueño: 1 } });
+      expect(informe.publicadas).toHaveLength(1);
+      expect(informe.enRevision.map((r) => r.motivos.join(' '))).toEqual([
+        expect.stringMatching(/el Autor «ana-ejemplo» tendría 2 atribuidas y el tope es 1 \(MAX_ATRIBUIDAS_POR_DUEÑO\)/u),
+      ]);
+    });
+
+    it('un duplicado de una candidata de corpus/_revision/ tampoco se publica', async () => {
+      const rutas = await conAna();
+      await escribirCita(rutas.revision, 'seneca--una-frase-que-espera.md', {
+        slug: 'seneca-una-frase-que-espera',
+        texto: 'Una frase que espera en revisión su turno.',
+        autor: 'seneca',
+        temas: [NOMBRE_DEL_TEMA_PUBLICADO],
+      });
+      // Con `--con-duplicados` el señalamiento de FR-14 no la para: la para la puerta de la atribuida.
+      const informe = await darDeAltaLote([deAna('Una frase que espera en revisión su turno.')], rutas, {
+        puerta: ABIERTA,
+        conDuplicados: true,
+      });
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.enRevision[0].motivos.join('\n')).toMatch(/coincide con «seneca-una-frase-que-espera», de la clase siempre/u);
+    });
+
+    it('el mínimo de dominios sigue a la puerta: dos direcciones de un mismo dominio no bastan con MIN 2', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote(
+        [
+          deAna('Una frase atestiguada dos veces por el mismo sitio.', {
+            atestiguaciones: [
+              { url: 'https://es.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+              { url: 'https://en.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+            ],
+          }),
+        ],
+        rutas,
+        { puerta: ABIERTA },
+      );
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.enRevision[0].motivos.join(' ')).toMatch(/la atestigua 1 dominio registrable/u);
+    });
+
+    it('sin Tema publicado no se escribe, como toda Cita', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote([deAna('Una frase sin Tema que la acerque.', { temas: [] })], rutas, { puerta: ABIERTA });
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.rechazadasPorTema).toHaveLength(1);
+    });
+  });
+
+  it('una clase tecleada en el lote no se obedece: la entrada va a revisión con el motivo', async () => {
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote([{ ...COMPLETA, clase: 'siempre' } as EntradaDeLote], rutas);
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision[0].motivos.join('\n')).toMatch(/la clase no se teclea/u);
+  });
+
+  it('un slug registrado con la otra clase cuenta como ocupado', async () => {
+    const rutas = await corpusDePrueba();
+    const seco = await darDeAltaLote([COMPLETA], rutas, { seco: true });
+    const slug = seco.publicadas[0].slug;
+    await writeFile(rutas.clasesDeCita, `clases:\n  - { slug: "${slug}", clase: atribuida, fecha: "2026-11-01" }\n`, 'utf8');
+    const informe = await darDeAltaLote([COMPLETA], rutas);
+    expect(informe.publicadas[0].slug).toBe(`${slug}-2`);
+  });
+
+  it('con el registro ilegible no escribe nada', async () => {
+    const rutas = await corpusDePrueba();
+    await writeFile(rutas.clasesDeCita, 'clases: [roto\n', 'utf8');
+    await expect(darDeAltaLote([COMPLETA], rutas)).rejects.toThrow(/clases-de-cita\.yml/u);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+    expect(await readdir(rutas.revision)).toEqual([]);
+  });
+
+  it('publicadas pero sin anotar —el añadido falla tras escribirlas—: registroSinAnotar, salida 1 y el parte da la siembra', async () => {
+    const rutas = await corpusDePrueba();
+    // Se lee bien y no se deja escribir: el fallo llega después de escribir las Citas.
+    await writeFile(rutas.clasesDeCita, CABECERA_DE_CLASES, 'utf8');
+    await chmod(rutas.clasesDeCita, 0o444);
+    const informe = await darDeAltaLote([COMPLETA], rutas);
+    expect(informe.publicadas).toHaveLength(1);
+    expect(await ficherosPublicados(rutas)).toHaveLength(1);
+    expect(informe.registroSinAnotar).toBeDefined();
+    expect(altaConFallo(informe)).toBe(true);
+    expect(formatearInforme(informe)).toContain(ORDEN_SEMBRAR_CLASES);
+    expect(await readFile(rutas.clasesDeCita, 'utf8')).toBe(CABECERA_DE_CLASES);
+  });
+
+  it('la orden, con publicadas sin anotar, sale con 1 y da la siembra', async () => {
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const { resolve } = await import('node:path');
+    const ejecutar = promisify(execFile);
+    const raiz = resolve(import.meta.dirname, '../..');
+    const rutas = await corpusDePrueba();
+    await writeFile(rutas.clasesDeCita, CABECERA_DE_CLASES, 'utf8');
+    await chmod(rutas.clasesDeCita, 0o444);
+    const lote = join(rutas.raiz, '..', 'lote.yaml');
+    await writeFile(lote, JSON.stringify([COMPLETA]), 'utf8');
+    let codigo = 0;
+    let salida = '';
+    try {
+      ({ stdout: salida } = await ejecutar('npx', ['tsx', join(raiz, 'tools/alta.ts'), lote, '--corpus', rutas.raiz], {
+        cwd: raiz,
+      }));
+    } catch (fallo) {
+      codigo = (fallo as { code?: number }).code ?? 1;
+      salida = (fallo as { stdout?: string }).stdout ?? '';
+    }
+    expect(codigo, salida).toBe(1);
+    expect(salida).toContain(ORDEN_SEMBRAR_CLASES);
+    expect(await ficherosPublicados(rutas)).toHaveLength(1);
+    expect(await readFile(rutas.clasesDeCita, 'utf8')).toBe(CABECERA_DE_CLASES);
+  });
+
+  it('el parte de un alta que lanzó: «nada escrito» solo si no se publicó nada', () => {
+    expect(mensajeDeAltaFallida(new Error('registro ilegible'))).toMatch(/registro ilegible\nNo se ha escrito nada\./u);
+    const interrumpida = new PublicacionInterrumpida(new Error('disco lleno'), ['seneca-a'], undefined);
+    expect(mensajeDeAltaFallida(interrumpida)).toBe(interrumpida.message);
+    expect(mensajeDeAltaFallida(interrumpida)).not.toMatch(/No se ha escrito nada/u);
   });
 });
 

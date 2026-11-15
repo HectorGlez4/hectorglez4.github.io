@@ -46,6 +46,7 @@ import {
   separarFrontmatter,
   type CitaEnCorpus,
 } from '../../tools/lib/corpus.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /**
  * Historia 24.1 — la Página de Obra lista sus Citas en el orden del libro.
@@ -355,6 +356,23 @@ describe('24.1 — posicionesDeCitas: dónde cae cada Cita, con el localizador d
     for (const apariciones of posiciones.values()) {
       for (const aparicion of apariciones) expect(Object.keys(aparicion).sort()).toEqual(['documento', 'posicion']);
     }
+  });
+
+  it('Historia 35.2 — la atribuida no se sitúa aunque su texto esté en el documento, y va al final', () => {
+    const posiciones = posicionesDeCitas(
+      [
+        frontmatter('atribuida', 'Una frase repartida en líneas.', { clase: 'atribuida', personaje: 'batman' }),
+        frontmatter('situada', 'Y otra frase.'),
+      ],
+      documentos,
+    );
+    expect(posiciones.get('atribuida')).toEqual([]);
+    expect(posiciones.get('situada')).not.toEqual([]);
+    const citas = [
+      { slug: 'atribuida', fuente: { id: 'ws' } },
+      { slug: 'situada', fuente: { id: 'ws' } },
+    ];
+    expect(ordenDelLibro(citas, posiciones, new Map()).map((c) => c.slug)).toEqual(['situada', 'atribuida']);
   });
 
   it('censo (sin Fuente), texto vacío, sin obra o que no aparece: lista vacía', () => {
@@ -765,7 +783,7 @@ describe('24.1 — el Corpus real, sin construir', () => {
 
   it('alguna Obra de varias Citas documentadas sale distinta del orden por slug', async () => {
     const fichas = await leerFichasDeObra(rutas);
-    const conObra = colgarObras(citas, fichas);
+    const conObra = colgarObras(citas, fichas, CUALQUIER_AUTOR);
     const porObra = new Map<string, typeof conObra>();
     for (const c of conObra) {
       if (c.obra === undefined) continue;
@@ -792,7 +810,7 @@ describe('24.1 — el Corpus real, sin construir', () => {
   it('en cada Obra real, documento y posición nunca retroceden dentro de una Fuente', async () => {
     const fichas = await leerFichasDeObra(rutas);
     const porObra = new Map<string, CitaEnCorpus[]>();
-    for (const c of colgarObras(citas, fichas)) {
+    for (const c of colgarObras(citas, fichas, CUALQUIER_AUTOR)) {
       if (c.obra === undefined) continue;
       porObra.set(c.obra.nombre, [...(porObra.get(c.obra.nombre) ?? []), c]);
     }
@@ -971,8 +989,10 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     const deCotejo = /import\s*\{([^}]*)\}\s*from\s*'\.\/cotejo\.ts'/.exec(codigo)?.[1] ?? '';
     // De `corpus.ts`, solo los lectores: ninguna de sus funciones que escriben en `corpus/`.
     const nombres = (lista: string) => lista.split(',').map((n) => n.trim()).filter((n) => n !== '').sort();
-    // La 32.3 añade los dos lectores del incipit: las fichas y un solo documento.
+    // La 32.3 añade los dos lectores del incipit: las fichas y un solo documento. La 35.9, los
+    // Autores: el incipit de una Obra con derechos vigentes no se ofrece (`derechosDeLaObra`).
     expect(nombres(deCorpus)).toEqual([
+      'leerAutores',
       'leerCitas',
       'leerDocumentoDeFuente',
       'leerDocumentosParaElCotejo',
@@ -1074,7 +1094,7 @@ describe('24.9 — las cuatro Obras del Corpus real, sin construir', () => {
     indices = await leerOrdenDeLosIndices(rutas);
     posiciones = posicionesDeCitas(citas, documentos);
     porObra = new Map();
-    for (const c of colgarObras(citas, fichas)) {
+    for (const c of colgarObras(citas, fichas, CUALQUIER_AUTOR)) {
       if (c.obra !== undefined) porObra.set(c.obra.nombre, [...(porObra.get(c.obra.nombre) ?? []), c]);
     }
   });
@@ -1182,6 +1202,14 @@ describe('31.1 — posicionesDeCitas: el pasaje de cada aparición, con el tope 
     for (const p of [sin, posicionesDeCitas(citas, documentos)]) {
       for (const apariciones of p.values()) for (const a of apariciones) expect('pasaje' in a).toBe(false);
     }
+  });
+
+  it('Historia 35.4 — una atribuida con Fuente y su texto en el documento no trae pasaje, ni con tope', () => {
+    const atribuida = { ...frontmatter('atribuida', 'la frase de dentro'), clase: 'atribuida', personaje: 'batman' };
+    const posiciones = posicionesDeCitas([atribuida, ...citas], documentos, { tope: 1200, lineasDeclaradas });
+    expect(posiciones.get('atribuida')).toEqual([]);
+    // La de siempre con el mismo texto, en la misma pasada, sí lo trae.
+    expect(posiciones.get('dentro')?.[0].pasaje).toBeDefined();
   });
 
   it('el tope en el borde lo ofrece; uno por debajo, no', () => {

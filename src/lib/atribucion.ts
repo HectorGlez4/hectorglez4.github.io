@@ -10,9 +10,12 @@
  * AD-5 — Derivación pura.
  */
 
-import type { Cita, Autor, SiguienteCita } from './publicado.ts';
+import type { Cita, Autor, Personaje, SiguienteCita } from './publicado.ts';
+import { esAtribuida } from './clase.ts';
 import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
+import type { AtribucionDeSemblanza } from './biografia.ts';
 import { MARCA } from './marca.ts';
+import { REGIONES_DE_VARIANTE } from './variante.ts';
 import { milesEnEspañol } from './formato.ts';
 import { escapar } from './lienzo.ts';
 import { enUnaLinea, versosDe } from './verso.ts';
@@ -61,15 +64,80 @@ export { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase };
  * `TypeError` crudo en una orden que promete rechazos redactados. Lo que no consta no se
  * escribe, que es la regla de siempre (FR-2).
  */
-export function procedenciaCompuesta(cita: Cita): string | undefined {
+export function procedenciaCompuesta(cita: Cita, quienes: QuienesDeLaCita): string | undefined {
   /*
    * Historia 22.3 — la obra se nombra con el título de su Obra resuelta, nunca con la grafía
    * que declara la Cita: una Obra que reúne dos grafías se llama igual en todas partes. El
    * año, en cambio, es el de la Procedencia de **esta** Cita, nunca el de la Obra.
+   *
+   * Historia 35.4 — con Personaje y Autor, «de {Autor}» va entre el título y el año: lo decide
+   * `firmaDeCita`, y esto es lo que va detrás del nombre de la primera línea.
    */
+  return restoDeLaFirma(partesDeLaFirma(cita, quienes));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La firma de una Cita — Historia 35.4, AD-33, UX-DR135–137
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Quién firma una Cita: el Autor y el Personaje que **declara**, cada uno solo si lo declara. Lo
+ * reciben todas las superficies que nombran a quien dice la Cita.
+ */
+export interface QuienesDeLaCita {
+  autor?: Pick<Autor, 'nombre'>;
+  personaje?: Pick<Personaje, 'nombre'>;
+}
+
+/**
+ * La firma de una Cita, en piezas y en su orden fijo — Personaje, Obra, Autor (AD-33):
+ *
+ *   · `nombre`, el de la primera línea: el Personaje si lo hay; si no, el Autor;
+ *   · `titulo`, el de su Obra resuelta, si la tiene;
+ *   · `deAutor`, el nombre del Autor **solo** si la Cita tiene Personaje y Autor: «…, de Séneca»;
+ *   · `año`, el de la Procedencia de **esta** Cita, si consta.
+ *
+ * Es la **única** composición del nombre: la usan lo copiado (y por él lo compartido y el texto
+ * plano de la Imagen), la procedencia de la Imagen y de la Tarjeta Social, el Fragmento, la
+ * Atribución y su línea de Obra. Sin Personaje sale lo de siempre, byte a byte. Una Cita sin
+ * Autor ni Personaje no tiene a nadie que firmar: el uso está roto, y lanza.
+ */
+export interface FirmaDeCita {
+  nombre: string;
+  titulo?: string;
+  deAutor?: string;
+  año?: number;
+}
+
+export function firmaDeCita(cita: Pick<Cita, 'slug' | 'obra' | 'procedencia'>, quienes: QuienesDeLaCita): FirmaDeCita {
+  const nombre = quienes.personaje?.nombre ?? quienes.autor?.nombre;
+  if (nombre === undefined) {
+    throw new Error(
+      `firmaDeCita: la Cita «${cita.slug}» llega sin Autor ni Personaje, y no hay nombre que firmar: ` +
+        'quien la pinta le pasa los que la Cita declara.',
+    );
+  }
+  return { nombre, ...partesDeLaFirma(cita, quienes) };
+}
+
+/** Lo que va detrás del nombre: título, «de {Autor}» y año, cada uno si consta. */
+function partesDeLaFirma(
+  cita: Pick<Cita, 'obra' | 'procedencia'>,
+  { autor, personaje }: QuienesDeLaCita,
+): Omit<FirmaDeCita, 'nombre'> {
   const titulo = cita.obra?.titulo;
   const año = cita.procedencia?.año;
-  return [titulo, año].filter((x) => x !== undefined).join(', ') || undefined;
+  return {
+    ...(titulo !== undefined ? { titulo } : {}),
+    ...(personaje !== undefined && autor !== undefined ? { deAutor: autor.nombre } : {}),
+    ...(año !== undefined ? { año } : {}),
+  };
+}
+
+/** «{título}, de {Autor}, {año}», con lo que conste, o `undefined` si no consta nada. */
+function restoDeLaFirma({ titulo, deAutor, año }: Omit<FirmaDeCita, 'nombre'>): string | undefined {
+  const partes = [titulo, deAutor === undefined ? undefined : `de ${deAutor}`, año];
+  return partes.filter((x) => x !== undefined).join(', ') || undefined;
 }
 
 /**
@@ -97,9 +165,16 @@ export function fraseDeTraduccion(
   );
 }
 
-export function textoParaCopiar(cita: Cita, autor: Autor): string {
-  const partes = [autor.nombre];
-  const fuente = procedenciaCompuesta(cita);
+export function textoParaCopiar(
+  cita: Cita,
+  autor: Pick<Autor, 'nombre'> | undefined,
+  /** El Personaje que declara la Cita, o `undefined`. Obligatorio: un uso nuevo no lo olvida. */
+  personaje: Pick<Personaje, 'nombre'> | undefined,
+): string {
+  // Historia 35.4 — «— {Personaje}, {título}, de {Autor}, {año}.»; sin Personaje, como siempre.
+  const quienes = { autor, personaje };
+  const partes = [firmaDeCita(cita, quienes).nombre];
+  const fuente = procedenciaCompuesta(cita, quienes);
   if (fuente !== undefined) partes.push(fuente);
 
   /*
@@ -133,6 +208,8 @@ export function textoParaCopiar(cita: Cita, autor: Autor): string {
  */
 export const SUPERFICIES_DE_LA_SEMBLANZA = [
   'ficha-de-autor',
+  // Historia 35.3 — la Ficha de Personaje de la página 1, que la porta como la de Autor.
+  'ficha-de-personaje',
   'meta-description',
   'datos-estructurados',
   'indice-de-busqueda',
@@ -158,6 +235,73 @@ export function lineaDeLaFuente(
     rotulo,
     despues: '.',
     ...(fuente.licencia !== undefined && { licencia: ` ${fuente.licencia}.` }),
+  };
+}
+
+/**
+ * La línea de la Variante — Historia 35.6, UX-DR138: «En España: «{texto}»», bajo la Línea de la
+ * Fuente de la Página de Cita atribuida. Este es su único dueño; el rótulo de la región sale de
+ * `REGIONES_DE_VARIANTE` (`src/lib/variante.ts`). Sin Variante, `undefined`: no se pinta nada.
+ * La Variante no entra en lo copiado, el Fragmento, la Imagen ni la Tarjeta: solo esta línea la dice.
+ */
+export function lineaDeVariante(cita: Pick<Cita, 'variante'>): string | undefined {
+  const variante = cita.variante;
+  if (variante === undefined) return undefined;
+  const rotulo: string | undefined = REGIONES_DE_VARIANTE[variante.region];
+  // El esquema solo admite regiones del conjunto; si una llegara sin rótulo, no se pinta «En undefined».
+  if (rotulo === undefined) throw new Error(`La Variante declara la región «${String(variante.region)}», que no es de REGIONES_DE_VARIANTE.`);
+  return `En ${rotulo}: «${variante.texto}»`;
+}
+
+/** Sobre qué página se pide corregir o retirar: una Cita atribuida o un Personaje. */
+export type SobreLaRetirada = { sobre: 'cita' | 'personaje'; slug: string };
+
+/** Lo que pinta la línea de retirada: la pregunta, el enlace, su `href` y la dirección como texto. */
+export interface LineaDeRetirada {
+  pregunta: string;
+  enlace: string;
+  href: string;
+  direccion: string;
+}
+
+/**
+ * La línea de retirada — Historia 35.8, FR-69, AD-35, UX-DR139. Su único dueño.
+ *
+ * «¿Esta cita está mal atribuida o te afecta? Pide que se corrija o se retire.» al pie de la
+ * Página de Cita atribuida, y «¿Alguna cita de esta página…» al pie de la de Personaje. La
+ * segunda frase es un `mailto:` a `buzon` con un `?subject=` que lleva el slug codificado; la
+ * dirección se dice también como texto. El buzón lo pasa quien pinta (`BUZON_DE_PETICIONES` de
+ * `src/lib/dominio.ts`), porque este módulo lo importan islas del cliente y `dominio.ts` lee el
+ * disco. **Sin buzón, o con uno que no es una dirección de correo, lanza**: la línea nunca falta donde hay una atribuida (con la puerta de la
+ * 35.1b, sin buzón no se publica ninguna).
+ */
+export function lineaDeRetirada({ sobre, slug }: SobreLaRetirada, buzon: string | undefined): LineaDeRetirada {
+  if (buzon === undefined || buzon.trim() === '') {
+    throw new Error(
+      `La línea de retirada de «${slug}» no tiene a dónde pedir: BUZON_DE_PETICIONES (src/lib/dominio.ts) no tiene valor. ` +
+        'Sin buzón no se publica ninguna atribuida (Historia 35.8, AD-35).',
+    );
+  }
+  const direccion = buzon.trim();
+  // Va tal cual al `href`: una dirección con espacios, `?`, `&`, `#`, `%`, comillas, `<>`, o con
+  // `,` o `;` —que en un `mailto:` separan destinatarios—, o sin `@` y dominio, compondría un
+  // `mailto:` roto o a varios en cada página que la pinta. Solo letras ASCII, cifras y `._+-`.
+  if (!/^[A-Za-z0-9._+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u.test(direccion)) {
+    throw new Error(
+      `La línea de retirada de «${slug}» no tiene a dónde pedir: BUZON_DE_PETICIONES (src/lib/dominio.ts) vale «${direccion}», ` +
+        'que no es una dirección de correo (usuario@dominio, con solo letras sin tilde, cifras y «._+-»).',
+    );
+  }
+  const asunto =
+    sobre === 'cita' ? `Corregir o retirar la cita ${slug}` : `Corregir o retirar citas del personaje ${slug}`;
+  return {
+    pregunta:
+      sobre === 'cita'
+        ? '¿Esta cita está mal atribuida o te afecta? '
+        : '¿Alguna cita de esta página está mal atribuida o te afecta? ',
+    enlace: 'Pide que se corrija o se retire.',
+    href: `mailto:${direccion}?subject=${encodeURIComponent(asunto)}`,
+    direccion,
   };
 }
 
@@ -195,6 +339,7 @@ export const PORTAN_LA_ATRIBUCION: ReadonlySet<SuperficieDeLaSemblanza | 'pasaje
   SuperficieDeLaSemblanza | 'pasaje'
 >([
   'ficha-de-autor',
+  'ficha-de-personaje',
   // Historia 31.2 — «Lee el pasaje» reproduce texto del documento de Fuente, con su línea de la
   // Fuente y su licencia debajo (`lineaDeLaFuente`).
   'pasaje',
@@ -204,13 +349,16 @@ export const PORTAN_LA_ATRIBUCION: ReadonlySet<SuperficieDeLaSemblanza | 'pasaje
  * La semblanza que una superficie puede reproducir, o `undefined` si no puede: una semblanza
  * ajena —el Autor declara biografía— solo donde se porta su atribución; una propia, donde
  * estaba.
+ *
+ * Historia 35.3 — la semblanza propia de un Personaje lleva quién responde de ella (`responde`),
+ * y eso es también una atribución: solo sale donde se porta, como la de una biografía.
  */
 export function semblanzaEn(
-  autor: Pick<Autor, 'semblanza' | 'atribucion'>,
+  entidad: { semblanza?: string; atribucion?: AtribucionDeSemblanza; responde?: string },
   superficie: SuperficieDeLaSemblanza,
 ): string | undefined {
-  if (autor.atribucion === undefined) return autor.semblanza;
-  return PORTAN_LA_ATRIBUCION.has(superficie) ? autor.semblanza : undefined;
+  if (entidad.atribucion === undefined && entidad.responde === undefined) return entidad.semblanza;
+  return PORTAN_LA_ATRIBUCION.has(superficie) ? entidad.semblanza : undefined;
 }
 
 /**
@@ -237,19 +385,26 @@ export const SUPERFICIES_SIN_SEMBLANZA: readonly string[] = [
  * de la Tarjeta Social de Autor—. Las partes van sin separador: la fila pone el punto medio para la
  * vista y la coma para el lector.
  *
- * Los años salen de `añosDeAutor` («1547–1616», «Fallecido en 65») y solo si consta el año de
- * fallecimiento. El esquema lo hace obligatorio, así que la rama sin años no se alcanza con el
- * Corpus; la función la admite para que la convención de ausencia —sin punto medio ni hueco— se
- * pueda probar sin relajar el tipo de `Autor`.
+ * Los años salen de `añosDeAutor` («1547–1616», «Fallecido en 65», «N. 1950» de un Autor vivo)
+ * y, cuando no da ninguno —un Autor vivo sin año de nacimiento (Historia 35.1)—, la fila va sin
+ * ellos: sin punto medio ni hueco.
  */
 export function hechosDeFilaDeAutor(
-  autor: { añoNacimiento?: number; añoFallecimiento?: number },
+  autor: { añoNacimiento?: number; añoFallecimiento?: number; vivo?: true },
   citas: number,
 ): { años?: string; recuento: string } {
   const recuento = recuentoDeCitas(citas);
-  if (autor.añoFallecimiento === undefined) return { recuento };
-  const años = añosDeAutor({ ...autor, añoFallecimiento: autor.añoFallecimiento });
-  return { años, recuento };
+  const años = añosDeAutor(autor);
+  return años === undefined ? { recuento } : { años, recuento };
+}
+
+/**
+ * Los hechos de la Fila de Personaje del Directorio de Autores — Historia 35.5, UX-DR140: donde la
+ * de Autor lleva los años, «personaje de {universo}» (`universoDePersonaje`, su único dueño), y el
+ * recuento de las Citas publicadas que lo declaran. La pinta la misma `FilaDeAutor`.
+ */
+export function hechosDeFilaDePersonaje(personaje: { universo: string }, citas: number): { años: string; recuento: string } {
+  return { años: universoDePersonaje(personaje), recuento: recuentoDeCitas(citas) };
 }
 
 /**
@@ -370,15 +525,22 @@ export function partesDeFichaTecnica(
  *
  *   · «1864–1936»; los dos antes de Cristo, «65–8 a. C.»; solo el primero, «4 a. C.–65 d. C.»;
  *   · sin año de nacimiento en el Corpus, «Fallecido en 65» o «Fallecido en 8 a. C.» —FR-2:
- *     nunca un año aproximado—.
+ *     nunca un año aproximado—;
+ *   · un Autor vivo (Historia 35.1), «N. 1950» —«n. 1950» en minúscula, como «fallecido»—; sin
+ *     año de nacimiento, ninguno: `undefined`, y quien pinta los años no pinta línea, paréntesis
+ *     ni hueco. La forma «n. {año}» está pendiente de Héctor (bmad-ux).
  *
  * Hasta la 17.2 el año negativo salía con su signo —«-4–65»—, que no es como se escribe.
  */
 export function añosDeAutor(
-  autor: Pick<Autor, 'añoNacimiento' | 'añoFallecimiento'>,
+  autor: Pick<Autor, 'añoNacimiento' | 'añoFallecimiento' | 'vivo'>,
   inicial: 'mayúscula' | 'minúscula' = 'mayúscula',
-): string {
+): string | undefined {
   const { añoNacimiento: nace, añoFallecimiento: muere } = autor;
+  if (autor.vivo === true) {
+    return nace === undefined ? undefined : `${inicial === 'mayúscula' ? 'N.' : 'n.'} ${añoLegible(nace, '')}`;
+  }
+  if (muere === undefined) return undefined;
   if (nace === undefined) {
     return `${inicial === 'mayúscula' ? 'Fallecido' : 'fallecido'} en ${añoLegible(muere, '')}`;
   }
@@ -405,12 +567,13 @@ export function recuentoDeDocumentadas(documentadas: number): string | undefined
  * el sistema no compone prosa sobre una persona real (§5 del PRD).
  */
 export function hechosDeAutor(
-  autor: Pick<Autor, 'nombre' | 'añoNacimiento' | 'añoFallecimiento'>,
+  autor: Pick<Autor, 'nombre' | 'añoNacimiento' | 'añoFallecimiento' | 'vivo'>,
   documentadas: number,
 ): string {
   const recuento = recuentoDeDocumentadas(documentadas);
+  const años = añosDeAutor(autor, 'minúscula');
   return (
-    `${autor.nombre} (${añosDeAutor(autor, 'minúscula')}).` +
+    `${autor.nombre}${años === undefined ? '' : ` (${años})`}.` +
     (recuento === undefined ? '' : ` ${recuento} en ${MARCA}.`)
   );
 }
@@ -424,7 +587,7 @@ export function hechosDeAutor(
  * «documentada»—: «… 4 a. C.–65 d. C. 12 cotejadas con su documento.»
  */
 export function descripcionDeAutor(
-  autor: Pick<Autor, 'nombre' | 'semblanza' | 'atribucion' | 'añoNacimiento' | 'añoFallecimiento'>,
+  autor: Pick<Autor, 'nombre' | 'semblanza' | 'atribucion' | 'añoNacimiento' | 'añoFallecimiento' | 'vivo'>,
   documentadas: number,
 ): string {
   const prefijo = `Citas de ${autor.nombre} con su procedencia documentada.`;
@@ -436,7 +599,33 @@ export function descripcionDeAutor(
       : ` ${documentadas} ${documentadas === 1 ? 'cotejada' : 'cotejadas'} con su documento.`;
   // «65–8 a. C.» ya acaba en punto: otro sería «a. C..».
   const años = añosDeAutor(autor);
+  if (años === undefined) return `${prefijo}${cotejadas}`;
   return `${prefijo} ${años}${años.endsWith('.') ? '' : '.'}${cotejadas}`;
+}
+
+/**
+ * «personaje de {universo}» — Historia 35.3b, el único dueño de la frase: la ficha de la Página de
+ * Personaje, su `<meta description>` (`descripcionDePersonaje`) y su Tarjeta Social
+ * (`datosDeTarjetaDePersonaje`). El universo va tal cual lo declara la ficha del Personaje.
+ */
+export function universoDePersonaje(personaje: { universo: string }): string {
+  return `personaje de ${personaje.universo}`;
+}
+
+/**
+ * El `<meta description>` de una Página de Personaje — Historia 35.3, UX-DR134:
+ * «{n} frases de {nombre}, personaje de {universo}.», con «1 frase» en singular; las 2+ añaden
+ * « Página N.», como la de Obra. {n} son las Citas publicadas del Personaje. Solo hechos del
+ * Corpus; «frases» solo aquí y en la pestaña, como en la Obra.
+ */
+export function descripcionDePersonaje(
+  personaje: { nombre: string; universo: string },
+  citas: number,
+  pagina = 1,
+): string {
+  const cuantas = `${citas} ${citas === 1 ? 'frase' : 'frases'}`;
+  const tramo = pagina > 1 ? ` Página ${pagina}.` : '';
+  return `${cuantas} de ${personaje.nombre}, ${universoDePersonaje(personaje)}.${tramo}`;
 }
 
 /**
@@ -449,7 +638,8 @@ export function descripcionDeAutor(
  * «Frases» solo aquí y en la pestaña; el cuerpo de la página dice «citas».
  */
 export function descripcionDeObra(
-  autor: Pick<Autor, 'nombre'>,
+  /** El dueño de la Obra —su Autor o, desde la Historia 35.4, su Personaje—: solo su nombre. */
+  autor: { nombre: string },
   obra: Pick<ObraResuelta, 'titulo' | 'año' | 'recuento'>,
   pagina = 1,
 ): string {
@@ -504,7 +694,7 @@ export const FILA_VER_LA_OBRA = 'Ver la obra';
 /**
  * Lo que dice la Tarjeta de Obra bajo la Cita — FR-12, UX-DR104, Historia 24.4.
  *
- * `hechos` son las partes de la línea «{Autor} · {año} · {n} citas», en su orden, sin
+ * `hechos` son las partes de la línea «{dueño} · {año} · {n} citas», en su orden, sin
  * separadores: el componente pone el punto medio para la vista y la coma para el lector. El año
  * es el de la Obra resuelta —omitido si sus Citas discrepan o no lo dicen, nunca el de una
  * traducción—, como lo lee una persona (`añoLegible`: «350 a. C.»), y cuando falta no deja
@@ -517,7 +707,8 @@ export const FILA_VER_LA_OBRA = 'Ver la obra';
  * tarjeta (28.2) y dos redacciones dirían la misma Obra de dos maneras.
  */
 export function contenidoDeTarjetaDeObra(
-  autor: Pick<Autor, 'nombre'>,
+  /** El dueño de la Obra (`obra.dueño`): su Autor o, desde la Historia 35.4, su Personaje. */
+  autor: { nombre: string },
   obra: Pick<ObraResuelta, 'año' | 'recuento' | 'edicionCotejada'>,
 ): { hechos: string[]; fila: string } {
   const hechos = [autor.nombre];
@@ -582,6 +773,15 @@ export function cierreDeLaMismaObra(obra: Pick<ObraResuelta, 'recuento' | 'titul
  */
 export function cierreDeMasDelAutor(autor: Pick<Autor, 'nombre'>, recuento: number): string {
   return `Las ${recuentoDeCierre('cierreDeMasDelAutor', recuento)} citas de ${autor.nombre}`;
+}
+
+/**
+ * El cierre de «Más de {Personaje}» — «Las {n} citas de {Personaje}», Historia 35.4, hermana de
+ * `cierreDeMasDelAutor` y con su misma regla de recuento (`recuentoDeCierre`). `recuento` son las
+ * Citas publicadas que declaran el Personaje: las que lista su página, a la que lleva.
+ */
+export function cierreDeMasDelPersonaje(personaje: Pick<Personaje, 'nombre'>, recuento: number): string {
+  return `Las ${recuentoDeCierre('cierreDeMasDelPersonaje', recuento)} citas de ${personaje.nombre}`;
 }
 
 /**
@@ -654,18 +854,28 @@ export function rotuloDeObrasPlegadas(m: number): string {
  *
  * UX-DR21 — frases completas con punto final, que se añade aquí y no se escribe en el corpus.
  */
-export function lineaDeProcedencia(cita: Cita): { titulo?: string; resto: string } {
-  const { año, referencia, traduccion } = cita.procedencia;
-  const titulo = cita.obra?.titulo;
+export function lineaDeProcedencia(
+  cita: Cita,
+  quienes: QuienesDeLaCita,
+): { titulo?: string; deAutor?: { antes: string; nombre: string }; resto: string } {
+  const { referencia, traduccion } = cita.procedencia;
+  /*
+   * Historia 35.4, UX-DR135 — con Personaje y Autor, la línea nombra al Autor detrás del título:
+   * «{título}, de {Autor}, {año}.», y sin Obra «de {Autor}, {año}.», sin «Sin obra documentada»:
+   * la ausencia de la Obra ya no deja la línea sin nada que decir. Las piezas salen de
+   * `firmaDeCita`; sin Personaje, `deAutor` no está y la línea es la de siempre.
+   */
+  const { titulo, deAutor, año } = partesDeLaFirma(cita, quienes);
   const conPunto = (frase: string) => (/[.?!]$/.test(frase) ? frase : `${frase}.`);
 
   const frases: string[] = [];
   let trasElTitulo = '';
-  if (titulo !== undefined) {
-    // La primera frase es el título con lo que lo acompaña; su punto va detrás de eso.
-    const primera = año !== undefined ? `, ${año}` : '';
-    trasElTitulo = conPunto(`${titulo}${primera}`).slice(titulo.length);
-    if (año === undefined && traduccion === undefined) frases.push('Sin año documentado');
+  if (titulo !== undefined || deAutor !== undefined) {
+    // La primera frase es el título —o «de {Autor}»— con lo que lo acompaña; su punto va detrás.
+    const delAutor = deAutor === undefined ? '' : `${titulo === undefined ? 'de ' : ', de '}${deAutor}`;
+    const primera = `${titulo ?? ''}${delAutor}${año !== undefined ? `, ${año}` : ''}`;
+    trasElTitulo = conPunto(primera).slice((titulo ?? '').length + delAutor.length);
+    if (titulo !== undefined && año === undefined && traduccion === undefined) frases.push('Sin año documentado');
   } else if (año !== undefined) {
     frases.push('Sin obra documentada', `Año ${año}`);
   } else {
@@ -677,8 +887,12 @@ export function lineaDeProcedencia(cita: Cita): { titulo?: string; resto: string
   if (referencia !== undefined) frases.push(referencia);
 
   const siguientes = frases.map(conPunto).join(' ');
-  if (titulo === undefined) return { resto: siguientes };
-  return { titulo, resto: siguientes === '' ? trasElTitulo : `${trasElTitulo} ${siguientes}` };
+  if (titulo === undefined && deAutor === undefined) return { resto: siguientes };
+  return {
+    ...(titulo !== undefined ? { titulo } : {}),
+    ...(deAutor !== undefined ? { deAutor: { antes: titulo === undefined ? 'de ' : ', de ', nombre: deAutor } } : {}),
+    resto: siguientes === '' ? trasElTitulo : `${trasElTitulo} ${siguientes}`,
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -712,12 +926,11 @@ export interface ReferenciaCompuesta {
 }
 
 /**
- * Si la Cita lleva «Cómo citar». Hoy, toda Cita; la Historia 35.4 añadirá aquí la Cita atribuida
- * (FR-65), y la página solo pregunta.
+ * Si la Cita lleva «Cómo citar» — FR-65, Historia 35.4: toda Cita salvo la atribuida, que no se
+ * coteja y no tiene una edición que referenciar. La página solo pregunta.
  */
-export function citaTieneComoCitar(cita: Pick<Cita, 'slug'>): boolean {
-  void cita;
-  return true;
+export function citaTieneComoCitar(cita: { clase?: unknown }): boolean {
+  return !esAtribuida(cita);
 }
 
 /** Lo que del Autor decide su nombre en una Referencia. */
@@ -968,12 +1181,11 @@ export function referenciaEnTexto(segmentos: readonly SegmentoDeReferencia[], fe
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * El nombre del Autor tal como lo pinta la Atribución y lo lleva el Fragmento (UX-DR137). Hoy es
- * el `nombre`; existe para que las dos superficies nombren por una sola función, donde la
- * Historia 35.4 añadirá el Personaje sin tocar los componentes.
+ * El nombre de la primera línea de la Atribución, el que lleva también el Fragmento (UX-DR137):
+ * el Personaje si la Cita lo declara y, si no, el Autor — Historia 35.4, por `firmaDeCita`.
  */
-export function nombreEnAtribucion(autor: Pick<Autor, 'nombre'>): string {
-  return autor.nombre;
+export function nombreEnAtribucion(cita: Pick<Cita, 'slug' | 'obra' | 'procedencia'>, quienes: QuienesDeLaCita): string {
+  return firmaDeCita(cita, quienes).nombre;
 }
 
 /**
@@ -996,7 +1208,13 @@ export function nombreEnAtribucion(autor: Pick<Autor, 'nombre'>): string {
  * —una Marca de llegada pegada en blogs ajenos atribuiría sus visitas a otra cosa— detiene la
  * construcción.
  */
-export function fragmentoParaInsertar(cita: Pick<Cita, 'texto' | 'obra'>, autor: Pick<Autor, 'nombre'>, canonica: string): string {
+export function fragmentoParaInsertar(
+  cita: Pick<Cita, 'slug' | 'texto' | 'obra' | 'procedencia'>,
+  autor: Pick<Autor, 'nombre'> | undefined,
+  canonica: string,
+  /** El Personaje que declara la Cita, o `undefined`. Obligatorio: un uso nuevo no lo olvida. */
+  personaje: Pick<Personaje, 'nombre'> | undefined,
+): string {
   let url: URL | undefined;
   try {
     url = new URL(canonica);
@@ -1016,11 +1234,14 @@ export function fragmentoParaInsertar(cita: Pick<Cita, 'texto' | 'obra'>, autor:
       `fragmentoParaInsertar: la canónica «${canonica}» no es una URL http(s) absoluta, en su forma normalizada, sin credenciales, «?» ni «#»`,
     );
   }
-  const titulo = cita.obra?.titulo;
-  const firma =
-    titulo === undefined
-      ? escapar(conPunto(nombreEnAtribucion(autor)))
-      : `${escapar(nombreEnAtribucion(autor))}, <cite>${escapar(titulo)}</cite>${punto(titulo)}`;
+  /*
+   * Historia 35.4 — «— {Personaje}, <cite>{título}</cite>, de {Autor}.»: el orden de `firmaDeCita`,
+   * sin año, como siempre. El punto va tras lo último que se nombra.
+   */
+  const { nombre, titulo, deAutor } = firmaDeCita(cita, { autor, personaje });
+  let firma = titulo === undefined ? escapar(nombre) : `${escapar(nombre)}, <cite>${escapar(titulo)}</cite>`;
+  if (deAutor !== undefined) firma += `, de ${escapar(deAutor)}`;
+  firma += punto(deAutor ?? titulo ?? nombre);
   return [
     '<blockquote>',
     `<p>${versosDe(cita.texto).map(escapar).join('<br>')}</p>`,

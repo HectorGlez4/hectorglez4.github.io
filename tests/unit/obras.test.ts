@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { esquemaDeObra, obraAdmisible } from '../../src/lib/admision.ts';
 import { TIENDA_DE_PRUEBA } from './ayuda/construir.js';
 import { procedenciaCompuesta, textoDeLoTomado, textoParaCopiar } from '../../src/lib/atribucion.ts';
-import type { Autor, Cita } from '../../src/lib/publicado.ts';
+import { obrasIndexables, type Autor, type Cita } from '../../src/lib/publicado.ts';
 import {
   edicionQueEncabeza,
   obraTieneComoCitar,
@@ -16,7 +16,11 @@ import {
   avisosDeAñosDeObras,
   avisosDeDistintaRancia,
   colgarObras,
+  dueñoDeCita,
+  dueñoDeFicha,
+  fichasDeCita,
   obraDeCita,
+  rutaDeLaObra,
   resolverObras,
   avisosDeObras,
   avisosDePrefijo,
@@ -31,6 +35,10 @@ import {
   prefijosDeFormas,
   obrasDeCitas,
   dondeLeer,
+  derechosDeLaObra,
+  fallosDeIncipitConDerechos,
+  avisosDeEdicionesSinCotejada,
+  ordenDelLibro,
   entradaComun,
   ROTULO_DE_FUENTE_SIN_NOMBRE,
   type CitaParaDondeLeer,
@@ -60,6 +68,7 @@ import { aprobar } from '../../tools/lib/revision.ts';
 import { darDeAltaLote } from '../../tools/alta.ts';
 import { retirarAutor } from '../../tools/lib/gestion.ts';
 import { NOMBRE_DEL_TEMA_PUBLICADO, TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado } from './ayuda/relleno.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /** Historia 22.1 — cada Obra tiene ficha antes de tener URL. */
 
@@ -140,7 +149,7 @@ describe('el esquema de la Ficha de Obra', () => {
     const r = obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], sinopsis: 'Y' });
     expect(r.success).toBe(false);
     expect(r.error?.issues.map((i) => i.message).join()).toContain(
-      'no reconoce «sinopsis». Sus campos son autor, titulo, formas, distintaDe, nota, ediciones, wikidata e incipit.',
+      'no reconoce «sinopsis». Sus campos son autor, personaje, personajes, titulo, formas, distintaDe, nota, ediciones, wikidata e incipit.',
     );
   });
 });
@@ -209,7 +218,7 @@ describe('la identidad, el nombre y la grafía por omisión', () => {
     expect(obras.filter((o) => o.grafias.length > 1)).toHaveLength(1);
     expect(prefijosDeFormas(obras)).toEqual([
       {
-        autor: 'unamuno',
+        dueño: 'unamuno',
         corta: 'del sentimiento tragico de la vida',
         larga: 'del sentimiento tragico de la vida i',
       },
@@ -1009,7 +1018,7 @@ describe('22.3 — la Obra resuelta, pura', () => {
 
   it('reunida: las dos grafías resuelven la misma Obra, con el título de la ficha', () => {
     const citas = [citaConAño('a', 'Artículos'), citaConAño('b', 'Artículos de costumbres')];
-    const obras = resolverObras(citas, [DOS]);
+    const obras = resolverObras(citas, [DOS], CUALQUIER_AUTOR);
     expect(obraDeCita(citas[0], [DOS], obras)?.titulo).toBe('Artículos');
     expect(obraDeCita(citas[1], [DOS], obras)?.titulo).toBe('Artículos');
     expect(obras.get('larra--articulos')?.recuento).toBe(2);
@@ -1018,21 +1027,21 @@ describe('22.3 — la Obra resuelta, pura', () => {
   it('el título sigue la regla de tituloEfectivo', () => {
     const otra = { ...DOS, titulo: 'Artículos varios' };
     const citas = [citaConAño('a', 'Artículos de costumbres'), citaConAño('b', 'Artículos de costumbres'), citaConAño('c', 'Artículos')];
-    expect(resolverObras(citas, [otra]).get(otra.nombre)?.titulo).toBe(
+    expect(resolverObras(citas, [otra], CUALQUIER_AUTOR).get(otra.nombre)?.titulo).toBe(
       tituloEfectivo(otra, [otra], citas),
     );
-    expect(resolverObras(citas, [otra]).get(otra.nombre)?.titulo).toBe('Artículos de costumbres');
+    expect(resolverObras(citas, [otra], CUALQUIER_AUTOR).get(otra.nombre)?.titulo).toBe('Artículos de costumbres');
   });
 
   it('año común: dos Citas con 1898 dan 1898', () => {
     const citas = [citaConAño('a', 'Artículos', { año: 1898 }), citaConAño('b', 'Artículos', { año: 1898 }), citaConAño('c', 'Artículos')];
-    expect(resolverObras(citas, [DOS]).get(DOS.nombre)?.año).toBe(1898);
+    expect(resolverObras(citas, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)?.año).toBe(1898);
     expect(avisosDeAñosDeObras([DOS], citas)).toEqual([]);
   });
 
   it('años distintos: se omite el año y se avisa nombrando ficha y años', () => {
     const citas = [citaConAño('a', 'Artículos', { año: 1902 }), citaConAño('b', 'Artículos', { año: 1898 })];
-    const obra = resolverObras(citas, [DOS]).get(DOS.nombre)!;
+    const obra = resolverObras(citas, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)!;
     expect(obra).not.toHaveProperty('año');
     const avisos = avisosDeAñosDeObras([DOS], citas);
     expect(avisos).toHaveLength(1);
@@ -1043,9 +1052,9 @@ describe('22.3 — la Obra resuelta, pura', () => {
 
   it('traducción: el año de la traducción no aporta año a la Obra', () => {
     const citas = [citaConAño('a', 'Artículos', { traduccion: { traductor: 'Fulano', año: 1909 } })];
-    expect(resolverObras(citas, [DOS]).get(DOS.nombre)).not.toHaveProperty('año');
+    expect(resolverObras(citas, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)).not.toHaveProperty('año');
     const mezcla = [...citas, citaConAño('b', 'Artículos', { año: 1835 })];
-    expect(resolverObras(mezcla, [DOS]).get(DOS.nombre)?.año).toBe(1835);
+    expect(resolverObras(mezcla, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)?.año).toBe(1835);
     expect(avisosDeAñosDeObras([DOS], mezcla)).toEqual([]);
   });
 
@@ -1055,24 +1064,24 @@ describe('22.3 — la Obra resuelta, pura', () => {
       citaConAño('b', 'Artículos', { fuente: 'wikisource', temas: ['la-patria'] }),
       citaConAño('c', 'Artículos de costumbres', { fuente: 'cervantes', temas: ['el-amor'] }),
     ];
-    const obra = resolverObras(citas, [DOS]).get(DOS.nombre)!;
+    const obra = resolverObras(citas, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)!;
     expect(obra.fuentes).toEqual(['cervantes', 'wikisource']);
     expect(obra.edicionCotejada).toBe(true);
     expect(obra.temas).toEqual(['el-amor', 'el-tiempo', 'la-patria']);
     expect(obra.recuento).toBe(3);
 
-    const sin = resolverObras([citaConAño('d', 'Artículos')], [DOS]).get(DOS.nombre)!;
+    const sin = resolverObras([citaConAño('d', 'Artículos')], [DOS], CUALQUIER_AUTOR).get(DOS.nombre)!;
     expect(sin.edicionCotejada).toBe(false);
     expect(sin.fuentes).toEqual([]);
   });
 
   it('una ficha sin Citas resuelve con recuento 0 y su título', () => {
-    const obra = resolverObras([], [DOS]).get(DOS.nombre)!;
+    const obra = resolverObras([], [DOS], CUALQUIER_AUTOR).get(DOS.nombre)!;
     expect(obra).toMatchObject({ titulo: 'Artículos', recuento: 0, fuentes: [], temas: [] });
   });
 
   it('sin obra: la Cita no lleva el campo', () => {
-    const [colgada] = colgarObras([{ slug: 'x', autor: 'larra', procedencia: { año: 1835 } }], [DOS]);
+    const [colgada] = colgarObras([{ slug: 'x', autor: 'larra', procedencia: { año: 1835 } }], [DOS], CUALQUIER_AUTOR);
     expect(colgada).not.toHaveProperty('obra');
   });
 
@@ -1088,12 +1097,12 @@ describe('22.3 — la Obra resuelta, pura', () => {
     });
     const [conAño, otraConAño, sinAño] = colgarObras(
       [base('a', 'Artículos', 1835), base('b', 'Artículos de costumbres', 1835), base('c', 'Artículos de costumbres')],
-      [DOS],
+      [DOS], CUALQUIER_AUTOR,
     );
     expect(conAño.obra?.año).toBe(1835);
-    expect(textoParaCopiar(otraConAño, AUTOR)).toBe('«Texto.» — Mariano José de Larra, Artículos, 1835.');
-    expect(textoParaCopiar(sinAño, AUTOR)).toBe('«Texto.» — Mariano José de Larra, Artículos.');
-    expect(procedenciaCompuesta(sinAño)).toBe('Artículos');
+    expect(textoParaCopiar(otraConAño, AUTOR, undefined)).toBe('«Texto.» — Mariano José de Larra, Artículos, 1835.');
+    expect(textoParaCopiar(sinAño, AUTOR, undefined)).toBe('«Texto.» — Mariano José de Larra, Artículos.');
+    expect(procedenciaCompuesta(sinAño, {})).toBe('Artículos');
   });
 });
 
@@ -1228,9 +1237,9 @@ describe('22.3 — citasConObra, del lado de tools/', () => {
 describe('22.3 — colgarObras no arrastra una Obra vieja', () => {
   it('quita el obra previo cuando ninguna ficha resuelve ya la Cita', () => {
     const DOS = ficha('larra--articulos', 'larra', 'Artículos', ['articulos']);
-    const [colgada] = colgarObras([{ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } }], [DOS]);
+    const [colgada] = colgarObras([{ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } }], [DOS], CUALQUIER_AUTOR);
     expect(colgada.obra?.titulo).toBe('Artículos');
-    const [otraVez] = colgarObras([colgada], []);
+    const [otraVez] = colgarObras([colgada], [], CUALQUIER_AUTOR);
     expect(otraVez).not.toHaveProperty('obra');
     expect(otraVez).toEqual({ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } });
   });
@@ -1523,7 +1532,7 @@ describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que rees
     // Cita pasa a la grafía por omisión, y la ficha conserva lo demás.
     const ruta = join(rutas.obras, `${destino}.yml`);
     await writeFile(ruta, (await readFile(ruta, 'utf8')).replace(/^titulo: .*$/m, 'titulo: "Título viejo"'), 'utf8');
-    const lineas = await ajustarTitulosDeObra(rutas, 'seneca', ['de la brevedad de la vida'], ESQUEMA);
+    const lineas = await ajustarTitulosDeObra(rutas, { autor: 'seneca' }, ['de la brevedad de la vida'], ESQUEMA);
     expect(lineas.join('\n')).toContain('Título viejo');
     expect(await yamlDe(destino)).not.toContain('Título viejo');
     await comprobar(destino);
@@ -1537,6 +1546,279 @@ describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que rees
     expect(bloqueDeEdiciones(await readFile(join(rutas.obrasRetiradas, `${absorbida}.yml`), 'utf8'))).toBe(
       EDICIONES,
     );
+  });
+});
+
+// ─── Historia 35.2 — la Obra tiene un solo dueño ─────────────────────────────
+
+describe('35.2 — el dueño de la ficha y de la Cita, y la resolución en dos pasos', () => {
+  const dePersonaje = (
+    nombre: string,
+    personaje: string,
+    formas: string[],
+    extra: { personajes?: string[]; autor?: string } = {},
+  ): FichaDeObra => ({
+    nombre,
+    ruta: `corpus/obras/${nombre}.yml`,
+    personaje,
+    personajes: extra.personajes ?? [personaje],
+    ...(extra.autor !== undefined ? { autor: extra.autor } : {}),
+    titulo: nombre,
+    formas,
+  });
+  const citaDe = (slug: string, dueños: { autor?: string; personaje?: string }, obra: string) => ({
+    slug,
+    ...dueños,
+    procedencia: { obra },
+    ruta: `corpus/citas/${slug}.md`,
+  });
+
+  it('el dueño de una ficha es su Personaje si lo declara; el de una Cita, su Autor si lo declara', () => {
+    expect(dueñoDeFicha(ficha('seneca--x', 'seneca', 'X', ['x']))).toEqual({ tipo: 'autor', slug: 'seneca' });
+    expect(dueñoDeFicha(dePersonaje('batman--x', 'batman', ['x'], { autor: 'kane' }))).toEqual({
+      tipo: 'personaje',
+      slug: 'batman',
+    });
+    expect(dueñoDeCita({ slug: 'a', autor: 'kane', personaje: 'batman' })).toEqual({ tipo: 'autor', slug: 'kane' });
+    expect(dueñoDeCita({ slug: 'a', personaje: 'batman' })).toEqual({ tipo: 'personaje', slug: 'batman' });
+    expect(() => dueñoDeCita({ slug: 'a' })).toThrow(/dueño/);
+  });
+
+  it('primer paso: las fichas que nombran al Autor de la Cita, como dueño o informativo', () => {
+    const delAutor = ficha('kane--la-noche', 'kane', 'La noche', ['la noche']);
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche']);
+    // Con el Autor, la de Autor gana, aunque la Cita declare también el Personaje.
+    expect(fichasDeCita(citaDe('kane-a', { autor: 'kane', personaje: 'batman' }, 'La noche'), [delAutor, delPersonaje])).toEqual([
+      delAutor,
+    ]);
+    // El Autor informativo de una ficha de Personaje cuenta en el primer paso.
+    const conAutor = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
+    expect(fichaDeCita(citaDe('kane-b', { autor: 'kane' }, 'La noche'), [conAutor])).toBe(conAutor);
+  });
+
+  it('segundo paso: sin ficha del Autor, la de Personaje cuyo «personajes» incluye el de la Cita', () => {
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche'], { personajes: ['batman', 'joker'] });
+    expect(fichaDeCita(citaDe('joker-a', { personaje: 'joker' }, 'La noche'), [delPersonaje])).toBe(delPersonaje);
+    expect(fichaDeCita(citaDe('kane-a', { autor: 'kane', personaje: 'joker' }, 'La noche'), [delPersonaje])).toBe(delPersonaje);
+    expect(fichaDeCita(citaDe('robin-a', { personaje: 'robin' }, 'La noche'), [delPersonaje])).toBeUndefined();
+  });
+
+  it('ficha ambigua: dos candidatas en el mismo paso rompen nombrando la Cita y las dos fichas', () => {
+    const delAutor = ficha('kane--la-noche', 'kane', 'La noche', ['la noche']);
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
+    const fallos = fallosDeObras(
+      [delAutor, delPersonaje],
+      [citaDe('kane-a', { autor: 'kane', personaje: 'batman' }, 'La noche')],
+      ['kane'],
+      undefined,
+      ['batman'],
+    );
+    const ambigua = fallos.find((f) => f.includes('corpus/citas/kane-a.md'));
+    expect(ambigua).toContain('corpus/obras/kane--la-noche.yml');
+    expect(ambigua).toContain('corpus/obras/batman--la-noche.yml');
+  });
+
+  it('dos fichas de Personaje con la misma forma rompen nombrándolas', () => {
+    const fallos = fallosDeObras(
+      [dePersonaje('batman--la-noche', 'batman', ['la noche']), dePersonaje('joker--la-noche', 'joker', ['la noche'])],
+      [],
+      [],
+      undefined,
+      ['batman', 'joker'],
+    );
+    expect(fallos.join('\n')).toMatch(/la noche.*2 fichas de Personaje.*batman--la-noche\.yml.*joker--la-noche\.yml/u);
+  });
+
+  it('el nombre lleva el prefijo del dueño, y sus Personajes y su Autor existen', () => {
+    const mal = dePersonaje('kane--la-noche', 'batman', ['la noche'], { autor: 'kane', personajes: ['batman', 'robin'] });
+    const fallos = fallosDeObras([mal], [], ['seneca'], undefined, ['batman']).join('\n');
+    expect(fallos).toContain('declara «personaje: batman»');
+    expect(fallos).toContain('su Autor «kane» no existe');
+    expect(fallos).toContain('su Personaje «robin» no existe en corpus/personajes/');
+    const bien = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
+    expect(fallosDeObras([bien], [], ['kane'], undefined, ['batman'])).toEqual([]);
+    // Sin Citas publicadas, avisa como cualquier ficha.
+    expect(avisosDeObras([bien], [])).toHaveLength(1);
+  });
+
+  it('desde la 35.4, una ficha de Personaje que resuelve Citas publicadas no rompe: tiene página', () => {
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche']);
+    const fallos = fallosDeObras(
+      [delPersonaje],
+      [citaDe('batman-a', { personaje: 'batman' }, 'La noche')],
+      [],
+      undefined,
+      ['batman'],
+    );
+    expect(fallos).toEqual([]);
+  });
+
+  it('una Cita de Personaje sin ficha nombra a su Personaje como dueño de la Obra', () => {
+    const fallos = fallosDeObras([], [citaDe('batman-a', { personaje: 'batman' }, 'La noche')], [], undefined, ['batman']);
+    expect(fallos.join('\n')).toContain('La Obra «La noche» de batman no tiene Ficha de Obra');
+  });
+
+  it('la Obra resuelta lleva su dueño; la ruta sale del nombre de la ficha, como siempre', () => {
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
+    const [resuelta] = resolverObras([], [delPersonaje], CUALQUIER_AUTOR).values();
+    expect(resuelta.dueño).toEqual({ tipo: 'personaje', slug: 'batman' });
+    expect(resuelta.autor).toBe('kane');
+    expect(rutaDeLaObra(resuelta)).toBe('/obra/batman/la-noche/');
+  });
+
+  it('indexable por su dueño: el recuento es el de las Citas del Personaje, no el de un Autor', () => {
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche']);
+    const delAutor = ficha('kane--otra', 'kane', 'Otra', ['otra']);
+    const base = (slug: string, dueños: { autor?: string; personaje?: string }, obra: string) => ({
+      ...citaDe(slug, dueños, obra),
+      texto: slug,
+      temas: [],
+      aptaParaPortada: false,
+    });
+    // Tres Citas de Batman en su Obra y siete más suyas fuera: 3/10 < MAX_PROPORCION_OBRA_DEL_AUTOR.
+    const citas = colgarObras(
+      [
+        ...[1, 2, 3].map((n) => base(`batman-n${n}`, { personaje: 'batman' }, 'La noche')),
+        ...[4, 5, 6, 7, 8, 9, 10].map((n) => base(`batman-s${n}`, { personaje: 'batman' }, 'Suelta')),
+        // Un Autor con dos Citas de su Obra y nada más: el 100 %, no se indexa.
+        base('kane-a', { autor: 'kane' }, 'Otra'),
+        base('kane-b', { autor: 'kane' }, 'Otra'),
+      ],
+      [delPersonaje, delAutor], CUALQUIER_AUTOR,
+    );
+    expect(obrasIndexables(citas, null).map((o) => o.nombre)).toEqual(['batman--la-noche']);
+  });
+});
+
+describe('35.2 — las órdenes de la ficha conservan su dueño', () => {
+  async function conPersonaje() {
+    const rutas = await corpusTemporal();
+    await writeFile(
+      join(rutas.obras, 'batman--la-noche.yml'),
+      'autor: "seneca"\npersonaje: "batman"\npersonajes:\n  - "batman"\n  - "joker"\ntitulo: "La noche"\nformas:\n  - "la noche"\n',
+      'utf8',
+    );
+    await writeFile(
+      join(rutas.obras, 'batman--la-noche-larga.yml'),
+      'personaje: "batman"\npersonajes:\n  - "batman"\ntitulo: "La noche larga"\nformas:\n  - "la noche larga"\n',
+      'utf8',
+    );
+    // Una Cita (Autor y Personaje) que resuelve la ficha de Personaje por su Autor informativo.
+    await publicar(rutas, { ...citaCompleta('seneca-n1', 'La Noche'), personaje: 'batman' });
+    await publicar(rutas, { ...citaCompleta('seneca-n2', 'La noche'), personaje: 'batman' });
+    return rutas;
+  }
+  const leida = async (rutas: Rutas, nombre: string) =>
+    (await leerFichasDeObra(rutas)).find((f) => f.nombre === nombre);
+
+  it('titular y separar conservan personaje, personajes y autor', async () => {
+    const rutas = await conPersonaje();
+    const titulada = await titularFicha(rutas, 'batman--la-noche', 'La Noche');
+    expect(titulada.ok, titulada.ok ? '' : titulada.motivos.join('\n')).toBe(true);
+    expect(await leida(rutas, 'batman--la-noche')).toMatchObject({
+      autor: 'seneca',
+      personaje: 'batman',
+      personajes: ['batman', 'joker'],
+      titulo: 'La Noche',
+    });
+    const separadas = await separarFichas(rutas, 'batman--la-noche', 'batman--la-noche-larga');
+    expect(separadas.ok, separadas.ok ? '' : separadas.motivos.join('\n')).toBe(true);
+    expect(await leida(rutas, 'batman--la-noche-larga')).toMatchObject({ personaje: 'batman', personajes: ['batman'] });
+    expect((await leida(rutas, 'batman--la-noche'))?.personajes).toEqual(['batman', 'joker']);
+  });
+
+  it('reunir conserva el dueño y une los Personajes; entre dueños distintos se niega', async () => {
+    const rutas = await conPersonaje();
+    await writeFile(join(rutas.obras, 'seneca--otra.yml'), 'autor: "seneca"\ntitulo: "Otra"\nformas:\n  - "otra"\n', 'utf8');
+    const antes = await readFile(join(rutas.obras, 'seneca--otra.yml'), 'utf8');
+    const negada = await reunirFichas(rutas, 'seneca--otra', 'batman--la-noche-larga');
+    expect(negada.ok).toBe(false);
+    if (!negada.ok) expect(negada.motivos.join('\n')).toMatch(/dueño/);
+    expect(await readFile(join(rutas.obras, 'seneca--otra.yml'), 'utf8')).toBe(antes);
+
+    const reunida = await reunirFichas(rutas, 'batman--la-noche', 'batman--la-noche-larga');
+    expect(reunida.ok, reunida.ok ? '' : reunida.motivos.join('\n')).toBe(true);
+    expect(await leida(rutas, 'batman--la-noche')).toMatchObject({
+      autor: 'seneca',
+      personaje: 'batman',
+      personajes: ['batman', 'joker'],
+      formas: ['la noche', 'la noche larga'],
+    });
+  });
+
+  it('retirar mueve la ficha de Personaje entera, y se niega mientras una Cita la resuelva', async () => {
+    const rutas = await conPersonaje();
+    expect((await retirarFichaDeObra(rutas, 'batman--la-noche', 'prueba')).ok).toBe(false);
+    const original = await readFile(join(rutas.obras, 'batman--la-noche-larga.yml'), 'utf8');
+    const hecho = await retirarFichaDeObra(rutas, 'batman--la-noche-larga', 'prueba');
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    expect(await readFile(join(rutas.obrasRetiradas, 'batman--la-noche-larga.yml'), 'utf8')).toBe(original);
+  });
+
+  it('el ajuste del título encuentra la ficha de Personaje por los dos pasos', async () => {
+    const rutas = await conPersonaje();
+    // Segundo paso: una Cita del Personaje sin Autor, en la ficha que no declara Autor.
+    const { autor: _sinAutor, ...sinAutor } = citaCompleta('batman-l1', 'La Noche Larga');
+    await publicar(rutas, { ...sinAutor, personaje: 'batman' });
+    const conTituloViejo = async (nombre: string) => {
+      const ruta = join(rutas.obras, `${nombre}.yml`);
+      await writeFile(ruta, (await readFile(ruta, 'utf8')).replace(/^titulo: .*$/m, 'titulo: "Título viejo"'), 'utf8');
+    };
+    await conTituloViejo('batman--la-noche');
+    await conTituloViejo('batman--la-noche-larga');
+
+    // Primer paso: la Cita de Séneca llega a la ficha de Batman por su `autor` informativo.
+    const primero = await ajustarTitulosDeObra(rutas, { autor: 'seneca', personaje: 'batman' }, ['la noche']);
+    expect(primero.join('\n')).toContain('batman--la-noche.yml');
+    expect(['La Noche', 'La noche']).toContain((await leida(rutas, 'batman--la-noche'))?.titulo);
+    expect((await leida(rutas, 'batman--la-noche-larga'))?.titulo).toBe('Título viejo');
+
+    const segundo = await ajustarTitulosDeObra(rutas, { personaje: 'batman' }, ['la noche larga']);
+    expect(segundo.join('\n')).toContain('batman--la-noche-larga.yml');
+    expect(await leida(rutas, 'batman--la-noche-larga')).toMatchObject({
+      personaje: 'batman',
+      personajes: ['batman'],
+      titulo: 'La Noche Larga',
+    });
+  });
+
+  it('asegurar la ficha de una Cita de Personaje sin Autor la crea con su dueño', async () => {
+    const rutas = await corpusTemporal();
+    const hecho = await asegurarFichaDeObra(rutas, {
+      personaje: 'batman',
+      obra: 'La noche',
+      citasPublicadas: [{ personaje: 'batman', procedencia: { obra: 'La noche' } }],
+    });
+    expect(hecho).toMatchObject({ ok: true, accion: 'creada' });
+    const [creada] = await leerFichasDeObra(rutas);
+    expect(creada).toMatchObject({ nombre: 'batman--la-noche', personaje: 'batman', personajes: ['batman'] });
+    expect(creada.autor).toBeUndefined();
+    // Y con Autor, la de Autor, como siempre.
+    const otra = await asegurarFichaDeObra(rutas, { autor: 'seneca', personaje: 'batman', obra: 'Otra', citasPublicadas: [] });
+    expect(otra).toMatchObject({ ok: true, accion: 'creada' });
+    expect(await leida(rutas, 'seneca--otra')).toMatchObject({ autor: 'seneca' });
+  });
+});
+
+describe('35.2 — el esquema del dueño de la ficha', () => {
+  it('la de Personaje lleva «personajes» que incluye al dueño; la de Autor no lleva «personajes»', () => {
+    expect(
+      obraAdmisible.safeParse({ personaje: 'batman', personajes: ['batman'], titulo: 'X', formas: ['x'] }).success,
+    ).toBe(true);
+    expect(
+      obraAdmisible.safeParse({ personaje: 'batman', personajes: ['batman'], autor: 'kane', titulo: 'X', formas: ['x'] })
+        .success,
+    ).toBe(true);
+    const sinLista = obraAdmisible.safeParse({ personaje: 'batman', titulo: 'X', formas: ['x'] });
+    expect(sinLista.error?.issues.map((i) => i.message).join()).toMatch(/personajes/);
+    const sinDueño = obraAdmisible.safeParse({ personaje: 'batman', personajes: ['joker'], titulo: 'X', formas: ['x'] });
+    expect(sinDueño.error?.issues.map((i) => i.message).join()).toMatch(/no incluye a «batman»/);
+    const repetidos = obraAdmisible.safeParse({ personaje: 'batman', personajes: ['batman', 'batman'], titulo: 'X', formas: ['x'] });
+    expect(repetidos.success).toBe(false);
+    const deAutor = obraAdmisible.safeParse({ autor: 'seneca', personajes: ['batman'], titulo: 'X', formas: ['x'] });
+    expect(deAutor.error?.issues.map((i) => i.message).join()).toMatch(/ficha de un Autor no lleva «personajes»/);
+    const nadie = obraAdmisible.safeParse({ titulo: 'X', formas: ['x'] });
+    expect(nadie.error?.issues.map((i) => i.message).join()).toMatch(/falta el Autor de la Ficha de Obra/);
   });
 });
 
@@ -1575,7 +1857,151 @@ describe('edicionQueEncabeza — Historia 32.5, FR-48', () => {
     expect(edicionQueEncabeza([])).toBeUndefined();
   });
 
-  it('toda Obra lleva «Cómo citar» (la 35.9 añadirá las exclusiones)', () => {
-    expect(obraTieneComoCitar({ nombre: 'seneca--cartas-a-lucilio' })).toBe(true);
+  it('35.9 — toda Obra lleva «Cómo citar» salvo la que tiene derechos vigentes (también la de un Personaje)', () => {
+    expect(obraTieneComoCitar({ derechosVigentes: false })).toBe(true);
+    expect(obraTieneComoCitar({ derechosVigentes: true })).toBe(false);
+  });
+});
+
+/**
+ * Historia 35.9 — la Obra con derechos vigentes (FR-70, AD-20 y AD-25 v9.1): una sola regla,
+ * `derechosDeLaObra`, sobre el dueño de la ficha; lo cotejado, solo de la clase de siempre; y las
+ * exclusiones con nombre de «Dónde leer esta obra», «Cómo citar», el aviso y el incipit.
+ */
+describe('35.9 — la Obra con derechos vigentes', () => {
+  const deAutor = (nombre: string, autor: string, extra: Partial<FichaDeObra> = {}): FichaDeObra => ({
+    ...ficha(nombre, autor, 'La obra', ['la obra']),
+    ...extra,
+  });
+  const deBatman: FichaDeObra = {
+    nombre: 'batman--la-obra',
+    ruta: 'corpus/obras/batman--la-obra.yml',
+    personaje: 'batman',
+    personajes: ['batman'],
+    titulo: 'La obra',
+    formas: ['la obra'],
+  };
+  const AUTORES = [
+    { slug: 'viva', vivo: true },
+    { slug: 'larra', añoFallecimiento: 1837 },
+    { slug: 'reciente', añoFallecimiento: 1980 },
+  ];
+  const FUENTE = { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/La_obra' };
+  const cita = (slug: string, autor: string, extra: Record<string, unknown> = {}) => ({
+    slug,
+    autor,
+    procedencia: { obra: 'La obra' },
+    ...extra,
+  });
+
+  it('un Personaje dueño, siempre; un Autor vivo, siempre; uno fallecido, solo con plazo que corre', () => {
+    expect(derechosDeLaObra(deBatman, AUTORES)).toBe(true);
+    expect(derechosDeLaObra(deAutor('viva--la-obra', 'viva'), AUTORES)).toBe(true);
+    expect(derechosDeLaObra(deAutor('larra--la-obra', 'larra'), AUTORES)).toBe(false);
+    expect(derechosDeLaObra(deAutor('reciente--la-obra', 'reciente'), AUTORES)).toBe(false);
+    const conPlazo = { plazo: 70, año: 2026 };
+    expect(derechosDeLaObra(deAutor('reciente--la-obra', 'reciente'), AUTORES, conPlazo)).toBe(true);
+    expect(derechosDeLaObra(deAutor('larra--la-obra', 'larra'), AUTORES, conPlazo)).toBe(false);
+  });
+
+  it('un Autor dueño que no está: `derechosDeLaObra`, `resolverObras` y `colgarObras` lanzan nombrando la ficha', () => {
+    const huerfana = deAutor('nadie--la-obra', 'nadie');
+    expect(() => derechosDeLaObra(huerfana, AUTORES)).toThrow(/corpus\/obras\/nadie--la-obra\.yml.*«nadie»/u);
+    expect(() => resolverObras([], [huerfana], AUTORES)).toThrow(/nadie--la-obra/u);
+    expect(() => colgarObras([cita('nadie-a', 'nadie')], [huerfana], AUTORES)).toThrow(/nadie--la-obra/u);
+    // Una de Personaje no busca a su Autor: el `autor` de su ficha es informativo.
+    expect(() => resolverObras([], [{ ...deBatman, autor: 'nadie' }], AUTORES)).not.toThrow();
+  });
+
+  it('la Obra resuelta lo lleva en `derechosVigentes`, y lo cotejado es de la clase de siempre', () => {
+    const viva = deAutor('viva--la-obra', 'viva');
+    const larra = deAutor('larra--la-obra', 'larra');
+    const obras = resolverObras(
+      [
+        cita('viva-a', 'viva', { clase: 'atribuida', fuente: FUENTE }),
+        cita('larra-a', 'larra', { fuente: FUENTE }),
+        cita('larra-b', 'larra', { clase: 'atribuida', fuente: { id: 'otra-fuente', url: 'https://otra.example/x' } }),
+      ],
+      [viva, larra],
+      AUTORES,
+    );
+    expect(obras.get('viva--la-obra')).toMatchObject({ derechosVigentes: true, edicionCotejada: false, fuentes: [], recuento: 1 });
+    expect(obras.get('larra--la-obra')).toMatchObject({
+      derechosVigentes: false,
+      edicionCotejada: true,
+      fuentes: ['wikisource-es'],
+      recuento: 2,
+    });
+    expect(resolverObras([], [deBatman], AUTORES).get('batman--la-obra')?.derechosVigentes).toBe(true);
+  });
+
+  it('dominio público con una atribuida con Fuente: una línea de una Cita, y «se tomó 1 de sus 2 citas»', () => {
+    const resumen = dondeLeer([{ fuente: FUENTE }, { fuente: { ...FUENTE, url: 'https://es.wikisource.org/wiki/Otra' }, clase: 'atribuida' }]);
+    expect(resumen.lineas).toHaveLength(1);
+    expect(resumen.lineas[0]).toMatchObject({ citas: 1, paginas: 1 });
+    expect(resumen).toMatchObject({ total: 2, citasSinDocumento: 1 });
+    expect(resumen).not.toHaveProperty('ventaSola');
+    expect(textoDeLoTomado(resumen.lineas[0].citas, resumen.total)).toBe('De esta edición se tomó 1 de sus 2 citas.');
+  });
+
+  it('con derechos vigentes `dondeLeer` no da ninguna línea, y lo dice con `ventaSola`', () => {
+    // El recuento sin documento es el real: la de siempre con Fuente no cuenta; la atribuida, sí.
+    expect(
+      dondeLeer([{ fuente: FUENTE }, {}, { fuente: FUENTE, clase: 'atribuida' }], { derechosVigentes: true }),
+    ).toEqual({
+      lineas: [],
+      citasSinDocumento: 2,
+      total: 3,
+      ventaSola: true,
+    });
+    expect(dondeLeer([{ fuente: FUENTE }], { derechosVigentes: false })).not.toHaveProperty('ventaSola');
+  });
+
+  it('la edición que encabeza y su traductor ignoran la Fuente de una atribuida', () => {
+    const atribuida: CitaParaDondeLeer = {
+      fuente: FUENTE,
+      procedencia: { traduccion: { traductor: 'Ana Ruiz' } },
+      clase: 'atribuida',
+    };
+    expect(edicionQueEncabeza([atribuida])).toBeUndefined();
+    expect(traductorDeLaEdicionQueEncabeza([atribuida, atribuida])).toBeUndefined();
+  });
+
+  it('«Ediciones sin edición cotejada» no avisa de la Obra con derechos vigentes, y sí de la de dominio público', () => {
+    const edicion = { tienda: TIENDA_DE_PRUEBA.clave, formato: 'impresa' as const, url: 'https://x' };
+    const viva = deAutor('viva--la-obra', 'viva', { ediciones: [edicion] });
+    const larra = deAutor('larra--la-obra', 'larra', { ediciones: [edicion] });
+    const citas = [
+      cita('viva-a', 'viva', { clase: 'atribuida' }),
+      // Una atribuida con Fuente no es edición cotejada: la de Larra avisa.
+      cita('larra-a', 'larra', { clase: 'atribuida', fuente: FUENTE }),
+    ];
+    const avisos = avisosDeEdicionesSinCotejada([viva, larra], citas, AUTORES).join('\n');
+    expect(avisos).toContain('corpus/obras/larra--la-obra.yml');
+    expect(avisos).not.toContain('viva--la-obra');
+    // La ficha cuyo Autor no está no avisa ni lanza: la para `fallosDeObras`.
+    expect(() => avisosDeEdicionesSinCotejada([deAutor('nadie--la-obra', 'nadie', { ediciones: [edicion] })], [], AUTORES)).not.toThrow();
+  });
+
+  it('«incipit» en una Obra con derechos vigentes rompe, nombrando la ficha; en la de dominio público, no', () => {
+    const incipit = { documento: 'wikisource-es--la-obra', desde: 'Había' };
+    const fallos = fallosDeIncipitConDerechos(
+      [
+        deAutor('viva--la-obra', 'viva', { incipit }),
+        deAutor('larra--la-obra', 'larra', { incipit }),
+        { ...deBatman, incipit },
+        deAutor('nadie--la-obra', 'nadie', { incipit }),
+      ],
+      AUTORES,
+    );
+    expect(fallos).toHaveLength(2);
+    expect(fallos.join('\n')).toContain('corpus/obras/viva--la-obra.yml → declara «incipit» y la Obra tiene derechos vigentes');
+    expect(fallos.join('\n')).toContain('corpus/obras/batman--la-obra.yml');
+    expect(fallos.join('\n')).not.toContain('larra--la-obra');
+  });
+
+  it('el orden del libro de una Obra con derechos vigentes es por slug: el cargador no sitúa atribuidas', () => {
+    const citas = [{ slug: 'viva-c', fuente: FUENTE }, { slug: 'viva-a' }, { slug: 'viva-b', fuente: FUENTE }];
+    expect(ordenDelLibro(citas, new Map(), new Map()).map((c) => c.slug)).toEqual(['viva-a', 'viva-b', 'viva-c']);
   });
 });

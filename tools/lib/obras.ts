@@ -21,9 +21,14 @@ import {
   colapsar,
   colgarObras,
   avisosDeEdicionesSinCotejada,
+  derechosDeLaObra,
   fichaDeCita,
   congelacionVigente,
+  dueñoDeCita,
+  dueñoDeFicha,
   esGrafiaLiteral,
+  fichasDeCita,
+  fichasDeForma,
   formaDeObra,
   grafiaPorOmision,
   grafiasDeFicha,
@@ -33,6 +38,7 @@ import {
   prefijosDeFormas,
   type CitaConObra,
   type CitaParaObra,
+  type Dueño,
   type FichaDeObra,
   type GrafiaDeObra,
   type ObraResuelta,
@@ -56,7 +62,7 @@ import {
   type Rutas,
 } from './corpus.ts';
 import { FICHERO_DEL_CENSO, colapsarEspacios, documentosDeCita } from './cotejo.ts';
-import { type MotivoSinIncipit } from './pasaje.ts';
+import { ofreceIncipit, type MotivoSinIncipit } from './pasaje.ts';
 import {
   fuenteDelIncipit,
   incipitDelDocumento,
@@ -91,7 +97,7 @@ export type PlanDeFicha =
   /** La forma ya tiene ficha activa, o la obra no deja forma (y no necesita ficha). */
   | { ok: true; accion: 'existente'; ruta?: string; titulo?: string }
   | { ok: true; accion: 'restaurar'; origen: string; titulo: string }
-  | { ok: true; accion: 'crear'; nombre: string; titulo: string; autor: string; forma: string }
+  | { ok: true; accion: 'crear'; nombre: string; titulo: string; dueño: Dueño; forma: string }
   | { ok: false; motivos: string[] };
 
 /** Lo que pasó al asegurar la ficha de una Obra. */
@@ -100,16 +106,20 @@ export type FichaAsegurada =
   | { ok: true; accion: 'restaurada' | 'creada'; ruta: string; titulo: string }
   | { ok: false; motivos: string[] };
 
-/** Las grafías literales de una Obra entre las Citas dadas. */
+/** Lo que de una Cita publicada necesita la resolución de su ficha. */
+type CitaParaFicha = Pick<CitaConObra, 'autor' | 'personaje' | 'procedencia'>;
+
+/** Las grafías literales de una Obra entre las Citas del mismo dueño. */
 function grafiasDe(
-  autor: string,
+  dueño: string,
   forma: string,
-  citas: readonly Pick<CitaConObra, 'autor' | 'procedencia'>[],
+  citas: readonly CitaParaFicha[],
 ): GrafiaDeObra[] {
   const cuenta = new Map<string, number>();
   for (const cita of citas) {
     const obra = cita.procedencia?.obra;
-    if (cita.autor !== autor || typeof obra !== 'string' || formaDeObra(obra) !== forma) continue;
+    const suyo = cita.autor ?? cita.personaje;
+    if (suyo !== dueño || typeof obra !== 'string' || formaDeObra(obra) !== forma) continue;
     cuenta.set(obra, (cuenta.get(obra) ?? 0) + 1);
   }
   return [...cuenta].map(([literal, citas]) => ({ literal, citas }));
@@ -118,13 +128,16 @@ function grafiasDe(
 const texto = (fallo: unknown) => (fallo instanceof Error ? fallo.message : String(fallo));
 
 /**
- * Decide, **sin escribir nada**, qué hace falta para que (Autor, obra) tenga ficha activa:
+ * Decide, **sin escribir nada**, qué hace falta para que la obra de una Cita tenga ficha activa:
  *
- *   1. busca la forma entre las fichas activas y las retiradas;
+ *   1. busca la forma entre las fichas activas y las retiradas, con la regla de dos pasos de
+ *      `fichasDeCita` (Historia 35.2): primero las que nombran al Autor de la Cita, y si
+ *      ninguna, las de Personaje cuyo `personajes` incluye el suyo;
  *   2. activa → nada que hacer;
  *   3. retirada → restaurarla, salvo que alguna de sus formas la reclame ya una activa;
  *   4. ninguna → crearla con `titulo` = grafía por omisión entre `citasPublicadas` y
- *      `formas: [forma]`;
+ *      `formas: [forma]`, con el dueño de la Cita: su Autor o, sin él, su Personaje
+ *      (`personaje` y `personajes: [p]`);
  *   5. colisión de nombre con otra ficha → se niega y lo dice. Nunca se sobrescribe.
  *
  * Una obra cuya forma canónica es vacía —«…», «—»— no necesita ficha, igual que una Cita
@@ -138,14 +151,28 @@ const texto = (fallo: unknown) => (fallo instanceof Error ? fallo.message : Stri
 export async function resolverFichaDeObra(
   rutas: Rutas,
   entrada: {
-    autor: string;
+    autor?: string;
+    personaje?: string;
     obra: string;
-    citasPublicadas: readonly Pick<CitaConObra, 'autor' | 'procedencia'>[];
+    citasPublicadas: readonly CitaParaFicha[];
   },
 ): Promise<PlanDeFicha> {
-  const { autor, obra } = entrada;
+  const { obra } = entrada;
   const forma = formaDeObra(obra);
   if (forma === '') return { ok: true, accion: 'existente' };
+  const cita = {
+    slug: '(la Cita que se publica)',
+    ...(entrada.autor !== undefined ? { autor: entrada.autor } : {}),
+    ...(entrada.personaje !== undefined ? { personaje: entrada.personaje } : {}),
+    procedencia: { obra },
+  };
+  let dueño: Dueño;
+  try {
+    dueño = dueñoDeCita(cita);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), 'No se ha escrito ninguna ficha.'] };
+  }
+  const autor = dueño.slug;
 
   let activas: FichaDeObra[];
   let retiradas: FichaDeObra[];
@@ -162,15 +189,14 @@ export async function resolverFichaDeObra(
     };
   }
 
-  const reclama = (f: FichaDeObra) => f.autor === autor && f.formas.includes(forma);
-
-  const activa = activas.find(reclama);
+  const activa = fichasDeCita(cita, activas)[0];
   if (activa) return { ok: true, accion: 'existente', ruta: activa.ruta, titulo: activa.titulo };
 
-  const retirada = retiradas.find(reclama);
+  const retirada = fichasDeCita(cita, retiradas)[0];
   if (retirada) {
+    const suDueño = dueñoDeFicha(retirada).slug;
     const enConflicto = activas.filter(
-      (f) => f.autor === autor && f.formas.some((otra) => retirada.formas.includes(otra)),
+      (f) => dueñoDeFicha(f).slug === suDueño && f.formas.some((otra) => retirada.formas.includes(otra)),
     );
     if (enConflicto.length > 0) {
       return {
@@ -228,7 +254,7 @@ export async function resolverFichaDeObra(
     };
   }
 
-  return { ok: true, accion: 'crear', nombre, titulo, autor, forma };
+  return { ok: true, accion: 'crear', nombre, titulo, dueño, forma };
 }
 
 /**
@@ -247,7 +273,10 @@ export async function aplicarFichaDeObra(rutas: Rutas, plan: PlanDeFicha): Promi
       }
       case 'crear': {
         const ruta = await escribirFichaDeObra(rutas, plan.nombre, {
-          autor: plan.autor,
+          // El dueño de la Cita, que no cambia: sin Autor, la ficha es de su Personaje.
+          ...(plan.dueño.tipo === 'autor'
+            ? { autor: plan.dueño.slug }
+            : { personaje: plan.dueño.slug, personajes: [plan.dueño.slug] }),
           titulo: plan.titulo,
           formas: [plan.forma],
         });
@@ -281,10 +310,10 @@ export interface InformeDeSiembra {
   restauradas: { ruta: string; titulo: string }[];
   existentes: number;
   fallos: string[];
-  /** Misma forma con grafías literales distintas. */
-  grupos: { autor: string; forma: string; grafias: GrafiaDeObra[] }[];
-  /** Pares de formas del mismo Autor en que una es prefijo de otra. */
-  prefijos: { autor: string; corta: string; larga: string }[];
+  /** Misma forma con grafías literales distintas, por dueño (Autor o Personaje). */
+  grupos: { dueño: string; forma: string; grafias: GrafiaDeObra[] }[];
+  /** Pares de formas del mismo dueño en que una es prefijo de otra. */
+  prefijos: { dueño: string; corta: string; larga: string }[];
 }
 
 /**
@@ -301,13 +330,16 @@ export async function sembrarFichasDeObra(rutas: Rutas): Promise<InformeDeSiembr
     fallos: [],
     grupos: obras
       .filter((o) => o.grafias.length > 1)
-      .map(({ autor, forma, grafias }) => ({ autor, forma, grafias })),
+      .map(({ dueño, forma, grafias }) => ({ dueño, forma, grafias })),
     prefijos: prefijosDeFormas(obras),
   };
 
   for (const obra of obras) {
+    // Una Cita del grupo dice quién es su Autor y su Personaje: el grupo es por su dueño.
+    const muestra = publicadas.find((c) => c.slug === obra.citas[0]);
     const asegurada = await asegurarFichaDeObra(rutas, {
-      autor: obra.autor,
+      ...(muestra?.autor !== undefined ? { autor: muestra.autor } : {}),
+      ...(muestra?.personaje !== undefined ? { personaje: muestra.personaje } : {}),
       obra: obra.grafias[0].literal,
       citasPublicadas: publicadas,
     });
@@ -333,14 +365,14 @@ export function formatearInformeDeSiembra(informe: InformeDeSiembra): string {
   lineas.push('', `Grupos de grafías equivalentes (misma forma, grafías distintas): ${informe.grupos.length}`);
   for (const grupo of informe.grupos) {
     lineas.push(
-      `  · ${grupo.autor} — «${grupo.forma}»: ` +
+      `  · ${grupo.dueño} — «${grupo.forma}»: ` +
         grupo.grafias.map((g) => `«${g.literal}» ×${g.citas}`).join(', '),
     );
   }
 
   lineas.push('', `Pares en que una forma es prefijo de otra del mismo Autor: ${informe.prefijos.length}`);
   for (const par of informe.prefijos) {
-    lineas.push(`  · ${par.autor} — «${par.corta}» ⊂ «${par.larga}»`);
+    lineas.push(`  · ${par.dueño} — «${par.corta}» ⊂ «${par.larga}»`);
   }
 
   if (informe.grupos.length > 0 || informe.prefijos.length > 0) {
@@ -400,12 +432,20 @@ export async function retirarFichaDeObra(
   }
   const objetivo = ficha;
 
+  /*
+   * Con la regla de dos pasos (Historia 35.2), y además toda Cita del dueño con una de sus
+   * formas: una candidata que hoy resolvería otra ficha la reclamaría esta al retirarse aquélla,
+   * así que bloquear de más es lo prudente, como antes por Autor y forma.
+   */
+  const delDueño = dueñoDeFicha(objetivo).slug;
   const resuelve = (c: CitaConObra) => {
     const obra = c.procedencia?.obra;
+    if (typeof obra !== 'string' || !objetivo.formas.includes(formaDeObra(obra))) return false;
     return (
-      c.autor === objetivo.autor &&
-      typeof obra === 'string' &&
-      objetivo.formas.includes(formaDeObra(obra))
+      c.autor === delDueño ||
+      (c.autor === undefined && c.personaje === delDueño) ||
+      (objetivo.autor !== undefined && c.autor === objetivo.autor) ||
+      (c.personaje !== undefined && (objetivo.personajes ?? []).includes(c.personaje))
     );
   };
   const publicadas = (await leerCitas(rutas.citas)).filter(resuelve).map((c) => c.slug);
@@ -513,7 +553,10 @@ async function fichaActiva(
  */
 function datosDeFicha(ficha: FichaDeObra) {
   return {
-    autor: ficha.autor,
+    // Historia 35.2 — el dueño y los Personajes se conservan: ninguna orden cambia el dueño.
+    ...(ficha.autor !== undefined ? { autor: ficha.autor } : {}),
+    ...(ficha.personaje !== undefined ? { personaje: ficha.personaje } : {}),
+    ...(ficha.personajes !== undefined ? { personajes: [...ficha.personajes] } : {}),
     titulo: ficha.titulo,
     formas: [...ficha.formas],
     ...(ficha.distintaDe !== undefined && ficha.distintaDe.length > 0
@@ -575,12 +618,13 @@ export async function reunirFichas(
   if (a.nombre === b.nombre) {
     return { ok: false, motivos: [`«${a.nombre}» es la misma ficha: no hay nada que reunir.`, NADA_ESCRITO] };
   }
-  if (a.autor !== b.autor) {
+  if (dueñoDeFicha(a).slug !== dueñoDeFicha(b).slug) {
     return {
       ok: false,
       motivos: [
-        `«${a.nombre}» es de ${a.autor} y «${b.nombre}» es de ${b.autor}. Una Obra es de un ` +
-          'Autor: reunir fichas de Autores distintos atribuiría Citas a quien no las firmó.',
+        `«${a.nombre}» es de ${dueñoDeFicha(a).slug} y «${b.nombre}» es de ${dueñoDeFicha(b).slug}. ` +
+          'Una Obra tiene un solo dueño: reunir fichas de dueños distintos atribuiría Citas a ' +
+          'quien no las dijo.',
         NADA_ESCRITO,
       ],
     };
@@ -598,7 +642,11 @@ export async function reunirFichas(
   // se heredan —describen otra ficha y las decide Héctor, no una orden—: se quedan en la
   // retirada y el parte lo dice.
   const nueva = {
-    autor: a.autor,
+    ...(a.autor !== undefined ? { autor: a.autor } : {}),
+    ...(a.personaje !== undefined ? { personaje: a.personaje } : {}),
+    ...(a.personajes !== undefined
+      ? { personajes: [...new Set([...a.personajes, ...(b.personajes ?? [])])] }
+      : {}),
     titulo: a.titulo,
     formas,
     ...(distintaDe.length > 0 ? { distintaDe } : {}),
@@ -618,7 +666,7 @@ export async function reunirFichas(
     (f) =>
       f.nombre !== a.nombre &&
       f.nombre !== b.nombre &&
-      f.autor === a.autor &&
+      dueñoDeFicha(f).slug === dueñoDeFicha(a).slug &&
       (f.distintaDe ?? []).some((forma) => b.formas.includes(forma)),
   );
 
@@ -754,12 +802,13 @@ export async function separarFichas(
   if (a.nombre === b.nombre) {
     return { ok: false, motivos: [`«${a.nombre}» es la misma ficha: no se separa de sí misma.`, NADA_ESCRITO] };
   }
-  if (a.autor !== b.autor) {
+  if (dueñoDeFicha(a).slug !== dueñoDeFicha(b).slug) {
     return {
       ok: false,
       motivos: [
-        `«${a.nombre}» es de ${a.autor} y «${b.nombre}» es de ${b.autor}: Obras de Autores ` +
-          'distintos ya son distintas, y `distintaDe` solo nombra formas del mismo Autor.',
+        `«${a.nombre}» es de ${dueñoDeFicha(a).slug} y «${b.nombre}» es de ${dueñoDeFicha(b).slug}: ` +
+          'Obras de dueños distintos ya son distintas, y `distintaDe` solo nombra formas del ' +
+          'mismo dueño.',
         NADA_ESCRITO,
       ],
     };
@@ -1017,12 +1066,15 @@ function lineasDeEdiciones(
  */
 async function avisoSinCotejada(rutas: Rutas, ficha: FichaDeObra): Promise<string[]> {
   let citas: Awaited<ReturnType<typeof leerCitas>>;
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
   try {
     citas = await leerCitas(rutas.citas);
+    autores = await leerAutores(rutas);
   } catch (fallo) {
     return [`Aviso: no se pudo comprobar si la Obra tiene alguna Cita cotejada: ${texto(fallo)}`];
   }
-  return avisosDeEdicionesSinCotejada([ficha], citas).length === 0
+  // Historia 35.9 — la Obra con derechos vigentes no avisa: sus ediciones van solas (FR-70).
+  return avisosDeEdicionesSinCotejada([ficha], citas, autores).length === 0
     ? []
     : [
         'Aviso: ninguna Cita publicada de esta Obra tiene documento cotejado, así que sus ' +
@@ -1086,7 +1138,7 @@ export async function quitarEdicion(
 }
 
 /**
- * Pone al día el título de las fichas de un Autor que reclaman alguna de `formas`, si ha
+ * Pone al día el título de las fichas de una Cita que reclaman alguna de `formas`, si ha
  * dejado de sostenerse: cuando ya no lo declara ninguna Cita publicada de la Obra, pasa a ser
  * el de `grafiaPorOmision`. Lo llaman, en el mismo gesto, quien cambia o retira una
  * Procedencia: `documentar`, `documentar --retirar` y `restituir-grafia`.
@@ -1096,7 +1148,12 @@ export async function quitarEdicion(
  */
 export async function ajustarTitulosDeObra(
   rutas: Rutas,
-  autor: string,
+  /**
+   * La Cita que cambió —su Autor y su Personaje—: sus fichas son las que la resolverían con la
+   * regla de dos pasos (`fichasDeForma`, Historia 35.2), también la de un Personaje que la
+   * reclama por su `autor` informativo.
+   */
+  quien: { autor?: string; personaje?: string },
   formas: readonly string[],
   /** Para las pruebas: el esquema de un conjunto de tiendas dado (22.9). */
   esquema?: EsquemaDeFicha,
@@ -1105,8 +1162,9 @@ export async function ajustarTitulosDeObra(
   try {
     const fichas = await leerFichasDeObra(rutas, esquema);
     const citas = await leerCitas(rutas.citas);
+    const suyas = new Set(formas.flatMap((forma) => fichasDeForma(quien, forma, fichas)));
     for (const ficha of fichas) {
-      if (ficha.autor !== autor || !ficha.formas.some((f) => formas.includes(f))) continue;
+      if (!suyas.has(ficha)) continue;
       const grafias = grafiasDeFicha(ficha, fichas, citas);
       if (grafias.length === 0 || grafias.some((g) => mismaGrafia(g.literal, ficha.titulo))) {
         continue;
@@ -1262,7 +1320,7 @@ export async function restituirGrafia(rutas: Rutas, slug: string): Promise<Resul
     return { ok: false, motivos: [`No se pudo escribir ${cita.ruta}: ${texto(fallo)}`, NADA_ESCRITO] };
   }
 
-  const titulos = await ajustarTitulosDeObra(rutas, cita.autor, [forma]);
+  const titulos = await ajustarTitulosDeObra(rutas, cita, [forma]);
 
   return {
     ok: true,
@@ -1303,8 +1361,11 @@ export async function citasConObra<C extends CitaParaObra>(
   { ok: true; citas: (C & { obra?: ObraResuelta })[] } | { ok: false; motivos: string[] }
 > {
   let fichas: FichaDeObra[];
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
   try {
     fichas = await leerFichasDeObra(rutas);
+    // Historia 35.9 — la Obra resuelta dice sus derechos, que decide su dueño.
+    autores = await leerAutores(rutas);
   } catch (fallo) {
     return {
       ok: false,
@@ -1314,9 +1375,12 @@ export async function citasConObra<C extends CitaParaObra>(
       ],
     };
   }
-  const reclamadas = new Set(fichas.flatMap((f) => f.formas.map((forma) => clave(f.autor, forma))));
-  const provisionales: FichaDeObra[] = obrasDeCitas(citas)
-    .filter((o) => !reclamadas.has(clave(o.autor, o.forma)))
+  // Con la regla de dos pasos: lo que ninguna ficha real resuelve recibe una provisional.
+  const sinFicha = citas.filter((c) => fichasDeCita(c, fichas).length === 0);
+  // Historia 35.9 — salvo la de un Autor que no está en el Corpus: sin él no hay derechos que
+  // juzgar (`derechosDeLaObra` lanzaría), y esa Cita la rechaza después quien la firma.
+  const conAutor = new Set(autores.map((a) => a.slug));
+  const provisionales: FichaDeObra[] = obrasDeCitas(sinFicha)
     .map((o) => ({
       /*
        * Un nombre que ninguna ficha real puede tener —lleva paréntesis y espacios, que
@@ -1324,13 +1388,28 @@ export async function citasConObra<C extends CitaParaObra>(
        * entera (Autor, forma). Con el nombre que `sembrar` derivaría, una provisional podía
        * coincidir con una ficha real de otra forma y llevarse su Obra resuelta.
        */
-      nombre: `(sin ficha) ${o.autor} ${o.forma}`,
+      nombre: `(sin ficha) ${o.dueño} ${o.forma}`,
       ruta: '(sin ficha)',
-      autor: o.autor,
+      ...dueñoProvisional(sinFicha, o),
       titulo: grafiaPorOmision(o.grafias),
       formas: [o.forma],
     }));
-  return { ok: true, citas: colgarObras(citas, [...fichas, ...provisionales]) };
+  const juzgables = provisionales.filter((f) => f.personaje !== undefined || conAutor.has(f.autor ?? ''));
+  try {
+    return { ok: true, citas: colgarObras(citas, [...fichas, ...juzgables], autores) };
+  } catch (fallo) {
+    // Una ficha real cuyo Autor no está: el build no la deja pasar, y aquí se dice en vez de lanzar.
+    return { ok: false, motivos: [texto(fallo), 'No se ha compuesto nada.'] };
+  }
+}
+
+/** El dueño de una ficha provisional: el de sus Citas, como lo escribiría `sembrar`. */
+function dueñoProvisional(
+  citas: readonly CitaConObra[],
+  obra: { citas: readonly string[] },
+): Pick<FichaDeObra, 'autor' | 'personaje' | 'personajes'> {
+  const dueño = dueñoDeCita(citas.find((c) => c.slug === obra.citas[0]) ?? { slug: obra.citas[0] });
+  return dueño.tipo === 'autor' ? { autor: dueño.slug } : { personaje: dueño.slug, personajes: [dueño.slug] };
 }
 
 // ─── La congelación de la familia Obra (Historia 22.8, AD-25) ──────────────────────────
@@ -1748,6 +1827,11 @@ export async function cambiarVigenteDeWikidata(rutas: Rutas, entidad: string, re
         return { ok: false, motivos: [`${ficha.ruta}: ${lectura.motivo}`, NADA_ESCRITO] };
       }
       conDocumento.push({ nombre: ficha.nombre, datos: lectura.documento.datos });
+      // Historia 35.2 — la ficha de un Personaje puede no declarar Autor: no hay con quién cotejar.
+      if (ficha.autor === undefined) {
+        discordantes.push(`${ficha.ruta}: no declara Autor con el que cotejar la entidad de Wikidata.`);
+        continue;
+      }
       const nombre = nombres.get(ficha.autor);
       if (nombre === undefined) {
         discordantes.push(`${ficha.ruta}: su Autor «${ficha.autor}» no existe.`);
@@ -1811,6 +1895,8 @@ const FALLO_DE_LA_FUENTE_DEL_INCIPIT: Record<FalloDeLaFuenteDelIncipit, string> 
 
 /** Por qué un incipit que se sostiene no saldría en la página, como lo dice el parte. */
 const MOTIVO_SIN_INCIPIT: Record<MotivoSinIncipit, string> = {
+  'derechos-vigentes':
+    'la Obra tiene derechos vigentes: una Obra con derechos vigentes no ofrece cómo empieza (FR-70, AD-30).',
   'sin-tope': 'MAX_CARACTERES_DEL_INCIPIT no tiene valor: la página no lo enseña.',
   'primera-no-cabe': 'su primera frase —o su primer verso— pasa de MAX_CARACTERES_DEL_INCIPIT: la página no lo enseña.',
   'forma-indeterminada': 'la forma de sus líneas es indeterminada: la página no lo enseña.',
@@ -1825,7 +1911,10 @@ const MOTIVO_SIN_INCIPIT: Record<MotivoSinIncipit, string> = {
  * Se niega —código 1, nada escrito— si la ficha no existe; si el documento no es un `.txt` de
  * `corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está
  * en la unión de `documentosDeCita` de sus Citas publicadas: el casado del cotejo); si su forma es
- * `indeterminada`; si `desde` no se localiza; o si la ficha ya declara ese mismo incipit. El build
+ * `indeterminada`; si `desde` no se localiza; o si la ficha ya declara ese mismo incipit. Historia
+ * 35.9 — y antes de mirar el documento, si la Obra tiene derechos vigentes (`derechosDeLaObra`,
+ * decidido por `ofreceIncipit`): esa Obra no ofrece cómo empieza, y el build rompe ante la ficha que
+ * lo declare. El build
  * repite la forma y la localización con la misma función (`incipitDelDocumento`), pero no el
  * casado. El parte dice la forma y el incipit que saldría con el tope de hoy, o por qué no sale.
  */
@@ -1841,6 +1930,18 @@ export async function declararIncipit(
   const activa = await fichaActiva(rutas, nombreDeFicha, esquema);
   if (!activa.ok) return { ok: false, motivos: [...activa.motivos, NADA_ESCRITO] };
   const { ficha, fichas } = activa;
+
+  // Historia 35.9 — la Obra con derechos vigentes no lleva incipit: lo decide `ofreceIncipit`, primero.
+  let conDerechos: boolean;
+  try {
+    conDerechos = derechosDeLaObra(ficha, await leerAutores(rutas));
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  const veto = ofreceIncipit({ tope, primera: '', derechosVigentes: conDerechos });
+  if (!veto.ofrece && veto.motivo === 'derechos-vigentes') {
+    return { ok: false, motivos: [`«${ficha.nombre}»: ${MOTIVO_SIN_INCIPIT['derechos-vigentes']}`, NADA_ESCRITO] };
+  }
 
   const ruta = resolve(documento);
   const dentro = relative(resolve(rutas.fuentes), ruta);

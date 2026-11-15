@@ -56,11 +56,12 @@ const aperturaDe = (nombre: string) =>
 /** La importación por defecto del componente, con el nombre que le dé quien la importa. */
 const IMPORTACION = /import\s+([A-Za-z_$][\w$]*)\s+from\s+(['"])[^'"]*\/TarjetaDeCita\.astro\2/g;
 
-/** Un uso: sus atributos, la atribución que declara (si es un literal) y si pasa `autor`. */
+/** Un uso: sus atributos, la atribución que declara (si es un literal) y si pasa `autor` y `personaje`. */
 interface Uso {
   etiqueta: string;
   atribuciones: (string | undefined)[];
   autor: boolean;
+  personaje: boolean;
 }
 
 /**
@@ -90,6 +91,7 @@ function usosDe(ruta: string, contenido: string): Uso[] {
       // literal: `undefined`.
       atribuciones: [...atributos.matchAll(/\satribucion=(?:"([^"]*)"|'([^']*)'|\{)/g)].map((m) => m[1] ?? m[2]),
       autor: /\sautor=/.test(atributos),
+      personaje: /\spersonaje=/.test(atributos),
     })),
   );
 }
@@ -112,7 +114,7 @@ async function astrosDeSrc(): Promise<string[]> {
 }
 
 describe('Historia 24.3 — el contrato del componente, sin construir', () => {
-  it('`Props` trae `atribucion` obligatoria con exactamente los tres literales, y nada más que `cita`, `atribucion`, `autor` y `zona`', async () => {
+  it('`Props` trae `atribucion` obligatoria con exactamente los tres literales, y nada más que `cita`, `atribucion`, `autor`, `personaje` y `zona`', async () => {
     const { fuente } = await frontmatterDe(COMPONENTE);
     const props = fuente.statements.find(
       (s): s is ts.InterfaceDeclaration => ts.isInterfaceDeclaration(s) && s.name.text === 'Props',
@@ -120,7 +122,7 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
     expect(props, 'sin `interface Props`').toBeDefined();
     const miembros = props!.members.filter(ts.isPropertySignature);
     expect(miembros).toHaveLength(props!.members.length);
-    expect(miembros.map((m) => m.name.getText(fuente)).sort()).toEqual(['atribucion', 'autor', 'cita', 'zona']);
+    expect(miembros.map((m) => m.name.getText(fuente)).sort()).toEqual(['atribucion', 'autor', 'cita', 'personaje', 'zona']);
 
     const atribucion = miembros.find((m) => m.name.getText(fuente) === 'atribucion')!;
     expect(atribucion.questionToken, '`atribucion` es opcional').toBeUndefined();
@@ -131,8 +133,9 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
     );
     expect(literales.sort()).toEqual([...ATRIBUCIONES].sort());
 
-    // `autor` se queda opcional: solo `autor-y-obra` lo pasa.
+    // `autor` se queda opcional: solo `autor-y-obra` lo pasa. Y `personaje` (Historia 35.4), igual.
     expect(miembros.find((m) => m.name.getText(fuente) === 'autor')!.questionToken).toBeDefined();
+    expect(miembros.find((m) => m.name.getText(fuente) === 'personaje')!.questionToken).toBeDefined();
   });
 
   it('la desestructuración de `Astro.props` no le da a `atribucion` valor por omisión', async () => {
@@ -175,6 +178,8 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
       'src/pages/tema/[slug]/[...page].astro': ['autor-y-obra'],
       'src/pages/coleccion/[slug]/[...page].astro': ['autor-y-obra'],
       'src/pages/autor/[slug]/[...page].astro': ['obra'],
+      // Historia 35.3 — la Página de Personaje, como la de Autor.
+      'src/pages/personaje/[slug]/[...page].astro': ['obra'],
       'src/pages/obra/[autor]/[slug]/[...page].astro': ['ninguna'],
       // Historia 24.6 — «De la misma obra» y «Más de {Autor}», en ese orden.
       'src/components/RutasDeSalida.astro': ['ninguna', 'obra'],
@@ -186,6 +191,10 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
         const [valor] = uso.atribuciones;
         expect(ATRIBUCIONES as readonly (string | undefined)[], `${ruta}: no es un literal del conjunto: ${uso.etiqueta}`).toContain(valor);
         expect(uso.autor, `${ruta}: \`autor\` va con \`autor-y-obra\` y con nada más: ${uso.etiqueta}`).toBe(
+          valor === 'autor-y-obra',
+        );
+        // Historia 35.4 — y `personaje`, igual: el que declara la Cita, solo con `autor-y-obra`.
+        expect(uso.personaje, `${ruta}: \`personaje\` va con \`autor-y-obra\` y con nada más: ${uso.etiqueta}`).toBe(
           valor === 'autor-y-obra',
         );
         vistas.set(ruta, [...(vistas.get(ruta) ?? []), valor as Atribucion]);
@@ -445,6 +454,15 @@ ${frontmatter}
     expect(errores.map((e) => e.linea).sort(), limpia).toEqual([7, 8]);
     expect(errores.find((e) => e.linea === 7)!.mensaje).toMatch(/'atribucion'/);
     expect(errores.find((e) => e.linea === 8)!.mensaje).toMatch(/"otra"/);
+  }, 300_000);
+
+  it('Historia 35.4 — `autor-y-obra` con un Personaje que la Cita no declara: código distinto de 0, nombrando los dos', async () => {
+    const resultado = await construirSonda(
+      "const seneca = conjunto.autores.find((a) => a.slug === 'seneca')!;\nconst batman = { slug: 'batman', nombre: 'Batman', universo: 'DC' };",
+      'atribucion="autor-y-obra" autor={seneca} personaje={batman}',
+    );
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(new RegExp(`«${SLUG}»[^\\n]*autor-y-obra[^\\n]*«batman»[^\\n]*«ninguno»`));
   }, 300_000);
 
   it('`autor-y-obra` con el Autor de otro: código distinto de 0, nombrando los dos', async () => {

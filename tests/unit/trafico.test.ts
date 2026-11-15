@@ -226,6 +226,7 @@ const CENSO: CensoPorFamilia = {
   tema: ['/tema/la-vida/'],
   coleccion: ['/coleccion/sin-trafico/'],
   directorio: [],
+  personaje: [],
 };
 
 describe('el reparto por familia', () => {

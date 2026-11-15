@@ -119,6 +119,7 @@ function conjuntoDe(cuantasCitas: number): ConjuntoPublicable {
     })),
     temas: [{ slug: 'la-vida', nombre: 'La vida' }],
     colecciones: [],
+    personajes: [],
   };
 }
 
@@ -130,24 +131,31 @@ describe('el censo por familia', () => {
     // Una Cita con Obra, para que la exclusión de abajo excluya algo de verdad.
     const conjunto: ConjuntoPublicable = {
       ...base,
+      // Historia 35.3 — un Personaje publicado, para que la igualdad de AD-11 cubra la séptima familia.
+      personajes: [{ slug: 'un-personaje', nombre: 'Un Personaje', universo: 'Un universo' }],
       citas: base.citas.map((c, i) =>
         i === 0
           ? ({
               ...c,
               obra: {
                 nombre: `${c.autor}--una-obra`,
+                dueño: { tipo: 'autor', slug: c.autor },
                 autor: c.autor,
                 titulo: 'Una obra',
                 fuentes: [],
                 edicionCotejada: false,
+                derechosVigentes: false,
                 temas: [],
                 recuento: 1,
               },
             } as Cita)
-          : c,
+          : i === 1
+            ? ({ ...c, personaje: 'un-personaje' } as Cita)
+            : c,
       ),
     };
     const censo = censoPorFamilia(conjunto);
+    expect(censo.personaje).toEqual(['/personaje/un-personaje/']);
 
     const delCenso = FAMILIAS_DEL_CENSO.flatMap((f) => [...censo[f]]).sort();
     /*
@@ -199,7 +207,7 @@ describe('el censo por familia', () => {
 
 /** Un censo hecho a mano, para poder mover los tamaños sin fabricar un corpus. */
 function censoDe(tamaños: Partial<Record<FamiliaDelCenso, number>>) {
-  const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] } as Record<
+  const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] } as Record<
     FamiliaDelCenso,
     string[]
   >;
@@ -1348,6 +1356,29 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
     expect(lectura.familias.cita?.censo).toBe('publicadas');
     expect(lectura.familias.autor?.censo).toBe('publicadas');
     expect(lectura.sinLeer).toEqual({});
+  });
+
+  it('Historia 35.3b — los Personajes que trae la lista del sitemap no entran en el censo de la Obra', async () => {
+    const { lectura } = await leerIndexacion({
+      conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
+      propiedad: 'sc-domain:x',
+      presupuesto: TECHO_DIARIO_DE_INSPECCIONES,
+      inspeccionar: inspectorQueContesta(() => 'FAIL'),
+      pasoMs: 0,
+      obras: { rutas: [...OBRAS, '/personaje/batman/'] },
+    });
+    expect(lectura.familias.obra?.publicadas).toBe(2);
+    // Solo Personajes en la lista: la Obra va a sinLeer, jamás a cero.
+    const soloPersonajes = await leerIndexacion({
+      conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
+      propiedad: 'sc-domain:x',
+      presupuesto: TECHO_DIARIO_DE_INSPECCIONES,
+      inspeccionar: inspectorQueContesta(() => 'FAIL'),
+      pasoMs: 0,
+      obras: { rutas: ['/personaje/batman/'] },
+    });
+    expect(soloPersonajes.lectura.familias.obra).toBeUndefined();
+    expect(soloPersonajes.lectura.sinLeer.obra).toMatch(/ninguna Obra/u);
   });
 
   it('sin sitemap legible, la Obra va a sinLeer con su motivo y jamás a cero', async () => {

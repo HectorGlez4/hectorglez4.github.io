@@ -8,9 +8,10 @@
  * (`RotuloDeGrupo.astro`) y su lista, por tienda en el orden de `TIENDAS`. Un formato sin
  * ediciones no llega (`edicionesPorFormato` no da el grupo), así que no deja rótulo ni hueco; sin
  * rótulo de tienda: cada línea la nombra. Va dentro del desplegable, tras «Gratis»: la edición en
- * venta nunca va sola ni en lugar de la cotejada (FR-54), y quien decide si se pinta es la página
- * (`modelosEnRuta`, la congelación) y `DondeLeer.astro` (solo con alguna línea cotejada). Este
- * componente no decide nada; si se le llama, se dibuja.
+ * venta nunca va sola ni en lugar de la cotejada (FR-54) —salvo en la Obra con derechos vigentes,
+ * donde va sola (FR-70, Historia 35.9, prop `sola`)—, y quien decide si se pinta es la página
+ * (`modelosEnRuta`, la congelación) y `DondeLeer.astro` (con alguna línea cotejada, o en venta
+ * sola). Este componente no decide nada; si se le llama, se dibuja.
  *
  * **Recibe los grupos hechos y no importa `src/lib/ingreso.ts`**, por lo mismo que
  * `Sostener.astro`: ningún componente puede importarlo (`tests/unit/ingreso-construido.test.ts`).
@@ -40,9 +41,15 @@ interface Props {
   id: string;
   /** Los grupos ya repartidos por formato y por tienda (`edicionesPorFormato`). */
   grupos: readonly GrupoDeEdiciones[];
+  /**
+   * Historia 35.9, FR-70 — las ediciones van solas, sin «Gratis» delante (la Obra con derechos
+   * vigentes): el primer grupo va a 2 × `--unidad` del `<summary>`, que da el relleno del
+   * desplegable, y no lleva los 3 × que lo separarían de un grupo anterior (UX-DR127).
+   */
+  sola?: boolean;
 }
 
-const { id, grupos } = Astro.props;
+const { id, grupos, sola = false } = Astro.props;
 
 /** Cada grupo con el número de su primera edición: los `id` siguen de un grupo al otro. */
 let pintadas = 0;
@@ -105,7 +112,7 @@ const SOLO_PARA_LECTORES = [
 const DECLARACION = 'Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.';
 ---
 
-<div data-ingreso={id} style={ENTRE_GRUPOS}>
+<div data-ingreso={id} style={sola ? undefined : ENTRE_GRUPOS}>
   {
     numerados.map(({ grupo, inicio }, g) => (
       <div style={g > 0 ? ENTRE_GRUPOS : undefined}>

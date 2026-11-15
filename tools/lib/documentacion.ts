@@ -86,6 +86,8 @@ import {
   type PlanDeFicha,
 } from './obras.ts';
 import { formaDeObra } from '../../src/lib/obras.ts';
+import { dueñoAutor, esAtribuida, esDeDominioPublico } from '../../src/lib/clase.ts';
+import { entradaVedada, registrarFormasVedadas, leerFormasVedadas, type MotivoDeFormaVedada } from './formasVedadas.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
 import { negativaPorAlcance } from './alcance.ts';
@@ -132,6 +134,21 @@ type Localizada = { ok: true; cita: CitaEnCorpus } | { ok: false; motivos: strin
 async function localizarPublicada(rutas: Rutas, slug: string): Promise<Localizada> {
   const publicadas = await leerCitas(rutas.citas);
   const cita = publicadas.find((c) => c.slug === slug);
+  /*
+   * Historia 35.6, AD-35 — documentar no toca una atribuida: no se coteja contra un documento, y
+   * su única puerta para cambiar es `npm run atribuida`, que guarda su Ficha de Obra, sus topes y
+   * su clase. Ni documentarla ni retirarla por aquí.
+   */
+  if (cita !== undefined && esAtribuida(cita)) {
+    return {
+      ok: false,
+      motivos: [
+        `«${slug}» es una Cita atribuida: documentar no la toca, porque no se coteja contra ningún documento.`,
+        'Una atribuida publicada solo se cambia con su orden:',
+        `  npm run atribuida -- {obra|autor|personaje|variante|texto} ${slug} …`,
+      ],
+    };
+  }
   if (cita !== undefined) return { ok: true, cita };
 
   const enRevision = (await leerCitas(rutas.revision)).some((c) => c.slug === slug);
@@ -754,7 +771,7 @@ export async function documentarCita(
   if (obraDeclarada !== documento.obra) {
     const formas = [formaDeObra(documento.obra)];
     if (obraDeclarada !== undefined) formas.push(formaDeObra(obraDeclarada));
-    for (const linea of await ajustarTitulosDeObra(rutas, cita.autor, formas)) avisar(linea);
+    for (const linea of await ajustarTitulosDeObra(rutas, cita, formas)) avisar(linea);
   }
 
   const pendientes = (await leerCensoDeCotejo(rutas)).length;
@@ -804,7 +821,10 @@ export async function documentarCita(
  * (AD-10), así que el sitio del motivo es el mensaje del commit que mueve el fichero; un
  * registro de retiradas sería un segundo origen de verdad sobre algo que `git log` ya
  * cuenta mejor. Que la orden lo exija es lo que impide que la retirada ocurra sin que nadie
- * lo haya pensado, y que lo devuelva escrito es para poder copiarlo al commit.
+ * lo haya pensado, y que lo devuelva escrito es para poder copiarlo al commit. Lo único que
+ * sí se anota es la **forma** del texto en `corpus/formas-vedadas.yml` (Historia 35.7), con un
+ * motivo del conjunto cerrado y derivado —`retirada` o `cambio-de-clase`—, para que lo retirado
+ * no vuelva como atribuida; el motivo tecleado sigue yendo solo al commit.
  */
 export async function retirarCita(
   rutas: Rutas,
@@ -836,6 +856,25 @@ export async function retirarCita(
   }));
   if (negativa !== undefined) return negativa;
 
+  /*
+   * Historia 35.7 — la forma de lo que se retira queda vedada a la atribuida (AD-32), con su
+   * motivo derivado y nunca tecleado: `cambio-de-clase` si su Autor ya no es de dominio público
+   * —vive, o su plazo corre: la Cita vuelve como atribuida con otro slug—, `retirada` si no. El
+   * registro se lee antes de tocar nada: ilegible, no se retira.
+   */
+  let motivoVedado: MotivoDeFormaVedada;
+  try {
+    await leerFormasVedadas(rutas);
+    // El Autor y su dominio, también antes de mover: un fallo aquí es una negativa, no una excepción.
+    const autorDeLaCita =
+      cita.autor === undefined ? undefined : (await leerAutores(rutas)).find((a) => a.slug === cita.autor);
+    motivoVedado =
+      autorDeLaCita !== undefined && !esDeDominioPublico(dueñoAutor(autorDeLaCita)) ? 'cambio-de-clase' : 'retirada';
+  } catch (fallo) {
+    return { ok: false, motivos: [`${fallo instanceof Error ? fallo.message : String(fallo)} No se ha retirado nada.`] };
+  }
+  const vedada = entradaVedada(cita.texto, motivoVedado, fechaLocal(new Date()), slug);
+
   const censoAntes = await leerCensoBruto(rutas);
   const censoDespues =
     censoAntes === undefined ? undefined : censoSinLaCita(censoAntes, slug);
@@ -860,11 +899,45 @@ export async function retirarCita(
     };
   }
 
+  // Historia 35.7 — se anota la forma; si no se puede, la Cita vuelve a su sitio y no se retira.
+  if (vedada !== undefined) {
+    try {
+      await registrarFormasVedadas(rutas, [vedada]);
+    } catch (fallo) {
+      let devuelta = false;
+      try {
+        await mover(destino, dirname(cita.ruta));
+        devuelta = true;
+      } catch {
+        /* lo dice el motivo */
+      }
+      let censoRestituido = true;
+      if (devuelta && censoAntes !== undefined && censoDespues !== undefined) {
+        try {
+          await escribirCenso(rutas, censoAntes);
+        } catch {
+          censoRestituido = false;
+        }
+      }
+      return {
+        ok: false,
+        motivos: [
+          `No se pudo anotar la forma en corpus/formas-vedadas.yml: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+          !devuelta
+            ? `Y la Cita no pudo volver: está en ${destino}. Devuélvala a ${dirname(cita.ruta)} a mano.`
+            : censoRestituido
+              ? 'La Cita ha vuelto a corpus/citas/ y el censo está como estaba: no se ha retirado nada.'
+              : `La Cita ha vuelto a corpus/citas/, pero el censo no se pudo restituir: devuelva «${slug}» a ${FICHERO_DEL_CENSO} a mano.`,
+        ],
+      };
+    }
+  }
+
   // Historia 22.2 — si esta Cita era la que sostenía el título de su ficha, se pone al día.
   const obraRetirada = cita.procedencia?.obra;
   const titulos =
     typeof obraRetirada === 'string' && formaDeObra(obraRetirada) !== ''
-      ? await ajustarTitulosDeObra(rutas, cita.autor, [formaDeObra(obraRetirada)])
+      ? await ajustarTitulosDeObra(rutas, cita, [formaDeObra(obraRetirada)])
       : [];
 
   const pendientes = (await leerCensoDeCotejo(rutas)).length;
@@ -876,6 +949,13 @@ export async function retirarCita(
       `«${slug}» retirada a ${rutas.revision} el ${fechaLocal(new Date())}.`,
       `  Motivo: ${motivo.trim()}`,
       `  Huella del texto retirado: ${huellaDeTexto(cita.texto)}`,
+      ...(vedada !== undefined
+        ? [
+            vedada.motivo === 'cambio-de-clase'
+              ? '  Su forma se anota en corpus/formas-vedadas.yml como baja por cambio de clase (cambio-de-clase): no veda su vuelta como atribuida.'
+              : `  Su forma queda vedada a la atribuida en corpus/formas-vedadas.yml (${vedada.motivo}).`,
+          ]
+        : []),
       censoDespues === undefined
         ? `No estaba en el censo de ${FICHERO_DEL_CENSO}; siguen ${pendientes} pendientes.`
         : `Sale del censo de ${FICHERO_DEL_CENSO}: quedan ${pendientes} pendientes de cotejo.`,
@@ -1066,12 +1146,18 @@ export async function restituirTraducciones(rutas: Rutas): Promise<Resultado> {
   const pendientes: Pendiente[] = [];
   const omitidas: string[] = [];
   let iguales = 0;
+  // Historia 35.6, AD-35 — documentar no toca una atribuida: se salta y se cuenta.
+  let atribuidas = 0;
 
   for (const [lote, enRevision] of [
     [publicadas, false],
     [candidatas, true],
   ] as const) {
     for (const cita of lote) {
+      if (esAtribuida(cita)) {
+        atribuidas += 1;
+        continue;
+      }
       const restitucion = restitucionDeTraduccion(cita as CitaParaRestituir, documentos);
       if (restitucion.tipo === 'nada') continue;
       if (restitucion.tipo === 'igual') {
@@ -1150,12 +1236,21 @@ export async function restituirTraducciones(rutas: Rutas): Promise<Resultado> {
       `Candidatas de revisión restituidas: ${deRevision.length}` +
         (deRevisionMovidas > 0 ? ` (${deRevisionMovidas} con el año movido).` : '.'),
       ...(iguales > 0 ? [`Ya restituidas, sin cambios: ${iguales}.`] : []),
+      ...(atribuidas > 0 ? [lineaDeAtribuidasSaltadas(atribuidas)] : []),
       ...(omitidas.length > 0
         ? [`No se han tocado ${citas(omitidas.length)}, y hay que mirarlas:`, ...omitidas]
         : []),
       'Ni el texto ni el slug han cambiado. El cambio del corpus va en un commit propio.',
     ].join('\n'),
   };
+}
+
+/** La línea del parte por las atribuidas que un modo por lote salta — Historia 35.6. */
+function lineaDeAtribuidasSaltadas(n: number): string {
+  return (
+    `Atribuidas saltadas, sin tocar: ${n}. Documentar no toca una atribuida; ` +
+    'se cambia con «npm run atribuida».'
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1278,6 +1373,8 @@ export async function restituirSaltos(
   };
 
   const sinDocumentoNombradas: string[] = [];
+  // Historia 35.6, AD-35 — documentar no toca una atribuida: se salta y se cuenta.
+  let atribuidasSaltadas = 0;
   const lotes = { publicadas: loteVacio(), candidatas: loteVacio() };
   for (const [citasDelLote, enRevision] of [
     [publicadas, false],
@@ -1287,6 +1384,10 @@ export async function restituirSaltos(
     for (const cita of citasDelLote) {
       if (nombradas !== undefined && !nombradas.has(cita.slug)) continue;
       if (typeof cita.texto !== 'string') continue;
+      if (esAtribuida(cita)) {
+        atribuidasSaltadas += 1;
+        continue;
+      }
       const legibles = legiblesDe(cita);
       const decision = saltosDeLaCita(cita.texto, conForma(legibles));
       const enumerar = (nombres: readonly string[]) => nombres.map((n) => `corpus/fuentes/${n}.txt`).join(', ');
@@ -1499,6 +1600,7 @@ export async function restituirSaltos(
       `Saltos de verso${seco ? ', en seco' : ''} (${segundos} s):`,
       ...parteDelLote('Citas publicadas', lotes.publicadas, true),
       ...parteDelLote('Candidatas de revisión', lotes.candidatas, false),
+      ...(atribuidasSaltadas > 0 ? [lineaDeAtribuidasSaltadas(atribuidasSaltadas)] : []),
       `Cambian de fecha ${paginasDeCita} ${paginasDeCita === 1 ? 'Página de Cita' : 'Páginas de Cita'} y ` +
         `${totalListados} ${totalListados === 1 ? 'listado' : 'listados'}` +
         (listados.length === 0 ? '.' : ` (${listados.map(([f, n]) => `${f}: ${n}`).join(', ')}).`),

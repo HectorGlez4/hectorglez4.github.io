@@ -20,23 +20,31 @@ import type { APIRoute, GetStaticPaths } from 'astro';
 import sharp from 'sharp';
 import { conjuntoPublicable } from '../../lib/publicado.ts';
 import { svgDeTarjeta } from '../../lib/tarjeta.ts';
-import { procedenciaCompuesta } from '../../lib/atribucion.ts';
+import { firmaDeCita, procedenciaCompuesta } from '../../lib/atribucion.ts';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
   const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+  const personajes = new Map(conjunto.personajes.map((p) => [p.slug, p]));
 
   // Historia 22.3 — la procedencia la compone `atribucion.ts`, con el título de la Obra
-  // resuelta: la misma que lo copiado, la Imagen y la Pieza.
-  return conjunto.citas.map((cita) => ({
-    params: { slug: cita.slug },
-    props: {
-      slug: cita.slug,
-      texto: cita.texto,
-      autor: autores.get(cita.autor)!.nombre,
-      procedencia: procedenciaCompuesta(cita),
-    },
-  }));
+  // resuelta: la misma que lo copiado, la Imagen y la Pieza. Historia 35.4 — y el nombre, por
+  // `firmaDeCita`: el Personaje si lo hay, con «de {Autor}» en la procedencia.
+  return conjunto.citas.map((cita) => {
+    const quienes = {
+      autor: cita.autor === undefined ? undefined : autores.get(cita.autor),
+      personaje: cita.personaje === undefined ? undefined : personajes.get(cita.personaje),
+    };
+    return {
+      params: { slug: cita.slug },
+      props: {
+        slug: cita.slug,
+        texto: cita.texto,
+        autor: firmaDeCita(cita, quienes).nombre,
+        procedencia: procedenciaCompuesta(cita, quienes),
+      },
+    };
+  });
 }) satisfies GetStaticPaths;
 
 export const GET: APIRoute = async ({ props }) => {

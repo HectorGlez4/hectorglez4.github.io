@@ -63,7 +63,8 @@ const datos = {
      */
     description: semblanzaEn(autor, 'datos-estructurados') ?? hechosDeAutor(autor, documentadas),
     ...(autor.añoNacimiento !== undefined ? { birthDate: String(autor.añoNacimiento) } : {}),
-    deathDate: String(autor.añoFallecimiento),
+    // Historia 35.1 — un Autor vivo no tiene fecha de muerte que declarar.
+    ...(autor.añoFallecimiento !== undefined ? { deathDate: String(autor.añoFallecimiento) } : {}),
   },
   mainEntity: listaDeCitas(citas, canonica, tramo),
 };

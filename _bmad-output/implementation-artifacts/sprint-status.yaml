@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-15-2026 03:42
+last_updated: 11-15-2026 18:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -523,20 +523,20 @@ development_status:
   # Épica 35 — la Cita atribuida, construida entera con la puerta cerrada: sin los cinco
   # topes ni BUZON_DE_PETICIONES (Héctor) no publica ninguna. La siembra a escala espera
   # a la pregunta 18; la Página de Personaje, criterios de patrón hasta UJ-8 (pregunta 24).
-  epic-35: backlog
-  35-1-la-clase-se-fija-al-dar-de-alta-y-queda-registrada: backlog
-  35-1b-la-atribuida-tiene-su-puerta-cerrada-y-sus-topes: backlog
-  35-2-el-personaje-entra-en-el-corpus-y-la-obra-tiene-un-solo-dueñ: backlog
-  35-3-la-página-de-personaje: backlog
-  35-3b-la-tarjeta-social-del-personaje-y-cuándo-se-indexa-su-página: backlog
-  35-4-el-personaje-va-donde-va-el-autor: backlog
-  35-5-los-personajes-en-los-directorios-y-en-la-búsqueda: backlog
-  35-6-la-variante-de-españa-y-la-única-orden-que-cambia-una-atribu: backlog
-  35-7-lo-que-cuenta-solo-la-clase-de-siempre: backlog
-  35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: backlog
-  35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog
-  35-10-la-siembra-acotada-desde-brainyquote: backlog
-  35-11-la-traducción-propia-como-la-decidió-héctor: backlog  # v9.2 (2026-11-14): ajusta la 35.10; la Épica 35 no se funde sin ella
+  epic-35: in-progress
+  35-1-la-clase-se-fija-al-dar-de-alta-y-queda-registrada: review  # v9-ralph 2026-11-08: clase fijada al alta y registro; diferidos: lecturas crudas de añoFallecimiento en tools (35.1b), relectura tras el append
+  35-1b-la-atribuida-tiene-su-puerta-cerrada-y-sus-topes: review  # v9-ralph 2026-11-13: la puerta de la atribuida, cerrada (cinco constantes sin valor que pone Héctor), sus topes y el esquema de atestiguaciones (tldts 7.4.19); dos pasadas de revisión; diferidos en el spec
+  35-2-el-personaje-entra-en-el-corpus-y-la-obra-tiene-un-solo-dueñ: review  # v9-ralph 2026-11-08: el Personaje entra en el Corpus (corpus/personajes/ vacío, tools/personaje.ts, un espacio de slugs con el Autor) y la Obra tiene un solo dueño; dos guardas hasta la 35.4; dos pasadas de revisión; diferidos para Héctor: --semblanza en biografia, dueño de la demanda para un slug de Personaje con Autor conocido, Autores retirados en la demanda
+  35-3-la-página-de-personaje: review  # v9-ralph 2026-11-09: la Página de Personaje (/personaje/{slug}/, Lista de Obras con Desplegable, Atribución que nombra al Personaje, séptima familia); guardas de la 35.2 hasta la 35.4; dos pasadas de revisión; decisiones delegadas: rótulo «Personaje» en el guion de /buscar/ y reordenado del <style> en /autor/**; diferido: avisar por indexabilidad de /personaje/ (35.3b)
+  35-3b-la-tarjeta-social-del-personaje-y-cuándo-se-indexa-su-página: review  # v9-ralph 2026-11-13: Tarjeta Social del Personaje y MIN_CITAS_POR_PERSONAJE = 2 (la fija la historia; Héctor puede cambiarla); avisar por indexabilidad de /personaje/ (cierra el diferido de la 35.3); una pasada de revisión (3 parches)
+  35-4-el-personaje-va-donde-va-el-autor: review  # v9-ralph 2026-11-14: el Personaje va donde va el Autor (firmaDeCita única, guardas de la 35.2 levantadas, Obra de Personaje con su Cabecera y JSON-LD character); dos pasadas de revisión; diferidos para Héctor: creator frente a author, serif o Inter para el Personaje, el año en la línea sin Obra, ficha de Personaje resuelta solo por Citas de otros
+  35-5-los-personajes-en-los-directorios-y-en-la-búsqueda: review  # v9-ralph 2026-11-14: Personajes en los Directorios (sección tras la A–Z en /autores/ y /obras/) y en /buscar/ (personaje=, optgroup, filtro de Pagefind); topes de los guiones de búsqueda y filtro subidos con la cifra medida; una pasada de revisión (2 parches); diferidos para Héctor en el spec
+  35-6-la-variante-de-españa-y-la-única-orden-que-cambia-una-atribu: review  # v9-ralph 2026-11-15: la Variante de España de la atribuida y npm run atribuida, la única orden que cambia una atribuida (la puerta sigue cerrada en el árbol); dos pasadas de revisión; supuestos para Héctor en el spec
+  35-7-lo-que-cuenta-solo-la-clase-de-siempre: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 22 parches; 8 diferidos para Héctor en el spec
+  35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 28 parches; diferidos para Héctor en el spec (BUZON_DE_PETICIONES y las constantes de SM-C6 sin valor; EXPERIENCE.md 3.2.6 por bmad-ux)
+  35-9-la-obra-con-derechos-vigentes-se-vende-sola: review  # v9-ralph 2026-11-15: la Obra con derechos vigentes se vende sola (derechosDeLaObra, lo cotejado solo de la clase de siempre, sin Gratis ni Cómo citar ni Cómo empieza, veto del incipit, curar-primero, AD-27 por los umbrales); dos pasadas de revisión; espaciado de la venta sola aceptado por delegación de Héctor (14/11), pendiente de bmad-ux; PLAZO_DE_PROTECCION_AÑOS y AÑO_DE_REFERENCIA sin valor
+  35-10-la-siembra-acotada-desde-brainyquote: review  # v9-ralph 2026-11-14: dos pasadas, 31 parches; con la traducción propia que decidió Héctor el 14/11 (FR-68 enmendado; la planificación v9.2 ya la recoge y la 35.11 la ajustó); semilla vacía, la siembra real es de Héctor
+  35-11-la-traducción-propia-como-la-decidió-héctor: review  # v9-ralph 2026-11-15: la traducción propia como la decidió Héctor (sin línea en la página, partida {texto, lengua}, doble aprobación con corpus/aprobaciones-de-atribuidas.yml, sustitución por atribuida texto, segunda muestra de SM-C6); dos pasadas de revisión; supuestos aceptados por delegación de Héctor (14/11): orden de commits, LENGUAS_DE_PARTIDA, población por el fichero de hoy; pendientes de bmad-architecture en el spec
   epic-35-retrospective: optional
   epic-36: backlog  # UX v9.3 (2026-11-14): se construye tras fundir las Épicas 29 a 35
   36-1-los-paneles-de-la-página-de-cita-y-de-la-de-autor: backlog

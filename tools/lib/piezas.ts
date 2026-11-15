@@ -51,6 +51,7 @@ import { REDES, enlaceConOrigen, esRedValida, type Red } from '../../src/lib/red
 import { rutaDeColeccion } from '../../src/lib/superficies.ts';
 import { admiteImagen } from '../../src/lib/tramos.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
+import { esAtribuida } from '../../src/lib/clase.ts';
 import { leerAutores, leerCitas, leerColecciones, type Rutas } from './corpus.ts';
 import {
   coleccionesParaHuecos,
@@ -161,7 +162,11 @@ export function textoDeLaPieza(
   red: Red,
   destino: string,
 ): string {
-  const atribuidas = citas.map((cita) => textoParaCopiar(cita, autores.get(cita.autor)!));
+  // Las Citas de una Pieza ya traen su Autor y ninguna dice un Personaje: `componerPieza` y
+  // `seleccionDeColeccion` las rechazan antes, y `citaEnPieza` se para si llegara alguna.
+  const atribuidas = citas.map((cita) =>
+    textoParaCopiar(cita, cita.autor === undefined ? undefined : autores.get(cita.autor), undefined),
+  );
   return `${atribuidas.join('\n\n')}\n\n${SITIO}${enlaceConOrigen(destino, red)}`;
 }
 
@@ -262,6 +267,7 @@ export async function componerPieza(
   );
 
   const elegidas: Cita[] = [];
+  const conAutor = new Map<string, Autor>();
   for (const slug of slugs) {
     if (typeof slug !== 'string' || !FORMA_DE_SLUG.test(slug)) {
       motivos.push(
@@ -278,6 +284,18 @@ export async function componerPieza(
           ? `La Cita «${slug}» no está publicada: sigue en corpus/_revision/. Una Pieza solo ` +
             'reúne Citas publicadas.'
           : `La Cita «${slug}» no existe en el corpus. Compruebe el slug.`,
+      );
+      continue;
+    }
+
+    /*
+     * Historia 35.7 — la Pieza reúne lo que el sitio promete, y la atribuida no se coteja: no entra
+     * en ninguna (pregunta 27, FR-30 v9.1). Se rechaza nombrándola.
+     */
+    if (esAtribuida(cita)) {
+      motivos.push(
+        `La Cita «${slug}» es atribuida, y una atribuida no entra en una Pieza (pregunta 27): ` +
+          'no se compone.',
       );
       continue;
     }
@@ -301,14 +319,30 @@ export async function componerPieza(
      * épica entera. Se comprueba que el Autor esté **y** que traiga nombre: un `.yml` con la
      * clave vacía compondría la Cita con un hueco donde va la firma.
      */
-    const autor = autores.get(cita.autor);
-    if (autor === undefined) {
+    /*
+     * Historia 35.4 — la Pieza firma con el Autor (`citaEnPieza`), y una Cita que dice un
+     * Personaje se firma con él en todo lo que sale del sitio (`firmaDeCita`): compuesta aquí
+     * saldría atribuida solo al Autor, o sin firma. Se rechaza, como en el material del Kit.
+     */
+    if (cita.personaje !== undefined) {
       motivos.push(
-        `El Autor «${cita.autor}» de la Cita «${slug}» no está en el corpus, así que la Pieza ` +
-          'la mostraría sin atribución.',
+        `La Cita «${slug}» la dice un Personaje («${cita.personaje}»), y la Pieza solo firma ` +
+          'con un Autor: no se compone para no atribuírsela a quien no la dice.',
       );
       continue;
     }
+
+    const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
+    if (autor === undefined) {
+      motivos.push(
+        cita.autor === undefined
+          ? `La Cita «${slug}» no declara Autor, así que la Pieza la mostraría sin atribución.`
+          : `El Autor «${cita.autor}» de la Cita «${slug}» no está en el corpus, así que la Pieza ` +
+              'la mostraría sin atribución.',
+      );
+      continue;
+    }
+
     if (typeof autor.nombre !== 'string' || autor.nombre.trim() === '') {
       motivos.push(
         `El Autor «${cita.autor}» de la Cita «${slug}» no tiene nombre en su ficha, así que la ` +
@@ -318,6 +352,7 @@ export async function componerPieza(
     }
 
     elegidas.push(cita);
+    conAutor.set(cita.slug, autor);
   }
 
   if (motivos.length > 0) {
@@ -325,7 +360,12 @@ export async function componerPieza(
     return { ok: false, motivos };
   }
 
-  const enPieza = elegidas.map((cita) => citaEnPieza(cita, autores.get(cita.autor)!));
+  const enPieza = elegidas.map((cita) => {
+    // Toda elegida entra con su Autor (arriba); si faltara, se dice en vez de componer un hueco.
+    const autor = conAutor.get(cita.slug);
+    if (autor === undefined) throw new Error(`La Cita «${cita.slug}» se eligió sin su Autor.`);
+    return citaEnPieza(cita, autor);
+  });
 
   const cabida = cabenEnPieza(enPieza);
   if (!cabida.cabe) {

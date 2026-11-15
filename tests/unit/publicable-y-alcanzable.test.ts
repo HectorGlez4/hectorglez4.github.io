@@ -8,6 +8,8 @@ import {
   TEMA_VALIDO,
   citaValida,
   coleccionValida,
+  ATESTIGUADA,
+  conLaPuertaAbierta,
   construirConCorpus,
   limpiar,
   paginaConstruida,
@@ -33,7 +35,7 @@ import {
   rutaNormalizada,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
-import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA, MIN_CITAS_POR_PERSONAJE } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import {
   BOTON_DE_BUSCAR,
@@ -231,9 +233,11 @@ const CITAS_DE_CARTAS = [
 ];
 const OBRA_INDEXABLE = '/obra/seneca/cartas-a-lucilio';
 const OBRA_NO_INDEXABLE = '/obra/seneca/sobre-la-brevedad-de-la-vida';
+/** Historia 35.3 — la Página de Personaje del corpus de abajo. */
+const PERSONAJE = '/personaje/batman';
 
 /** Las páginas 2+ de un listado, también las de Obra, que tienen dos segmentos. */
-const PAGINA_SEGUNDA = /^\/(?:(?:autor|tema|coleccion)\/[^/]+|obra\/[^/]+\/[^/]+)\/\d+$/;
+const PAGINA_SEGUNDA = /^\/(?:(?:autor|tema|coleccion|personaje)\/[^/]+|obra\/[^/]+\/[^/]+)\/\d+$/;
 
 const CORPUS_COMPLETO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
@@ -274,6 +278,49 @@ const CORPUS_COMPLETO: Record<string, string> = {
       }),
     ]),
   ),
+  /*
+   * Historia 35.3 — la familia de Personaje entra en los dos lazos: una atribuida de Séneca que
+   * dice Batman, de «Cartas a Lucilio» (3 de 54, sigue indexable) y del Tema, en su página 1 —su
+   * slug ordena delante—, a tres saltos de la portada.
+   */
+  'personajes/batman.yml': 'nombre: "Batman"\nuniverso: "DC Comics"\nordenAlfabetico: "Batman"\n',
+  'citas/seneca--a-batman.md': citaValida({
+    slug: 'seneca-a-batman',
+    texto: 'Carta de Batman: la noche es más oscura antes del alba, y hay que aprenderlo.',
+    personaje: 'batman',
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    ...ATESTIGUADA,
+    procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+    fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+  }),
+  /*
+   * Historia 35.3b — las que le faltan a Batman para `MIN_CITAS_POR_PERSONAJE`, así su página se
+   * indexa y entra en Pagefind: fuera del Tema, para no mover su página 1, y en la 1 del Autor.
+   */
+  ...Object.fromEntries(
+    Array.from({ length: MIN_CITAS_POR_PERSONAJE - 1 }, (_, i) => [
+      `citas/seneca--a-batman-otra-${i + 1}.md`,
+      citaValida({
+        slug: `seneca-a-batman-otra-${i + 1}`,
+        texto: [
+          'Un murciélago vigila el campanario mientras la ciudad duerme tranquila.',
+          'Quien guarda silencio en el tejado conoce el precio de cada promesa rota.',
+          'La capa negra pesa menos que el recuerdo de aquella calle sin farolas.',
+        ][i] ??
+          ((): never => {
+            throw new Error(`MIN_CITAS_POR_PERSONAJE (${MIN_CITAS_POR_PERSONAJE}) pide más textos de Batman que los de la prueba`);
+          })(),
+        temas: [],
+        personaje: 'batman',
+        clase: 'atribuida',
+        estadoDerechos: undefined,
+        ...ATESTIGUADA,
+        procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+      }),
+    ]),
+  ),
 };
 
 describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
@@ -281,7 +328,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   let salidaDelBuild: string;
 
   beforeAll(async () => {
-    const resultado = await construirConCorpus(CORPUS_COMPLETO);
+    const resultado = await construirConCorpus(CORPUS_COMPLETO, { ficheros: conLaPuertaAbierta() });
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
     salidaDelBuild = resultado.salida;
@@ -294,7 +341,8 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   });
 
   beforeEach(() => {
-    declararRutasIndexables([OBRA_INDEXABLE]);
+    // Historia 35.3 — y el Personaje, que hoy se indexa siempre que tenga página.
+    declararRutasIndexables([OBRA_INDEXABLE, PERSONAJE]);
   });
 
   afterEach(() => {
@@ -751,8 +799,11 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(rutas).toContain('/coleccion/frases-cortas');
       // Historia 22.4 — la Obra que no repite otra página.
       expect(rutas).toContain(OBRA_INDEXABLE);
+      // Historia 35.3 — y la Página de Personaje, con la Cita que lo declara.
+      expect(rutas).toContain(PERSONAJE);
       expect(rutas.filter((r) => r.startsWith('/cita/')).length).toBe(
-        CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length,
+        // Las de Batman: `MIN_CITAS_POR_PERSONAJE` (Historia 35.3b).
+        CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length + MIN_CITAS_POR_PERSONAJE,
       );
     });
 
@@ -807,7 +858,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       if (ruta === '/') return 'portada';
       // Historia 26.3 — por su declaración, no por el prefijo: `/autores` empieza como `/autor/`.
       if (esRutaDeDirectorio(ruta)) return 'directorio';
-      return /^\/(cita|autor|tema|coleccion|obra)\//.exec(ruta)?.[1];
+      return /^\/(cita|autor|tema|coleccion|obra|personaje)\//.exec(ruta)?.[1];
     };
 
     /** Cada elemento con su `data-pagefind-filter`, con la etiqueta en que va. */
@@ -862,18 +913,20 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         expect(filtros.filter((f) => !permitidas.has(f.valor.split(':')[0])), ruta).toEqual([]);
         vistas.add(tipo!);
       }
-      // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las seis familias.
-      expect(conCuerpo).toBeGreaterThan(6);
-      expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'directorio', 'obra', 'portada', 'tema']);
+      // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las siete familias.
+      expect(conCuerpo).toBeGreaterThan(7);
+      expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'directorio', 'obra', 'personaje', 'portada', 'tema']);
     });
 
     /*
      * Historia 27.1, AD-11, AD-25 — los filtros `autor`, `obra` y `tema` y la clave de orden los
      * lleva solo la Página de Cita, y toda Página de Cita lleva su clave: Pagefind saca de los
      * resultados ordenados a la página que no la trae. El tipo de la 26.2 queda exento por nombre.
+     * Historia 35.5 (AD-33) — y lo mismo el de `personaje`, que es uno más de `FILTROS_DE_CITA`.
      */
-    it('fuera de `/cita/…` ningún HTML lleva filtro `autor`, `obra` ni `tema` ni clave de orden, y toda Página de Cita lleva la suya', async () => {
+    it('fuera de `/cita/…` ningún HTML lleva filtro `autor`, `personaje`, `obra` ni `tema` ni clave de orden, y toda Página de Cita lleva la suya', async () => {
       const deCita = new Set<string>(Object.values(FILTROS_DE_CITA));
+      expect(deCita.has('personaje')).toBe(true);
       const fuera: string[] = [];
       const claves = new Map<string, string[]>();
       for (const [ruta, html] of await paginas()) {
@@ -926,6 +979,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const conjunto = await conjuntoDelCorpus(rutasDelCorpus(join(proyecto, 'corpus')));
       const { porCita } = filtrosDeLaBusqueda(conjunto);
       const nombres = new Map(conjunto.autores.map((autor) => [autor.slug, autor.nombre]));
+      const deLosPersonajes = new Map(conjunto.personajes.map((personaje) => [personaje.slug, personaje.nombre]));
       const vistas = new Set<string>();
       for (const [ruta, html] of await paginas()) {
         const slug = /^\/cita\/([^/]+)$/.exec(ruta)?.[1];
@@ -935,12 +989,17 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         vistas.add(slug);
         const valores = filtrosDe(html).map((f) => f.valor);
         const de = (clave: string) => valores.filter((v) => v.startsWith(`${clave}:`)).map((v) => v.slice(clave.length + 1));
-        expect(de(FILTROS_DE_CITA.autor), ruta).toEqual([esperado!.autor]);
+        expect(de(FILTROS_DE_CITA.autor), ruta).toEqual(esperado!.autor === undefined ? [] : [esperado!.autor]);
+        // Historia 35.5 — el del Personaje, si la Cita lo declara.
+        expect(de(FILTROS_DE_CITA.personaje), ruta).toEqual(esperado!.personaje === undefined ? [] : [esperado!.personaje]);
         expect(de(FILTROS_DE_CITA.obra), ruta).toEqual(esperado!.obra === undefined ? [] : [esperado!.obra]);
         expect(de(FILTROS_DE_CITA.tema), ruta).toEqual([...esperado!.temas]);
         const metas = metadatosDe(html, 'autor');
         expect(metas.elementos, ruta).toBe(1);
-        expect(metas.valores, ruta).toEqual([nombres.get(esperado!.autor)]);
+        // El metadato `autor` lleva a quien va en la línea del resultado: el Personaje, si lo hay (35.5).
+        expect(metas.valores, ruta).toEqual([
+          esperado!.personaje !== undefined ? deLosPersonajes.get(esperado!.personaje) : nombres.get(esperado!.autor ?? ''),
+        ]);
       }
       // Todas las Citas publicadas, y no en vacío.
       expect([...vistas].sort()).toEqual([...porCita.keys()].sort());
@@ -1070,11 +1129,17 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(clases(hijos[2])).toContain('del-dia');
     });
 
-    it('la línea dice las cifras del Corpus, con el censo vacío: «cada una cotejada»', async () => {
+    it('la línea dice las cifras del Corpus: con el censo vacío y atribuidas, sin «cada una» (35.7)', async () => {
       const html = await portada();
       const linea = /<p class="cifras[^"]*"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1].replace(/\s+/g, ' ').trim();
-      // 53 Citas de Séneca, todas con Fuente: el andamio les escribe el documento.
-      expect(linea).toBe(`${CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length} citas de 1 autor, cada una cotejada con el texto de su fuente.`);
+      // 53 Citas de Séneca, todas con Fuente: el andamio les escribe el documento. Y las
+      // `MIN_CITAS_POR_PERSONAJE` atribuidas de Séneca que dice Batman (35.3b), también con
+      // Fuente: cuentan en n, pero k cuenta solo lo cotejado de la clase de siempre, así que con
+      // el censo vacío la línea va en la redacción 1 (UX-DR57, Historia 35.7).
+      const deSiempre = CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length;
+      expect(linea).toBe(
+        `${deSiempre + MIN_CITAS_POR_PERSONAJE} citas de 1 autor; ${deSiempre} cotejadas con el texto de su fuente.`,
+      );
     });
 
     it('el formulario es un GET a `/buscar/` con `q`, con su botón y sin ningún guion', async () => {

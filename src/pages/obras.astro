@@ -24,12 +24,19 @@
  * Modelo de Ingreso (`SUPERFICIES_SIN_INGRESO`) y sin semblanzas, Citas ni notas de Ficha de Obra
  * (`SUPERFICIES_SIN_SEMBLANZA`): lista entidades y dice hechos del Corpus. Ni la línea de Citas
  * sin obra de la Página de Autor, ni ningún glifo de avance.
+ *
+ * Historia 35.5, UX-DR141 — tras la A–Z, la sección «Personajes» (`directorio.personajes`): las
+ * Obras que no van bajo ningún Autor, bajo su Personaje dueño, con la misma cabecera de grupo
+ * enlazada a su Página de Personaje y la misma Lista de Obras. Dentro de `.listado`, como un grupo
+ * más (`data-personajes`), para que el filtro la alcance. Una Obra con Autor sigue bajo su Autor.
+ * Sin Personajes con Obra no hay sección. La meta y la Tarjeta cuentan solo la A–Z.
  */
 import Armazon from '../components/Armazon.astro';
 import LetrasDeSalto from '../components/LetrasDeSalto.astro';
 import GrupoDeLetra from '../components/GrupoDeLetra.astro';
 import ListaDeObras from '../components/ListaDeObras.astro';
 import FiltroDelDirectorio from '../components/FiltroDelDirectorio.astro';
+import Rotulo from '../components/Rotulo.astro';
 import { conjuntoPublicable } from '../lib/publicado.ts';
 import { directorioDeObras } from '../lib/directorios.ts';
 import { descripcionDelDirectorioDeObras } from '../lib/atribucion.ts';
@@ -37,11 +44,18 @@ import { NOMBRE_DEL_DIRECTORIO_DE_OBRAS, tituloDelDirectorioDeObras } from '../l
 import { TARJETA_DEL_DIRECTORIO_DE_OBRAS, rutaDelDirectorioDeObras } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
-const directorio = directorioDeObras(conjunto.autores, conjunto.citas);
+const directorio = directorioDeObras(conjunto.autores, conjunto.citas, conjunto.personajes);
 const descripcion = descripcionDelDirectorioDeObras(directorio);
 
 /** El nombre accesible de las letras: «Obras de autores por la S». */
 const ENTIDADES_DE_LAS_LETRAS = 'Obras de autores';
+
+/*
+ * Historia 35.5 — la sección «Personajes», a 5 × `--unidad` del cierre del último grupo, en un
+ * atributo `style` y no en el `<style>` de la página, que Astro emite aunque no haya sección: sin
+ * Personajes la página sale byte a byte como antes. Solo tokens.
+ */
+const DE_LA_SECCION = 'margin-top: calc(var(--unidad) * 5)';
 ---
 
 <Armazon
@@ -69,6 +83,19 @@ const ENTIDADES_DE_LAS_LETRAS = 'Obras de autores';
             ))}
           </GrupoDeLetra>
         ))}
+        {
+          directorio.personajes.length > 0 && (
+            <section class="grupo" data-personajes style={DE_LA_SECCION}>
+              <Rotulo id="personajes" destino>Personajes</Rotulo>
+              {directorio.personajes.flatMap((grupo) => grupo.entradas).map((personaje) => (
+                <section class="autor">
+                  <h3 data-zona="directorio"><a href={personaje.ruta}>{personaje.nombre}</a></h3>
+                  <ListaDeObras obras={personaje.obras} zona="directorio" pliegue={false} />
+                </section>
+              ))}
+            </section>
+          )
+        }
       </div>
     </div>
   </div>

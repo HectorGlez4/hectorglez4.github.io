@@ -19,10 +19,12 @@ import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 
 const obra = (nombre: string, autor: string, titulo: string, recuento: number): ObraResuelta => ({
   nombre,
+  dueño: { tipo: 'autor', slug: autor },
   autor,
   titulo,
   fuentes: [],
   edicionCotejada: false,
+  derechosVigentes: false,
   temas: [],
   recuento,
 });

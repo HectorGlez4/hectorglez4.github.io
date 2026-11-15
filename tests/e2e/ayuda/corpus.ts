@@ -205,6 +205,7 @@ function citasResueltas(): CitaResuelta[] {
         texto: string;
         procedencia?: { obra?: string } | null;
         fuente?: { id: string } | null;
+        clase?: string;
       };
       // La Fuente también: de ella sale si la Obra tiene edición cotejada (Historia 24.4).
       return {
@@ -213,7 +214,19 @@ function citasResueltas(): CitaResuelta[] {
         texto: datos.texto,
         procedencia: datos.procedencia,
         ...(datos.fuente != null ? { fuente: datos.fuente } : {}),
+        // Historia 35.9 — lo cotejado es de la clase de siempre: la Fuente de una atribuida no cuenta.
+        ...(datos.clase !== undefined ? { clase: datos.clase } : {}),
       };
+    });
+  // Historia 35.9 — los Autores reales, con lo que decide los derechos de sus Obras, como en el sitio.
+  const autores = readdirSync(join(raiz, 'autores'))
+    .filter((f) => /\.ya?ml$/.test(f))
+    .map((fichero) => {
+      const datos = parse(readFileSync(join(raiz, 'autores', fichero), 'utf8')) as {
+        vivo?: unknown;
+        añoFallecimiento?: unknown;
+      };
+      return { slug: fichero.replace(/\.ya?ml$/, ''), vivo: datos.vivo, añoFallecimiento: datos.añoFallecimiento };
     });
   const fichas: FichaDeObra[] = readdirSync(join(raiz, 'obras'))
     .filter((f) => /\.ya?ml$/.test(f))
@@ -221,7 +234,7 @@ function citasResueltas(): CitaResuelta[] {
       const ficha = parse(readFileSync(join(raiz, 'obras', fichero), 'utf8')) as Omit<FichaDeObra, 'nombre' | 'ruta'>;
       return { ...ficha, nombre: fichero.replace(/\.ya?ml$/, ''), ruta: `corpus/obras/${fichero}` };
     });
-  return colgarObras(citas, fichas).map((c) => ({
+  return colgarObras(citas, fichas, autores).map((c) => ({
     slug: c.slug,
     autor: c.autor,
     texto: c.texto,

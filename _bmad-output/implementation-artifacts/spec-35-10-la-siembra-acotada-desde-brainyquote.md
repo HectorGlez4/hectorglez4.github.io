@@ -1,0 +1,370 @@
+---
+title: 'Historia 35.10 — La siembra acotada desde BrainyQuote'
+type: 'feature'
+created: '2026-11-14'
+status: 'done'
+baseline_revision: 'd82e6badb3b016b7be17847dc9f77bec27aa362f'
+review_loop_iteration: 0
+followup_review_recommended: false
+context:
+  - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
+warnings: [oversized]
+deferred:
+  - summary: 'SEMILLA_DE_ATRIBUIDAS queda vacía en el árbol: qué Personajes y Autores lleva la semilla, y la página de BrainyQuote de cada uno, lo decide Héctor en un diff (FR-68).'
+    severity: low
+    location: 'src/lib/umbrales.ts'
+  - summary: 'Pendiente de Héctor: correr la siembra real (semilla + proponer + revisar --aprobar) y registrar la sesión con --clase-de-cita atribuida. Ningún agente lo hace.'
+    severity: low
+  - summary: 'El lector de la página de BrainyQuote (anclas title="view quote" / title="view author") es [ASSUMPTION]: no se ha contrastado con la página real, porque ningún agente la pide. Si la página real no casa, la orden sale con 1 sin escribir y se ajusta el lector.'
+    severity: medium
+    location: 'tools/lib/siembraAtribuida.ts'
+  - summary: >-
+      Pendiente de Héctor: las condiciones de uso y el robots.txt de BrainyQuote para la petición de la semilla, y la nota de derechos de la lista en inglés que se guarda sin versionar.
+    evidence: |-
+      Revisión externa (blind-hunter, pasada 1): nada comprueba ni documenta los términos de BrainyQuote antes de pedir la página. La elección de la fuente es de FR-68 y la semilla de Héctor; ningún agente pide la página.
+    location: >-
+      tools/atribuida.ts
+    severity: low
+  - summary: >-
+      DOMINIOS_QUE_NO_ATESTIGUAN solo declara brainyquote.com: ningún espejo suyo queda excluido de verdad.
+    evidence: |-
+      ac-auditor, hueco 2: src/lib/atestiguaciones.ts:29 es ['brainyquote.com']; viene de la 35.1b, no de esta historia. Qué espejos se declaran lo decide Héctor.
+    location: >-
+      src/lib/atestiguaciones.ts:29
+    severity: low
+  - summary: 'FR-68 enmendado por Héctor el 2026-11-14 (traducción propia en la atribuida): pendiente de volver a pasar bmad-prd, bmad-architecture y bmad-spec.'
+    evidence: |-
+      Decisión de Héctor en el chat, 2026-11-14: «lets just translate the text as the best as we can». El PRD (FR-68), la espina (AD-32: el conjunto cerrado de `origen`; AD-27: `origen` en CAMPOS_QUE_NO_FECHAN) y el SPEC dicen todavía «el sitio no traduce» y tres orígenes; el código ya lleva el cuarto, `traduccion-propia`, solo en la atribuida. La clase de siempre sigue sin traducirse (§4.11).
+    location: >-
+      src/lib/admision.ts (ORIGENES), src/lib/clase.ts (ORIGEN_TRADUCCION_PROPIA)
+    severity: medium
+  - summary: '[ASSUMPTION] pendiente de Héctor (bmad-ux): la redacción y el sitio de la línea de la traducción propia, «Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.», en caption bajo la Línea de la Fuente de la Página de Cita y antes de la Variante; y si lo copiado, la Imagen, el Fragmento, el JSON-LD o «Cómo citar» tienen que decirlo también (hoy no lo dicen: ninguna superficie pintaba el origen).'
+    location: >-
+      src/lib/atribucion.ts (lineaDeTraduccionPropia), src/components/TraduccionPropia.astro
+    severity: medium
+  - summary: '[ASSUMPTION] pendiente de Héctor (bmad-ux/bmad-architecture): la Variante no admite `traduccion-propia` (ORIGENES_DE_VARIANTE), porque es la letra que circula en otra región; un intercambio por `variante` que la dejaría con ese origen se niega.'
+    location: >-
+      src/lib/admision.ts (ORIGENES_DE_VARIANTE), tools/lib/cambioDeAtribuida.ts
+    severity: low
+  - summary: >-
+      Ninguna orden cambia el `origen` del texto principal de una atribuida publicada: cuando aparezca una versión en español que circule para una `traduccion-propia`, no hay forma sancionada de pasarla a `doblaje`/`traduccion-publicada` con su letra (y quitar su `textoOriginal`).
+    evidence: |-
+      Revisión externa, pasada 2 (blind-hunter): `npm run atribuida -- texto` corrige la letra por parecido y `variante` intercambia con la Variante, pero ninguna cambia el `origen` del principal; una atribuida publicada no se edita a mano, así que «no circula ninguna versión en español» puede quedar rancio. Pendiente de Héctor (bmad-create-epics-and-stories): una orden de cambio de origen.
+    location: >-
+      tools/lib/cambioDeAtribuida.ts
+    severity: medium
+  - summary: >-
+      Una segunda sesión atribuida real en la misma jornada con el mismo resultado no se puede registrar (se toma por reintento) ni anular (`--anular` no admite `--clase-de-cita`), y `proponer` nunca publica, así que el caso es corriente.
+    evidence: |-
+      Revisión externa, pasada 2 (blind-hunter, edge-case-hunter): la matriz de la intent-contract fija «misma jornada y mismo resultado → no anota (1)» y «--clase-de-cita con --anular → 2»; distinguirlas (hora, motivo) o anular una sesión atribuida es decisión de Héctor sobre la cadencia.
+    location: >-
+      tools/objetivo.ts (registrarSesionAtribuida)
+    severity: low
+---
+
+<intent-contract>
+
+## Intent
+
+**Problem:** La Cita atribuida tiene puerta (35.1b), Variante (35.6) y formas vedadas (35.7), pero no hay forma de sembrarla sin teclear metadato: falta la orden que lleve una semilla de prueba de BrainyQuote —unos pocos Personajes o Autores que elige Héctor— a candidatas en `corpus/_revision/`, y la sesión no dice de qué clase de Cita es.
+
+**Approach:** Una lista con nombre `SEMILLA_DE_ATRIBUIDAS` (vacía) en `src/lib/umbrales.ts`; dos subórdenes nuevas de `npm run atribuida`: `semilla <slug>` (la cáscara descarga una vez la página declarada y escribe, fuera de `corpus/` y sin versionar, las frases en inglés y quién las dice) y `proponer <lote.yaml>` (juzga candidatas en español con lo de la 35.1b/35.6/35.7 y escribe las que pasan solo en `corpus/_revision/`); y `npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida`, que anota `claseDeCita: atribuida` con las atribuidas publicadas.
+
+## Boundaries & Constraints
+
+**Always:**
+- La red solo en la cáscara `tools/atribuida.ts` (AD-22); `tools/lib/siembraAtribuida.ts` es puro sobre HTML ya recibido y sobre el Corpus leído.
+- `proponer` nunca escribe en `corpus/citas/`, ni fichas de Obra, ni el registro de clases ni el de formas vedadas: aprobar es de una persona con `revisar --aprobar`.
+- La clase se deriva (`claseQueCorresponde`), nunca se teclea; el dueño del slug y del fichero es el Autor o, sin él, el Personaje (`nombreDeFicheroDeCita`, `slugDeCita`, `slugLibre` con `slugsConOtraClase`).
+- Los dominios los cuenta solo `dominiosQueAtestiguan`; los duplicados, solo `parecidoEntre` (vía `tools/lib/atribuidas.ts`).
+- Códigos: 2 por la forma de la invocación, 1 por lo que dice; con todo el lote rechazado, no se escribe nada.
+- Las pruebas no tocan la red (`tests/unit/ayuda/doble-de-red.mjs`) ni el Corpus real; la semilla llena solo en una copia del proyecto.
+- `dist/` no cambia: `SEMILLA_DE_ATRIBUIDAS` no la importa ninguna página ni isla; `src/lib/vocabulario.ts` y `GUIONES_EXTERNOS` no se tocan.
+
+**Block If:** la historia exigiera un valor de Héctor para construirse (no lo exige: la lista va vacía y `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` sin valor se informa sin juzgar).
+
+**Never:** pedir BrainyQuote ni ninguna dirección real; sembrar, proponer o aprobar sobre el Corpus real; dar valor a `SEMILLA_DE_ATRIBUIDAS` ni a ninguna constante de la puerta; editar `_bmad-output/planning-artifacts/` o `_bmad-output/specs/`; búsqueda abierta o siembra a escala (pregunta 18); traducir.
+
+## I/O & Edge-Case Matrix
+
+| Scenario | Input / State | Expected Output / Behavior | Error Handling |
+|----------|--------------|---------------------------|----------------|
+| semilla, slug de la lista | lista con `{slug:'batman', pagina:'https://www.brainyquote.com/…'}`, doble responde 200 HTML con frases | escribe `semillas/batman.json` (o `--salida`) con `{slug, pagina, descargadaEl, frases:[{frase, quien}]}`; una sola petición | 0 |
+| semilla, fuera de la lista / lista vacía | slug ausente | no pide nada; mensaje nombra `SEMILLA_DE_ATRIBUIDAS` y que la siembra a escala espera a la pregunta 18 | 1 |
+| semilla repetida | la salida ya existe | no pide nada, no reescribe («una sola vez») | 1 |
+| semilla, red falla / no-200 / no HTML / 3xx / ninguna frase reconocida | doble | no escribe nada, nombra el motivo | 1 |
+| semilla, `--salida` dentro de `corpus/` o sin `.json` | — | no pide nada | 1 |
+| semilla, forma | sin slug, dos slugs, bandera desconocida/repetida/vacía | uso | 2 |
+| proponer, candidata válida | texto es, Personaje de la lista que existe, `origen`, atestiguaciones con dominios, Obra opcional resoluble | escrita en `corpus/_revision/{dueño}--….md` con `clase: atribuida`, `personaje`/`autor`, `procedencia.obra` si consta, `temas: []`, atestiguaciones, origen, variante | 0 |
+| proponer, sin `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` | mínimo sin valor | se escribe igual; el parte da sus dominios y «sin juzgar el mínimo: MIN_ATESTIGUACIONES_DE_ATRIBUIDA sin valor» | 0 |
+| proponer, mínimo con valor (por parámetro) | menos dominios | rechazada con el motivo de `motivoDeAtestiguacionesEscasas` | 1 |
+| proponer, rechazos | sin `texto` (sin versión en español), sin Personaje ni Autor, Personaje/Autor inexistente, fuera de la semilla, de clase de siempre, `clase` tecleada, sin `origen` u otra regla del esquema, ningún dominio que cuente, Obra que `resolverFichaDeObra` no resuelve, duplicado (`parecidoEntre`) con publicada de cualquier clase, candidata de `_revision/`, otra entrada del lote o forma vedada | no se escribe; el parte la nombra (posición y texto) con cada motivo | 1 |
+| proponer, todo rechazado | — | no escribe nada | 1 |
+| proponer, forma | sin lote, lote ilegible o que no es lista, bandera desconocida | uso | 2 |
+| proponer, registro de clases o de formas vedadas ilegible | — | no escribe nada | 1 |
+| registrar atribuida | `--registrar --clase-de-cita atribuida` | entrada con `fecha`, `hora`, `claseDeCita: "atribuida"`, `resultado: {citasPublicadas, atribuidasPublicadas}`, sin `clase`/`propuesto`/`hueco` de la política | 0 |
+| registrar atribuida repetida | misma jornada y mismo resultado | no anota (reintento) | 1 |
+| clase-de-cita mal | valor distinto de `atribuida`, o sin `--registrar`, o con `--anular`/`--elegido` | uso | 2 |
+
+</intent-contract>
+
+## Code Map
+
+- `src/lib/umbrales.ts` (~1446–1500, bloque de la atribuida) -- añadir `EntradaDeSemilla {slug, pagina}` y `SEMILLA_DE_ATRIBUIDAS: readonly EntradaDeSemilla[] = []` con su comentario (de Héctor; generalizar es otra decisión). Lo importa el filtro de Directorios: un literal sin uso se elimina del guion.
+- `src/lib/atestiguaciones.ts` -- `dominiosQueAtestiguan`, `DOMINIOS_QUE_NO_ATESTIGUAN` (brainyquote.com). Solo se reutiliza.
+- `src/lib/admision.ts:377` -- `motivoDeAtestiguacionesEscasas(urls, minimo)`; `citaAdmisible` (esquema completo con `reglasDeClase`: origen, atestiguaciones, variante, una línea).
+- `tools/lib/atribuidas.ts:~340–390` -- los bucles de duplicados entre clases y de formas vedadas viven dentro de `fallosDeAtribuidas`, tras el corte de puerta cerrada: extraerlos a `fallosDeDuplicados(...)` exportada y que `fallosDeAtribuidas` la llame (mismo comportamiento), para que `proponer` los juzgue con la puerta cerrada.
+- `tools/alta.ts:226–800` -- patrón a calcar: dueño (`slugDueño = autor ?? personaje`), `slugDeCita`/`slugLibre`/`slugsConOtraClase`, `claseQueCorresponde`, `MOTIVO_CLASE_TECLEADA`, `escribirCita(rutas.revision, …)`, `resolverFichaDeObra` en solo lectura, `paraAtribuidas`/`textoDeVariante`.
+- `tools/lib/revision.ts:489+` -- `aprobar` ya publica una atribuida de `_revision/` con la puerta abierta: el formato que escribe `proponer` tiene que ser el que `loteEnRevision` lee (frontmatter de Cita; `procedencia.obra`).
+- `tools/lib/corpus.ts` -- `leerAutores`, `leerPersonajes:495`, `leerCitas`, `leerRegistroDeClases:3786`, `escribirCita:939`, `nombreDeFicheroDeCita:1154`; sesiones: `SesionDeSembrado:1548`, `SesionRegistrada:1562`, `registrarSesionDeSembrado:1659` (solo añade, valida en memoria).
+- `tools/lib/formasVedadas.ts:136` -- `leerFormasVedadas`.
+- `tools/lib/html.ts` -- utilidades de HTML para el lector de la página (texto de un elemento, entidades).
+- `tools/atribuida.ts` -- cáscara con `FORMA` por suborden: añadir `semilla` (1 suelto, `--salida`) y `proponer` (1 suelto, `--corpus`), USO y cabecera.
+- `tools/recuperar.ts:1121–1200` -- patrón de `fetch` (redirect manual, `AbortSignal.timeout`, user-agent, tipo de contenido).
+- `tools/objetivo.ts` -- registrar: nueva bandera `--clase-de-cita` (con valor), rama atribuida que no consulta la política ni exige objetivo; `salud.atribuidas` ya existe.
+- `tests/unit/ayuda/doble-de-red.mjs` -- doble con `DOBLE_GUION`/`DOBLE_REGISTRO`; `tests/unit/recuperar-cli.test.ts:106` -- cómo se precarga.
+- `tests/unit/ayuda/construir.ts` -- `RAIZ`, `enlazarDependencias`, `ATESTIGUADA`, `AUTOR_VALIDO`, `TEMA_VALIDO`, `citaValida`.
+- `tests/unit/atribuida-cli.test.ts`, `tests/unit/objetivo-cli.test.ts` -- patrones de prueba por proceso con `--corpus` en temporal.
+- `.gitignore` -- añadir `semillas/` (como `piezas/`).
+- `AGENTS.md` -- nueva sección «Una sesión de sembrado de la Cita atribuida» tras «La Cita atribuida»/sus subsecciones.
+
+## Tasks & Acceptance
+
+**Execution:**
+- `src/lib/umbrales.ts` -- `EntradaDeSemilla` y `SEMILLA_DE_ATRIBUIDAS = []` -- la lista que llena Héctor.
+- `tools/lib/atribuidas.ts` -- extraer `fallosDeDuplicados` (duplicados entre clases + formas vedadas) sin cambiar `fallosDeAtribuidas` -- juzgar duplicados con la puerta cerrada.
+- `tools/lib/siembraAtribuida.ts` (nuevo) -- `problemasDeLaSemilla(semilla)` (slug con forma de slug, sin repetidos, `pagina` `https:` de `brainyquote.com` o subdominio); `entradaDeSemilla(slug, semilla)`; `frasesDeLaPagina(html)` (pares frase/quién en orden, texto decodificado y colapsado; vacío si no reconoce); `componerSemilla(...)` (el JSON); `proponerAtribuidas(rutas, lote, {semilla, minAtestiguaciones, hoy?})` → informe `{escritas:[{ruta, slug, dominios, sinJuzgarMinimo}], rechazadas:[{indice, texto, motivos}]}` y escribe solo si alguna pasa; `formatearPropuesta(informe)` -- todo lo decidible sin red.
+- `tools/atribuida.ts` -- subórdenes `semilla` (comprueba la lista, la salida fuera de `corpus/` y que no exista antes de pedir; una petición, `redirect: 'manual'`, timeout, 200 + `text/html`; escribe con `wx`) y `proponer` (lee el YAML; 2 si no es lista) -- la cáscara con red.
+- `tools/lib/corpus.ts` -- `SesionDeSembrado` admite la rama `{claseDeCita:'atribuida', momento?, resultado}`; `SesionRegistrada` con `claseDeCita?` y `clase`/`propuesto` opcionales; `ResultadoDeLaSesion` con `atribuidasPublicadas?`; `claseDeCitaDeLaSesion(s)` (sin campo → `siempre`) -- la sesión dice su clase.
+- `tools/objetivo.ts` -- `--clase-de-cita atribuida` solo con `--registrar` -- registra sin la política.
+- `.gitignore` -- `semillas/`.
+- `tests/unit/siembra-atribuida.test.ts` (nuevo) -- la matriz: puras (`problemasDeLaSemilla`, `frasesDeLaPagina`, `proponerAtribuidas` con semilla y mínimo por parámetro sobre un corpus temporal, incluidos todos los rechazos, lote todo rechazado sin escribir y que `aprobar` con la puerta abierta por parámetro publica lo propuesto); por proceso con el árbol (lista vacía → 1 sin petición registrada; forma → 2); por proceso en una copia del proyecto (`tools/`, `src/`, `public/CNAME`, `package.json`, `tsconfig.json`, `enlazarDependencias`) con la lista llena y el doble de red: una petición, JSON escrito, repetir → 1 sin segunda petición.
+- `tests/unit/objetivo-cli.test.ts` -- casos de `--clase-de-cita` (registra, repetida → 1, formas → 2, entradas viejas sin campo se leen `siempre`).
+- `AGENTS.md` -- la sección nueva: la semilla de prueba y su lista, la versión en español que circula con su origen —o, desde la enmienda del 2026-11-14, la traducción del sitio con `origen: traduccion-propia`—, la puerta de calidad, que aprobar es de una persona, que la escala espera a la pregunta 18, y el registro con su clase.
+
+**Acceptance Criteria:**
+- Given el árbol, when `npm run atribuida -- semilla <x>` o `-- proponer <lote>`, then sale con 1 nombrando `SEMILLA_DE_ATRIBUIDAS` y la pregunta 18, sin petición de red ni escritura.
+- Given una candidata que pasa con la puerta abierta por parámetro, when `aprobar` la publica, then sale de `corpus/_revision/` a `corpus/citas/` como atribuida (lo propuesto es aprobable tal cual).
+- Given la historia cerrada, when se mira el árbol, then `SEMILLA_DE_ATRIBUIDAS` está vacía, `corpus/` no tiene ningún cambio y `semillas/` está ignorado.
+
+## Spec Change Log
+
+### 2026-11-14 — FR-68 enmendado por Héctor: la traducción propia en la atribuida
+
+Decisión de Héctor en el chat: «lets just translate the text as the best as we can». Para la clase
+atribuida, cuando no circula ninguna versión en español, el texto es la traducción del sitio, lo más fiel
+posible, con `origen: traduccion-propia`. El «Never: traducir» de arriba queda enmendado solo para eso; la
+clase de siempre nunca se traduce (§4.11). `proponer` sigue rechazando la entrada sin `texto` (el español
+lo escribe alguien) y aprobar sigue siendo de una persona. La Página de Cita lo dice en una línea propia
+(supuesto de redacción, diferido a `bmad-ux`), así que `origen` pasa de `CAMPOS_QUE_NO_FECHAN` a
+`CAMPOS_QUE_PINTA` de la Página de Cita. La Variante no admite ese origen. PRD, espina y SPEC quedan
+pendientes de volver a pasar sus skills (diferido).
+
+## Review Triage Log
+
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+(Las capas de revisión son externas y esta pasada no trae hallazgos: las corre el orquestador después.)
+
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 20: (high 0, medium 7, low 13)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 22: (high 0, medium 1, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` La guardia de `corpus/` de `semilla` comparaba con `startsWith('..')`: `corpus/..semilla.json` se escribía dentro. Ahora juzga segmento a segmento (`dentroDe`), sin distinguir mayúsculas en darwin/win32.
+  - `[medium]` `[patch]` `semilla` resolvía `corpus/` y `semillas/` contra el directorio de trabajo: ahora contra la raíz del proyecto (la de la orden, `import.meta.url`).
+  - `[medium]` `[patch]` `--salida` admitía cualquier `.json` del repositorio fuera de `corpus/` (versionable): dentro del repositorio solo se admite bajo `semillas/`, que git ignora.
+  - `[medium]` `[patch]` Una entidad numérica fuera de Unicode (`&#x110000;`) hacía lanzar `String.fromCodePoint` tras la única petición: se deja tal cual.
+  - `[medium]` `[patch]` Los campos desconocidos del lote se descartaban en silencio (una errata, un `slug` o un `aptaParaPortada` tecleados): ahora se rechazan nombrándolos; `aptaParaPortada` ya no pasa del lote a la candidata.
+  - `[medium]` `[patch]` Si una escritura de `proponer` fallaba a medias, quedaban candidatas sin parte y la excepción escapaba: se quitan las de la pasada y sale con 1 nombrando el fallo.
+  - `[medium]` `[patch]` Pruebas de la ocupación del slug (verification-gap): una candidata de `_revision/` con el mismo arranque, una entrada anterior del lote y un slug del registro con la otra clase dan `-3`/`-4`, y el fichero de revisión sigue byte a byte.
+  - `[low]` `[patch]` `mkdir`/`writeFile` de `semilla` sin capturar (y el `EEXIST` del hueco entre comprobar y escribir): salen con 1 y su motivo.
+  - `[low]` `[patch]` La extensión `.json` se juzga sin distinguir mayúsculas.
+  - `[low]` `[patch]` `application/xhtml+xml` se admite como HTML.
+  - `[low]` `[patch]` `descargadaEl` es la jornada local (`fechaLocal`), como el registro de sesiones.
+  - `[low]` `[patch]` `textoDe` lee `&rsquo;`, `&lsquo;`, `&ldquo;`, `&rdquo;`, `&mdash;`, `&ndash;`, `&hellip;`.
+  - `[low]` `[patch]` La página de la semilla: solo `brainyquote.com` o `www.`, como dice el Design Notes, y sin puerto, consulta ni fragmento.
+  - `[low]` `[patch]` La clase de la candidata se deriva con `claseQueCorresponde` también con Personaje, en vez de escribirse fija.
+  - `[low]` `[patch]` Una entrada rechazada ya no cuenta como «anterior del lote»: no bloquea su corrección más abajo.
+  - `[low]` `[patch]` Con escritura parcial, el parte dice que el lote corregido lleva solo las rechazadas; la cabecera de `tools/atribuida.ts` ya no afirma que con 1 no se escribe nada.
+  - `[low]` `[patch]` `temas` que no es una lista se rechaza en vez de perderse.
+  - `[low]` `[patch]` `--ayuda` junto a `--clase-de-cita` muestra la ayuda y sale con 0 (las formas de `--clase-de-cita` siguen saliendo con 2); fuera la línea en blanco sobrante.
+  - `[low]` `[patch]` «Una sola vez» por página: antes de pedir, `semilla` busca en `semillas/` un fichero con la misma `pagina`, sea cual sea su nombre.
+  - `[low]` `[patch]` La prueba por proceso de `proponer` con la lista vacía comprueba también la pregunta 18.
+
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 3, low 8)
+- defer: 2: (high 0, medium 1, low 1)
+- reject: 19: (high 0, medium 3, low 16)
+- addressed_findings:
+  - `[medium]` `[patch]` La traducción propia convivía con una Variante (la Página diría «no circula ninguna versión» y enseñaría una): `reglasDeLaAtribuida` rechaza el par, y con él `proponer` y `npm run atribuida -- variante`, que valida con `citaAdmisible`.
+  - `[medium]` `[patch]` El original inglés no quedaba en ninguna parte: nuevo campo `textoOriginal` (una línea), obligatorio con `origen: traduccion-propia` y rechazado con cualquier otro origen y en la de siempre; lo admite el lote, se escribe en la candidata, sobrevive a `aprobar`, no se pinta y va en `CAMPOS_QUE_NO_FECHAN.cita`.
+  - `[medium]` `[patch]` La línea «Traducción de Sabiduría de Bolsillo…» se indexaba igual en toda Cita traducida: lleva `data-pagefind-ignore`; la prueba de `dist/` busca sus palabras sin devolver la Cita, y su texto sí.
+  - `[low]` `[patch]` El `aviso` de la semilla decía que el español sale siempre de una versión que circula: dice las dos salidas y `textoOriginal`; la prueba por proceso mira `aviso` y `descargadaEl`.
+  - `[low]` `[patch]` `--salida` relativa se resolvía contra el directorio de trabajo: ahora contra la raíz del proyecto, como la de por omisión (prueba desde `tools/sub`).
+  - `[low]` `[patch]` Un `personaje` o `autor` del lote que no es una cadena se descartaba y la Cita quedaba del otro dueño: se rechaza nombrándolo.
+  - `[low]` `[patch]` Nada comprobaba que `origen` fecha la Página de Cita: prueba gemela de la de la Variante, y otra de que `textoOriginal` no fecha nada.
+  - `[low]` `[patch]` La prueba de la línea no comprobaba que va antes de la Fila de acciones ni fuera del índice: lo comprueba, y que el original no se pinta.
+  - `[low]` `[patch]` La salida `--json` de la sesión atribuida no se probaba: prueba de `sesion.claseDeCita` y `sesion.resultado`.
+  - `[low]` `[patch]` Ninguna prueba aprobaba una `traduccion-propia`: se aprueba con la puerta abierta por parámetro y se publica con su origen y su `textoOriginal`.
+  - `[low]` `[patch]` El Tasks de AGENTS.md decía «(el sitio no traduce)»: dice la enmienda (la intent-contract no se toca; la enmienda vive en el Spec Change Log).
+
+## Design Notes
+
+- **La lista lleva la página.** Cada entrada es `{slug, pagina}`: la dirección de BrainyQuote la declara Héctor con el slug, en vez de adivinarla por el nombre; la orden solo admite `https://` de `brainyquote.com` (o `www.`). El slug tiene que ser, al proponer, un Personaje de `corpus/personajes/` o un Autor de `corpus/autores/` (lo dan de alta sus órdenes; `proponer` no crea ninguno), y todo Personaje y Autor que declare una candidata tiene que estar en la lista.
+- **Ninguna atestiguación que cuente** rechaza siempre: cualquier valor de `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` es un entero positivo, así que cero dominios no pasaría con ninguno; no es inventar un mínimo.
+- **Sin versión en español** = la entrada sin `texto`. El lote no lleva la frase inglesa; la semilla solo sirve de lista de trabajo. Desde la enmienda del 2026-11-14, sin versión que circule el `texto` es la traducción del sitio con `origen: traduccion-propia`; sin `texto` sigue rechazada.
+- **La sesión atribuida no lleva la política**: sin `clase`, `propuesto` ni `hueco`. Su `resultado` es `{citasPublicadas (las dos clases, como siempre), atribuidasPublicadas}`.
+
+## Verification
+
+**Commands:**
+- `npx vitest run tests/unit/siembra-atribuida.test.ts` -- expected: verde.
+- `npx vitest run tests/unit/atribuidas.test.ts tests/unit/atribuida-cli.test.ts tests/unit/objetivo-cli.test.ts tests/unit/objetivo.test.ts` -- expected: verde (sin regresión del extraído).
+- `npx astro check` -- expected: 0 errores.
+- `npm test` (desatendido con correr.sh) -- expected: verde.
+- `git status --short corpus/` -- expected: vacío.
+
+## Auto Run Result
+
+Status: done
+Blocking condition: ninguna
+
+**Qué se hizo.** La siembra acotada de la Cita atribuida, construida y sin sembrar nada: la lista
+`SEMILLA_DE_ATRIBUIDAS` (vacía) en `src/lib/umbrales.ts`; `npm run atribuida -- semilla <slug>` (la
+cáscara pide una vez la página declarada y escribe la lista en inglés en `semillas/`, ignorado) y
+`-- proponer <lote.yaml>` (juzga y escribe solo en `corpus/_revision/`); y
+`npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida`.
+
+**Ficheros.**
+- `src/lib/umbrales.ts` — `EntradaDeSemilla` y `SEMILLA_DE_ATRIBUIDAS = []`.
+- `tools/lib/siembraAtribuida.ts` (nuevo) — lista de la semilla, lector de la página, propuesta y parte; sin red.
+- `tools/lib/atribuidas.ts` — `fallosDeDuplicados` extraída de `fallosDeAtribuidas`, sin cambio de comportamiento.
+- `tools/atribuida.ts` — subórdenes `semilla` (la única con `fetch`) y `proponer`.
+- `tools/lib/corpus.ts` — sesión `SesionDeSembradoAtribuida`, `claseDeCita` y `claseDeCitaDeLaSesion`.
+- `tools/objetivo.ts` — `--clase-de-cita atribuida` con `--registrar` (2 por la forma).
+- `.gitignore` — `semillas/`.
+- `tests/unit/siembra-atribuida.test.ts` (nuevo), `tests/unit/objetivo-cli.test.ts` — la matriz.
+- `tests/unit/andamiaje.test.ts` — `tools/atribuida.ts` entra como décima excepción de AD-22, con su motivo (la historia la exige).
+- `AGENTS.md` — «Una sesión de sembrado de la Cita atribuida».
+
+**Desviaciones del plan, menores.** El lote admite además `año` y `referencia`, porque el esquema exige
+Procedencia (obra, año o referencia) a toda Cita; el duplicado dentro del lote se juzga solo contra las
+entradas anteriores (la primera pasa, la repetida se nombra).
+
+**Revisión.** Sin hallazgos en esta pasada (capas externas): 0 parches, 0 diferidos, 0 rechazados.
+`followup_review_recommended: false` (puntuación 0).
+
+**Verificación.** `npx vitest run tests/unit/siembra-atribuida.test.ts` 47/47;
+`tests/unit/objetivo-cli.test.ts` 50/50; `clase`, `atribuidas`, `atribuida-cli`, `objetivo` en verde;
+`npx astro check` 0 errores; `npm test` completo: 8483/8485, los dos fallos eran de
+`tests/unit/andamiaje.test.ts` (la excepción AD-22 de la cáscara nueva), corregidos y vueltos a correr
+en verde (89/89 con la prueba de la siembra). `corpus/` sin cambios.
+
+**Riesgos.** El lector de BrainyQuote es un supuesto sin contrastar (diferido). `dist/` no se ha
+reconstruido para compararlo: el único cambio de `src/` es una constante que ninguna página importa.
+
+### Pasada de revisión 1 (capas externas, 2026-11-14)
+
+**Qué se cambió.** Veinte parches, ninguno de la intent-contract: `semilla` juzga sus rutas contra la raíz
+del proyecto y segmento a segmento (`corpus/..x.json` ya no entra en `corpus/`), dentro del repositorio
+solo escribe bajo `semillas/`, no vuelve a pedir una página que `semillas/` ya guarda con otro nombre,
+captura los fallos de escritura, admite `.JSON` y `application/xhtml+xml`, fecha con la jornada local y
+solo acepta `brainyquote.com`/`www.` sin puerto, consulta ni fragmento; el lector no rompe con una
+entidad fuera de Unicode y lee las tipográficas; `proponer` rechaza los campos que no son del lote
+(`aptaParaPortada` incluido), y los `temas` que no son lista, deriva la clase también con Personaje, no
+deja que una rechazada bloquee su corrección, deshace la pasada si una escritura falla y orienta tras una
+escritura parcial; `objetivo.ts --ayuda` gana a `--clase-de-cita`.
+
+**Ficheros.**
+- `tools/atribuida.ts` — guardias de ruta (`dentroDe`, raíz del proyecto, solo `semillas/`), «una sola vez» por página, escritura capturada, cabecera de códigos.
+- `tools/lib/siembraAtribuida.ts` — página de la semilla estricta, entidades, campos del lote, clase derivada, lote sin bloqueo por rechazadas, vuelta atrás, parte.
+- `tools/objetivo.ts` — `--ayuda` gana; fuera la línea en blanco.
+- `tests/unit/siembra-atribuida.test.ts` — páginas, entidades, campos ajenos, `temas`, rechazada corregida, ocupación de slug (`-3`/`-4`, revisión intacta), rutas de `--salida`, otra salida y otro cwd, pregunta 18 por proceso.
+- `tests/unit/objetivo-cli.test.ts` — `--ayuda` con `--clase-de-cita`.
+
+**Hallazgos.** 20 parches (7 medios, 13 bajos), 2 diferidos (términos de BrainyQuote; espejos sin
+declarar, de la 35.1b), 22 rechazados (lector bajo `[ASSUMPTION]` ya diferido —título con comillas,
+anclas seguidas, paginación—, tope de tamaño del cuerpo, colisión de Fichas dentro del lote —la
+aprobación las resuelve—, `temas: []` de la matriz frente a la convención de omitir de AGENTS.md, el 2
+del lote mal formado antes que la semilla —es la forma—, el reintento de la misma jornada y resultado
+—es la matriz—, el acoplamiento con `auditar` —`salud.ts` cuenta las atribuidas aparte—, la lectura sin
+captura de `leerCitas` y la validación de `analizarRegistro` —anteriores—, lectores de la cadencia —el
+único es `objetivo.ts`—, el idioma del texto y la semilla estricta —Design Notes—, `dist/` sin prueba
+propia y el slug de la semilla sin cotejar con el Corpus antes de pedir).
+
+**Revisión de seguimiento recomendada: sí.** Parches de esta pasada: 0 altos, 7 medios, 13 bajos;
+puntuación 3×7 + 13 = 34 (≥ 5).
+
+**Verificación.** `npx vitest run tests/unit/siembra-atribuida.test.ts` 54/54;
+`atribuidas`, `atribuida-cli`, `objetivo-cli`, `objetivo` y `andamiaje` 214/214; `npx astro check`
+0 errores; `npm test` completo, desatendido: 195 ficheros, 8494/8494 en verde; `git status --short corpus/`
+vacío.
+
+**Riesgos.** El lector de BrainyQuote sigue sin contrastar (diferido). «Una sola vez» se protege con lo
+que hay en `semillas/`: borrar el fichero, o escribir fuera del repositorio con `--salida`, permite
+volver a pedir la página.
+
+### Enmienda de Héctor, 2026-11-14: la traducción propia
+
+`traduccion-propia` entra en `ORIGENES` (`src/lib/admision.ts`; la constante, `ORIGEN_TRADUCCION_PROPIA`
+de `src/lib/clase.ts`), no en `ORIGENES_DE_VARIANTE`. `aplanarCita` la hace viajar como
+`traduccionPropia: true` y `TraduccionPropia.astro` la dice en la Página de Cita con
+`lineaDeTraduccionPropia`; `origen` pasa a `CAMPOS_QUE_PINTA.cita.cita`. `MOTIVO_SIN_ESPAÑOL`, el parte de
+`semilla` y AGENTS.md («Una sesión de sembrado de la Cita atribuida») dicen ya las dos salidas: la versión
+que circula o la traducción propia. `src/lib/vocabulario.ts` no se toca. Con el Corpus real (sin
+atribuidas) `dist/` es idéntico al de la base 7b6a041031.
+
+### Pasada de revisión 2 (capas externas, 2026-11-14) — la última
+
+**Qué se cambió.** La traducción propia queda honesta y coherente con la enmienda de Héctor: guarda la
+frase que se tradujo (`textoOriginal`, obligatoria con `origen: traduccion-propia` y rechazada con
+cualquier otro origen y en la de siempre; una línea, no se pinta ni fecha), no convive con una Variante
+(el esquema rechaza el par, y con él `proponer` y `npm run atribuida -- variante`), su línea en la Página
+de Cita sale del índice de Pagefind, y el `aviso` de la semilla dice las dos salidas. Además `--salida`
+relativa se lee contra la raíz del proyecto, y un `personaje`/`autor` del lote que no es cadena se
+rechaza en vez de descartarse.
+
+**Ficheros.**
+- `src/lib/admision.ts` — `textoOriginal` y las dos reglas de la traducción propia en `reglasDeLaAtribuida`; prohibido en la de siempre.
+- `src/content.config.ts` — `textoOriginal` en la colección `citas`.
+- `src/components/TraduccionPropia.astro` — `data-pagefind-ignore`.
+- `tools/lib/cambios.ts` — `textoOriginal` en `CAMPOS_QUE_NO_FECHAN.cita`.
+- `tools/lib/siembraAtribuida.ts` — `aviso`, `MOTIVO_SIN_ESPAÑOL`, `textoOriginal` en el lote, dueños que no son cadena.
+- `tools/atribuida.ts` — `--salida` contra la raíz del proyecto; parte de `semilla`.
+- `AGENTS.md` — `textoOriginal`, sin Variante, fuera de Pagefind.
+- Pruebas: `variante.test.ts`, `atribuida-cli.test.ts`, `siembra-atribuida.test.ts`, `variante-build.test.ts`, `fecha-de-cambio.test.ts`, `objetivo-cli.test.ts`, `atribuidas.test.ts`.
+
+**Hallazgos.** 11 parches (3 medios, 8 bajos), 2 diferidos (cambiar el `origen` del principal cuando
+aparezca una versión que circule; la segunda sesión atribuida de la misma jornada), 19 rechazados
+(probar que no circula ninguna versión —la enmienda confía en quien compone y en quien aprueba—, las
+demás superficies que no dicen la traducción —ya diferido a `bmad-ux`—, duplicados por el inglés,
+enlaces simbólicos, `--corpus` relativo al directorio de trabajo —la convención de toda orden—, `origen`
+que fecha aunque solo cambie entre orígenes que no se pintan —el comparador es por campo y fechar de más
+es el lado seguro—, `dist/` sin prueba propia, la redacción provisional sin puerta, el mensaje de
+`--clase-de-cita --registrar`, el registro de páginas fuera del repositorio, el slug sin cotejar antes de
+pedir, el ancla de cita sin texto —el lector sigue bajo `[ASSUMPTION]` diferido—, la sobrescritura en
+`_revision/` y la vuelta atrás con `allSettled`, la semilla que no entra en `proponer` —la lectura R2 es
+defendible—, la circulación que la orden no puede observar, y PRD/espina/SPEC y espejos, ya diferidos).
+
+**Revisión de seguimiento recomendada: no** por regla del bucle (esta es la última ronda permitida). La
+cuenta del flujo daría sí: parches 0 altos, 3 medios, 8 bajos; puntuación 3×3 + 8 = 17 (≥ 5).
+
+**Verificación.** `variante`, `atribuida-cli`, `siembra-atribuida`, `objetivo-cli`, `fecha-de-cambio`,
+`atribuidas`, `variante-build` y `clase` en verde por fichero; `npx astro check` 0 errores; `npm test`
+completo, desatendido: 195 ficheros, 8522/8522 en verde; `corpus/` sin cambios.
+
+**Riesgos.** El lector de BrainyQuote sigue sin contrastar (diferido). Ninguna orden pasa una
+traducción propia a una versión que circule (diferido). `textoOriginal` se exige solo a la traducción
+propia: los demás orígenes no guardan su original.

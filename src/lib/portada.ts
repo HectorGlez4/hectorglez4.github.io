@@ -26,6 +26,7 @@
  */
 
 import { esJornada } from './citaDelDia.ts';
+import { esAtribuida } from './clase.ts';
 
 /**
  * Las fijaciones que el sitio puede usar, sacadas del JSON tal cual se importó.
@@ -49,4 +50,25 @@ export function fijacionesDeclaradas(bruto: unknown): Record<string, string> {
     if (esJornada(jornada) && typeof cita === 'string') fijaciones[jornada] = cita;
   }
   return fijaciones;
+}
+
+/**
+ * Las fijaciones sin las que apuntan a una Cita atribuida — Historia 35.7, pregunta 22.
+ *
+ * Una atribuida no sale en portada: la orden no la deja fijar, y si una fijación escrita a mano
+ * la nombra, el sitio la descarta aquí, como descarta lo que no entiende. `/lote` no la descarta:
+ * la enseña muda, que es para lo que existe.
+ */
+export function fijacionesSinAtribuidas(
+  fijaciones: Readonly<Record<string, string>> | undefined,
+  citas: readonly { slug: string; clase?: unknown }[],
+): Record<string, string> {
+  // Un fichero sin la clave `fijaciones` es una forma que la orden admite: no hay nada que fijar.
+  if (typeof fijaciones !== 'object' || fijaciones === null) return {};
+  const atribuidas = new Set(citas.filter((c) => esAtribuida(c)).map((c) => c.slug));
+  const quedan: Record<string, string> = {};
+  for (const [jornada, cita] of Object.entries(fijaciones)) {
+    if (!atribuidas.has(cita)) quedan[jornada] = cita;
+  }
+  return quedan;
 }

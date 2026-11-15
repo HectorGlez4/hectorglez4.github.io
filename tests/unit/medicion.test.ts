@@ -37,6 +37,7 @@ import {
   MAX_BYTES_DE_GUION,
   MAX_BYTES_GUION_DE_MEDICION,
   MAX_CARACTERES_IMAGEN,
+  MIN_CITAS_POR_PERSONAJE,
   MIN_MS_VISIBLES_PARA_LA_LECTURA,
   PAUSA_DE_LOS_SELECTORES_MS,
   PAUSA_DE_TECLEO_MS,
@@ -108,6 +109,8 @@ import {
   TEMA_VALIDO,
   citaValida,
   coleccionValida,
+  ATESTIGUADA,
+  conLaPuertaAbierta,
   construirConCorpus,
   limpiar,
   paginaConstruida,
@@ -1988,6 +1991,28 @@ const TEXTO_LARGO =
   'nuestro, y esa sola posesión, fugaz y resbaladiza, nos la arrebata cualquiera que ' +
   'quiere, sin que nos demos cuenta de lo que hemos perdido hasta que ya no queda nada.';
 const SLUG_LARGO = 'seneca-frase-larga';
+/** Historia 35.3 — la Cita que dice un Personaje, y su página. */
+const SLUG_DE_PERSONAJE = 'seneca-a-batman-le-dice';
+const TEXTO_DE_PERSONAJE = 'La noche del catálogo de prueba es más oscura antes del alba.';
+const PERSONAJE = '/personaje/batman/';
+/** Historia 35.3b — las demás Citas de Batman, hasta `MIN_CITAS_POR_PERSONAJE`. */
+const SLUGS_DE_BATMAN = Array.from({ length: MIN_CITAS_POR_PERSONAJE - 1 }, (_, i) => `seneca-a-batman-otra-${i + 1}`);
+const TEXTOS_DE_BATMAN = [
+  'Un murciélago vigila el campanario mientras la ciudad duerme tranquila.',
+  'Quien guarda silencio en el tejado conoce el precio de cada promesa rota.',
+  'La capa negra pesa menos que el recuerdo de aquella calle sin farolas.',
+].slice(0, SLUGS_DE_BATMAN.length);
+if (TEXTOS_DE_BATMAN.length < SLUGS_DE_BATMAN.length) {
+  throw new Error(`MIN_CITAS_POR_PERSONAJE (${MIN_CITAS_POR_PERSONAJE}) pide más textos de Batman que los de la prueba`);
+}
+/**
+ * Historia 35.4 — una Cita de Batman sin Autor, de su Obra «La noche del murciélago» (ficha de
+ * Personaje), en el Tema: su slug la deja en la página 1 del listado, a tres saltos de la portada.
+ * Da a la Página de Cita de un Personaje su «Más de Batman» y a la Obra de un Personaje su Cabecera.
+ */
+const SLUG_SIN_AUTOR = 'batman-sin-autor-en-la-noche';
+const TEXTO_SIN_AUTOR = 'Ningún tejado de la prueba guarda tantos secretos como el campanario.';
+const OBRA_DE_BATMAN = '/obra/batman/la-noche-del-murcielago/';
 const CORPUS_MEDIDO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
   'temas/el-tiempo.yml': TEMA_VALIDO,
@@ -2026,12 +2051,73 @@ const CORPUS_MEDIDO: Record<string, string> = {
       }),
     ]),
   ),
+  /*
+   * Historia 35.3 — un Personaje con su página: una atribuida de Séneca que dice Batman, del Tema
+   * —su slug ordena delante, en la página 1 del listado, a tres saltos de la portada— y de
+   * «Cartas a Lucilio», que sigue indexable (3 de 55) y da a la página su Lista de Obras.
+   */
+  'personajes/batman.yml': 'nombre: "Batman"\nuniverso: "DC Comics"\nordenAlfabetico: "Batman"\n',
+  'obras/batman--la-noche-del-murcielago.yml':
+    'personaje: "batman"\npersonajes:\n  - "batman"\ntitulo: "La noche del murciélago"\nformas:\n  - "la noche del murcielago"\n',
+  [`citas/batman--sin-autor-en-la-noche.md`]: citaValida({
+    texto: TEXTO_SIN_AUTOR,
+    slug: SLUG_SIN_AUTOR,
+    autor: undefined,
+    personaje: 'batman',
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    ...ATESTIGUADA,
+    procedencia: { obra: 'La noche del murciélago', año: 2000 },
+    fuente: undefined,
+  }),
+  [`citas/${SLUG_DE_PERSONAJE}.md`]: citaValida({
+    texto: TEXTO_DE_PERSONAJE,
+    slug: SLUG_DE_PERSONAJE,
+    personaje: 'batman',
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    ...ATESTIGUADA,
+    procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+    fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+  }),
+  /*
+   * Historia 35.3b — las que le faltan a Batman para `MIN_CITAS_POR_PERSONAJE`, así su página 1
+   * se indexa y emite su vista: fuera del Tema y de la Colección, para no tocar sus listados, y con
+   * un slug que las deja en la página 1 del Autor. «Cartas a Lucilio» sigue indexable.
+   */
+  ...Object.fromEntries(
+    SLUGS_DE_BATMAN.map((slug, i) => [
+      `citas/${slug}.md`,
+      citaValida({
+        texto: TEXTOS_DE_BATMAN[i],
+        slug,
+        temas: [],
+        personaje: 'batman',
+        clase: 'atribuida',
+        estadoDerechos: undefined,
+        ...ATESTIGUADA,
+        procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+      }),
+    ]),
+  ),
 };
-const SLUGS_DE_CITA = [...SLUGS, SLUG_LARGO, 'seneca-carta-0', 'seneca-carta-1'];
+const SLUGS_DE_CITA = [
+  ...SLUGS,
+  SLUG_LARGO,
+  'seneca-carta-0',
+  'seneca-carta-1',
+  SLUG_DE_PERSONAJE,
+  ...SLUGS_DE_BATMAN,
+  SLUG_SIN_AUTOR,
+];
 const TEXTOS_DE_CITA = [
   ...SLUGS.map((_, i) => `Frase número ${i} del catálogo de prueba.`),
   TEXTO_LARGO,
   ...[0, 1].map((i) => `Carta número ${i} del catálogo de prueba.`),
+  TEXTO_DE_PERSONAJE,
+  ...TEXTOS_DE_BATMAN,
+  TEXTO_SIN_AUTOR,
 ];
 
 /** Construye una vez por entorno y apunta el proyecto para limpiarlo, falle o no. */
@@ -2041,7 +2127,7 @@ function construccionUnica(
 ): () => Promise<string> {
   let construccion: Promise<string> | undefined;
   return () => {
-    construccion ??= construirConCorpus(CORPUS_MEDIDO, { entorno, conBusqueda }).then(
+    construccion ??= construirConCorpus(CORPUS_MEDIDO, { entorno, conBusqueda, ficheros: conLaPuertaAbierta() }).then(
       (resultado) => {
         // Se apunta **antes** de afirmar: un build fallido también deja su proyecto temporal.
         aLimpiar.push(resultado.proyecto);
@@ -2086,7 +2172,7 @@ const cabezaDe = (html: string): string => html.slice(0, html.indexOf('</head>')
 const RUTA_DEL_FICHERO = rutaDelGuionDeMedicion(ENDPOINT);
 const CITA = `/cita/${SLUGS[0]}/`;
 const CITA_SIN_IMAGEN = `/cita/${SLUG_LARGO}/`;
-const PAGINAS_1 = ['/', '/autor/seneca/', '/tema/el-tiempo/', '/coleccion/frases-cortas/'];
+const PAGINAS_1 = ['/', '/autor/seneca/', '/tema/el-tiempo/', '/coleccion/frases-cortas/', PERSONAJE];
 const PAGINAS_2 = ['/autor/seneca/2/', '/tema/el-tiempo/2/', '/coleccion/frases-cortas/2/'];
 const SIN_VISTA = ['/buscar/', '/404', '/kit/', '/lote/'];
 const AJENAS = ['/kit/', '/lote/'];
@@ -2102,7 +2188,7 @@ describe('Historia 20.1 y 23.1 — las vistas salen de la declaración, al `data
   // La lista de rutas indexables que FR-52 da para este corpus; sin ella `consecuenciasDe` no
   // sabe qué es una Obra. Que el build decidió lo mismo lo dice la propia comparación.
   beforeEach(() => {
-    declararRutasIndexables([OBRA_INDEXABLE]);
+    declararRutasIndexables([OBRA_INDEXABLE, PERSONAJE]);
   });
   afterEach(() => {
     olvidarRutasIndexables();
@@ -2164,7 +2250,7 @@ const llevaNoindex = (html: string): boolean => marcasDePagina(html).noindex;
 
 describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
   beforeEach(() => {
-    declararRutasIndexables([OBRA_INDEXABLE]);
+    declararRutasIndexables([OBRA_INDEXABLE, PERSONAJE]);
   });
   afterEach(() => {
     olvidarRutasIndexables();
@@ -2241,7 +2327,7 @@ describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
 
 describe('Historia 23.1 — con punto final, la medición es un fichero', () => {
   beforeEach(() => {
-    declararRutasIndexables([OBRA_INDEXABLE]);
+    declararRutasIndexables([OBRA_INDEXABLE, PERSONAJE]);
   });
   afterEach(() => {
     olvidarRutasIndexables();
@@ -2308,6 +2394,7 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
     const malEscrito = 'medicion.ejemplo.workers.dev/e';
     const { codigo, salida } = await construirConCorpus(CORPUS_MEDIDO, {
       entorno: { MEDICION_ENDPOINT: malEscrito },
+      ficheros: conLaPuertaAbierta(),
       conservar: false,
     });
     expect(codigo, salida).not.toBe(0);
@@ -2515,11 +2602,12 @@ describe('Historia 23.1 — la Página de Cita no pierde su listón', () => {
     const proyecto = await sitioMedido();
     const paginas = paginasDe(proyecto);
     const barrido = superficiesDelBarrido([...paginas.keys()]);
-    // Portada, Cita, Autor, Tema, Colección, Obra, los dos Directorios (26.3, 26.4), búsqueda y
-    // 404: una por familia pública.
-    expect(barrido).toHaveLength(10);
+    // Portada, Cita, Autor, Tema, Colección, Obra, los dos Directorios (26.3, 26.4), el Personaje
+    // (35.3), búsqueda y 404: una por familia pública.
+    expect(barrido).toHaveLength(11);
     expect(barrido).toContain('/autores');
     expect(barrido).toContain('/obras');
+    expect(barrido).toContain('/personaje/batman');
     const muestra = [...barrido, CITA_SIN_IMAGEN];
 
     const huecos: string[] = [];
@@ -2592,6 +2680,9 @@ describe('Historia 23.1 — ningún guion en línea lleva contenido', () => {
     const contenido = [
       ...SLUGS_DE_CITA,
       ...TEXTOS_DE_CITA,
+      // Historia 35.4 — el nombre del Personaje y su Obra van en `data-*`, nunca en un guion.
+      'Batman',
+      'La noche del murciélago',
       'Séneca',
       'Sobre la brevedad de la vida',
       'Cartas a Lucilio',
@@ -3284,6 +3375,24 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ['/coleccion/frases-cortas/', /^\/coleccion\/frases-cortas\/2\/?$/, [{ zona: 'paginacion' }]],
     ['/coleccion/frases-cortas/2/', /^\/cita\//, [{ zona: 'listado' }]],
     ['/coleccion/frases-cortas/2/', /^\/coleccion\/frases-cortas\/?$/, [{ zona: 'paginacion' }]],
+    // Historia 35.3 — la Atribución de la Cita que dice un Personaje lo enlaza a él, y su página
+    // lista sus Obras y sus Citas. Historia 35.4 — y su pie, «Más de Batman», con su cierre a su
+    // página; el Autor va en la línea de Obra de la Atribución.
+    [`/cita/${SLUG_DE_PERSONAJE}/`, PERSONAJE, [{ zona: 'atribucion' }, { zona: 'rutas-de-salida' }]],
+    [`/cita/${SLUG_DE_PERSONAJE}/`, '/autor/seneca/', [{ zona: 'atribucion' }]],
+    [`/cita/${SLUG_DE_PERSONAJE}/`, `/cita/${SLUG_SIN_AUTOR}/`, [{ zona: 'rutas-de-salida' }]],
+    [`/cita/${SLUG_SIN_AUTOR}/`, PERSONAJE, [{ zona: 'atribucion' }, { zona: 'rutas-de-salida' }]],
+    [`/cita/${SLUG_SIN_AUTOR}/`, OBRA_DE_BATMAN, [{ zona: 'atribucion' }]],
+    [`/cita/${SLUG_SIN_AUTOR}/`, /^\/cita\//, [{ zona: 'rutas-de-salida' }]],
+    // Historia 35.4 — la Cabecera de la Obra de un Personaje, por la zona de la Atribución.
+    [OBRA_DE_BATMAN, PERSONAJE, [{ zona: 'atribucion' }]],
+    [OBRA_DE_BATMAN, /^\/cita\//, [{ zona: 'listado' }]],
+    [PERSONAJE, /^\/obra\//, [{ zona: 'lista-de-obras' }]],
+    [PERSONAJE, /^\/cita\//, [{ zona: 'listado' }]],
+    // Historia 35.5 — la sección «Personajes» de los Directorios enlaza a Batman y a su Obra con
+    // `directorio`, una zona de la Épica 26 que esta tabla no compara (`esDeOtraEpica`): la fija
+    // `tests/unit/personajes-en-los-directorios.test.ts`, y aquí, la prueba de que todo enlace de
+    // `main` tiene zona.
     [OBRA_INDEXABLE, '/autor/seneca/', [{ zona: 'atribucion' }]],
     [OBRA_INDEXABLE, /^\/cita\//, [{ zona: 'listado' }]],
     [OBRAS[1], '/autor/seneca/', [{ zona: 'atribucion' }]],
@@ -6008,6 +6117,71 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(escritas(entorno).at(-1)).toEqual(['replaceState', `/buscar/?autor=jose-marti&obra=${MAESTROS}`]);
         expect(entorno.longitud()).toBe(3);
         expect(plano(entorno.estadoDelHistorial())).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { autor: 'jose-marti', obra: MAESTROS } });
+      }, 240_000);
+    });
+    describe('Historia 35.5 — el Personaje se elige en el grupo «Personajes» del selector de Autor', () => {
+      const PERSONAJE_ = FILTROS_DE_CITA.personaje;
+      const OBRA = FILTROS_DE_CITA.obra;
+      const ORDEN = { [ORDEN_DE_CITA]: 'asc' };
+      const CABALLERO = 'batman--el-caballero';
+      const CON_BATMAN: OpcionesDeLaIsla = {
+        personajes: [{ valor: 'batman', rotulo: 'Batman' }],
+        mapa: {
+          'jose-marti': [['jose-marti--cartas', 'Cartas']],
+          'personaje:batman': [[CABALLERO, 'El caballero']],
+        },
+        recuentosDeObra: { 'jose-marti--cartas': 1, [CABALLERO]: 2 },
+      };
+      type Entorno = Awaited<ReturnType<typeof isla>>;
+      const escritas = (entorno: Entorno) => entorno.direcciones().map((d) => [d.metodo, d.direccion]);
+      const busquedas = (entorno: Entorno) => entorno.llamadas().filter((l) => l[0] === 'search');
+      const elegirYEsperar = async (entorno: Entorno, cual: 'autor' | 'obra' | 'tema', valor: string) => {
+        entorno.elegir(cual, valor);
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.vaciar();
+      };
+
+      it('elegirlo: `?personaje=`, el filtro `personaje`, su Obra del mapa, y se asienta como un Autor', async () => {
+        const entorno = await isla(CON_BATMAN);
+        await elegirYEsperar(entorno, 'autor', 'batman');
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?personaje=batman']]);
+        expect(plano(entorno.estadoDelHistorial())).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { personaje: 'batman' } });
+        expect(busquedas(entorno)).toEqual([['search', null, { filters: { [PERSONAJE_]: 'batman' }, sort: ORDEN }]]);
+        expect(entorno.region().texto).toBe('4 citas de Batman.');
+        // El selector de Obra sale de la lista del Personaje en el mapa.
+        expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: [{ valor: '' }, { valor: CABALLERO, rotulo: 'El caballero (2 citas)' }] });
+        await elegirYEsperar(entorno, 'obra', CABALLERO);
+        expect(escritas(entorno).at(-1)).toEqual(['pushState', `/buscar/?personaje=batman&obra=${CABALLERO}`]);
+        expect(busquedas(entorno).at(-1)).toEqual(['search', null, { filters: { [PERSONAJE_]: 'batman', [OBRA]: CABALLERO }, sort: ORDEN }]);
+        expect(entorno.region().texto).toBe('2 citas de Batman en El caballero.');
+        entorno.pulsarResultado(0);
+        // La misma combinación que daría un Autor: el vocabulario no cambia.
+        expect(entorno.emitidos()).toEqual([[BUSQUEDA, '1-9', 'autor-obra']]);
+        expect(entorno.marcas()).toHaveLength(1);
+      }, 240_000);
+
+      it('llegar con `?obra=` sola de un Personaje: el dueño sale del mapa, con su tipo, y se reemplaza la entrada', async () => {
+        const entorno = await isla({ ...CON_BATMAN, busqueda: `?obra=${CABALLERO}` });
+        expect(entorno.elegidos()).toEqual({ autor: 'batman', tema: '' });
+        expect(entorno.obra().valor).toBe(CABALLERO);
+        expect(escritas(entorno)).toEqual([['replaceState', `/buscar/?personaje=batman&obra=${CABALLERO}`]]);
+        expect(busquedas(entorno).at(-1)).toEqual(['search', null, { filters: { [PERSONAJE_]: 'batman', [OBRA]: CABALLERO }, sort: ORDEN }]);
+      }, 240_000);
+
+      it('un `personaje` que no existe se descarta y se dice; con `autor` a la vez, también', async () => {
+        const nadie = await isla({ ...CON_BATMAN, busqueda: '?q=vida&personaje=nadie' });
+        expect(nadie.elegidos()).toEqual({ autor: '', tema: '' });
+        expect(escritas(nadie)).toEqual([['replaceState', '/buscar/?q=vida']]);
+        expect(nadie.region().texto).toMatch(/^Uno de los filtros de esta dirección no se puede usar, y la búsqueda va sin él\. /u);
+        const losDos = await isla({ ...CON_BATMAN, busqueda: '?autor=jose-marti&personaje=batman' });
+        expect(losDos.elegidos()).toEqual({ autor: 'jose-marti', tema: '' });
+        expect(escritas(losDos)).toEqual([['replaceState', '/buscar/?autor=jose-marti']]);
+      }, 240_000);
+
+      it('sin Personajes, ningún `optgroup` en el selector y la isla de siempre', async () => {
+        const entorno = await isla();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?autor=jose-marti']]);
       }, 240_000);
     });
     describe('Historia 27.5 — los resultados llegan de 30 en 30', () => {

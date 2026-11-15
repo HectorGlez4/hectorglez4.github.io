@@ -672,10 +672,12 @@ export function listaDeEpocaRegistrada(registrada: EpocaRegistrada): CandidatosD
  * avisa — deja una época terminada de más.
  */
 export function slugsSembrados(
-  autores: readonly { slug: string; tituloEnFuente?: string }[],
+  autores: readonly { slug: string; tituloEnFuente?: string; vivo?: unknown }[],
 ): Set<string> {
   const slugs = new Set<string>();
   for (const autor of autores) {
+    // Historia 35.7 — un Autor `vivo` solo tiene atribuidas: no siembra ninguna época (AD-1).
+    if (autor.vivo === true) continue;
     slugs.add(autor.slug);
     if (autor.tituloEnFuente !== undefined && autor.tituloEnFuente.trim() !== '') {
       slugs.add(slugDeAutor(autor.tituloEnFuente));
@@ -698,7 +700,7 @@ export function slugsSembrados(
  */
 export function epocasParaHuecos(
   versionadas: readonly EpocaRegistrada[],
-  autores: readonly { slug: string; tituloEnFuente?: string }[],
+  autores: readonly { slug: string; tituloEnFuente?: string; vivo?: unknown }[],
   descartes: readonly Descarte[],
 ): EpocaParaHuecos[] {
   const sembrados = slugsSembrados(autores);

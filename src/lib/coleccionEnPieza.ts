@@ -33,6 +33,11 @@ import {
 import type { Autor, Cita, ColeccionPublicada } from './publicado.ts';
 import { admiteImagen } from './tramos.ts';
 import { MAX_CARACTERES_IMAGEN } from './umbrales.ts';
+import { esAtribuida } from './clase.ts';
+
+/** Por qué una atribuida no entra en una Pieza — Historia 35.7, pregunta 27. */
+export const MOTIVO_DE_ATRIBUIDA_FUERA_DE_LA_PIEZA =
+  'es atribuida, y una atribuida no entra en una Pieza (pregunta 27): no se coteja';
 
 /** Una Cita de la Colección que no entra en su Pieza, con el motivo ya redactado. */
 export interface MiembroFuera {
@@ -87,6 +92,11 @@ export function seleccionDeColeccion(
   const aptas: { cita: Cita; enPieza: CitaEnPieza }[] = [];
 
   for (const cita of coleccion.citas) {
+    // Historia 35.7 — la atribuida no entra en ninguna Pieza (pregunta 27, FR-30 v9.1).
+    if (esAtribuida(cita)) {
+      fuera.push({ slug: cita.slug, motivo: MOTIVO_DE_ATRIBUIDA_FUERA_DE_LA_PIEZA });
+      continue;
+    }
     if (!admiteImagen(cita.texto)) {
       /*
        * La misma regla que le niega la Imagen de Cita, dicha con su nombre: por encima de
@@ -107,11 +117,26 @@ export function seleccionDeColeccion(
      * épica entera. Se mira que el Autor esté **y** que traiga nombre: un `.yml` con la clave
      * vacía compondría la Cita con un hueco donde va la firma.
      */
-    const autor = autores.get(cita.autor);
+    /*
+     * Historia 35.4 — la Pieza firma con el Autor (`citaEnPieza`), y una Cita que dice un
+     * Personaje se firma con él en todo lo que sale del sitio: anunciada aquí saldría atribuida
+     * solo al Autor, o sin firma. Se queda fuera con su motivo.
+     */
+    if (cita.personaje !== undefined) {
+      fuera.push({
+        slug: cita.slug,
+        motivo: `la dice un Personaje («${cita.personaje}»), y la Pieza solo firma con un Autor`,
+      });
+      continue;
+    }
+    const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
     if (autor === undefined) {
       fuera.push({
         slug: cita.slug,
-        motivo: `su Autor «${cita.autor}» no está en el corpus, así que aparecería sin atribución`,
+        motivo:
+          cita.autor === undefined
+            ? 'no declara Autor, así que aparecería sin atribución'
+            : `su Autor «${cita.autor}» no está en el corpus, así que aparecería sin atribución`,
       });
       continue;
     }

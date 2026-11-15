@@ -90,6 +90,34 @@ async function portadaDe(rutas: Rutas): Promise<Record<string, unknown>> {
 const fijacionesDe = async (rutas: Rutas) =>
   (await portadaDe(rutas)).fijaciones as Record<string, string>;
 
+describe('Historia 35.1b — una atribuida no se fija (pregunta 22)', () => {
+  it('se niega nombrando la Cita, aunque la marque apta a mano, y no escribe nada', async () => {
+    const rutas = await corpusDePrueba();
+    await writeFile(
+      join(rutas.citas, 'ana--atribuida.md'),
+      cita('ana-atribuida', true).replace('---\n', '---\nclase: "atribuida"\n'),
+      'utf8',
+    );
+    const resultado = await fijarJornadas(rutas, [{ jornada: MANANA, cita: 'ana-atribuida' }], HOY);
+    expect(resultado.ok).toBe(false);
+    expect(resultado.ok ? '' : resultado.motivos.join('\n')).toMatch(/«ana-atribuida» es atribuida.*pregunta 22/u);
+    expect(existsSync(rutas.portada)).toBe(false);
+  });
+
+  it('listar marca muda la fijación escrita a mano que nombra una atribuida, aunque esté marcada (35.7)', async () => {
+    const rutas = await corpusDePrueba({ fijaciones: { [MANANA]: 'ana-atribuida' } });
+    await writeFile(
+      join(rutas.citas, 'ana--atribuida.md'),
+      cita('ana-atribuida', true).replace('---\n', '---\nclase: "atribuida"\n'),
+      'utf8',
+    );
+    const inventario = await inventarioDeJornadas(rutas, HOY);
+    expect(inventario.ok).toBe(true);
+    if (!inventario.ok) return;
+    expect(inventario.jornadas[0]).toMatchObject({ publicada: true, apta: false, atribuida: true });
+  });
+});
+
 describe('Historia 13.1 — fijar varias jornadas de una sentada', () => {
   it('deja las jornadas escritas en corpus/portada.json, que es de donde sale la Cita del Día', async () => {
     const rutas = await corpusDePrueba();
@@ -457,6 +485,19 @@ describe('Historia 13.1 — la orden jornada', () => {
     expect(listado.codigo, listado.error).toBe(0);
     expect(listado.salida).toContain(MANANA);
     expect(listado.salida).toContain(PASADO);
+  });
+
+  it('listar da la razón cierta de la fijación muda de una atribuida (35.7)', async () => {
+    const rutas = await corpusDePrueba({ fijaciones: { [MANANA]: 'ana-atribuida' } });
+    await writeFile(
+      join(rutas.citas, 'ana--atribuida.md'),
+      cita('ana-atribuida', true).replace('---\n', '---\nclase: "atribuida"\n'),
+      'utf8',
+    );
+    const listado = await correr(['listar', '--corpus', rutas.raiz]);
+    expect(listado.codigo, listado.error).toBe(0);
+    expect(listado.salida).toContain('ana-atribuida  ← es atribuida, y una atribuida no sale en portada (pregunta 22)');
+    expect(listado.salida).not.toContain('ya no está marcada apta');
   });
 
   it('sin nada fijado lo dice, en vez de imprimir una lista vacía', async () => {

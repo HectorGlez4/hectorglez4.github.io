@@ -150,6 +150,8 @@ async function elCruce() {
   const filtros = filtrosDeLaBusqueda(conjunto);
   const cruces = new Map<string, number>();
   for (const [, deCita] of filtros.porCita) {
+    // Historia 35.4 — la Cita de un Personaje sin Autor no hace cruce de Autor.
+    if (deCita.autor === undefined) continue;
     for (const tema of deCita.temas) cruces.set(`${deCita.autor}|${tema}`, (cruces.get(`${deCita.autor}|${tema}`) ?? 0) + 1);
   }
   // Solo los cruces cuyo Tema se ofrece en el selector (publicado): uno sin opción no se elige.
@@ -304,5 +306,25 @@ test.describe('Historia 27.4 — «atrás» devuelve la búsqueda, con la caché
       ).toBe('back_forward');
       expect(await page.evaluate(() => (window as unknown as { __restaurada?: boolean }).__restaurada)).toBeUndefined();
     });
+  });
+});
+
+test.describe('Historia 35.5 — el Personaje se elige en el grupo «Personajes» del selector de Autor', () => {
+  test('elegirlo escribe `?personaje=`, el recuento lo nombra, y «atrás» y «adelante» lo devuelven', async ({ page }) => {
+    const filtros = filtrosDeLaBusqueda(conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(join(RAIZ, 'corpus')))));
+    const personaje = filtros.personajes[0];
+    test.skip(personaje === undefined, 'el sitio construido no tiene Personajes (el Corpus real de hoy)');
+    await page.goto(`${SITIO}${RUTA}`);
+    await expect(page.locator('#filtro-de-autor optgroup[label="Personajes"] option')).toHaveCount(filtros.personajes.length);
+    await page.locator('#filtro-de-autor').selectOption(personaje.valor);
+    await direccion(page, `?personaje=${personaje.valor}`);
+    await expect(page.locator(ESTADO)).toHaveText(fraseDelRecuento({ total: personaje.recuento, texto: '', autor: personaje.rotulo }), {
+      timeout: 10_000,
+    });
+    await page.goBack();
+    await direccion(page, '');
+    await page.goForward();
+    await direccion(page, `?personaje=${personaje.valor}`);
+    await expect(page.locator('#filtro-de-autor')).toHaveValue(personaje.valor);
   });
 });

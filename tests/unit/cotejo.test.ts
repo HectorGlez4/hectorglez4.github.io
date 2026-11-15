@@ -16,6 +16,7 @@ import {
   type CitaParaCotejar,
 } from '../../tools/lib/cotejo.ts';
 import { fuenteDeCita } from '../../src/lib/admision.ts';
+import { CLASE_ATRIBUIDA } from '../../src/lib/clase.ts';
 import { analizarDocumento } from '../../tools/lib/documento.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -158,6 +159,35 @@ describe('qué documento le toca a cada Cita', () => {
 
   it('una obra que no deja ni una letra no da nombre utilizable', () => {
     expect(documentoDeCita({ id: 'wikisource-es' }, '···')).toBeUndefined();
+  });
+});
+
+describe('Historia 35.1b — la atribuida no se coteja', () => {
+  it('no se le exige Fuente, ni se coteja la que la declara, ni cuenta como cotejada', () => {
+    const resultado = cotejar({
+      citas: [
+        cita(),
+        cita({ slug: 'ana-sin-fuente', texto: 'Nada de esto está en la obra.', fuente: undefined, clase: CLASE_ATRIBUIDA }),
+        cita({ slug: 'ana-con-fuente', texto: 'Tampoco esto, aunque declare Fuente.', clase: CLASE_ATRIBUIDA }),
+      ],
+      documentos: conDocumento(),
+      censo: [],
+    });
+    expect(resultado.fallos).toEqual([]);
+    expect(resultado.cotejadas).toBe(1);
+    expect(motivoParaNoPublicar({ slug: 'ana-sin-fuente', texto: 'x', clase: CLASE_ATRIBUIDA })).toBeUndefined();
+    expect(motivoParaNoPublicar({ slug: 'ana-sin-fuente', texto: 'x' })).toBeDefined();
+  });
+
+  it('una atribuida en el censo rompe', () => {
+    const resultado = cotejar({
+      citas: [cita({ fuente: undefined, clase: CLASE_ATRIBUIDA })],
+      documentos: new Map(),
+      censo: [SLUG],
+      censoDePartida: PARTIDA,
+    });
+    expect(resultado.ok).toBe(false);
+    expect(resultado.fallos.map((f) => f.regla).join('\n')).toMatch(/es una Cita atribuida y está en .*quítela del censo/u);
   });
 });
 

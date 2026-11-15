@@ -37,6 +37,7 @@
 
 import {
   PAGINAS_DE_DIRECTORIO,
+  PAGINA_DE_PERSONAJE,
   SUPERFICIES,
   esServicioPorForma,
   rutaNormalizada,
@@ -205,7 +206,12 @@ export const MODELOS_VEDADOS_EN_LECTURA: readonly IdDeModelo[] = [
  * la página. Se nombra por fichero, como `admitidoEn`, y por eso cubre todas las formas de cada
  * superficie: la página 1 y las 2+ (que además quedan fuera por forma).
  */
-export const SUPERFICIES_SIN_INGRESO: readonly string[] = ['autor/[slug]/[...page].astro', ...PAGINAS_DE_DIRECTORIO];
+export const SUPERFICIES_SIN_INGRESO: readonly string[] = [
+  'autor/[slug]/[...page].astro',
+  ...PAGINAS_DE_DIRECTORIO,
+  // Historia 35.3 — la Página de Personaje, como la de Autor: no aloja ningún Modelo.
+  PAGINA_DE_PERSONAJE,
+];
 
 /**
  * Si un fichero de página es la Página de Obra — la única superficie que puede admitir la

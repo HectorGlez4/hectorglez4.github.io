@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -13,6 +13,7 @@ import { MIN_PARECIDO_PARA_CORREGIR, parecidoDeTextos } from '../../tools/lib/pa
 import { censoSinLaCita, colapsarEspacios } from '../../tools/lib/cotejo.ts';
 import { leerCensoDeCotejo, rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
+import { CABECERA_DE_FORMAS_VEDADAS, leerFormasVedadas } from '../../tools/lib/formasVedadas.ts';
 import { TEMA_VALIDO, citaValida } from './ayuda/construir.js';
 import {
   DE_EPICTETO,
@@ -586,6 +587,59 @@ describe('Historia 11.6 — retirar una Cita publicada', () => {
     expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
     if (resultado.ok) expect(resultado.mensaje).toContain('No estaba en el censo');
     expect(await readdir(rutas.revision)).toHaveLength(1);
+  });
+});
+
+describe('Historia 35.7 — retirar anota la forma en corpus/formas-vedadas.yml', () => {
+  it('con el Autor de dominio público anota «retirada», con su slug, y el parte lo dice', async () => {
+    const rutas = await corpusDocumentable();
+    const resultado = await retirarCita(rutas, SLUG, 'No aparece en la edición de 1583.');
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    if (resultado.ok) expect(resultado.mensaje).toContain('vedada a la atribuida en corpus/formas-vedadas.yml (retirada)');
+    expect(await leerFormasVedadas(rutas)).toEqual([
+      { forma: 'quien a dios tiene nada le falta', slug: SLUG, motivo: 'retirada', fecha: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u) },
+    ]);
+  });
+
+  it('con el Autor ya vivo —la Cita pasa a ser atribuida— anota «cambio-de-clase»', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      'autores/teresa-de-jesus.yml': FICHA_DE_TERESA.replace('añoFallecimiento: 1582', 'vivo: true'),
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO),
+    });
+    const resultado = await retirarCita(rutas, SLUG, 'Su Autor vive: vuelve como atribuida.');
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    expect((await leerFormasVedadas(rutas)).map((e) => e.motivo)).toEqual(['cambio-de-clase']);
+  });
+
+  it('si la forma no se puede anotar tras mover la Cita, la Cita vuelve y el censo queda como estaba', async () => {
+    const rutas = await corpusDocumentable();
+    // Legible pero sin permiso de escritura: la lectura previa pasa y el añadido falla después de mover.
+    await writeFile(rutas.formasVedadas, CABECERA_DE_FORMAS_VEDADAS, 'utf8');
+    await chmod(rutas.formasVedadas, 0o444);
+    const antes = await corpusEnDisco(rutas);
+    try {
+      const resultado = await retirarCita(rutas, SLUG, 'No aparece en la edición de 1583.');
+      expect(resultado.ok).toBe(false);
+      if (!resultado.ok) {
+        expect(resultado.motivos.join('\n')).toContain('No se pudo anotar la forma');
+        expect(resultado.motivos.join('\n')).toContain('La Cita ha vuelto a corpus/citas/');
+      }
+      expect(await corpusEnDisco(rutas)).toEqual(antes);
+    } finally {
+      await chmod(rutas.formasVedadas, 0o644);
+    }
+  });
+
+  it('con el registro ilegible no retira nada', async () => {
+    const rutas = await corpusDocumentable();
+    await writeFile(rutas.formasVedadas, 'formas: [roto\n', 'utf8');
+    const antes = await corpusEnDisco(rutas);
+    const resultado = await retirarCita(rutas, SLUG, 'No aparece en la edición de 1583.');
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) expect(resultado.motivos.join('\n')).toContain('No se ha retirado nada');
+    expect(await corpusEnDisco(rutas)).toEqual(antes);
   });
 });
 

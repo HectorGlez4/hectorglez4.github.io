@@ -1,0 +1,37 @@
+---
+/**
+ * La línea de la Variante — Historia 35.6, UX-DR138, AD-34.
+ *
+ * «En España: «{texto}»», en caption, bajo la Línea de la Fuente de la Página de Cita atribuida
+ * y antes de Copiar: la misma frase en el doblaje de otra región. La compone solo
+ * `lineaDeVariante` de `src/lib/atribucion.ts`; sin Variante no se emite nada, ni nodo vacío.
+ *
+ * Es texto: sin `lang`, sin enlace, no enfocable y sin guion. Va dentro de `data-pagefind-body`
+ * —la busca el buscador propio por su cuerpo, nunca por un metadato (NFR-13)— y fuera de todo
+ * `data-pagefind-ignore`.
+ *
+ * La presentación va en un atributo `style` con los tokens, nunca en un bloque `<style>`: Astro
+ * emite el `<style>` de un componente por el grafo de importaciones, se pinte o no, y uno nuevo
+ * cambiaría el CSS de toda Página de Cita aunque ninguna tenga Variante (el precedente es
+ * `Sostener.astro`).
+ */
+import type { Cita } from '../lib/publicado.ts';
+import { lineaDeVariante } from '../lib/atribucion.ts';
+
+interface Props {
+  cita: Cita;
+}
+
+const linea = lineaDeVariante(Astro.props.cita);
+---
+
+{
+  linea !== undefined && (
+    <p
+      class="variante"
+      style="font-family: var(--sans); font-size: var(--pie); font-weight: var(--peso-regular); line-height: var(--interlineado-pie); color: var(--tinta-apagada); margin: var(--unidad) 0 0; max-width: var(--medida-prosa);"
+    >
+      {linea}
+    </p>
+  )
+}

@@ -18,20 +18,22 @@
  */
 import BloqueDeCita from './BloqueDeCita.astro';
 import LoQueRota from './LoQueRota.astro';
-import type { Autor, Cita } from '../lib/publicado.ts';
+import type { Autor, Cita, Personaje } from '../lib/publicado.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
   autor: Autor;
+  /** El Personaje que la dice, si lo declara (Historia 35.3): la Atribución lo nombra. */
+  personaje: Personaje | undefined;
 }
 
-const { cita, autor } = Astro.props;
+const { cita, autor, personaje } = Astro.props;
 ---
 
 <LoQueRota como="section" class="del-dia">
   <h2>La cita de hoy</h2>
-  <BloqueDeCita cita={cita} autor={autor} />
+  <BloqueDeCita cita={cita} autor={autor} personaje={personaje} />
   {/* Historia 23.7 — la Zona de salida interna va en el contenedor del enlace. */}
   <p class="ir" data-zona="cita-del-dia">
     <a href={rutaDeCita(cita.slug)}>Ver esta cita</a>

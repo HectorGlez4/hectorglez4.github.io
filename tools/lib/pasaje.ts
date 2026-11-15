@@ -21,18 +21,22 @@
  * seguidos, con lo que haya entre ellos tal cual. Del trozo solo se quita el blanco de los dos
  * extremos: nunca se recorta dentro, se corrige ni se completa.
  *
- * Si se ofrece lo decide un solo punto con nombre, `ofrecePasaje`, que la 35.4 ampliará.
+ * Si se ofrece lo decide un solo punto con nombre, `ofrecePasaje`, que desde la 35.4 niega la atribuida.
  *
  * Puro: sin disco, sin red y sin escribir nada en `corpus/` (AD-22).
  */
 
+import { CLASE_ATRIBUIDA } from '../../src/lib/clase.ts';
 import { equivalentes } from '../../src/lib/normalizar.ts';
 import type { PasajeDeAparicion } from '../../src/lib/obras.ts';
 import { colapsarEspacios, tramoEnCrudo, type Colapsado } from './cotejo.ts';
 import { esFormaDeVerso, esPieDeLicencia, FORMAS_DE_LINEAS, type FormaDeLineas } from './lineas.ts';
 
-/** Por qué una aparición no trae pasaje. */
-export type MotivoSinPasaje = 'forma-sin-parrafo' | 'sin-tope' | 'no-dice-mas' | 'pasa-del-tope';
+/**
+ * Por qué una aparición no trae pasaje. El de la Cita atribuida (Historia 35.4) es el literal de su
+ * clase, que solo escriben `src/lib/clase.ts` y la admisión: aquí se nombra por su constante.
+ */
+export type MotivoSinPasaje = 'forma-sin-parrafo' | typeof CLASE_ATRIBUIDA | 'sin-tope' | 'no-dice-mas' | 'pasa-del-tope';
 
 /** Las formas cuyo trozo es el bloque entre líneas en blanco. */
 const FORMAS_POR_BLOQUES: readonly FormaDeLineas[] = [FORMAS_DE_LINEAS[0], FORMAS_DE_LINEAS[3]];
@@ -83,19 +87,23 @@ function lineaDe(lineas: readonly { inicio: number; fin: number }[], desplazamie
 
 /**
  * Si se ofrece un pasaje — Historia 31.1. Es el **único** punto que lo decide, y decide en este
- * orden: sin tope (`MAX_CARACTERES_DEL_PASAJE` en `undefined`), no; si el trozo no dice más que
+ * orden: la Cita atribuida, no —Historia 35.4, AD-30 v9.1: no se coteja y su documento no es el
+ * de una edición que reproducir—; sin tope (`MAX_CARACTERES_DEL_PASAJE` en `undefined`), no; si el trozo no dice más que
  * la Cita (forma canónica de `normalizar`, AD-3: un párrafo que solo añade el punto final no
  * cuenta), no; si pasa del tope en puntos de código, no. Igual al tope, sí. «No dice más» va
  * antes que el tope para que el recuento por motivo no dependa de su valor.
  *
- * Recibe un objeto para que la 35.4 lo amplíe (la Cita atribuida, la Obra con derechos).
+ * Recibe un objeto para que se amplíe sin tocar a quien lo llama (la Obra con derechos, 35.9).
  */
 export function ofrecePasaje(opciones: {
   trozo: string;
   textoDeCita: string;
   tope: number | undefined;
+  /** Si la Cita es atribuida (`esAtribuida`): lo decide primero. */
+  atribuida: boolean;
 }): { ofrece: true } | { ofrece: false; motivo: Exclude<MotivoSinPasaje, 'forma-sin-parrafo'> } {
-  const { trozo, textoDeCita, tope } = opciones;
+  const { trozo, textoDeCita, tope, atribuida } = opciones;
+  if (atribuida) return { ofrece: false, motivo: CLASE_ATRIBUIDA };
   if (tope === undefined) return { ofrece: false, motivo: 'sin-tope' };
   if (equivalentes(trozo, textoDeCita)) return { ofrece: false, motivo: 'no-dice-mas' };
   if ([...trozo].length > tope) return { ofrece: false, motivo: 'pasa-del-tope' };
@@ -117,8 +125,10 @@ export function pasajeDeAparicion(opciones: {
   buscado: Colapsado;
   textoDeCita: string;
   tope: number | undefined;
+  /** Si la Cita es atribuida: `ofrecePasaje` se lo niega (Historia 35.4). */
+  atribuida: boolean;
 }): { pasaje: PasajeDeAparicion } | { motivo: MotivoSinPasaje } {
-  const { crudo, forma, posicion, buscado, textoDeCita, tope } = opciones;
+  const { crudo, forma, posicion, buscado, textoDeCita, tope, atribuida } = opciones;
   const porBloques = FORMAS_POR_BLOQUES.includes(forma);
   if (!porBloques && forma !== FORMA_POR_LINEAS) return { motivo: 'forma-sin-parrafo' };
 
@@ -140,7 +150,7 @@ export function pasajeDeAparicion(opciones: {
   while (b > tramo.fin && BLANCO.test(crudo[b - 1])) b -= 1;
   const texto = crudo.slice(a, b);
 
-  const decision = ofrecePasaje({ trozo: texto, textoDeCita, tope });
+  const decision = ofrecePasaje({ trozo: texto, textoDeCita, tope, atribuida });
   if (!decision.ofrece) return { motivo: decision.motivo };
   const parrafos = parrafosDelTrozo({ crudo, lineas, primera, ultima, a, b, porBloques, ajustada: forma === FORMA_AJUSTADA });
   return { pasaje: { texto, inicio: tramo.inicio - a, fin: tramo.fin - a, parrafos } };
@@ -199,7 +209,12 @@ function parrafosDelTrozo(opciones: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Por qué una Obra con incipit declarado no lo enseña. */
-export type MotivoSinIncipit = 'sin-tope' | 'primera-no-cabe' | 'forma-indeterminada' | 'sin-texto';
+export type MotivoSinIncipit =
+  | 'derechos-vigentes'
+  | 'sin-tope'
+  | 'primera-no-cabe'
+  | 'forma-indeterminada'
+  | 'sin-texto';
 
 /** La forma ante la que no se sabe qué es una frase ni un verso. */
 const FORMA_INDETERMINADA: FormaDeLineas = FORMAS_DE_LINEAS[4];
@@ -214,13 +229,16 @@ const FIN_DE_FRASE = /[.?!…][»”"’')\]]*(?= |$)/gu;
  * Si se ofrece un incipit — Historia 32.3. Es el **único** punto que lo decide: sin tope
  * (`MAX_CARACTERES_DEL_INCIPIT` en `undefined`), no; si la primera unidad —la primera frase o el
  * primer verso— pasa del tope en puntos de código, no (el incipit nunca se recorta); igual al
- * tope, sí. Recibe un objeto para que la 35.9 lo amplíe (la Obra con derechos vigentes).
+ * tope, sí. Historia 35.9 (AD-30 v9.1, FR-70) — y antes que nada, una Obra con derechos vigentes
+ * (`derechosDeLaObra`) no lo ofrece nunca, con su propio motivo, aunque el tope sea absurdo.
  */
 export function ofreceIncipit(opciones: {
   tope: number | undefined;
   primera: string;
+  derechosVigentes?: boolean;
 }): { ofrece: true } | { ofrece: false; motivo: Exclude<MotivoSinIncipit, 'forma-indeterminada' | 'sin-texto'> } {
   const { tope, primera } = opciones;
+  if (opciones.derechosVigentes === true) return { ofrece: false, motivo: 'derechos-vigentes' };
   if (tope === undefined) return { ofrece: false, motivo: 'sin-tope' };
   // Un tope que no es un entero positivo no es un tope: con `NaN` ninguna comparación cortaría y
   // saldría el documento entero. Lo da Héctor en `umbrales.ts`; mal dado, se para la construcción.

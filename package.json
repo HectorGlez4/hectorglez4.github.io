@@ -20,6 +20,7 @@
     "ingreso": "tsx tools/ingreso.ts",
     "coleccion": "tsx tools/coleccion.ts",
     "documentar": "tsx tools/documentar.ts",
+    "atribuida": "tsx tools/atribuida.ts",
     "obra": "tsx tools/obra.ts",
     "jornada": "tsx tools/jornada.ts",
     "pieza": "tsx tools/pieza.ts",
@@ -35,6 +36,7 @@
     "demanda:registrar": "tsx tools/demanda.ts --registrar",
     "rastreo": "tsx tools/rastreo.ts",
     "canal": "tsx tools/canal.ts",
+    "peticion": "tsx tools/peticion.ts",
     "medicion": "tsx tools/medicion.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -44,6 +46,7 @@
     "@astrojs/sitemap": "^3.7.3",
     "astro": "^7.2.0",
     "sharp": "^0.35.3",
+    "tldts": "7.4.19",
     "yaml": "^2.9.0"
   },
   "devDependencies": {

@@ -64,6 +64,7 @@ import { rutaDeLaObra } from '../src/lib/obras.ts';
 import {
   MAX_PROPORCION_OBRA_DEL_AUTOR,
   MIN_CITAS_OBRA_INDEXABLE,
+  MIN_CITAS_POR_PERSONAJE,
   type CongelacionDeObras,
 } from '../src/lib/umbrales.ts';
 import { constanteNumerica, leerCongelacionDeclarada } from './lib/obras.ts';
@@ -72,10 +73,12 @@ import {
   entradasCrudas,
   historialDeLosFicheros,
   soloDeModo,
+  versionDelLado,
   versionesDeBlobs,
 } from '../integraciones/historial.ts';
-import { obrasDelCorpusEnDisco } from '../integraciones/indexables.ts';
+import { obrasDelCorpusEnDisco, personajesIndexablesEnDisco } from '../integraciones/indexables.ts';
 import {
+  FICHERO_DE_LOS_UMBRALES,
   VERSION_OPACA,
   bajasDelHistorial,
   conRutas,
@@ -86,7 +89,7 @@ import {
   type CorpusParaFechar,
   type Version,
 } from './lib/cambios.ts';
-import { esRutaDeObra } from '../src/lib/superficies.ts';
+import { esRutaDeObra, esRutaDePersonaje } from '../src/lib/superficies.ts';
 /*
  * Las rutas se componen con los constructores y no a mano, por lo mismo que en el sitio:
  * lo que se anuncia aquí tiene que ser la canónica. Escritas a mano se quedaron sin barra
@@ -215,8 +218,12 @@ async function corpusDeRevision(raiz: string, revision: string): Promise<string>
   return copia;
 }
 
-/** Lo que el rango tiene que mirar fuera del Corpus: la regla de indexabilidad. */
-const FICHERO_DE_LA_REGLA = 'src/lib/umbrales.ts';
+/**
+ * Lo que el rango tiene que mirar fuera del Corpus: la regla de indexabilidad y, desde la Historia
+ * 35.9, las constantes de los derechos, que componen por su veredicto las Obras de un Autor
+ * fallecido (`derechosEnLosUmbrales` de `tools/lib/cambios.ts`). El mismo fichero.
+ */
+const FICHERO_DE_LA_REGLA = FICHERO_DE_LOS_UMBRALES;
 
 /**
  * La congelación que regía en una revisión, leída de su `umbrales.ts` con el mismo analizador
@@ -353,8 +360,14 @@ async function leerRango(
   // del rango puede haber cambiado de fecha algo que el propio rango deshizo.
   if (delCorpus.length === 0 && !reglaCambiada && opciones.aunSinCambios !== true) return undefined;
 
+  /*
+   * Historia 35.9 — `umbrales.ts` entra también como cambio, con sus dos versiones reducidas a las
+   * constantes de los derechos (`analizarVersion`): la relación lo compone por su veredicto, y
+   * `componerAviso` no le da portada, porque no tiene familia de fichero.
+   */
+  const deLaRegla = entradas.filter((e) => e.fichero === FICHERO_DE_LA_REGLA);
   const pedidos = new Map<string, string>();
-  for (const e of delCorpus) {
+  for (const e of [...delCorpus, ...deLaRegla]) {
     if (familiaDeFichero(e.fichero) === 'documento') continue;
     for (const blob of [e.antes, e.despues]) if (blob !== null) pedidos.set(blob, e.fichero);
   }
@@ -374,9 +387,13 @@ async function leerRango(
   }
   const version = (blob: string | null, opaca: boolean): Version | null =>
     blob === null ? null : opaca ? VERSION_OPACA : (versiones.get(blob) ?? VERSION_OPACA);
-  const cambios: CambioDeFichero[] = delCorpus.map((e) => {
+  const cambios: CambioDeFichero[] = [...delCorpus, ...deLaRegla].map((e) => {
     const opaca = familiaDeFichero(e.fichero) === 'documento';
-    return { fichero: e.fichero, antes: version(e.antes, opaca), despues: version(e.despues, opaca) };
+    return {
+      fichero: e.fichero,
+      antes: versionDelLado(e.fichero, version(e.antes, opaca)),
+      despues: versionDelLado(e.fichero, version(e.despues, opaca)),
+    };
   });
 
   const copias: string[] = [];
@@ -403,12 +420,18 @@ async function leerRango(
     try {
       if (copia === undefined || relacionAntes === undefined) throw new Error(`Corpus de ${desde} ilegible`);
       const { congelacion, texto } = await congelacionEnRevision(raiz, desde);
-      for (const nombre of ['MIN_CITAS_OBRA_INDEXABLE', 'MAX_PROPORCION_OBRA_DEL_AUTOR'] as const) {
+      // Historia 35.3b — también el umbral del Personaje, que decide su lista de antes igual.
+      const umbralesDeHoy = {
+        MIN_CITAS_OBRA_INDEXABLE,
+        MAX_PROPORCION_OBRA_DEL_AUTOR,
+        MIN_CITAS_POR_PERSONAJE,
+      } as const;
+      for (const [nombre, hoy] of Object.entries(umbralesDeHoy)) {
         const entonces = constanteNumerica(texto, nombre);
-        const hoy = nombre === 'MIN_CITAS_OBRA_INDEXABLE' ? MIN_CITAS_OBRA_INDEXABLE : MAX_PROPORCION_OBRA_DEL_AUTOR;
         if (entonces !== undefined && entonces !== hoy) {
+          const lista = nombre === 'MIN_CITAS_POR_PERSONAJE' ? 'Personajes' : 'Obras';
           avisar(
-            `${nombre} cambió en el rango (${entonces} → ${hoy}): la lista de Obras indexables ` +
+            `${nombre} cambió en el rango (${entonces} → ${hoy}): la lista de ${lista} indexables ` +
               'de antes se calcula con los umbrales de hoy.',
           );
         }
@@ -419,7 +442,13 @@ async function leerRango(
        * AD-11 prohíbe.
        */
       const { indexables } = await obrasDelCorpusEnDisco(copia, congelacion);
-      antes = { rutas: indexables.map((obra) => rutaDeLaObra(obra)) };
+      // Historia 35.3b — y los Personajes indexables de `desde`, con la misma función que el build.
+      antes = {
+        rutas: [
+          ...indexables.map((obra) => rutaDeLaObra(obra)),
+          ...(await personajesIndexablesEnDisco(copia)),
+        ],
+      };
     } catch (fallo) {
       antes = { motivo: fallo instanceof Error ? fallo.message : String(fallo) };
     }
@@ -508,7 +537,8 @@ export async function ensayoDelRango(
   const inicio = performance.now();
   const absoluto = await historialDeLosFicheros(
     raiz,
-    FAMILIAS_DE_FICHERO.map(([directorio]) => resolve(raiz, directorio)),
+    // Historia 35.9 — y `umbrales.ts`, como en la fecha del sitemap.
+    [...FAMILIAS_DE_FICHERO.map(([directorio]) => resolve(raiz, directorio)), resolve(raiz, FICHERO_DE_LA_REGLA)],
     { rango: `${desde}..${hasta}`, opacos: [resolve(raiz, DIRECTORIO_DE_DOCUMENTOS)] },
   );
   const msDelHistorial = performance.now() - inicio;
@@ -530,7 +560,7 @@ export async function ensayoDelRango(
     const familia =
       lectura.relacionDespues.get(ruta)?.familia ??
       lectura.relacionAntes?.get(ruta)?.familia ??
-      (esRutaDeObra(ruta) ? 'obra' : undefined);
+      (esRutaDeObra(ruta) ? 'obra' : esRutaDePersonaje(ruta) ? 'personaje' : undefined);
     if (familia !== undefined) reparto[familia].seAvisarian += 1;
   }
   return { aviso, reparto, portada, msDelHistorial };

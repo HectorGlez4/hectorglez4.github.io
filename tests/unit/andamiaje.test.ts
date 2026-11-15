@@ -137,7 +137,7 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
 /**
  * AD-22 — La red vive **solo** en la cáscara exterior de `tools/`.
  *
- * Nueve excepciones, las nueve escritas y con nombre. Una excepción escrita se revisa; un
+ * Diez excepciones, las diez escritas y con nombre. Una excepción escrita se revisa; un
  * punto ciego, no:
  *
  *   · `tools/recuperar.ts` es la cáscara exterior de las herramientas de editor: la única
@@ -169,6 +169,10 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
  *     prueba. Lo que decide qué se envía y cómo se lee lo que contesta D1 vive en
  *     `tools/lib/medicion.ts`, que no pide nada. El build no la invoca y ningún paso de CI la
  *     ejecuta: la corre Héctor (AD-14).
+ *   · `tools/atribuida.ts` es la cáscara de la siembra acotada de la Cita atribuida —Historia
+ *     35.10—: `semilla` pide una sola vez la página de BrainyQuote de una entrada de
+ *     `SEMILLA_DE_ATRIBUIDAS`, que llena Héctor. Lo que lee y la propuesta viven en
+ *     `tools/lib/siembraAtribuida.ts`, que no pide nada. El build no la invoca.
  *   · `tools/avisar.ts` es la cáscara del aviso a IndexNow: avisa a los buscadores de lo ya
  *     publicado y corre en el flujo de trabajo detrás del despliegue (`needs: desplegar`). El
  *     build no la invoca, así que sigue construyendo sin internet.
@@ -215,6 +219,10 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     [
       'tools/epocas.ts',
       'la cáscara de la cobertura por época: deriva la lista de candidatos de las categorías de la Fuente en vez de escribirla a mano, y el build no la invoca — la corre una persona antes de sembrar (AD-22)',
+    ],
+    [
+      'tools/atribuida.ts',
+      'la cáscara de la siembra acotada de la Cita atribuida (Historia 35.10, FR-68): su suborden semilla pide una sola vez la página de BrainyQuote que declara SEMILLA_DE_ATRIBUIDAS; lo que lee de ella y la propuesta viven en tools/lib/siembraAtribuida.ts, que no pide nada — el build no la invoca y ningún paso de CI la ejecuta',
     ],
     [
       'tools/avisar.ts',
@@ -346,13 +354,15 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(codigo.replace(delMapa, ''))).toBe(false);
   });
 
-  it('no hay más excepciones que esas nueve', () => {
-    // Añadir una décima tiene que ser un cambio deliberado de esta prueba. La octava,
+  it('no hay más excepciones que esas diez', () => {
+    // Añadir una undécima tiene que ser un cambio deliberado de esta prueba. La octava,
     // `tools/medicion.ts`, la añadió la Historia 23.2; la novena, el guion de `/buscar/`, la
-    // Historia 27.3, y es la única que corre en el navegador y no en una herramienta.
+    // Historia 27.3, y es la única que corre en el navegador y no en una herramienta; la
+    // décima, `tools/atribuida.ts`, la Historia 35.10 (la semilla de BrainyQuote).
     expect([...EXCEPCIONES.keys()].sort()).toEqual([
       'astro.config.mjs',
       'src/components/Busqueda.astro',
+      'tools/atribuida.ts',
       'tools/avisar.ts',
       'tools/epocas.ts',
       'tools/indexacion.ts',
@@ -465,6 +475,7 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(conRed.sort()).toEqual([
       'astro.config.mjs',
       'src/components/Busqueda.astro',
+      'tools/atribuida.ts',
       'tools/avisar.ts',
       'tools/epocas.ts',
       'tools/indexacion.ts',

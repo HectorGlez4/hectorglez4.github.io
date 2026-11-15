@@ -26,6 +26,7 @@ import {
   contenidoDeTarjetaDeObra,
 } from '../../src/lib/atribucion.ts';
 import { formaDeObra, resolverObras, type FichaDeObra } from '../../src/lib/obras.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 import { componerDocumento, nombreDeDocumento } from '../../tools/lib/documento.ts';
 
@@ -89,7 +90,7 @@ describe('Historia 24.4 — lo que dice la tarjeta, sin construir', () => {
 
   /** Lo que la tarjeta dice de la Obra que resuelven `citas`, resuelta como en el build. */
   function contenidoDe(nombreDelAutor: string, f: FichaDeObra, citas: CitaDePrueba[]) {
-    const obra = resolverObras(citas, [f]).get(f.nombre);
+    const obra = resolverObras(citas, [f], CUALQUIER_AUTOR).get(f.nombre);
     expect(obra, f.nombre).toBeDefined();
     return contenidoDeTarjetaDeObra({ nombre: nombreDelAutor }, obra!);
   }
@@ -223,13 +224,14 @@ const sinComentarios = (texto: string) =>
     .replace(/^\s*\/\/.*$/gm, '');
 
 describe('Historia 24.4 — el contrato de los componentes, sin construir', () => {
-  it('`TarjetaDeObra`: `cita`, `autor`, `nivel: 2 | 3` y `siguiente`, los cuatro obligatorios', async () => {
+  it('`TarjetaDeObra`: `cita`, `dueño`, `nivel: 2 | 3` y `siguiente`, los cuatro obligatorios', async () => {
     const props = await propsDe(TARJETA);
-    expect([...props.keys()].sort()).toEqual(['autor', 'cita', 'nivel', 'siguiente']);
+    expect([...props.keys()].sort()).toEqual(['cita', 'dueño', 'nivel', 'siguiente']);
     // Historia 24.5 — obligatorio y sin `?`: cada uso declara si hay «Siguiente…».
     expect(props.get('siguiente')).toMatchObject({ tipo: 'SiguienteCita | undefined', opcional: false });
     expect(props.get('cita')).toMatchObject({ tipo: 'Cita', opcional: false });
-    expect(props.get('autor')).toMatchObject({ tipo: 'Autor', opcional: false });
+    // Historia 35.4 — el dueño de la Obra, Autor o Personaje, con su nombre; sin Obra, `undefined`.
+    expect(props.get('dueño')).toMatchObject({ tipo: '(Dueño & { nombre: string }) | undefined', opcional: false });
     const nivel = props.get('nivel')!;
     expect(nivel.opcional, '`nivel` es opcional').toBe(false);
     expect(nivel.nodo !== undefined && ts.isUnionTypeNode(nivel.nodo), '`nivel` no es una unión').toBe(true);
@@ -310,7 +312,7 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(usan).toEqual(['src/pages/cita/[slug].astro']);
     const pagina = await readFile(join(RAIZ, 'src/pages/cita/[slug].astro'), 'utf8');
     const usos = [...sinComentarios(pagina).matchAll(/<TarjetaDeObra\b[^>]*\/>/g)].map((m) => m[0]);
-    expect(usos).toEqual(['<TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />']);
+    expect(usos).toEqual(['<TarjetaDeObra cita={cita} dueño={dueñoDeLaObra} nivel={2} siguiente={siguiente} />']);
     // Historia 30.1 — tras las acciones y compartir, antes de las Rutas de salida.
     const plantilla = sinComentarios(pagina);
     const orden = [
@@ -653,7 +655,7 @@ function corpusDeLaTarjeta(): { corpus: Record<string, string>; esperadas: Map<s
 // ─── Una construcción que falla ──────────────────────────────────────────────
 
 describe('Historia 24.4 — la tarjeta con el Autor de otro detiene la construcción', () => {
-  it('código distinto de 0, nombrando la Cita, la ruta y los dos Autores', async () => {
+  it('código distinto de 0, nombrando la Cita, la ruta y los dos dueños (Historia 35.4: `dueño`)', async () => {
     const PRIMERA = 'seneca-brevedad-0';
     const SONDA = `---
 import TarjetaDeObra from '../components/TarjetaDeObra.astro';
@@ -664,7 +666,7 @@ const otro = conjunto.autores.find((a) => a.slug === 'antonio-machado')!;
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><TarjetaDeObra cita={cita} autor={otro} nivel={2} siguiente={undefined} /></body></html>
+<body><TarjetaDeObra cita={cita} dueño={{ tipo: 'autor', slug: otro.slug, nombre: otro.nombre }} nivel={2} siguiente={undefined} /></body></html>
 `;
     const resultado = await construirConCorpus(corpusDeLaTarjeta().corpus, {
       paginas: { 'sonda-tarjeta-de-obra.astro': SONDA },
@@ -672,7 +674,7 @@ const otro = conjunto.autores.find((a) => a.slug === 'antonio-machado')!;
     aLimpiar.push(resultado.proyecto);
     expect(resultado.codigo, resultado.salida).not.toBe(0);
     expect(resultado.salida).toMatch(
-      new RegExp(`«${PRIMERA}»[^\\n]*/sonda-tarjeta-de-obra/?[^\\n]*«antonio-machado»[^\\n]*«seneca»`),
+      new RegExp(`«${PRIMERA}»[^\\n]*/sonda-tarjeta-de-obra/?[^\\n]*autor «antonio-machado»[^\\n]*autor «seneca»`),
     );
   }, 300_000);
 
@@ -690,7 +692,7 @@ const destino = conjunto.citas.find((c) => c.slug === '${destino}')!;
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={{ por: 'obra', cita: destino }} /></body></html>
+<body><TarjetaDeObra cita={cita} dueño={{ tipo: 'autor', slug: autor.slug, nombre: autor.nombre }} nivel={2} siguiente={{ por: 'obra', cita: destino }} /></body></html>
 `;
 
   it('24.5 — «Siguiente…» a la propia Cita detiene la construcción, nombrándola', async () => {
@@ -733,7 +735,7 @@ const autor = conjunto.autores.find((a) => a.slug === cita.autor)!;
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><h2>La cita de hoy</h2><TarjetaDeObra cita={cita} autor={autor} nivel={3} siguiente={undefined} />
+<body><h2>La cita de hoy</h2><TarjetaDeObra cita={cita} dueño={{ tipo: 'autor', slug: autor.slug, nombre: autor.nombre }} nivel={3} siguiente={undefined} />
 <Rotulo id="sin-nivel">Sin nivel</Rotulo><Rotulo id="nivel-2" nivel={2}>Nivel 2</Rotulo><Rotulo id="nivel-3" nivel={3}>Nivel 3</Rotulo>
 <Rotulo id="destino-2" destino>Destino 2</Rotulo><Rotulo id="destino-3" nivel={3} destino>Destino 3</Rotulo></body></html>
 `;

@@ -19,9 +19,9 @@
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import type { AstroIntegration } from 'astro';
-import { leerAutores, leerCitas, rutasDelCorpus } from '../tools/lib/corpus.ts';
-import { fallosDeClaves } from '../tools/lib/claves.ts';
-import { autoresPublicados, type Autor, type Cita } from '../src/lib/publicado.ts';
+import { leerAutores, leerCitas, leerPersonajes, rutasDelCorpus } from '../tools/lib/corpus.ts';
+import { fallosDeClaves, ORDENES_DE_PERSONAJE } from '../tools/lib/claves.ts';
+import { autoresPublicados, personajesPublicados, type Autor, type Cita } from '../src/lib/publicado.ts';
 
 /** La ruta relativa a la raíz, con barras `/`, que es como se teclea. */
 function relativaALaRaiz(raiz: string, ruta: string): string {
@@ -48,21 +48,33 @@ export default function clavesDeOrden(): AstroIntegration {
         citas.map((c) => ({ autor: c.autor }) as Cita),
       ).map((a) => a.slug),
     );
-    return fallosDeClaves(
-      autores.map((a) => ({
-        slug: a.slug,
-        ruta: relativaALaRaiz(raiz, a.ruta),
-        nombre: a.nombre,
-        ...('ordenAlfabetico' in a ? { ordenAlfabetico: a.ordenAlfabetico } : {}),
-        ...('ordenRevisado' in a ? { ordenRevisado: a.ordenRevisado } : {}),
-      })),
-      publicados,
+    /*
+     * Historia 35.2 — el Personaje publicado (alguna Cita lo declara) también lleva clave, con
+     * la misma regla y el mismo validador, y el fallo nombra sus órdenes de `tools/personaje.ts`.
+     */
+    const personajes = await leerPersonajes(rutas);
+    const personajesConCitas = new Set(
+      personajesPublicados(
+        personajes.map((p) => ({ slug: p.slug, nombre: String(p.nombre ?? '') })),
+        citas,
+      ).map((p) => p.slug),
     );
+    const paraClaves = (e: { slug: string; ruta: string; nombre?: unknown }) => ({
+      slug: e.slug,
+      ruta: relativaALaRaiz(raiz, e.ruta),
+      nombre: e.nombre,
+      ...('ordenAlfabetico' in e ? { ordenAlfabetico: e.ordenAlfabetico } : {}),
+      ...('ordenRevisado' in e ? { ordenRevisado: e.ordenRevisado } : {}),
+    });
+    return [
+      ...fallosDeClaves(autores.map(paraClaves), publicados),
+      ...fallosDeClaves(personajes.map(paraClaves), personajesConCitas, ORDENES_DE_PERSONAJE),
+    ];
   }
 
   const titular = (n: number) =>
-    `Claves de orden: ${n} ${n === 1 ? 'Autor incumple' : 'Autores incumplen'} la regla. ` +
-    'Un Autor publicado tiene clave de orden, y toda clave empieza por una letra de la A a la Z o la Ñ.';
+    `Claves de orden: ${n} ${n === 1 ? 'Autor o Personaje incumple' : 'Autores o Personajes incumplen'} la regla. ` +
+    'Un Autor o Personaje publicado tiene clave de orden, y toda clave empieza por una letra de la A a la Z o la Ñ.';
 
   return {
     name: 'claves-de-orden',

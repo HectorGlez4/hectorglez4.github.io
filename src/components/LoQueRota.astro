@@ -31,13 +31,13 @@ interface Props {
   class?: string;
 }
 
-const { como, class: clase } = Astro.props;
+const { como, class: nombreDeClase } = Astro.props;
 ---
 
 {
   como === 'section' ? (
-    <section class={clase} data-jornada data-pagefind-ignore="all"><slot /></section>
+    <section class={nombreDeClase} data-jornada data-pagefind-ignore="all"><slot /></section>
   ) : (
-    <div class={clase} data-jornada data-pagefind-ignore="all"><slot /></div>
+    <div class={nombreDeClase} data-jornada data-pagefind-ignore="all"><slot /></div>
   )
 }

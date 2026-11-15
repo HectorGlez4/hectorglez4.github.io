@@ -262,7 +262,9 @@ describe('Historia 28.3 — las Obras de la portada, construidas', () => {
         .split('|');
       // El año solo si las Citas de la Obra lo declaran igual; si discrepan, la fila no lleva ninguno.
       const año = obra.año === undefined ? [] : [String(obra.año)];
-      expect(partes, href).toEqual([nombreDe.get(obra.autor), ...año, recuentoDeCitas(obra.recuento)]);
+      // Historia 35.4 — la fila nombra al dueño de la Obra; en este Corpus, siempre un Autor.
+      expect(obra.dueño.tipo, href).toBe('autor');
+      expect(partes, href).toEqual([nombreDe.get(obra.dueño.slug), ...año, recuentoDeCitas(obra.recuento)]);
     }
     // Y la jornada enseña de las dos clases: no se pasa por no tener ninguna sin año.
     const años = filas.map(([, href]) => porRuta.get(href)!.año);

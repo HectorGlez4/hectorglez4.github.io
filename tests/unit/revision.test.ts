@@ -1,10 +1,20 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { aprobar, loteEnRevision, rechazar } from '../../tools/lib/revision.ts';
-import { leerCitas, nombreDeFicheroDeCita, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { leerAprobaciones } from '../../tools/lib/aprobaciones.ts';
+import {
+  CABECERA_DE_CLASES,
+  leerCitas,
+  leerRegistroDeClases,
+  nombreDeFicheroDeCita,
+  rutasDelCorpus,
+  type Rutas,
+} from '../../tools/lib/corpus.ts';
+import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from '../../tools/lib/clases.ts';
+import { motivoPuertaCerrada, type ValoresDeLaPuerta } from '../../tools/lib/atribuidas.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import { TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado, sinRelleno } from './ayuda/relleno.ts';
 
@@ -616,6 +626,426 @@ describe('Historia 26.8 — aprobar no publica una Cita sin Tema publicado', () 
       expect(salida).toContain(`! ${c.slug} — publicada, pero se quedó sin ningún Tema publicado`);
     });
   });
+});
+
+describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
+  const SENECA = 'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo."\nordenAlfabetico: "Séneca"\n';
+  const VIVA = 'nombre: "Ana Ejemplo"\nvivo: true\nsemblanza: "Escritora."\nordenAlfabetico: "Ejemplo"\n';
+  /** Historia 35.1b — lo que la atribuida declara además, y la puerta abierta por parámetro. */
+  const ATESTIGUADA = {
+    atestiguaciones: [
+      { url: 'https://es.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+      { url: 'https://www.elpais.com/ana', consultadaEl: '2026-11-02' },
+    ],
+    origen: 'original',
+  };
+  const ABIERTA: ValoresDeLaPuerta = {
+    maxCaracteres: 200,
+    maxPorObra: 5,
+    maxPorDueño: 5,
+    minAtestiguaciones: 2,
+    buzon: 'peticiones@ejemplo.org',
+  };
+  // La puerta cerrada se pasa por parámetro: las pruebas no dependen del valor que tenga el árbol.
+  const CERRADA = motivoPuertaCerrada({})!;
+  const conAutores = async (candidatas: Record<string, unknown>[], publicadas: Record<string, unknown>[] = []) => {
+    const rutas = await corpusCon(candidatas, publicadas);
+    await writeFile(join(rutas.autores, 'seneca.yml'), SENECA, 'utf8');
+    await writeFile(join(rutas.autores, 'ana-ejemplo.yml'), VIVA, 'utf8');
+    return rutas;
+  };
+
+  it('la de siempre se publica y queda anotada «siempre»; repetir el slug con la otra clase lo renombra', async () => {
+    const rutas = await conAutores([CANDIDATA_COMPLETA]);
+    await writeFile(
+      rutas.clasesDeCita,
+      `clases:\n  - { slug: "${CANDIDATA_COMPLETA.slug}", clase: atribuida, fecha: "2026-11-01" }\n`,
+      'utf8',
+    );
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect(resultado.renombradas).toEqual([{ de: CANDIDATA_COMPLETA.slug, a: `${CANDIDATA_COMPLETA.slug}-2` }]);
+    expect(await readFile(rutas.clasesDeCita, 'utf8')).toMatch(
+      new RegExp(`  - \\{ slug: "${CANDIDATA_COMPLETA.slug}-2", clase: siempre, fecha: "\\d{4}-\\d{2}-\\d{2}" \\}\\n$`, 'u'),
+    );
+  });
+
+  it('la atribuida no se aprueba: su puerta está cerrada, y sigue en revisión intacta', async () => {
+    const { estadoDerechos: _e, ...sinDerechos } = CANDIDATA_COMPLETA;
+    const atribuida = { ...sinDerechos, ...ATESTIGUADA, autor: 'ana-ejemplo', slug: 'ana-ejemplo-una-frase', clase: 'atribuida' };
+    const rutas = await conAutores([atribuida]);
+    const resultado = await aprobar(rutas, [atribuida.slug], [], { puerta: {} });
+    expect(resultado.publicadas).toEqual([]);
+    expect(CERRADA).toMatch(/MAX_CARACTERES_DE_ATRIBUIDA, .*BUZON_DE_PETICIONES/u);
+    expect(resultado.rechazadasPorAdmision).toEqual([{ slug: atribuida.slug, motivos: [CERRADA] }]);
+    expect(await readdir(rutas.revision)).toHaveLength(1);
+    expect(existsSync(rutas.clasesDeCita)).toBe(false);
+  });
+
+  it('Historia 35.2 — la de un Personaje sin Autor se lee con su dueño, y la puerta cerrada la deja intacta', async () => {
+    const { estadoDerechos: _e, autor: _a, ...sinAutor } = CANDIDATA_COMPLETA;
+    const dePersonaje = { ...sinAutor, ...ATESTIGUADA, personaje: 'batman', slug: 'batman-la-noche-es-larga', clase: 'atribuida' };
+    const rutas = await conAutores([]);
+    await mkdir(rutas.personajes, { recursive: true });
+    await writeFile(join(rutas.personajes, 'batman.yml'), 'nombre: "Batman"\nuniverso: "DC Comics"\n', 'utf8');
+    await writeFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), ficheroDeCita(dePersonaje), 'utf8');
+    const antes = await readFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), 'utf8');
+    const lote = await loteEnRevision(rutas);
+    const leida = lote.find((c) => c.slug === dePersonaje.slug);
+    expect(leida).toMatchObject({ personaje: 'batman', clase: 'atribuida', admisible: true });
+    expect(leida?.autor).toBeUndefined();
+    const resultado = await aprobar(rutas, [dePersonaje.slug], [], { puerta: {} });
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision).toEqual([{ slug: dePersonaje.slug, motivos: [CERRADA] }]);
+    expect(await readFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), 'utf8')).toBe(antes);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+  });
+
+  it('Historia 35.2 — la de un Personaje que no existe no se aprueba, y lo dice antes que la puerta', async () => {
+    const { estadoDerechos: _e, autor: _a, ...sinAutor } = CANDIDATA_COMPLETA;
+    const dePersonaje = { ...sinAutor, ...ATESTIGUADA, personaje: 'joker', slug: 'joker-por-que-tan-serio', clase: 'atribuida' };
+    const rutas = await conAutores([]);
+    await writeFile(join(rutas.revision, 'joker--por-que-tan-serio.md'), ficheroDeCita(dePersonaje), 'utf8');
+    const resultado = await aprobar(rutas, [dePersonaje.slug]);
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision).toHaveLength(1);
+    expect(resultado.rechazadasPorAdmision[0].motivos.join('\n')).toMatch(/Personaje «joker» no existe en corpus\/personajes\//u);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+  });
+
+  it('una de siempre de un Autor vivo, o una atribuida de uno de dominio público, no casa con su clase', async () => {
+    const deViva = { ...CANDIDATA_COMPLETA, autor: 'ana-ejemplo', slug: 'ana-ejemplo-de-siempre' };
+    const { estadoDerechos: _e, ...sinDerechos } = CANDIDATA_COMPLETA;
+    const deSeneca = { ...sinDerechos, ...ATESTIGUADA, slug: 'seneca-atribuida', clase: 'atribuida' };
+    const rutas = await conAutores([deViva, deSeneca]);
+    const resultado = await aprobar(rutas, [deViva.slug, deSeneca.slug]);
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
+      [deViva.slug, expect.stringMatching(/dice ser siempre y le corresponde atribuida/u)],
+      [deSeneca.slug, expect.stringMatching(/dice ser atribuida y le corresponde siempre/u)],
+    ]);
+  });
+
+  describe('Historia 35.1b — con la puerta abierta por parámetro', () => {
+    const { estadoDerechos: _e, fuente: _f, ...sinDerechos } = CANDIDATA_COMPLETA;
+    const deAna = (slug: string, texto: string, extra: Record<string, unknown> = {}) => ({
+      ...sinDerechos,
+      ...ATESTIGUADA,
+      autor: 'ana-ejemplo',
+      slug,
+      texto,
+      procedencia: { obra: 'Obras de Ana', año: 2020 },
+      clase: 'atribuida',
+      ...extra,
+    });
+    const fichaDeAna = async (rutas: Rutas) => {
+      await mkdir(rutas.obras, { recursive: true });
+      await writeFile(
+        join(rutas.obras, 'ana-ejemplo--obras-de-ana.yml'),
+        'autor: "ana-ejemplo"\ntitulo: "Obras de Ana"\nformas:\n  - "obras de ana"\n',
+        'utf8',
+      );
+    };
+
+    it('publica la feliz, sin Fuente, anotada «atribuida» y con sus atestiguaciones', async () => {
+      const feliz = deAna('ana-ejemplo-la-feliz', 'Una frase que nadie más ha dicho nunca.');
+      const rutas = await conAutores([feliz]);
+      await fichaDeAna(rutas);
+      const resultado = await aprobar(rutas, [feliz.slug], [], { puerta: ABIERTA });
+      expect(resultado.rechazadasPorAdmision).toEqual([]);
+      expect(resultado.publicadas).toEqual([feliz.slug]);
+      const publicada = await readFile(join(rutas.citas, `${feliz.slug}.md`), 'utf8');
+      expect(publicada).toContain('es.wikiquote.org');
+      expect(publicada).toContain('origen: "original"');
+      expect(await readFile(rutas.clasesDeCita, 'utf8')).toMatch(new RegExp(`slug: "${feliz.slug}", clase: atribuida`, 'u'));
+    });
+
+    it('un duplicado de una de siempre publicada o de otra candidata no se aprueba', async () => {
+      const copia = deAna('ana-ejemplo-copia', CANDIDATA_COMPLETA.texto);
+      const gemelaA = deAna('ana-ejemplo-gemela-a', 'Las gemelas se parecen en todo menos en el nombre.');
+      const otra = { ...CANDIDATA_COMPLETA, slug: 'seneca-otra-gemela', texto: 'Las gemelas se parecen en todo menos en el nombre' };
+      const rutas = await conAutores([copia, gemelaA, otra], [CANDIDATA_COMPLETA]);
+      await fichaDeAna(rutas);
+      const resultado = await aprobar(rutas, [copia.slug, gemelaA.slug], [], { puerta: ABIERTA });
+      expect(resultado.publicadas).toEqual([]);
+      expect(resultado.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
+        [copia.slug, expect.stringMatching(new RegExp(`coincide con «${CANDIDATA_COMPLETA.slug}», de la clase siempre`, 'u'))],
+        [gemelaA.slug, expect.stringMatching(/coincide con «seneca-otra-gemela», de la clase siempre/u)],
+      ]);
+    });
+
+    it('la copia exacta de una atribuida publicada —el mismo slug— no se aprueba renombrada', async () => {
+      const publicada = deAna('ana-ejemplo-la-misma', 'Una frase que Ana ya tiene publicada.');
+      const rutas = await conAutores([publicada], [publicada]);
+      await fichaDeAna(rutas);
+      const resultado = await aprobar(rutas, [publicada.slug], [], { puerta: ABIERTA });
+      expect(resultado.publicadas).toEqual([]);
+      expect(resultado.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
+        [publicada.slug, expect.stringMatching(/coincide con «ana-ejemplo-la-misma», de la clase atribuida/u)],
+      ]);
+    });
+
+    it('un tope: el texto largo y la Obra llena, con recuento y tope; y el Autor sin Obra (pregunta 23)', async () => {
+      const larga = deAna('ana-ejemplo-larga', `Una frase larga ${'muy '.repeat(60)}larga.`);
+      const una = deAna('ana-ejemplo-una', 'La primera de la obra de Ana, que cabe.');
+      const dos = deAna('ana-ejemplo-dos', 'La segunda ya no cabe en la obra de Ana.');
+      const sinObra = deAna('ana-ejemplo-sin-obra', 'Sin obra no hay atribuida que valga.', { procedencia: { año: 2020 } });
+      const rutas = await conAutores([larga, una, dos]);
+      await fichaDeAna(rutas);
+      const resultado = await aprobar(rutas, [larga.slug, una.slug, dos.slug], [], { puerta: { ...ABIERTA, maxPorObra: 1 } });
+      expect(resultado.publicadas).toEqual([una.slug]);
+      expect(resultado.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
+        [larga.slug, expect.stringMatching(/tiene \d+ caracteres y el tope es 200 \(MAX_CARACTERES_DE_ATRIBUIDA\)/u)],
+        [dos.slug, expect.stringMatching(/la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1/u)],
+      ]);
+      const sin = await conAutores([sinObra]);
+      const sinFicha = await aprobar(sin, [sinObra.slug], [], { puerta: ABIERTA });
+      expect(sinFicha.publicadas).toEqual([]);
+      expect(sinFicha.rechazadasPorAdmision[0].motivos.join(' ')).toMatch(/«ana-ejemplo», sin Personaje.*pregunta 23/u);
+    });
+
+    it('la primera de una Obra sin ficha se aprueba y escribe su ficha; dos de esa Obra nueva cuentan juntas', async () => {
+      const una = deAna('ana-ejemplo-una-nueva', 'La primera de una obra que aún no tiene ficha.');
+      const rutas = await conAutores([una]);
+      const resultado = await aprobar(rutas, [una.slug], [], { puerta: ABIERTA });
+      expect(resultado.rechazadasPorAdmision).toEqual([]);
+      expect(resultado.publicadas).toEqual([una.slug]);
+      expect(await readdir(rutas.obras)).toContain('ana-ejemplo--obras-de-ana.yml');
+
+      const dos = deAna('ana-ejemplo-dos-nueva', 'La segunda de esa obra, que ya no cabe en ella.');
+      const juntas = await conAutores([una, dos]);
+      const pasada = await aprobar(juntas, [una.slug, dos.slug], [], { puerta: { ...ABIERTA, maxPorObra: 1 } });
+      expect(pasada.publicadas).toEqual([una.slug]);
+      expect(pasada.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
+        [dos.slug, expect.stringMatching(/la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1/u)],
+      ]);
+    });
+
+    describe('Historia 35.11 — la traducción propia la aprueban dos agentes, y queda anotado', () => {
+      const PARTIDA = { texto: 'A sentence nobody else ever said.', lengua: 'en' };
+      const propia = () =>
+        deAna('ana-ejemplo-la-traducida', 'Una frase que nadie más dijo jamás en ninguna lengua.', {
+          origen: 'traduccion-propia',
+          partida: PARTIDA,
+        });
+      /** Todo lo que una negativa no puede cambiar: el Corpus entero, registros incluidos. */
+      const instantanea = async (rutas: Rutas) => {
+        const salida: Record<string, string> = {};
+        for (const e of await readdir(rutas.raiz, { recursive: true, withFileTypes: true })) {
+          if (!e.isFile()) continue;
+          const ruta = join(e.parentPath, e.name);
+          salida[ruta] = await readFile(ruta, 'utf8');
+        }
+        return salida;
+      };
+
+      it('con dos agentes distintos la publica, anota {slug, propone, aprueba, fecha} y su clase', async () => {
+        const c = propia();
+        const rutas = await conAutores([c]);
+        await fichaDeAna(rutas);
+        const resultado = await aprobar(rutas, [c.slug], [], { puerta: ABIERTA, agentes: { propone: ' agente-a ', aprueba: 'agente-b' } });
+        expect(resultado.rechazadasPorAdmision).toEqual([]);
+        expect(resultado.publicadas).toEqual([c.slug]);
+        const [entrada] = await leerAprobaciones(rutas);
+        expect(entrada).toEqual({ slug: c.slug, propone: 'agente-a', aprueba: 'agente-b', fecha: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u) });
+        expect(await readFile(rutas.aprobacionesDeAtribuidas, 'utf8')).toMatch(/^# Aprobaciones de la traducción propia/u);
+        expect(await readFile(rutas.clasesDeCita, 'utf8')).toMatch(new RegExp(`slug: "${c.slug}", clase: atribuida`, 'u'));
+      });
+
+      it.each<[string, { propone?: string; aprueba?: string } | undefined, RegExp]>([
+        ['sin agentes', undefined, /falta --propone y falta --aprueba/u],
+        ['sin --aprueba', { propone: 'Ana' }, /falta --aprueba/u],
+        ['el mismo agente, recortado y en minúsculas', { propone: 'Ana', aprueba: ' ana ' }, /dicen el mismo/u],
+        ['un agente en blanco', { propone: '  ', aprueba: 'b' }, /--propone está en blanco/u],
+      ])('%s: sale sin escribir nada', async (_, agentes, motivo) => {
+        const c = propia();
+        const rutas = await conAutores([c]);
+        await fichaDeAna(rutas);
+        const antes = await instantanea(rutas);
+        const resultado = await aprobar(rutas, [c.slug], [], { puerta: ABIERTA, ...(agentes ? { agentes } : {}) });
+        expect(resultado.agentesRechazados).toMatch(motivo);
+        expect(resultado.publicadas).toEqual([]);
+        expect(await instantanea(rutas)).toEqual(antes);
+      });
+
+      it('agentes sin ninguna traducción propia en la pasada: sale sin escribir nada', async () => {
+        const feliz = deAna('ana-ejemplo-la-feliz', 'Una frase que nadie más ha dicho nunca.');
+        const rutas = await conAutores([feliz]);
+        await fichaDeAna(rutas);
+        const antes = await instantanea(rutas);
+        const resultado = await aprobar(rutas, [feliz.slug], [], { puerta: ABIERTA, agentes: { propone: 'a', aprueba: 'b' } });
+        expect(resultado.agentesRechazados).toMatch(/solo la traducción propia lleva dos agentes/u);
+        expect(await instantanea(rutas)).toEqual(antes);
+      });
+
+      it('si el registro falla tras escribirla, vuelve a corpus/_revision/ con su contenido de antes y sin clase', async () => {
+        const c = propia();
+        const rutas = await conAutores([c]);
+        await fichaDeAna(rutas);
+        // Un registro sin su clave: el añadido se juzga y se niega después de publicar la Cita.
+        await writeFile(rutas.aprobacionesDeAtribuidas, 'otra: cosa\n', 'utf8');
+        const candidata = join(rutas.revision, `${c.slug}.md`);
+        const antes = await readFile(candidata, 'utf8');
+        const resultado = await aprobar(rutas, [c.slug], [], {
+          puerta: ABIERTA,
+          agentes: { propone: 'a', aprueba: 'b' },
+        });
+        expect(resultado.aprobacionesSinAnotar?.devueltas).toEqual([c.slug]);
+        expect(resultado.aprobacionesSinAnotar?.motivo).toMatch(/falta la clave «aprobaciones:»/u);
+        expect(resultado.publicadas).toEqual([]);
+        expect(await readFile(candidata, 'utf8')).toBe(antes);
+        expect(existsSync(join(rutas.citas, `${c.slug}.md`))).toBe(false);
+        const clases = existsSync(rutas.clasesDeCita) ? await readFile(rutas.clasesDeCita, 'utf8') : '';
+        expect(clases).not.toContain(c.slug);
+      });
+
+      it('con Temas de la orden (la reescribe), si el registro falla también vuelve con su contenido de antes', async () => {
+        const c = propia();
+        const rutas = await conAutores([c]);
+        await fichaDeAna(rutas);
+        await writeFile(rutas.aprobacionesDeAtribuidas, 'otra: cosa\n', 'utf8');
+        const candidata = join(rutas.revision, `${c.slug}.md`);
+        const antes = await readFile(candidata, 'utf8');
+        const resultado = await aprobar(rutas, [c.slug], [TEMA_PUBLICADO], { puerta: ABIERTA, agentes: { propone: 'a', aprueba: 'b' } });
+        expect(resultado.aprobacionesSinAnotar?.devueltas).toEqual([c.slug]);
+        expect(await readFile(candidata, 'utf8')).toBe(antes);
+        expect((await readdir(rutas.citas)).filter((f) => f.includes('la-traducida'))).toEqual([]);
+      });
+
+      it('una pasada que se interrumpe tras publicar una traducción propia anota su aprobación', async () => {
+        const c = propia();
+        const segunda = deAna('ana-ejemplo-la-segunda', 'Otra frase que tampoco dijo nadie en ninguna parte.', {
+          origen: 'traduccion-propia',
+          partida: { texto: 'Another sentence nobody said.', lengua: 'en' },
+        });
+        const rutas = await conAutores([c, segunda]);
+        await fichaDeAna(rutas);
+        // Un fichero con el nombre que tomaría la segunda (y otro slug): `mover` no pisa y lanza a
+        // media pasada, con la primera ya en corpus/citas/.
+        await writeFile(
+          join(rutas.citas, `${segunda.slug}.md`),
+          ficheroDeCita({ ...CANDIDATA_COMPLETA, slug: 'seneca-ajena', texto: 'Una ajena.' }),
+          'utf8',
+        );
+        await writeFile(rutas.clasesDeCita, `${CABECERA_DE_CLASES}  - { slug: "seneca-ajena", clase: siempre, fecha: "2026-11-01" }\n`, 'utf8');
+        const lanzado = await aprobar(rutas, [c.slug, segunda.slug], [], {
+          puerta: ABIERTA,
+          agentes: { propone: 'agente-a', aprueba: 'agente-b' },
+        }).then(
+          () => undefined,
+          (error: unknown) => error,
+        );
+        expect(lanzado).toBeInstanceOf(PublicacionInterrumpida);
+        expect((lanzado as PublicacionInterrumpida).publicadas).toEqual([c.slug]);
+        expect((await leerAprobaciones(rutas)).map((e) => [e.slug, e.propone, e.aprueba])).toEqual([[c.slug, 'agente-a', 'agente-b']]);
+      });
+    });
+
+    it('el mínimo de dominios sigue a la puerta: dos direcciones de un mismo dominio no bastan con MIN 2', async () => {
+      const escasa = deAna('ana-ejemplo-escasa', 'Una frase atestiguada dos veces por el mismo sitio.', {
+        atestiguaciones: [
+          { url: 'https://es.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+          { url: 'https://en.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+        ],
+      });
+      const rutas = await conAutores([escasa]);
+      await fichaDeAna(rutas);
+      const resultado = await aprobar(rutas, [escasa.slug], [], { puerta: ABIERTA });
+      expect(resultado.publicadas).toEqual([]);
+      expect(resultado.rechazadasPorAdmision[0].motivos.join(' ')).toMatch(/la atestigua 1 dominio registrable/u);
+    });
+
+    it('sin Tema publicado tampoco se aprueba: la atribuida necesita Tema como toda Cita', async () => {
+      const feliz = deAna('ana-ejemplo-sin-tema', 'Una frase que nadie más ha dicho nunca.', { temas: [] });
+      const rutas = await conAutores([feliz]);
+      await fichaDeAna(rutas);
+      const resultado = await aprobar(rutas, [feliz.slug], [], { puerta: ABIERTA });
+      expect(resultado.publicadas).toEqual([]);
+      expect(resultado.rechazadasPorTema.map((r) => r.slug)).toEqual([feliz.slug]);
+    });
+  });
+
+  it('con el registro ilegible no publica nada', async () => {
+    const rutas = await conAutores([CANDIDATA_COMPLETA]);
+    await writeFile(rutas.clasesDeCita, 'clases: [roto\n', 'utf8');
+    await expect(aprobar(rutas, [CANDIDATA_COMPLETA.slug])).rejects.toThrow(/clases-de-cita\.yml/u);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+  });
+
+  /** `tools/revisar.ts --aprobar` sobre el Corpus dado: código y salida entera. */
+  const revisar = async (rutas: Rutas, ...slugs: string[]) => {
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const raiz = join(import.meta.dirname, '..', '..');
+    return promisify(execFile)('npx', ['tsx', join(raiz, 'tools/revisar.ts'), '--corpus', rutas.raiz, ...(slugs[0]?.startsWith('--') ? [] : ['--aprobar']), ...slugs], {
+      cwd: raiz,
+    }).then(
+      (r) => ({ codigo: 0, salida: `${r.stdout}${r.stderr}` }),
+      (e: { code?: number; stdout?: string; stderr?: string }) => ({ codigo: e.code ?? 1, salida: `${e.stdout ?? ''}${e.stderr ?? ''}` }),
+    );
+  };
+
+  it('publicada pero sin anotar —el añadido falla tras moverla—: registroSinAnotar, y la orden sale con 1 dando la siembra', async () => {
+    const rutas = await conAutores([CANDIDATA_COMPLETA]);
+    // Se lee bien y no se deja escribir: el fallo llega después de publicar.
+    await writeFile(rutas.clasesDeCita, CABECERA_DE_CLASES, 'utf8');
+    await chmod(rutas.clasesDeCita, 0o444);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect(resultado.registroSinAnotar).toBeDefined();
+    expect(await readFile(rutas.clasesDeCita, 'utf8')).toBe(CABECERA_DE_CLASES);
+
+    const otra = await conAutores([CANDIDATA_COMPLETA]);
+    await writeFile(otra.clasesDeCita, CABECERA_DE_CLASES, 'utf8');
+    await chmod(otra.clasesDeCita, 0o444);
+    const { codigo, salida } = await revisar(otra, CANDIDATA_COMPLETA.slug);
+    expect(codigo, salida).toBe(1);
+    expect(salida).toContain('Las publicadas no se anotaron en corpus/clases-de-cita.yml');
+    expect(salida).toContain(ORDEN_SEMBRAR_CLASES);
+  }, 60_000);
+
+  it('Historia 35.11 — la orden pasa --propone y --aprueba a la aprobación, y su forma sale con 2', async () => {
+    const rutas = await conAutores([CANDIDATA_COMPLETA]);
+    const antes = await readdir(rutas.revision);
+    // Los dos agentes llegan a `aprobar`: sobre una de siempre los rechaza con su motivo, no con «falta».
+    const dados = await revisar(rutas, CANDIDATA_COMPLETA.slug, '--propone', 'agente-a', '--aprueba', 'agente-b');
+    expect(dados.codigo, dados.salida).toBe(1);
+    expect(dados.salida).toContain('solo la traducción propia lleva dos agentes');
+    const repetida = await revisar(rutas, CANDIDATA_COMPLETA.slug, '--propone', 'a', '--propone', 'b', '--aprueba', 'c');
+    expect(repetida.codigo, repetida.salida).toBe(2);
+    expect(repetida.salida).toContain('«--propone» está repetida');
+    const sinAprobar = await revisar(rutas, '--rechazar', CANDIDATA_COMPLETA.slug, '--propone', 'a');
+    expect(sinAprobar.codigo, sinAprobar.salida).toBe(2);
+    expect(sinAprobar.salida).toContain('«--propone» solo acompaña a «--aprobar»');
+    expect(await readdir(rutas.revision)).toEqual(antes);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+  }, 60_000);
+
+  it('una pasada que se interrumpe tras publicar anota lo publicado, y la orden no dice «ninguna publicada»', async () => {
+    const segunda = { ...CANDIDATA_COMPLETA, texto: 'Otra sentencia distinta de Séneca.', slug: 'seneca-otra-sentencia' };
+    const preparar = async () => {
+      const rutas = await conAutores([CANDIDATA_COMPLETA, segunda]);
+      // Un fichero publicado con el nombre que tomaría la segunda (y otro slug): `mover` no pisa,
+      // y lanza a media pasada, con la primera ya en corpus/citas/.
+      await writeFile(join(rutas.citas, `${segunda.slug}.md`), ficheroDeCita({ ...CANDIDATA_COMPLETA, slug: 'seneca-ajena', texto: 'Una ajena.' }), 'utf8');
+      await writeFile(rutas.clasesDeCita, `${CABECERA_DE_CLASES}  - { slug: "seneca-ajena", clase: siempre, fecha: "2026-11-01" }\n`, 'utf8');
+      return rutas;
+    };
+
+    const rutas = await preparar();
+    const lanzado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug, segunda.slug]).then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    expect(lanzado).toBeInstanceOf(PublicacionInterrumpida);
+    expect((lanzado as PublicacionInterrumpida).publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect((await leerRegistroDeClases(rutas)).map((e) => e.slug)).toEqual(['seneca-ajena', CANDIDATA_COMPLETA.slug]);
+
+    const { codigo, salida } = await revisar(await preparar(), CANDIDATA_COMPLETA.slug, segunda.slug);
+    expect(codigo, salida).toBe(1);
+    expect(salida).toMatch(new RegExp(`tras publicar 1 Cita \\(${CANDIDATA_COMPLETA.slug}\\)`, 'u'));
+    expect(salida).not.toContain('No se ha publicado ninguna candidata');
+  }, 60_000);
 });
 
 describe('Historia 29.2 — aprobar publica la candidata con los saltos de su documento de verso', () => {

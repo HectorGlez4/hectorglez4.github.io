@@ -47,10 +47,12 @@ const FLECHA = '→';
 describe('Historia 24.5 — `siguienteCita`, sin construir', () => {
   const obra = (nombre: string, recuento: number): ObraResuelta => ({
     nombre,
+    dueño: { tipo: 'autor', slug: nombre.split('--')[0] },
     autor: nombre.split('--')[0],
     titulo: nombre,
     fuentes: ['wikisource-es'],
     edicionCotejada: true,
+    derechosVigentes: false,
     temas: [],
     recuento,
   });
@@ -154,6 +156,27 @@ describe('Historia 24.5 — `siguienteCita`, sin construir', () => {
     const x = sola('seneca-x', 'seneca', ['la-vida']);
     const suyas = ['seneca-a', 'seneca-b', 'seneca-c'].map((s) => cita(s, 'seneca', ['la-vida']));
     expect(siguienteCita(x.cita, x.porObra, PUBLICADOS, new Map([['la-vida', [...suyas, x.cita]]]))).toBeUndefined();
+  });
+
+  it('Historia 35.4 — por el Tema, otro dueño: un Personaje cuenta como dueño, también con Autor', () => {
+    // Batman (sin Autor), Batman con Séneca, Joker con Séneca y Séneca solo, en un Tema.
+    const deObra = (slug: string) => obra(`${slug}--libro`, 1);
+    const batman = { ...cita('batman-a', 'x', ['la-vida'], deObra('batman-a')), autor: undefined, personaje: 'batman' };
+    const batmanConSeneca = { ...cita('seneca-b', 'seneca', ['la-vida'], deObra('seneca-b')), personaje: 'batman' };
+    const jokerConSeneca = { ...cita('seneca-c', 'seneca', ['la-vida'], deObra('seneca-c')), personaje: 'joker' };
+    const seneca = cita('seneca-d', 'seneca', ['la-vida'], deObra('seneca-d'));
+    const todas = [batman, batmanConSeneca, jokerConSeneca, seneca];
+    const porObra = new Map(todas.map((c) => [c.obra!.nombre, [c]]));
+    const listados = new Map([['la-vida', todas]]);
+    const destino = (c: Cita) => siguienteCita(c, porObra, PUBLICADOS, listados)?.cita.slug;
+    // De Batman a Joker: la siguiente, Batman con Séneca, es del mismo dueño de sus rutas.
+    expect(destino(batman)).toBe('seneca-c');
+    // De Batman con Séneca, a Joker con Séneca: el mismo Autor, otro Personaje.
+    expect(destino(batmanConSeneca)).toBe('seneca-c');
+    // De Joker con Séneca, a Séneca solo: el mismo Autor, pero su dueño es el Autor.
+    expect(destino(jokerConSeneca)).toBe('seneca-d');
+    // De Séneca solo, con vuelta, a Batman.
+    expect(destino(seneca)).toBe('batman-a');
   });
 
   it('grupo roto: la Cita no está en el grupo de su Obra, o el grupo falta, y lanza nombrando Cita y ficha', () => {

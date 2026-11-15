@@ -7,6 +7,11 @@ import {
   fechaDeConsulta,
   fragmentoParaInsertar,
   citaTieneComoCitar,
+  cierreDeMasDelPersonaje,
+  firmaDeCita,
+  lineaDeProcedencia,
+  procedenciaCompuesta,
+  textoParaCopiar,
   nombreEnAtribucion,
   nombreEnReferencia,
   partesDelNombre,
@@ -223,8 +228,10 @@ describe('Historia 30.3 — las Referencias de la tabla, literales', () => {
     ]);
   });
 
-  it('toda Cita lleva «Cómo citar» (la 35.4 añadirá la Cita atribuida)', () => {
+  it('toda Cita lleva «Cómo citar» salvo la atribuida (Historia 35.4, FR-65)', () => {
     expect(citaTieneComoCitar(citaDe())).toBe(true);
+    expect(citaTieneComoCitar(citaDe({ clase: 'atribuida' }))).toBe(false);
+    expect(citaTieneComoCitar({})).toBe(true);
   });
 });
 
@@ -536,18 +543,18 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
   ];
 
   it.each(tabla)('$caso', ({ cita, autor, esperado }) => {
-    expect(fragmentoParaInsertar(cita, autor, U)).toBe(esperado);
+    expect(fragmentoParaInsertar(cita, autor, U, undefined)).toBe(esperado);
   });
 
   it('la Cita de prueba larga pasa de `MAX_CARACTERES_IMAGEN` y va entera', () => {
     expect(largo.length).toBeGreaterThanOrEqual(400);
     expect(largo.length).toBeGreaterThan(MAX_CARACTERES_IMAGEN);
-    expect(fragmentoParaInsertar(citaDe({ texto: largo }), MARTI, U)).toContain(`<p>${largo}</p>`);
+    expect(fragmentoParaInsertar(citaDe({ texto: largo }), MARTI, U, undefined)).toContain(`<p>${largo}</p>`);
   });
 
   it('el `href` también sale escapado', () => {
     // Una comilla no llega: el parser la escribe `%22` y la canónica no normalizada se rechaza.
-    expect(fragmentoParaInsertar(citaDe(), MARTI, 'https://ejemplo.org/cita/a&b/')).toContain('href="https://ejemplo.org/cita/a&amp;b/"');
+    expect(fragmentoParaInsertar(citaDe(), MARTI, 'https://ejemplo.org/cita/a&b/', undefined)).toContain('href="https://ejemplo.org/cita/a&amp;b/"');
   });
 
   it.each([
@@ -565,14 +572,127 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
     'https://ejemplo.org/cita/x/\n',
     'https://usuario:clave@ejemplo.org/cita/x/',
   ])('una canónica «%s» detiene la construcción', (canonica) => {
-    expect(() => fragmentoParaInsertar(citaDe(), MARTI, canonica)).toThrow(/canónica/);
+    expect(() => fragmentoParaInsertar(citaDe(), MARTI, canonica, undefined)).toThrow(/canónica/);
   });
 
   it('`nombreEnAtribucion` da el `nombre`, revisada la clave o no', () => {
-    expect(nombreEnAtribucion(MARTI)).toBe('José Martí');
-    expect(nombreEnAtribucion(MARTI_SIN_REVISAR)).toBe('José Martí');
-    expect(nombreEnAtribucion(autorDe('Horacio', 'Horacio'))).toBe('Horacio');
+    expect(nombreEnAtribucion(citaDe(), { autor: MARTI })).toBe('José Martí');
+    expect(nombreEnAtribucion(citaDe(), { autor: MARTI_SIN_REVISAR })).toBe('José Martí');
+    expect(nombreEnAtribucion(citaDe(), { autor: autorDe('Horacio', 'Horacio') })).toBe('Horacio');
   });
+
+  it('`nombreEnAtribucion` da el Personaje si lo hay (Historia 35.4)', () => {
+    expect(nombreEnAtribucion(citaDe(), { autor: MARTI, personaje: { nombre: 'Batman' } })).toBe('Batman');
+    expect(nombreEnAtribucion(citaDe(), { personaje: { nombre: 'Batman' } })).toBe('Batman');
+    expect(() => nombreEnAtribucion(citaDe(), {})).toThrow(/sin Autor ni Personaje/);
+  });
+});
+
+// ─── Historia 35.4 — el Personaje va donde va el Autor ───────────────────────
+
+describe('Historia 35.4 — la firma de una Cita, en orden fijo Personaje, Obra, Autor', () => {
+  const SENECA = autorDe('Séneca');
+  const BATMAN = { nombre: 'Batman' };
+  const conObra = citaDe({ texto: 'Soy la noche.', procedencia: { año: 2000 }, obra: obra('Obras de Séneca') });
+  const sinObra = citaDe({ texto: 'Soy la noche.', procedencia: { año: 2000 }, obra: undefined });
+  const sinObraNiAño = citaDe({ texto: 'Soy la noche.', procedencia: {}, obra: undefined });
+  const soloObra = citaDe({ texto: 'Soy la noche.', procedencia: {}, obra: obra('El caballero') });
+
+  it.each<[string, Cita, Parameters<typeof firmaDeCita>[1], ReturnType<typeof firmaDeCita>]>([
+    ['Personaje y Autor, con Obra', conObra, { autor: SENECA, personaje: BATMAN }, { nombre: 'Batman', titulo: 'Obras de Séneca', deAutor: 'Séneca', año: 2000 }],
+    ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, { nombre: 'Batman', deAutor: 'Séneca', año: 2000 }],
+    ['Personaje solo, con Obra', soloObra, { personaje: BATMAN }, { nombre: 'Batman', titulo: 'El caballero' }],
+    ['Autor solo, como siempre', conObra, { autor: SENECA }, { nombre: 'Séneca', titulo: 'Obras de Séneca', año: 2000 }],
+  ])('%s', (_, cita, quienes, esperada) => {
+    expect(firmaDeCita(cita, quienes)).toEqual(esperada);
+  });
+
+  it.each<[string, Cita, Parameters<typeof firmaDeCita>[1], string, string | undefined]>([
+    ['Personaje y Autor, con Obra', conObra, { autor: SENECA, personaje: BATMAN }, '«Soy la noche.» — Batman, Obras de Séneca, de Séneca, 2000.', 'Obras de Séneca, de Séneca, 2000'],
+    ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, '«Soy la noche.» — Batman, de Séneca, 2000.', 'de Séneca, 2000'],
+    ['Personaje y Autor, sin Obra ni año', sinObraNiAño, { autor: SENECA, personaje: BATMAN }, '«Soy la noche.» — Batman, de Séneca.', 'de Séneca'],
+    ['Personaje solo, con Obra', soloObra, { personaje: BATMAN }, '«Soy la noche.» — Batman, El caballero.', 'El caballero'],
+    ['Autor solo, como siempre', conObra, { autor: SENECA }, '«Soy la noche.» — Séneca, Obras de Séneca, 2000.', 'Obras de Séneca, 2000'],
+  ])('lo copiado y la procedencia de la Imagen y la Tarjeta: %s', (_, cita, quienes, copiado, procedencia) => {
+    expect(textoParaCopiar(cita, quienes.autor, quienes.personaje)).toBe(copiado);
+    expect(procedenciaCompuesta(cita, quienes)).toBe(procedencia);
+  });
+
+  it('la traducción sigue detrás, como siempre', () => {
+    const traducida = citaDe({
+      texto: 'Soy la noche.',
+      procedencia: { año: 2000, traduccion: { traductor: 'Ana Ruiz', año: 2001 } },
+      obra: obra('Obras de Séneca'),
+    });
+    expect(textoParaCopiar(traducida, SENECA, BATMAN)).toBe(
+      '«Soy la noche.» — Batman, Obras de Séneca, de Séneca, 2000, trad. de Ana Ruiz, 2001.',
+    );
+  });
+
+  it.each<[string, Cita, Parameters<typeof firmaDeCita>[1], string]>([
+    ['Personaje y Autor, con Obra', conObra, { autor: SENECA, personaje: BATMAN }, '<p>— Batman, <cite>Obras de Séneca</cite>, de Séneca. <a'],
+    ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, '<p>— Batman, de Séneca. <a'],
+    ['Personaje solo, con Obra', soloObra, { personaje: BATMAN }, '<p>— Batman, <cite>El caballero</cite>. <a'],
+    ['Personaje solo, sin Obra', sinObraNiAño, { personaje: BATMAN }, '<p>— Batman. <a'],
+    ['Autor solo, como siempre', conObra, { autor: SENECA }, '<p>— Séneca, <cite>Obras de Séneca</cite>. <a'],
+  ])('el Fragmento: %s', (_, cita, quienes, firma) => {
+    expect(fragmentoParaInsertar(cita, quienes.autor, U, quienes.personaje)).toContain(firma);
+  });
+
+  it.each<[string, Cita, Parameters<typeof firmaDeCita>[1], ReturnType<typeof lineaDeProcedencia>]>([
+    ['Personaje y Autor, con Obra', conObra, { autor: SENECA, personaje: BATMAN }, { titulo: 'Obras de Séneca', deAutor: { antes: ', de ', nombre: 'Séneca' }, resto: ', 2000.' }],
+    ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, { deAutor: { antes: 'de ', nombre: 'Séneca' }, resto: ', 2000.' }],
+    ['Personaje y Autor, sin Obra ni año', sinObraNiAño, { autor: SENECA, personaje: BATMAN }, { deAutor: { antes: 'de ', nombre: 'Séneca' }, resto: '.' }],
+    ['Personaje solo, sin Obra: la línea de siempre', sinObraNiAño, { personaje: BATMAN }, { resto: 'Sin obra documentada.' }],
+    ['Personaje y Autor, con Obra y sin año: la ausencia del año se dice, como con el Autor solo', soloObra, { autor: SENECA, personaje: BATMAN }, { titulo: 'El caballero', deAutor: { antes: ', de ', nombre: 'Séneca' }, resto: '. Sin año documentado.' }],
+    ['Personaje solo, con Obra y sin año', soloObra, { personaje: BATMAN }, { titulo: 'El caballero', resto: '. Sin año documentado.' }],
+    ['Autor solo, con Obra y sin año, como siempre', soloObra, { autor: SENECA }, { titulo: 'El caballero', resto: '. Sin año documentado.' }],
+    ['Autor solo, como siempre', conObra, { autor: SENECA }, { titulo: 'Obras de Séneca', resto: ', 2000.' }],
+  ])('la línea de Obra de la Atribución: %s', (_, cita, quienes, esperada) => {
+    expect(lineaDeProcedencia(cita, quienes)).toEqual(esperada);
+  });
+
+  it('una Cita sin Autor ni Personaje no tiene firma', () => {
+    expect(() => firmaDeCita(conObra, {})).toThrow(/sin Autor ni Personaje/);
+    expect(() => textoParaCopiar(conObra, undefined, undefined)).toThrow(/sin Autor ni Personaje/);
+  });
+
+  it('el cierre de «Más de {Personaje}», con la regla del de Autor', () => {
+    expect(cierreDeMasDelPersonaje(BATMAN, 5)).toBe('Las 5 citas de Batman');
+    expect(() => cierreDeMasDelPersonaje(BATMAN, 1)).toThrow(/dos Citas o más/);
+  });
+});
+
+describe('Historia 35.8 — la línea de retirada', async () => {
+  const { lineaDeRetirada } = await import('../../src/lib/atribucion.ts');
+
+  it('en la Página de Cita, la pregunta, el enlace y el asunto con el slug codificado', () => {
+    expect(lineaDeRetirada({ sobre: 'cita', slug: 'buzz-hasta-el-infinito' }, ' peticiones@ejemplo.org ')).toEqual({
+      pregunta: '¿Esta cita está mal atribuida o te afecta? ',
+      enlace: 'Pide que se corrija o se retire.',
+      href: 'mailto:peticiones@ejemplo.org?subject=Corregir%20o%20retirar%20la%20cita%20buzz-hasta-el-infinito',
+      direccion: 'peticiones@ejemplo.org',
+    });
+  });
+
+  it('en la de Personaje, la pregunta por las citas de la página', () => {
+    const linea = lineaDeRetirada({ sobre: 'personaje', slug: 'buzz' }, 'peticiones@ejemplo.org');
+    expect(linea.pregunta).toBe('¿Alguna cita de esta página está mal atribuida o te afecta? ');
+    expect(linea.enlace).toBe('Pide que se corrija o se retire.');
+    expect(linea.href).toBe('mailto:peticiones@ejemplo.org?subject=Corregir%20o%20retirar%20citas%20del%20personaje%20buzz');
+  });
+
+  it('sin buzón —sin valor o en blanco— lanza nombrando la constante', () => {
+    expect(() => lineaDeRetirada({ sobre: 'cita', slug: 'x' }, undefined)).toThrow(/BUZON_DE_PETICIONES/u);
+    expect(() => lineaDeRetirada({ sobre: 'personaje', slug: 'x' }, '   ')).toThrow(/BUZON_DE_PETICIONES/u);
+  });
+
+  it.each(['peticiones', 'peticiones@ejemplo', 'pe ticiones@ejemplo.org', 'peticiones@ejemplo.org?cc=otro@x.org', 'a@b.org&x', 'a@b.org,otro@x.org', 'a@b.org;otro@x.org', 'a%40@b.org', '"a"@b.org', '<a@b.org>'])(
+    'con un buzón que no es una dirección de correo lanza nombrando la constante: %s',
+    (buzon) => {
+      expect(() => lineaDeRetirada({ sobre: 'cita', slug: 'x' }, buzon)).toThrow(/BUZON_DE_PETICIONES.*no es una dirección de correo/u);
+    },
+  );
 });
 
 /*

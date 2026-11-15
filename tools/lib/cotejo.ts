@@ -15,6 +15,7 @@ import { createHash } from 'node:crypto';
 import { CLASE_BIOGRAFIA, nombreDeBiografia, nombreDeDocumento } from './documento.ts';
 import { fuenteDe, fuenteDeUrl, revisionExacta } from './fuentes.ts';
 import { ENLACES_DE_LICENCIA } from '../../src/lib/biografia.ts';
+import { esAtribuida } from '../../src/lib/clase.ts';
 import {
   esFormaDeLineas,
   esFormaDeVerso,
@@ -490,9 +491,11 @@ function reglaDelSalto(
  * `undefined` es «puede publicarse». Devuelve motivo cuando no.
  */
 export function motivoParaNoPublicar(
-  cita: { slug: string; texto: string; fuente?: unknown },
+  cita: { slug: string; texto: string; fuente?: unknown; clase?: unknown },
   censoDePartida: Readonly<Record<string, string>> = CENSO_DE_PARTIDA,
 ): string | undefined {
+  // Historia 35.1b — la atribuida no se coteja: no se le exige Fuente aunque la declare.
+  if (esAtribuida(cita)) return undefined;
   if (cita.fuente !== undefined && cita.fuente !== null) return undefined;
 
   const huellaCensada = censoDePartida[cita.slug];
@@ -521,6 +524,11 @@ export interface CitaParaCotejar {
   /** La obra de su Procedencia, que es la mitad del nombre del documento. */
   obra?: string;
   fuente?: { id: string; url?: string };
+  /**
+   * Historia 35.1b — la clase de la Cita, solo si es atribuida (la lee `esAtribuida`). La
+   * atribuida no se coteja ni se le exige Fuente, y no cuenta como cotejada.
+   */
+  clase?: unknown;
 }
 
 /**
@@ -670,6 +678,22 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
   }
 
   for (const cita of citas) {
+    /*
+     * Historia 35.1b — la atribuida no se coteja: no se le exige Fuente aunque la declare, y no
+     * cuenta como cotejada. Su puerta es otra (`tools/lib/atribuidas.ts`). En el censo, en
+     * cambio, no cabe: el censo ampara Citas de siempre anteriores a la v3.
+     */
+    if (esAtribuida(cita)) {
+      if (enCenso.has(cita.slug)) {
+        fallos.push({
+          ruta: cita.ruta,
+          regla:
+            `Regla incumplida: «${cita.slug}» es una Cita atribuida y está en ${rutaDelCenso}. El censo ` +
+            'ampara Citas de siempre sin documento; una atribuida no se coteja y no se censa: quítela del censo.',
+        });
+      }
+      continue;
+    }
     if (enCenso.has(cita.slug)) {
       if (cita.fuente !== undefined) {
         // Tiene documento y sigue exenta: la exención ya no se sostiene, y dejarla
@@ -937,6 +961,11 @@ export interface AutorParaCotejar {
    * Autor con biografía y sin semblanza no pasa la puerta.
    */
   semblanza?: string;
+  /**
+   * Historia 35.2 — quién declara la biografía, como lo nombra el fallo: «el Autor», por
+   * omisión, o «el Personaje». La semblanza de un Personaje se coteja con la misma regla.
+   */
+  quien?: 'el Autor' | 'el Personaje';
 }
 
 /**
@@ -995,14 +1024,16 @@ export function cotejarBiografias(
 
     const ruta = `${carpeta}/${declarada.documento}.txt`;
     const regla = (detalle: string) => ({ ruta: autor.ruta, regla: `Regla incumplida: ${detalle}` });
-    const delante = `el Autor declara la biografía ${ruta} (revisión ${declarada.revision}) y`;
+    const quien = autor.quien ?? 'el Autor';
+    const orden = quien === 'el Personaje' ? 'tools/personaje.ts' : 'tools/autor.ts';
+    const delante = `${quien} declara la biografía ${ruta} (revisión ${declarada.revision}) y`;
 
     if (!documentos.has(declarada.documento)) {
       fallos.push(
         regla(
           `${delante} ese documento no existe. Recupere esa revisión con: npx tsx ` +
             'tools/recuperar.ts "<enlace permanente con oldid>", y declárela con: npx tsx ' +
-            'tools/autor.ts biografia <slug> <documento>.',
+            `${orden} biografia <slug> <documento>.`,
         ),
       );
       continue;
@@ -1037,7 +1068,7 @@ export function cotejarBiografias(
     if (cabecera.revision !== declarada.revision) {
       fallos.push(
         regla(
-          `el Autor declara la revisión ${declarada.revision} de su biografía y ${ruta} es ` +
+          `${quien} declara la revisión ${declarada.revision} de su biografía y ${ruta} es ` +
             `la revisión ${cabecera.revision}. Una revisión distinta es otro documento: ` +
             'recupérela, o declare la que está versionada.',
         ),
@@ -1104,7 +1135,7 @@ export function cotejarBiografias(
     if (typeof autor.semblanza !== 'string' || autor.semblanza.trim() === '') {
       fallos.push(
         regla(
-          `${delante} no tiene semblanza que cotejar. La semblanza de un Autor con biografía ` +
+          `${delante} no tiene semblanza que cotejar. La semblanza de ${quien === 'el Personaje' ? 'un Personaje' : 'un Autor'} con biografía ` +
             'es el texto literal de esa revisión.',
         ),
       );

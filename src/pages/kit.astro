@@ -22,17 +22,24 @@ import portada from '../../corpus/portada.json';
 import { aptasParaPortada, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { materialDelKit } from '../lib/kit.ts';
 import { tituloDe } from '../lib/marca.ts';
-import { fijacionesDeclaradas } from '../lib/portada.ts';
+import { fijacionesDeclaradas, fijacionesSinAtribuidas } from '../lib/portada.ts';
 import { conjuntoPublicable } from '../lib/publicado.ts';
 
 const conjunto = await conjuntoPublicable();
 const jornada = jornadaDelBuild(process.env, new Date());
 // El fichero se puede editar a mano y ningún esquema lo juzga: se lee por el único lector
 // del sitio, que descarta lo que no entiende en vez de tumbar el build (Historia 13.1).
-const fijaciones = fijacionesDeclaradas(portada);
+// Historia 35.7 — sin las fijaciones que nombran una atribuida (pregunta 22).
+const fijaciones = fijacionesSinAtribuidas(fijacionesDeclaradas(portada), conjunto.citas);
 const material = materialDelKit(aptasParaPortada(conjunto.citas), jornada, fijaciones);
 
-const autorDe = (slug: string) => conjunto.autores.find((a) => a.slug === slug)!;
+// Las Citas del material son aptas para portada, y una apta lleva Autor (la atribuida nunca lo
+// es): si alguna no lo trajera, se para aquí.
+const autorDe = (slug: string | undefined) => {
+  const autor = conjunto.autores.find((a) => a.slug === slug);
+  if (autor === undefined) throw new Error(`El material lleva una Cita cuyo Autor «${slug ?? 'ninguno'}» no está en el Corpus.`);
+  return autor;
+};
 
 const delDia = material && { cita: material.delDia.cita, autor: autorDe(material.delDia.cita.autor) };
 const alternativa = material?.alternativa

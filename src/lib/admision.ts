@@ -14,9 +14,16 @@
  */
 
 import { z } from 'astro/zod';
-import { MAX_CARACTERES_CRITERIO, MAX_CARACTERES_NOTA_DE_OBRA } from './umbrales.ts';
+import {
+  MAX_CARACTERES_CRITERIO,
+  MAX_CARACTERES_NOTA_DE_OBRA,
+  MIN_ATESTIGUACIONES_DE_ATRIBUIDA,
+} from './umbrales.ts';
+import { dominiosQueAtestiguan } from './atestiguaciones.ts';
 import { inicialDeClave, normalizar } from './normalizar.ts';
 import { esJornada } from './jornada.ts';
+import { esAtribuida, ORIGEN_TRADUCCION_PROPIA } from './clase.ts';
+import { CLAVES_DE_REGION, esRegionDeVariante } from './variante.ts';
 import { FORMATOS_DE_EDICION, TIENDAS, esDelDominio, tiendaDe, type Tienda } from './ingreso.ts';
 
 /**
@@ -183,6 +190,363 @@ export const estadoDerechos = z.literal('dominio-público', {
 });
 
 /**
+ * La clase de una Cita — Historia 35.1, AD-32.
+ *
+ * Solo la atribuida la escribe: `clase: atribuida`. La de siempre **no lleva** el campo, y
+ * escribir `clase: siempre` es un error con mensaje propio, para que la ausencia sea la única
+ * forma de decirla y nadie tenga que adivinar si un fichero sin el campo es de siempre o un
+ * olvido. Lo lee solo `esAtribuida` de `src/lib/clase.ts`. No se teclea: el alta y la
+ * aprobación la derivan (`claseQueCorresponde`).
+ */
+export const MENSAJE_CLASE_SIEMPRE_ESCRITA =
+  'Regla incumplida: la clase de siempre no se escribe. Una Cita de dominio público, cotejada, ' +
+  'no lleva el campo «clase»; solo la atribuida lleva «clase: atribuida».';
+
+export const clase = z.literal('atribuida', {
+  error: (problema) =>
+    problema.input === 'siempre'
+      ? MENSAJE_CLASE_SIEMPRE_ESCRITA
+      : 'Regla incumplida: «clase» solo admite «atribuida»; la Cita de siempre no lleva el campo.',
+});
+
+/**
+ * El Personaje que dice una Cita atribuida — Historias 35.1 y 35.2.
+ *
+ * Aquí solo se juzga su **forma**, la de un slug. Que el Personaje exista en
+ * `corpus/personajes/` es relación entre ficheros, y la comprueba la puerta del build
+ * (`integraciones/personajes.ts`). Solo lo admite la atribuida (`reglasDeClase`).
+ */
+export const personaje = z
+  .string({ message: 'Regla incumplida: el Personaje de la Cita es un slug.' })
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Regla incumplida: el Personaje de la Cita es un slug: minúsculas, dígitos y guiones, sin diacríticos.',
+  );
+
+/**
+ * Una atestiguación de una Cita atribuida — Historia 35.1b, AD-32: la dirección `http(s)` de un
+ * sitio que la atribuye y la jornada en que se consultó. No se descarga ni se coteja: cuenta su
+ * dominio registrable (`dominioDeAtestiguacion` de `src/lib/atestiguaciones.ts`).
+ */
+export const atestiguacion = z
+  .object(
+    {
+      url: z
+        .string({ message: 'Regla incumplida: una atestiguación declara su «url».' })
+        .refine((valor) => {
+          try {
+            const leida = new URL(valor);
+            return (
+              (leida.protocol === 'http:' || leida.protocol === 'https:') &&
+              leida.username === '' &&
+              leida.password === ''
+            );
+          } catch {
+            return false;
+          }
+        }, 'Regla incumplida: la «url» de una atestiguación es una dirección http:// o https://, sin usuario ni contraseña.'),
+      consultadaEl: z
+        .string({ message: 'Regla incumplida: una atestiguación declara «consultadaEl», la jornada AAAA-MM-DD.' })
+        .refine(esJornada, 'Regla incumplida: «consultadaEl» es una jornada AAAA-MM-DD que existe.'),
+    },
+    { message: 'Regla incumplida: una atestiguación es un objeto con «url» y «consultadaEl».' },
+  )
+  .strict();
+
+export const atestiguaciones = z
+  .array(atestiguacion, { message: 'Regla incumplida: «atestiguaciones» es una lista de {url, consultadaEl}.' })
+  .min(1, 'Regla incumplida: una atribuida declara al menos una atestiguación.');
+
+/**
+ * De dónde sale la letra de una atribuida — Historia 35.1b, AD-32. `traduccion-propia` (decisión de
+ * Héctor del 2026-11-14, FR-68 v9.2; Historia 35.11): el último recurso, cuando no circula ninguna
+ * versión en español; el texto es la traducción del sitio, lleva su `partida` y la aprueban dos
+ * agentes distintos, cuyo registro lee solo el build. **Ninguna superficie pinta el origen** —ni
+ * línea, ni sello, ni hueco (UX v9.3)—: se guarda para auditar y no fecha (`CAMPOS_QUE_NO_FECHAN`).
+ * Solo la atribuida: la de siempre no declara origen y nunca se traduce (§4.11).
+ */
+export const ORIGENES = ['original', 'doblaje', 'traduccion-publicada', ORIGEN_TRADUCCION_PROPIA] as const;
+
+export const origen = z.enum(ORIGENES, {
+  message: `Regla incumplida: «origen» es uno de ${ORIGENES.map((o) => `«${o}»`).join(', ')}.`,
+});
+
+/**
+ * Los de la Variante: los mismos salvo la traducción propia. Una Variante es la letra que circula
+ * en otra región —hoy, el doblaje de España—; una traducción del sitio no es de ninguna región, y
+ * donde circula una versión en español no hace falta traducir.
+ */
+export const ORIGENES_DE_VARIANTE = ORIGENES.filter(
+  (o): o is Exclude<(typeof ORIGENES)[number], typeof ORIGEN_TRADUCCION_PROPIA> => o !== ORIGEN_TRADUCCION_PROPIA,
+);
+
+const origenDeVariante = z.enum(ORIGENES_DE_VARIANTE, {
+  message:
+    `Regla incumplida: el «origen» de la Variante es uno de ${ORIGENES_DE_VARIANTE.map((o) => `«${o}»`).join(', ')}` +
+    ' —una Variante es la letra que circula en otra región, nunca una traducción del sitio—.',
+});
+
+/**
+ * La Variante de una Cita atribuida — Historia 35.6, AD-34: la misma frase en otra región
+ * —hoy, el doblaje de España—, con su `origen`. Una como mucho, y solo en la atribuida
+ * (`reglasDeClase`). No crea slug ni URL: el slug sale solo del texto principal (AD-4).
+ * Que no repita otra Cita lo juzga `fallosDeAtribuidas` (`tools/lib/atribuidas.ts`); que vaya en
+ * una línea, `reglasDeLaAtribuida`.
+ */
+export const variante = z.strictObject(
+  {
+    texto: z
+      .string({ message: 'Regla incumplida: la Variante declara su «texto».' })
+      .min(1, 'Regla incumplida: el texto de la Variante no puede estar vacío.')
+      .refine((t) => t.trim() !== '', 'Regla incumplida: el texto de la Variante no puede estar en blanco.'),
+    region: z
+      .string({ message: 'Regla incumplida: la Variante declara su «region».' })
+      .refine(
+        esRegionDeVariante,
+        `Regla incumplida: la «region» de la Variante es una de ${CLAVES_DE_REGION.map((r) => `«${r}»`).join(', ')}.`,
+      ),
+    origen: origenDeVariante,
+  },
+  {
+    error: (problema) =>
+      problema.code === 'unrecognized_keys'
+        ? 'Regla incumplida: la Variante solo declara «texto», «region» y «origen».'
+        : 'Regla incumplida: «variante» es un objeto con «texto», «region» y «origen»; una como mucho.',
+  },
+);
+
+/**
+ * Las lenguas de las que sale una traducción propia — Historia 35.11, AD-32 v9.2: un conjunto
+ * cerrado de códigos ISO 639-1 de trabajo. Ampliarlo o renombrarlo es un diff de Héctor.
+ */
+export const LENGUAS_DE_PARTIDA = ['en', 'fr', 'it', 'de', 'pt', 'ja'] as const;
+
+/**
+ * La frase de partida de la traducción propia — Historia 35.11, AD-32 v9.2: lo que dijo su dueño en
+ * su lengua, tal cual lo traen sus atestiguaciones, con la lengua de `LENGUAS_DE_PARTIDA`, para que
+ * la fidelidad de la traducción se pueda auditar (SM-C6, segunda muestra). Obligatoria con
+ * `origen: traduccion-propia` y prohibida con cualquier otro y en la de siempre (`reglasDeClase`).
+ * El texto, en una línea. No se pinta en ninguna superficie, y por eso no fecha.
+ */
+export const partida = z.strictObject(
+  {
+    texto: z
+      .string({ message: 'Regla incumplida: la «partida» declara su «texto», la frase en su lengua.' })
+      .refine((t) => t.trim() !== '', 'Regla incumplida: el texto de la «partida» no puede estar en blanco.')
+      .refine(
+        (t) => !/[\n\r\u2028\u2029\u0085\v\f]/u.test(t),
+        'Regla incumplida: el texto de la «partida» va en una sola línea.',
+      ),
+    lengua: z.enum(LENGUAS_DE_PARTIDA, {
+      message: `Regla incumplida: la «lengua» de la «partida» es una de ${LENGUAS_DE_PARTIDA.map((l) => `«${l}»`).join(', ')}.`,
+    }),
+  },
+  {
+    error: (problema) =>
+      problema.code === 'unrecognized_keys'
+        ? 'Regla incumplida: la «partida» solo declara «texto» y «lengua».'
+        : 'Regla incumplida: «partida» es un objeto con «texto» y «lengua».',
+  },
+);
+
+/** Sin Autor ni Personaje, una Cita no tiene dueño: ni prefijo, ni fichero, ni página. */
+export const MENSAJE_CITA_SIN_DUEÑO =
+  'Regla incumplida: falta el Autor o el Personaje de la Cita. Toda Cita lleva uno de los dos, al menos: ' +
+  'es su dueño, y de él salen el prefijo de su slug y su fichero.';
+
+/**
+ * Las reglas que una Cita cumple según su clase — Historia 35.1. Las comparten `citaAdmisible`
+ * y la colección `citas` de `src/content.config.ts`, para que el alta y el build digan lo mismo:
+ *
+ *   · toda Cita lleva Autor o Personaje, al menos uno (Historia 35.2): es su dueño;
+ *   · la de siempre lleva `estadoDerechos: dominio-público` y no lleva `personaje`;
+ *   · la atribuida no lleva `estadoDerechos`: su derecho no es el dominio público.
+ *
+ * Corre aunque falle otra regla del objeto (`when`), así que no supone nada de la forma del valor.
+ */
+export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const cita = valor as Record<string, unknown>;
+  const atribuida = esAtribuida(cita);
+  if (cita.autor === undefined && cita.personaje === undefined) {
+    contexto.addIssue({ code: 'custom', path: ['autor'], message: MENSAJE_CITA_SIN_DUEÑO });
+  }
+  // Una clase sin valor admisible ya la rechaza el literal: no se juzga lo demás por ella.
+  if (cita.clase !== undefined && !atribuida) return;
+  if (atribuida) {
+    reglasDeLaAtribuida(cita, contexto);
+    if (cita.estadoDerechos !== undefined) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['estadoDerechos'],
+        message:
+          'Regla incumplida: una Cita atribuida no lleva estadoDerechos. Su derecho no es el ' +
+          'dominio público, y declararlo sería afirmar lo contrario de lo que es.',
+      });
+    }
+    return;
+  }
+  for (const campo of ['atestiguaciones', 'origen', 'partida'] as const) {
+    if (cita[campo] === undefined) continue;
+    contexto.addIssue({
+      code: 'custom',
+      path: [campo],
+      message:
+        `Regla incumplida: solo una Cita atribuida declara «${campo}». La de siempre se coteja ` +
+        'contra su documento: no se atestigua ni declara origen.',
+    });
+  }
+  if (cita.variante !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['variante'],
+      message:
+        'Regla incumplida: solo una Cita atribuida declara «variante». La de siempre se publica ' +
+        'con la letra de su documento, y otra letra sería otra Cita.',
+    });
+  }
+  if (cita.estadoDerechos === undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['estadoDerechos'],
+      message:
+        'Regla incumplida: falta estadoDerechos. Una Cita de siempre declara «dominio-público», ' +
+        'que es lo que permite publicarla.',
+    });
+  }
+  if (cita.personaje !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['personaje'],
+      message:
+        'Regla incumplida: solo una Cita atribuida declara Personaje. La de siempre es de un ' +
+        'Autor de dominio público y no lleva el campo.',
+    });
+  }
+}
+
+/**
+ * Por qué no bastan las atestiguaciones de una atribuida, o `undefined` si bastan — Historia 35.1b.
+ * Cuentan los dominios registrables distintos de `dominiosQueAtestiguan`; sin mínimo (`undefined`,
+ * la puerta cerrada), no se juzga: la puerta ya no deja publicar nada.
+ */
+export function motivoDeAtestiguacionesEscasas(urls: readonly string[], minimo: number | undefined): string | undefined {
+  if (minimo === undefined) return undefined;
+  const dominios = dominiosQueAtestiguan(urls);
+  if (dominios.length >= minimo) return undefined;
+  return (
+    `Regla incumplida: la atestigua${dominios.length === 1 ? '' : 'n'} ${dominios.length} ` +
+    `${dominios.length === 1 ? 'dominio registrable' : 'dominios registrables distintos'}` +
+    `${dominios.length > 0 ? ` (${dominios.join(', ')})` : ''} y hacen falta ${minimo} ` +
+    '(MIN_ATESTIGUACIONES_DE_ATRIBUIDA). Los subdominios de un mismo dominio cuentan uno, y BrainyQuote y el ' +
+    'propio sitio no cuentan.'
+  );
+}
+
+/**
+ * Lo que la atribuida cumple sola, sin mirar otros ficheros — Historia 35.1b, AD-32: declara sus
+ * atestiguaciones y su origen, va en una línea aunque traiga Fuente, no es apta para portada y,
+ * con `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` con valor, la atestiguan al menos tantos dominios
+ * registrables distintos. Lo que relaciona ficheros —topes, Obra, duplicados— lo juzga
+ * `tools/lib/atribuidas.ts`.
+ */
+function reglasDeLaAtribuida(cita: Record<string, unknown>, contexto: z.RefinementCtx): void {
+  if (cita.atestiguaciones === undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['atestiguaciones'],
+      message:
+        'Regla incumplida: una Cita atribuida declara sus «atestiguaciones» ({url, consultadaEl}): ' +
+        'no se coteja, se publica porque otros sitios la atestiguan.',
+    });
+  } else if (Array.isArray(cita.atestiguaciones)) {
+    const urls = cita.atestiguaciones
+      .map((a) => (a !== null && typeof a === 'object' ? (a as { url?: unknown }).url : undefined))
+      .filter((u): u is string => typeof u === 'string');
+    const motivo = motivoDeAtestiguacionesEscasas(urls, MIN_ATESTIGUACIONES_DE_ATRIBUIDA);
+    if (motivo !== undefined) contexto.addIssue({ code: 'custom', path: ['atestiguaciones'], message: motivo });
+  }
+  if (cita.origen === undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['origen'],
+      message: `Regla incumplida: una Cita atribuida declara su «origen»: ${ORIGENES.join(', ')}.`,
+    });
+  }
+  // Historias 35.10 y 35.11 — la traducción del sitio no convive con una letra que circula, y guarda su partida.
+  const traduccionPropia = cita.origen === ORIGEN_TRADUCCION_PROPIA;
+  if (traduccionPropia && cita.variante !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['variante'],
+      message:
+        'Regla incumplida: una atribuida con «origen: traduccion-propia» no declara Variante. La traducción ' +
+        'del sitio es para la frase de la que no circula ninguna versión en español, y una Variante es una ' +
+        'que circula: con ella, el texto es esa versión y su origen, el de ella.',
+    });
+  }
+  if (traduccionPropia && cita.partida === undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['partida'],
+      message:
+        'Regla incumplida: una atribuida con «origen: traduccion-propia» declara su «partida» —{texto, lengua}—, ' +
+        'la frase que dijo su dueño en su lengua, tal cual la traen sus atestiguaciones: sin ella, la traducción ' +
+        'no se puede auditar.',
+    });
+  }
+  if (!traduccionPropia && cita.partida !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['partida'],
+      message:
+        'Regla incumplida: solo una atribuida con «origen: traduccion-propia» declara «partida»: el ' +
+        'texto de las demás es la versión en español que circula, y no se tradujo de nada.',
+    });
+  }
+  if (typeof cita.texto === 'string' && cita.texto.includes('\n')) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['texto'],
+      message:
+        'Regla incumplida: una Cita atribuida va en una sola línea, aunque traiga Fuente: el salto ' +
+        'de verso es de la Cita cotejada contra su documento.',
+    });
+  }
+  const deLaVariante =
+    cita.variante !== null && typeof cita.variante === 'object' ? (cita.variante as { texto?: unknown }).texto : undefined;
+  if (typeof deLaVariante === 'string' && /[\n\r\u2028\u2029\u0085\v\f]/u.test(deLaVariante)) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['variante', 'texto'],
+      message: 'Regla incumplida: la Variante de una Cita atribuida va en una sola línea, como su texto.',
+    });
+  }
+  // Una Variante es otra letra de la frase: igual al texto (forma canónica, AD-3) no dice nada.
+  if (
+    typeof deLaVariante === 'string' &&
+    typeof cita.texto === 'string' &&
+    normalizar(deLaVariante) === normalizar(cita.texto)
+  ) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['variante', 'texto'],
+      message: 'Regla incumplida: la Variante repite el texto de la Cita; una Variante es otra letra de la frase.',
+    });
+  }
+  if (cita.aptaParaPortada === true) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['aptaParaPortada'],
+      message: 'Regla incumplida: una Cita atribuida no es apta para portada (pregunta 22).',
+    });
+  }
+}
+
+/** Las opciones con que se engancha `reglasDeClase`: corre también si otra regla falló. */
+export const CUANDO_SIEMPRE = { when: () => true } as const;
+
+/**
  * La Fuente de la que salió una Cita — Historia 11.2.
  *
  * Es lo que ata una Cita a su documento versionado en `corpus/fuentes/`: con el
@@ -268,11 +632,44 @@ export const nombre = (entidad: string, articulo = 'del') =>
     );
 
 /** AD-1 — sin año de fallecimiento no hay forma de sostener que la obra es de dominio
- * público. Es obligatorio y su ausencia rompe el build (FR-13, FR-15). */
-export const añoFallecimiento = añoEntero(
+ * público. Desde la Historia 35.1 el Autor lleva o su año de fallecimiento o `vivo: true`, uno
+ * de los dos y nunca los dos (`reglasDeAutor`); sin ninguno, el mensaje es este. */
+export const MENSAJE_SIN_FALLECIMIENTO =
   'Regla incumplida: falta el año de fallecimiento del Autor. Es obligatorio porque es ' +
-    'lo que sostiene que su obra está en dominio público.',
-);
+  'lo que sostiene que su obra está en dominio público.';
+
+export const añoFallecimiento = añoEntero(MENSAJE_SIN_FALLECIMIENTO);
+
+/**
+ * El Autor vivo — Historia 35.1. Solo admite `true`: un Autor que no está vivo lo dice con su
+ * año de fallecimiento, no con `vivo: false`. Sus Citas son atribuidas (`derechosVigentes`).
+ */
+export const vivo = z.literal(true, {
+  message: 'Regla incumplida: «vivo» solo admite true; un Autor fallecido declara su año de fallecimiento.',
+});
+
+/**
+ * Exactamente uno de `añoFallecimiento` y `vivo: true` — Historia 35.1. Lo comparten
+ * `autorAdmisible` y la colección `autores`.
+ */
+export function reglasDeAutor(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const autor = valor as Record<string, unknown>;
+  const conAño = autor.añoFallecimiento !== undefined;
+  // Solo `vivo: true` es vivo: otro valor lo rechaza el literal de `vivo`, sin un segundo error.
+  const esVivo = autor.vivo === true;
+  if (conAño && esVivo) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['vivo'],
+      message:
+        'Regla incumplida: el Autor declara a la vez «vivo: true» y su año de fallecimiento. ' +
+        'Lleva uno de los dos: el año si murió, «vivo: true» si vive.',
+    });
+  } else if (!conAño && !esVivo) {
+    contexto.addIssue({ code: 'custom', path: ['añoFallecimiento'], message: MENSAJE_SIN_FALLECIMIENTO });
+  }
+}
 
 export const semblanza = z
   .string({ message: 'Regla incumplida: falta la semblanza del Autor.' })
@@ -383,16 +780,119 @@ export const ordenRevisado = z
 
 export const autorAdmisible = z.object({
   nombre: nombre('Autor'),
-  añoFallecimiento,
+  añoFallecimiento: añoFallecimiento.optional(),
+  vivo: vivo.optional(),
   añoNacimiento: año.optional(),
   semblanza,
   tradicion: tradicion.optional(),
   biografia: biografia.optional(),
   ordenAlfabetico: ordenAlfabetico.optional(),
   ordenRevisado: ordenRevisado.optional(),
-});
+}).superRefine(reglasDeAutor, CUANDO_SIEMPRE);
 
 export type AutorAdmisible = z.infer<typeof autorAdmisible>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El Personaje — Historia 35.2, AD-1, AD-33
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Lo que dice el esquema ante un año en la ficha de un Personaje — AD-33.
+ *
+ * Un Personaje no nace ni muere: sus derechos están siempre vigentes (`derechosVigentes`), y
+ * un año en su ficha haría creer que hay un plazo que vence. El mensaje lo dice en vez de
+ * contestar con la clave sobrante genérica.
+ */
+export const MENSAJE_AÑOS_DE_PERSONAJE =
+  'Regla incumplida: un Personaje no lleva años ni «vivo» (añoNacimiento, añoFallecimiento, ' +
+  'vivo): no nace ni muere, y sus derechos están siempre vigentes (AD-33). Quítelos de la ficha.';
+
+const CLAVES_DE_AÑOS = ['añoNacimiento', 'añoFallecimiento', 'vivo'];
+
+/** El universo de un Personaje: una cadena con algo escrito, sin recortarla (NFR-12). */
+export const universo = z
+  .string({ message: 'Regla incumplida: falta el universo del Personaje, que es obligatorio.' })
+  .regex(/\S/, 'Regla incumplida: el universo del Personaje no puede estar vacío ni ser solo espacios.');
+
+/**
+ * La semblanza propia de un Personaje — Historia 35.2: un texto escrito para el sitio y quién
+ * responde de él, cuando no hay revisión de una Fuente mutable que la sostenga (AD-26). La
+ * escribe `npx tsx tools/personaje.ts semblanza`, y sobre el Corpus real solo Héctor.
+ */
+export const semblanzaPropia = z
+  .object(
+    {
+      texto: z
+        .string({ message: 'Regla incumplida: la semblanza propia del Personaje no declara su texto.' })
+        .regex(/\S/, 'Regla incumplida: el texto de la semblanza propia no puede estar vacío.'),
+      responde: z
+        .string({ message: 'Regla incumplida: la semblanza propia del Personaje no dice quién responde de ella.' })
+        .regex(/\S/, 'Regla incumplida: quién responde de la semblanza propia no puede estar vacío.'),
+    },
+    { message: 'Regla incumplida: la semblanza propia es un objeto con «texto» y «responde».' },
+  )
+  .strict();
+
+/**
+ * La semblanza de un Personaje sale por una de dos vías, nunca por las dos: la de AD-26 —
+ * `semblanza` cotejada literal contra su `biografia`, las dos juntas— o `semblanzaPropia`. Sin
+ * ninguna, la ficha no lleva semblanza.
+ */
+export function reglasDePersonaje(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const p = valor as Record<string, unknown>;
+  const conSemblanza = p.semblanza !== undefined;
+  const conBiografia = p.biografia !== undefined;
+  if (conSemblanza !== conBiografia) {
+    contexto.addIssue({
+      code: 'custom',
+      path: [conSemblanza ? 'biografia' : 'semblanza'],
+      message:
+        'Regla incumplida: la semblanza de un Personaje por AD-26 va con su biografía, las dos ' +
+        'juntas: la semblanza se coteja literal contra esa revisión. Sin biografía, use la ' +
+        'semblanza propia (npx tsx tools/personaje.ts semblanza).',
+    });
+  }
+  if (p.semblanzaPropia !== undefined && (conSemblanza || conBiografia)) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['semblanzaPropia'],
+      message:
+        'Regla incumplida: un Personaje lleva la semblanza de su biografía o la semblanza propia, ' +
+        'nunca las dos.',
+    });
+  }
+}
+
+export const personajeAdmisible = z
+  .object(
+    {
+      nombre: nombre('Personaje'),
+      universo,
+      semblanza: z
+        .string({ message: 'Regla incumplida: la semblanza del Personaje es una cadena.' })
+        .min(1, 'Regla incumplida: la semblanza del Personaje no puede estar vacía.')
+        .optional(),
+      biografia: biografia.optional(),
+      semblanzaPropia: semblanzaPropia.optional(),
+      ordenAlfabetico: ordenAlfabetico.optional(),
+      ordenRevisado: ordenRevisado.optional(),
+    },
+    {
+      error: (problema) =>
+        problema.code === 'unrecognized_keys'
+          ? problema.keys.some((k) => CLAVES_DE_AÑOS.includes(k))
+            ? MENSAJE_AÑOS_DE_PERSONAJE
+            : 'Regla incumplida: el Personaje no reconoce ' +
+              `«${problema.keys.join('», «')}». Sus campos son nombre, universo, semblanza, ` +
+              'biografia, semblanzaPropia, ordenAlfabetico y ordenRevisado.'
+          : 'Regla incumplida: un Personaje es un objeto con nombre y universo.',
+    },
+  )
+  .strict()
+  .superRefine(reglasDePersonaje, CUANDO_SIEMPRE);
+
+export type PersonajeAdmisible = z.infer<typeof personajeAdmisible>;
 
 /**
  * Esquema de Cita **sin las referencias**, que son cosa de Astro. La herramienta valida
@@ -400,11 +900,22 @@ export type AutorAdmisible = z.infer<typeof autorAdmisible>;
  */
 export const citaAdmisible = z.object({
   texto,
-  autor: z.string({ message: 'Regla incumplida: falta el Autor de la Cita.' }).min(1),
+  // Historia 35.2 — opcional: el dueño es el Autor o, sin él, el Personaje (`reglasDeClase`).
+  autor: z.string({ message: 'Regla incumplida: el Autor de la Cita es un slug.' }).min(1).optional(),
   temas: z.array(z.string()).default([]),
   slug,
   procedencia,
-  estadoDerechos,
+  // Historia 35.1 — obligatorio en la de siempre y prohibido en la atribuida (`reglasDeClase`).
+  estadoDerechos: estadoDerechos.optional(),
+  clase: clase.optional(),
+  personaje: personaje.optional(),
+  // Historia 35.1b — solo de la atribuida, y en ella obligatorios (`reglasDeClase`).
+  atestiguaciones: atestiguaciones.optional(),
+  origen: origen.optional(),
+  // Historia 35.6 — solo de la atribuida, una como mucho (`reglasDeClase`).
+  variante: variante.optional(),
+  // Historia 35.11 — solo con `origen: traduccion-propia`, y en ella obligatoria (`reglasDeClase`).
+  partida: partida.optional(),
   aptaParaPortada: z.boolean().default(false),
   /*
    * Opcional, y lo será mientras quede censo. Las 38 Citas anteriores a la v3 no tienen
@@ -414,7 +925,7 @@ export const citaAdmisible = z.object({
    * esquema, no de la puerta.
    */
   fuente: fuenteDeCita.optional(),
-});
+}).superRefine(reglasDeClase, CUANDO_SIEMPRE);
 
 export type CitaAdmisible = z.infer<typeof citaAdmisible>;
 
@@ -628,13 +1139,22 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
   return z
     .object(
       {
-        autor: z
-          .string({ message: 'Regla incumplida: falta el Autor de la Ficha de Obra.' })
-          .regex(
-            /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-            'Regla incumplida: el Autor de una Ficha de Obra es el slug de un Autor: ' +
-              'minúsculas, dígitos y guiones, sin diacríticos.',
-          ),
+        /*
+         * Historia 35.2 — la ficha tiene un solo dueño: su Personaje si lo declara y, si no, su
+         * Autor (`dueñoDeFicha`). En la de un Personaje, `autor` es informativo —el Autor de la
+         * Obra, si se sabe— y no cambia el dueño ni el nombre. `reglasDeDueñoDeObra` lo juzga.
+         */
+        autor: slugDeFicha('el Autor', 'Autor').optional(),
+        personaje: slugDeFicha('el Personaje', 'Personaje').optional(),
+        personajes: z
+          .array(slugDeFicha('cada Personaje', 'Personaje'), {
+            error: 'Regla incumplida: «personajes» es la lista de slugs de los Personajes de la Obra.',
+          })
+          .min(1, 'Regla incumplida: «personajes» lleva al menos el Personaje dueño de la ficha.')
+          .refine((lista) => new Set(lista).size === lista.length, {
+            message: 'Regla incumplida: «personajes» no repite ningún Personaje.',
+          })
+          .optional(),
         titulo: z
           .string({ message: 'Regla incumplida: falta el título de la Ficha de Obra.' })
           .regex(
@@ -770,10 +1290,11 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
         error: (problema) =>
           problema.code === 'unrecognized_keys'
             ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
-              `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas, ` +
-              'distintaDe, nota, ediciones, wikidata e incipit.'
-            : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
-              'opcionalmente distintaDe, nota, ediciones, wikidata e incipit.',
+            `«${problema.keys.join('», «')}». Sus campos son autor, personaje, personajes, ` +
+              'titulo, formas, distintaDe, nota, ediciones, wikidata e incipit.'
+            : 'Regla incumplida: una Ficha de Obra es un objeto con su dueño (autor, o personaje y ' +
+              'personajes), titulo y formas, y opcionalmente distintaDe, nota, ediciones, wikidata e ' +
+              'incipit.',
       },
     )
     .strict()
@@ -785,7 +1306,75 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
           'misma reclama.',
         path: ['distintaDe'],
       },
+    )
+    .superRefine(reglasDeDueñoDeObra, CUANDO_SIEMPRE);
+}
+
+/** El slug de un Autor o de un Personaje dentro de una Ficha de Obra, con su mensaje. */
+function slugDeFicha(quien: string, entidad: string) {
+  return z
+    .string({ message: `Regla incumplida: ${quien} de una Ficha de Obra es un slug.` })
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      `Regla incumplida: ${quien} de una Ficha de Obra es el slug de un ${entidad}: ` +
+        'minúsculas, dígitos y guiones, sin diacríticos.',
     );
+}
+
+/**
+ * El dueño de una Ficha de Obra — Historia 35.2, AD-25 v9.1.
+ *
+ *   · la de un Autor declara `autor` y no lleva `personaje` ni `personajes`;
+ *   · la de un Personaje declara `personaje` y `personajes`, una lista que **incluye** al dueño,
+ *     y `autor` solo si se sabe (informativo).
+ *
+ * Corre aunque falle otra regla (`when`), así que no supone la forma de los valores.
+ */
+export function reglasDeDueñoDeObra(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const ficha = valor as Record<string, unknown>;
+  if (ficha.personaje === undefined) {
+    if (ficha.autor === undefined) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['autor'],
+        message:
+          'Regla incumplida: falta el Autor de la Ficha de Obra. Una ficha declara su dueño: su ' +
+          'Autor o, si es la Obra de un Personaje, «personaje» y «personajes».',
+      });
+    }
+    if (ficha.personajes !== undefined) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['personajes'],
+        message:
+          'Regla incumplida: la ficha de un Autor no lleva «personajes»: solo la de un Personaje, ' +
+          'que declara además «personaje», su dueño.',
+      });
+    }
+    return;
+  }
+  if (!Array.isArray(ficha.personajes)) {
+    if (ficha.personajes === undefined) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['personajes'],
+        message:
+          'Regla incumplida: la ficha de un Personaje declara «personajes», la lista de los ' +
+          'Personajes de la Obra, que incluye al dueño.',
+      });
+    }
+    return;
+  }
+  if (!ficha.personajes.includes(ficha.personaje)) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['personajes'],
+      message:
+        `Regla incumplida: «personajes» no incluye a «${String(ficha.personaje)}», el Personaje ` +
+        'dueño de la ficha.',
+    });
+  }
 }
 
 /**

@@ -10,15 +10,26 @@
  * documentada». El bloque nunca se omite en silencio, y nunca se muestra una procedencia
  * inferida o aproximada. Presencia de la ausencia.
  */
-import type { Cita, Autor } from '../lib/publicado.ts';
-import { rutaDeAutor } from '../lib/superficies.ts';
+import type { Cita, Autor, Personaje } from '../lib/publicado.ts';
+import { rutaDeAutor, rutaDePersonaje } from '../lib/superficies.ts';
 import { lineaDeProcedencia, nombreEnAtribucion } from '../lib/atribucion.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
   cita: Cita;
-  autor: Autor;
+  /**
+   * El Autor que declara la Cita, o `undefined` si no declara ninguno (la de un Personaje sin
+   * Autor, Historia 35.4). Ni otro ni ninguno de más: detiene la construcción.
+   */
+  autor: Autor | undefined;
+  /**
+   * El Personaje que dice la Cita, si lo declara — Historia 35.3: entonces el párrafo del nombre
+   * lo nombra a él y enlaza a su página. Sin él, el marcado es el de siempre. Obligatoria, como
+   * `zona`: cada uso dice qué Personaje recibe (`undefined` si la Cita no declara ninguno), y uno
+   * nuevo que la olvide no pasa `astro check`.
+   */
+  personaje: Personaje | undefined;
   /**
    * La Zona de salida interna de sus enlaces (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
    * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
@@ -26,23 +37,64 @@ interface Props {
   zona: Zona;
 }
 
-const { cita, autor, zona } = Astro.props;
+const { cita, autor, personaje, zona } = Astro.props;
+/*
+ * Historia 35.3 — el Personaje que llega es el que la Cita declara, ni otro ni ninguno: un uso
+ * que lo olvidara nombraría al Autor en una superficie y al Personaje en otra, y la arista
+ * Cita → Personaje del grafo del modelo faltaría sin que nada lo dijera.
+ */
+if (personaje?.slug !== cita.personaje) {
+  throw new Error(
+    `Atribución de ${cita.slug}: la Cita declara el Personaje «${cita.personaje ?? 'ninguno'}» y ` +
+      `recibe «${personaje?.slug ?? 'ninguno'}». Quien la pinta le pasa el Personaje del conjunto.`,
+  );
+}
+if (autor?.slug !== cita.autor) {
+  throw new Error(
+    `Atribución de ${cita.slug}: la Cita declara el Autor «${cita.autor ?? 'ninguno'}» y ` +
+      `recibe «${autor?.slug ?? 'ninguno'}». Quien la pinta le pasa el Autor del conjunto.`,
+  );
+}
+/*
+ * Historia 35.4, UX-DR135 — la primera línea nombra al Personaje si lo hay y, si no, al Autor: lo
+ * decide `firmaDeCita`, por `nombreEnAtribucion`. Con Personaje y Autor, el Autor va en la línea
+ * de la Obra, enlazado a su página.
+ */
+const quienes = { autor, personaje };
+const nombre = nombreEnAtribucion(cita, quienes);
+// Sin ninguno de los dos no hay a quién nombrar ni a dónde enlazar: se para aquí, con su nombre.
+const rutaDelNombre =
+  personaje !== undefined ? rutaDePersonaje(personaje.slug) : autor !== undefined ? rutaDeAutor(autor.slug) : undefined;
+if (rutaDelNombre === undefined) {
+  throw new Error(`Atribución de ${cita.slug}: la Cita no declara ni Autor ni Personaje, y no hay a quién nombrar.`);
+}
+const nombrado = { ruta: rutaDelNombre, nombre };
 /*
  * La línea de procedencia la compone `lineaDeProcedencia` (src/lib/atribucion.ts) en piezas:
- * el título de la Obra, si consta, y lo que le sigue. Historia 22.4 — el título enlaza a la
- * Página de Obra, también si esa página no se indexa; «, año», la traducción y la referencia
- * quedan fuera del enlace.
+ * el título de la Obra, si consta, «de {Autor}» si la Cita tiene Personaje y Autor, y lo que les
+ * sigue. Historia 22.4 — el título enlaza a la Página de Obra, también si esa página no se
+ * indexa; «, año», la traducción y la referencia quedan fuera del enlace.
  */
-const linea = lineaDeProcedencia(cita);
+const linea = lineaDeProcedencia(cita, quienes);
 const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obra);
+/*
+ * «de {Autor}» solo lo compone `lineaDeProcedencia` con un Autor: si llegara sin él, `resto` ya
+ * va cortado tras el Autor y la línea lo perdería en silencio. Se para.
+ */
+if (linea.deAutor !== undefined && autor === undefined) {
+  throw new Error(`Atribución de ${cita.slug}: la línea de la Obra dice «de ${linea.deAutor.nombre}» y no llega ningún Autor.`);
+}
+const enlaceDelAutor = linea.deAutor === undefined || autor === undefined ? undefined : rutaDeAutor(autor.slug);
 ---
 
 {/* La zona va en los dos párrafos, que son los contenedores que pinta el build (Historia 23.7). */}
 <p class="autor" data-zona={zona}>
-  <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta">{nombreEnAtribucion(autor)}</a>
+  <a href={nombrado.ruta} class="enlace-en-tinta">{nombrado.nombre}</a>
 </p>
 {
-  linea.titulo !== undefined && enlaceDeObra !== undefined ? (
+  linea.deAutor !== undefined && enlaceDelAutor !== undefined ? (
+    <p class="procedencia" data-zona={zona}>{linea.titulo !== undefined && enlaceDeObra !== undefined && <a href={enlaceDeObra} class="enlace-en-tinta">{linea.titulo}</a>}{linea.deAutor.antes}<a href={enlaceDelAutor} class="enlace-en-tinta">{linea.deAutor.nombre}</a>{linea.resto}</p>
+  ) : linea.titulo !== undefined && enlaceDeObra !== undefined ? (
     <p class="procedencia" data-zona={zona}><a href={enlaceDeObra} class="enlace-en-tinta">{linea.titulo}</a>{linea.resto}</p>
   ) : (
     <p class="procedencia" data-zona={zona}>{linea.resto}</p>

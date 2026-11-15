@@ -13,9 +13,16 @@
  * Una candidata que la incumpla se queda donde está por muy aprobada que esté.
  */
 
-import { readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { citaAdmisible } from '../../src/lib/admision.ts';
+import { readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { basename, join } from 'node:path';
+import { citaAdmisible, gradoDeProcedencia } from '../../src/lib/admision.ts';
+import {
+  entradaVedada,
+  leerFormasVedadas,
+  registrarFormasVedadas,
+  type FormaVedada,
+  type MotivoDeFormaVedada,
+} from './formasVedadas.ts';
 import { cargaDeCandidata, type SeñalDeOrden } from '../../src/lib/ordenDeRevision.ts';
 import { esAparatoDeLaFuente, esTrozoDeCitaAjena, tienePuntuacionRota } from './extraccion.ts';
 import {
@@ -38,23 +45,56 @@ import {
 import { slugLibre } from '../../src/lib/slug.ts';
 import {
   conLaLineaDeTexto,
+  fechaLocal,
+  leerAutores,
   leerCitas,
   leerDocumentosParaElCotejo,
   leerFichasDeObra,
+  leerPersonajes,
+  leerRegistroDeClases,
   leerTemas,
   mover,
   nombreDeFicheroDeCita,
+  registrarClases,
   type Rutas,
 } from './corpus.ts';
+import { claseDe, claseQueCorresponde, esAtribuida, ORIGEN_TRADUCCION_PROPIA, type Clase } from '../../src/lib/clase.ts';
+import {
+  agentesDe,
+  aprobarTrasInterrupcion,
+  MOTIVO_AGENTES_SIN_TRADUCCION,
+  registrarAprobaciones,
+  type Agentes,
+} from './aprobaciones.ts';
+import { anotarTrasInterrupcion, motivoClaseDistinta, slugsConOtraClase } from './clases.ts';
+import {
+  fallosDeAtribuidas,
+  fichaPlaneada,
+  motivoPuertaCerrada,
+  motivosDe,
+  planDaFichaAlAutor,
+  textoDeVariante,
+  type CitaParaAtribuidas,
+  type ValoresDeLaPuerta,
+} from './atribuidas.ts';
+import type { FichaDeObra } from '../../src/lib/obras.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
 import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
+import { dueñoDeCita } from '../../src/lib/obras.ts';
 
 export interface CandidataEnRevision {
   slug: string;
   texto: string;
-  /** Slug del Autor: compone el nombre del fichero al publicar. */
-  autor: string;
+  /**
+   * Slug del Autor. Con él, o sin él con el Personaje (Historia 35.2), su dueño compone el
+   * nombre del fichero al publicar (`dueñoDeCita`).
+   */
+  autor?: string;
+  /** La clase que dice su fichero (`claseDe`) — Historia 35.1. */
+  clase: Clase;
+  /** El Personaje que declara, si declara alguno — Historia 35.1. */
+  personaje?: string;
   /**
    * Los Temas que ya declara, si declara alguno — Historia 26.8: aprobarla exige que, con los
    * de la orden, alguno quede publicado.
@@ -69,6 +109,21 @@ export interface CandidataEnRevision {
   /** Su Fuente, si declara una: de ella salen los documentos de los que toma sus saltos (29.2). */
   fuente?: { id: string };
   /**
+   * Sus atestiguaciones tal como las declara su fichero, si declara alguna — Historia 35.1b: la
+   * puerta de la atribuida cuenta sus dominios con el mínimo de la puerta.
+   */
+  atestiguaciones?: unknown;
+  /**
+   * El texto de su Variante, si declara una — Historia 35.6: la puerta de la atribuida la juzga
+   * con el tope y la compara como duplicado, y el aviso FR-14 la mira también.
+   */
+  variante?: string;
+  /**
+   * Historia 35.11 — si es una atribuida con `origen: traduccion-propia`: aprobarla exige dos
+   * agentes distintos y anota su aprobación en `corpus/aprobaciones-de-atribuidas.yml`.
+   */
+  traduccionPropia?: true;
+  /**
    * La Cita ya presente con la que coincide, si coincide con alguna — FR-14.
    *
    * Se señala, no se decide: el sistema no tiene criterio para saber si dos textos
@@ -82,6 +137,13 @@ export interface CandidataEnRevision {
    * Se omite si no hay ninguna. Como `duplicaA`, señala y no bloquea nada.
    */
   parecidas?: Parecida[];
+  /**
+   * Historia 35.7 — una de siempre a la que el cotejo no deja publicarse (no declara Fuente:
+   * `motivoParaNoPublicar`): dejarla en revisión anota su forma en `corpus/formas-vedadas.yml`.
+   */
+  faltaCotejo?: true;
+  /** Historia 35.7 — una de siempre cuya Procedencia es ausente: lo mismo, con `sin-procedencia`. */
+  faltaProcedencia?: true;
   /** Si pasaría la puerta de admisión ahora mismo, y qué le falta si no. */
   admisible: boolean;
   motivos: string[];
@@ -117,8 +179,8 @@ export interface Parecida {
  * ninguna candidata y no se mira.
  */
 function parecidasDeLasCandidatas(
-  pendientes: readonly { slug: string; autor: string; texto?: string; procedencia?: { obra?: string } | null }[],
-  publicadas: readonly { slug: string; autor: string; texto: string; procedencia?: { obra?: string } | null }[],
+  pendientes: readonly { slug: string; autor?: string; personaje?: string; texto?: string; procedencia?: { obra?: string } | null }[],
+  publicadas: readonly { slug: string; autor?: string; personaje?: string; texto: string; procedencia?: { obra?: string } | null }[],
   fichas: Parameters<typeof fichaDeCita>[1],
 ): Map<string, Parecida[]> {
   const todas: { slug: string; donde: 'publicadas' | 'en revisión'; forma: FormaParaComparar }[] = [
@@ -202,7 +264,15 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
   // El índice de comparación usa la forma canónica de AD-3, la misma que la búsqueda:
   // si duplicados y búsqueda usaran criterios distintos, el corpus podría acabar con dos
   // Citas que la búsqueda presenta como una sola.
-  const yaPublicadas = new Map(publicadas.map((c) => [normalizar(c.texto), c.slug]));
+  const yaPublicadas = new Map<string, string>();
+  // Historia 35.6 — también la Variante de cada publicada, con su slug: repetirla es repetir la
+  // Cita. El texto se indexa después y gana si los dos coinciden con otra.
+  for (const c of publicadas) {
+    const v = textoDeVariante(c);
+    const k = v !== undefined ? normalizar(v) : '';
+    if (k !== '') yaPublicadas.set(k, c.slug);
+  }
+  for (const c of publicadas) yaPublicadas.set(normalizar(c.texto), c.slug);
 
   const vistasEnRevision = new Map<string, string>();
   const lote: CandidataEnRevision[] = [];
@@ -225,6 +295,8 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       slug: candidata.slug,
       texto: candidata.texto ?? '',
       ...(candidata.fuente !== undefined ? { fuente: candidata.fuente } : {}),
+      // Historia 35.1b — a la atribuida no se le exige Fuente: no se coteja.
+      ...(esAtribuida(candidata) ? { clase: claseDe(candidata) } : {}),
     });
 
     /*
@@ -257,17 +329,27 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
      */
     const puntuacion = tienePuntuacionRota(candidata.texto ?? '');
 
-    const duplicadaPublicada = yaPublicadas.get(canonico);
-    const duplicadaEnRevision = vistasEnRevision.get(canonico);
+    // Historia 35.6 — la candidata se mira también por su Variante, si la declara.
+    const varianteDeLaCandidata = textoDeVariante(candidata);
+    const canonicoDeLaVariante = varianteDeLaCandidata !== undefined ? normalizar(varianteDeLaCandidata) : '';
+    const enYa = (indice: Map<string, string>) =>
+      indice.get(canonico) ?? (canonicoDeLaVariante !== '' ? indice.get(canonicoDeLaVariante) : undefined);
+    const duplicadaPublicada = enYa(yaPublicadas);
+    const duplicadaEnRevision = enYa(vistasEnRevision);
 
     lote.push({
       slug: candidata.slug,
       texto: candidata.texto,
-      autor: candidata.autor,
+      ...(candidata.autor !== undefined ? { autor: candidata.autor } : {}),
+      clase: claseDe(candidata),
+      ...(typeof candidata.personaje === 'string' ? { personaje: candidata.personaje } : {}),
       ...(Array.isArray(candidata.temas) && candidata.temas.length > 0 ? { temas: candidata.temas } : {}),
       ruta: candidata.ruta,
       ...(typeof candidata.procedencia?.obra === 'string' ? { obra: candidata.procedencia.obra } : {}),
       ...(typeof candidata.fuente?.id === 'string' ? { fuente: { id: candidata.fuente.id } } : {}),
+      ...(candidata.atestiguaciones !== undefined ? { atestiguaciones: candidata.atestiguaciones } : {}),
+      ...(varianteDeLaCandidata !== undefined ? { variante: varianteDeLaCandidata } : {}),
+      ...(esAtribuida(candidata) && candidata.origen === ORIGEN_TRADUCCION_PROPIA ? { traduccionPropia: true as const } : {}),
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
       ...(duplicadaPublicada !== undefined
         ? { duplicaA: { slug: duplicadaPublicada, donde: 'publicadas' as const } }
@@ -276,6 +358,11 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
           : {}),
       ...(parecidas.has(candidata.slug) ? { parecidas: parecidas.get(candidata.slug)! } : {}),
       ...cargaYSeñales(candidata.texto ?? ''),
+      // Historia 35.7 — solo de la clase de siempre: la atribuida no se coteja ni se veda.
+      ...(!esAtribuida(candidata) && sinDocumento !== undefined ? { faltaCotejo: true as const } : {}),
+      ...(!esAtribuida(candidata) && gradoDeProcedencia(candidata.procedencia ?? undefined) === 'ausente'
+        ? { faltaProcedencia: true as const }
+        : {}),
       admisible:
         comprobacion.success &&
         sinDocumento === undefined &&
@@ -300,6 +387,9 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
     });
 
     if (canonico !== '') vistasEnRevision.set(canonico, candidata.slug);
+    if (canonicoDeLaVariante !== '' && !vistasEnRevision.has(canonicoDeLaVariante)) {
+      vistasEnRevision.set(canonicoDeLaVariante, candidata.slug);
+    }
   }
 
   /*
@@ -362,6 +452,12 @@ export interface ResultadoDeDecision {
    * antes de construir. Vacío casi siempre — Historia 26.8.
    */
   publicadasSinTema: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  /**
+   * Si las publicadas no se pudieron anotar en `corpus/clases-de-cita.yml` después de moverlas
+   * —un fallo de disco—: el motivo. Ya están publicadas; `npx tsx tools/clases.ts sembrar` las
+   * anota, y la orden sale con 1 — Historia 35.1.
+   */
+  registroSinAnotar?: string;
   rechazadas: string[];
   /**
    * Publicadas que llegaban sin los saltos de verso de su documento —una candidata extraída antes de
@@ -376,6 +472,46 @@ export interface ResultadoDeDecision {
    */
   avisos: { slug: string; duplicaA?: CandidataEnRevision['duplicaA']; parecidas: Parecida[] }[];
   noEncontradas: string[];
+  /**
+   * Historia 35.7 — las formas que la orden anotó en `corpus/formas-vedadas.yml`: las de siempre
+   * que rechaza, o que la aprobación deja en revisión por el cotejo o por la Procedencia.
+   */
+  vedadas: FormaVedada[];
+  /**
+   * Si la aprobación no pudo anotarlas —un fallo de disco—: el motivo. Lo aprobado sigue
+   * aprobado, y la orden sale con 1.
+   */
+  vedadasSinAnotar?: string;
+  /**
+   * Historia 35.11 — por qué los agentes de la pasada no valen (falta uno, son el mismo, o se dan
+   * sin ninguna traducción propia): no se escribió nada, y la orden sale con 1.
+   */
+  agentesRechazados?: string;
+  /**
+   * Historia 35.11 — las aprobaciones anotadas en `corpus/aprobaciones-de-atribuidas.yml`.
+   */
+  aprobaciones?: { slug: string; propone: string; aprueba: string; fecha: string }[];
+  /**
+   * Historia 35.11 — si el registro de aprobaciones no se pudo escribir tras publicar: el motivo, y
+   * las traducciones propias que volvieron a `corpus/_revision/` con su contenido de antes (sin
+   * entrada de clase). La orden sale con 1.
+   */
+  aprobacionesSinAnotar?: {
+    motivo: string;
+    devueltas: string[];
+    /** Las que no se pudieron mover de vuelta: siguen publicadas sin aprobación. */
+    sinDevolver: string[];
+    /** Las que volvieron a `corpus/_revision/` pero con el contenido publicado, no el de antes. */
+    sinRestaurar: string[];
+  };
+}
+
+/**
+ * El motivo con que se veda la forma de una candidata de siempre — Historia 35.7: sin Procedencia,
+ * `sin-procedencia`; en lo demás, `cotejo-fallido`.
+ */
+export function motivoDeLaCandidata(candidata: Pick<CandidataEnRevision, 'faltaProcedencia'>): MotivoDeFormaVedada {
+  return candidata.faltaProcedencia === true ? 'sin-procedencia' : 'cotejo-fallido';
 }
 
 /**
@@ -389,6 +525,18 @@ export async function aprobar(
   rutas: Rutas,
   slugs: string[],
   temas: string[] = [],
+  /**
+   * Historia 35.1b — los valores de la puerta de la atribuida. Por omisión, los del árbol; las
+   * pruebas la abren por aquí sin parchear nada.
+   */
+  opciones: {
+    puerta?: ValoresDeLaPuerta;
+    /**
+     * Historia 35.11 — los agentes de `--propone` y `--aprueba`, tal como llegan: solo la traducción
+     * propia los lleva, y en ella son obligatorios y distintos.
+     */
+    agentes?: { propone?: string; aprueba?: string };
+  } = {},
 ): Promise<ResultadoDeDecision> {
   const lote = await loteEnRevision(rutas);
   let leidos:
@@ -409,6 +557,7 @@ export async function aprobar(
     noEncontradas: [],
     conSaltos: [],
     avisos: [],
+    vedadas: [],
   };
 
   /*
@@ -421,6 +570,22 @@ export async function aprobar(
    * lo caza después con `reference()`, pero para entonces la Cita ya está publicada y lo
    * que se rompe es la construcción del sitio.
    */
+  /*
+   * Historia 35.11 — los agentes, antes de escribir nada: con una traducción propia en la pasada,
+   * los dos y distintos; sin ninguna, ninguno.
+   */
+  const propiasEnRevision = new Set(lote.filter((c) => c.traduccionPropia === true).map((c) => c.slug));
+  const conTraduccion = slugs.some((slug) => propiasEnRevision.has(slug));
+  const dados = opciones.agentes?.propone !== undefined || opciones.agentes?.aprueba !== undefined;
+  let agentes: Agentes | undefined;
+  if (conTraduccion) {
+    const juicio = agentesDe(opciones.agentes?.propone, opciones.agentes?.aprueba);
+    if (!juicio.ok) return { ...resultado, agentesRechazados: juicio.motivo };
+    agentes = juicio.agentes;
+  } else if (dados) {
+    return { ...resultado, agentesRechazados: MOTIVO_AGENTES_SIN_TRADUCCION };
+  }
+
   const temasDelCorpus = await leerTemas(rutas);
   if (temas.length > 0) {
     const conocidos = new Set(temasDelCorpus.map((t) => t.slug));
@@ -428,12 +593,52 @@ export async function aprobar(
     if (desconocidos.length > 0) return { ...resultado, temasDesconocidos: desconocidos };
   }
 
+  /*
+   * Historia 35.1 — el registro de clases se lee antes de escribir nada (ilegible, nada se
+   * aprueba), y la clase de cada candidata se deriva de su Autor: no se teclea.
+   */
+  const registro = await leerRegistroDeClases(rutas);
+  // Historia 35.7 — las formas vedadas, antes de escribir nada: ilegibles, nada se aprueba.
+  const vedadas = await leerFormasVedadas(rutas);
+  // Las de siempre que esta pasada deja en revisión por el cotejo o por la Procedencia.
+  const porVedar: FormaVedada[] = [];
+  const hoyDeLaPasada = fechaLocal(new Date());
+  const autorPorSlug = new Map((await leerAutores(rutas)).map((a) => [a.slug, a]));
+  // Historia 35.2 — el Personaje de una candidata existe en corpus/personajes/, o el build rompería.
+  const personajesDelCorpus = new Set((await leerPersonajes(rutas)).map((p) => p.slug));
+  const claseQueLeToca = (candidata: CandidataEnRevision): Clase => {
+    // La de un Personaje sin Autor: la clase la dice el Personaje (Historia 35.2).
+    if (candidata.autor === undefined) {
+      return candidata.personaje !== undefined ? claseQueCorresponde({ personaje: candidata.personaje }, {}) : candidata.clase;
+    }
+    const autor = autorPorSlug.get(candidata.autor);
+    if (autor === undefined) return candidata.clase;
+    return claseQueCorresponde(candidata.personaje !== undefined ? { personaje: candidata.personaje } : {}, autor);
+  };
+
   // Los slugs que no se pueden pisar: los publicados, más los que esta misma ejecución
   // vaya publicando. Sin lo segundo, dos candidatas que colisionan entre sí se pisarían.
   const yaPublicadas = await leerCitas(rutas.citas);
   const ocupados = new Set(yaPublicadas.map((c) => c.slug));
+  // Historia 35.1b — las fichas del disco (se leen una vez: las de la pasada se escriben después de
+  // planear) y las que la pasada crea, con los Autores a los que da una.
+  let fichasEnDisco: FichaDeObra[] | undefined;
+  const fichasPlaneadas: FichaDeObra[] = [];
+  const autoresConFichaPlaneada: string[] = [];
+  // Historia 35.1b — lo publicado, como lo juzga la puerta de la atribuida; se compone una vez.
+  let paraAtribuidas: CitaParaAtribuidas[] | undefined;
+  const publicadasParaAtribuidas = (): CitaParaAtribuidas[] =>
+    (paraAtribuidas ??= yaPublicadas.map((c) => ({
+      slug: c.slug,
+      texto: c.texto,
+      ...(textoDeVariante(c) !== undefined ? { variante: textoDeVariante(c) } : {}),
+      ...(c.autor !== undefined ? { autor: c.autor } : {}),
+      ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
+      ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+      ...(c.procedencia !== undefined && c.procedencia !== null ? { procedencia: c.procedencia } : {}),
+    })));
   // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
-  const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
+  const publicadasParaObra: { autor?: string; personaje?: string; procedencia?: { obra?: string } }[] = [
     ...yaPublicadas,
   ];
 
@@ -452,7 +657,7 @@ export async function aprobar(
     slug: string;
     candidata: CandidataEnRevision;
     temas: string[];
-    comoPublicada: { autor: string; procedencia?: { obra?: string } };
+    comoPublicada: { autor?: string; personaje?: string; procedencia?: { obra?: string } };
     /** El `texto` con sus saltos de verso, si llega sin ellos (Historia 29.2). */
     conSaltos?: { texto: string; documento: string };
   }[] = [];
@@ -465,6 +670,39 @@ export async function aprobar(
     }
     if (!candidata.admisible) {
       resultado.rechazadasPorAdmision.push({ slug, motivos: candidata.motivos });
+      /*
+       * Historia 35.7 — la de siempre que el cotejo o la Procedencia dejan en revisión no vuelve
+       * como atribuida: su forma se anota en `corpus/formas-vedadas.yml` (AD-32).
+       */
+      if (candidata.faltaCotejo === true || candidata.faltaProcedencia === true) {
+        const entrada = entradaVedada(candidata.texto ?? '', motivoDeLaCandidata(candidata), hoyDeLaPasada, slug);
+        if (entrada !== undefined) porVedar.push(entrada);
+      }
+      continue;
+    }
+    if (candidata.personaje !== undefined && !personajesDelCorpus.has(candidata.personaje)) {
+      resultado.rechazadasPorAdmision.push({
+        slug,
+        motivos: [
+          `su Personaje «${candidata.personaje}» no existe en corpus/personajes/: publicada, rompería ` +
+            'la construcción. Dele de alta con «npx tsx tools/personaje.ts crear» o corrija la candidata.',
+        ],
+      });
+      continue;
+    }
+    /*
+     * Historia 35.1 — una candidata cuya clase escrita no es la que le corresponde no se aprueba,
+     * y la atribuida tampoco: su puerta llega con la 35.1b. Las dos siguen en revisión, intactas.
+     */
+    const corresponde = claseQueLeToca(candidata);
+    if (corresponde !== candidata.clase) {
+      resultado.rechazadasPorAdmision.push({ slug, motivos: [motivoClaseDistinta(candidata.clase, corresponde)] });
+      continue;
+    }
+    // Historia 35.1b — con la puerta cerrada, la atribuida sigue en revisión, intacta, y se dice por qué.
+    const cerrada = esAtribuida(candidata) ? motivoPuertaCerrada(opciones.puerta) : undefined;
+    if (cerrada !== undefined) {
+      resultado.rechazadasPorAdmision.push({ slug, motivos: [cerrada] });
       continue;
     }
     /*
@@ -474,7 +712,8 @@ export async function aprobar(
      * publicarla así rompería el build siguiente. Se publica con sus saltos; un conflicto entre dos
      * documentos de verso se publica como está, igual que la regla 4 solo avisa.
      */
-    const saltos = await saltosQueLeFaltan(candidata);
+    // Historia 35.1b — la atribuida va en una línea: no se le restituyen saltos.
+    const saltos = esAtribuida(candidata) ? undefined : await saltosQueLeFaltan(candidata);
     if (saltos !== undefined && !saltos.ok) {
       resultado.rechazadasPorAdmision.push({ slug, motivos: [saltos.motivo] });
       continue;
@@ -482,7 +721,8 @@ export async function aprobar(
     const conSaltos = saltos?.ok ? { texto: saltos.texto, documento: saltos.documento } : undefined;
     const obra = candidata.obra;
     const comoPublicada = {
-      autor: candidata.autor,
+      ...(candidata.autor !== undefined ? { autor: candidata.autor } : {}),
+      ...(candidata.personaje !== undefined ? { personaje: candidata.personaje } : {}),
       ...(obra !== undefined ? { procedencia: { obra } } : {}),
     };
     /*
@@ -490,9 +730,10 @@ export async function aprobar(
      * cuenta para los Temas de las demás, y así ninguna se publica apoyada en una que no saldrá.
      * Al escribir se vuelve a resolver, porque el disco cambia con cada ficha escrita.
      */
+    let plan: Awaited<ReturnType<typeof resolverFichaDeObra>> | undefined;
     if (obra !== undefined) {
-      const plan = await resolverFichaDeObra(rutas, {
-        autor: candidata.autor,
+      plan = await resolverFichaDeObra(rutas, {
+        ...dueñosDe(candidata),
         obra,
         citasPublicadas: [...planeadasParaObra, comoPublicada],
       });
@@ -501,7 +742,42 @@ export async function aprobar(
         continue;
       }
     }
+    /*
+     * Historia 35.1b — con la puerta abierta, la atribuida se juzga con lo publicado más lo que esta
+     * pasada publica: topes, figura sin Obra (la ficha que se resuelve aquí cuenta) y duplicados
+     * entre clases contra lo publicado y las demás candidatas de corpus/_revision/.
+     */
+    if (esAtribuida(candidata)) {
+      const propia = candidataParaAtribuidas(candidata);
+      const fallos = fallosDeAtribuidas({
+        citas: [...publicadasParaAtribuidas(), ...planeadas.map((p) => candidataParaAtribuidas(p.candidata)), propia],
+        autores: [...autorPorSlug.values()],
+        // Las fichas del disco más las que esta pasada crea: las fichas se escriben después de
+        // planear, y sin las planeadas dos atribuidas de una Obra nueva no contarían juntas.
+        fichas: [
+          ...(fichasEnDisco ??= await leerFichasDeObra(rutas)),
+          ...fichasPlaneadas,
+          ...[fichaPlaneada(plan, candidata.autor)].filter((f) => f !== undefined),
+        ],
+        autoresConFichaNueva: [
+          ...autoresConFichaPlaneada,
+          ...(planDaFichaAlAutor(plan) && candidata.autor !== undefined ? [candidata.autor] : []),
+        ],
+        comparables: lote.filter((c) => c !== candidata).map(candidataParaAtribuidas),
+        juzgar: new Set([propia.slug]),
+        vedadas,
+        ...(opciones.puerta !== undefined ? { valores: opciones.puerta } : {}),
+      });
+      const suyos = motivosDe(fallos, propia.slug);
+      if (suyos.length > 0) {
+        resultado.rechazadasPorAdmision.push({ slug, motivos: suyos });
+        continue;
+      }
+    }
     planeadasParaObra.push(comoPublicada);
+    const fichaNueva = fichaPlaneada(plan, candidata.autor);
+    if (fichaNueva !== undefined) fichasPlaneadas.push(fichaNueva);
+    if (planDaFichaAlAutor(plan) && candidata.autor !== undefined) autoresConFichaPlaneada.push(candidata.autor);
     planeadas.push({
       indice,
       slug,
@@ -515,7 +791,9 @@ export async function aprobar(
   // Historia 29.4 — con qué slug salió cada candidata publicada en esta pasada, para los avisos.
   const publicadaComo = new Map<string, string>();
   // Lo que esta pasada ya publicó: cuenta para los Temas de las que quedan.
-  const escritas: { slug: string; temas: string[] }[] = [];
+  const escritas: { slug: string; temas: string[]; clase: Clase }[] = [];
+  // Historia 35.11 — las traducciones propias escritas: dónde quedaron y qué eran antes.
+  const propiasEscritas: { slug: string; de: string; publicada: string; contenido: string }[] = [];
   let pendientes = planeadas;
   /*
    * La regla de Tema sobre lo que queda por escribir. Se repite si una Ficha de Obra falla al
@@ -540,60 +818,140 @@ export async function aprobar(
   };
   replanificar();
 
-  while (pendientes.length > 0) {
-    const { slug, candidata, temas: suyos, comoPublicada, conSaltos } = pendientes.shift()!;
+  /*
+   * Historia 35.1 — un fallo a media pasada (al mover, reescribir o escribir la ficha) no deja sin
+   * anotar lo ya publicado: se anota, y el error que sube lo cuenta (`PublicacionInterrumpida`).
+   */
+  const hoy = fechaLocal(new Date());
+  try {
+    while (pendientes.length > 0) {
+      const { slug, candidata, temas: suyos, comoPublicada, conSaltos } = pendientes.shift()!;
 
-    /*
-     * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
-     *
-     * Primero se **resuelve**, en solo lectura: si no se puede asegurar sin decidir —una
-     * colisión de nombre—, la Cita no se publica. La ficha se escribe justo **después** de
-     * mover la Cita, así que ningún fallo deja una ficha sin Citas.
-     */
-    const obra = candidata.obra;
-    const plan =
-      obra === undefined
-        ? undefined
-        : await resolverFichaDeObra(rutas, {
-            autor: candidata.autor,
-            obra,
-            citasPublicadas: [...publicadasParaObra, comoPublicada],
-          });
-    if (plan !== undefined && !plan.ok) {
-      resultado.rechazadasPorFicha.push({ slug, motivos: plan.motivos });
-      replanificar();
-      continue;
-    }
-
-    const definitivo = slugLibre(candidata.slug, ocupados);
-    ocupados.add(definitivo);
-
-    if (definitivo === candidata.slug && temas.length === 0 && conSaltos === undefined) {
-      await mover(candidata.ruta, rutas.citas);
-    } else {
-      await reescribirConSlug(candidata, definitivo, rutas, temas, conSaltos?.texto);
-      if (definitivo !== candidata.slug) {
-        resultado.renombradas.push({ de: candidata.slug, a: definitivo });
+      /*
+       * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
+       *
+       * Primero se **resuelve**, en solo lectura: si no se puede asegurar sin decidir —una
+       * colisión de nombre—, la Cita no se publica. La ficha se escribe justo **después** de
+       * mover la Cita, así que ningún fallo deja una ficha sin Citas.
+       */
+      const obra = candidata.obra;
+      const plan =
+        obra === undefined
+          ? undefined
+          : await resolverFichaDeObra(rutas, {
+              ...dueñosDe(candidata),
+              obra,
+              citasPublicadas: [...publicadasParaObra, comoPublicada],
+            });
+      if (plan !== undefined && !plan.ok) {
+        resultado.rechazadasPorFicha.push({ slug, motivos: plan.motivos });
+        replanificar();
+        continue;
       }
-    }
-    publicadasParaObra.push(comoPublicada);
-    escritas.push({ slug: definitivo, temas: suyos });
 
-    if (plan !== undefined) {
-      const ficha = await aplicarFichaDeObra(rutas, plan);
-      if (!ficha.ok) resultado.fichasSinAsegurar.push({ slug, motivos: ficha.motivos });
-    }
+      // Un slug registrado con la otra clase cuenta como ocupado: una Cita no cambia de clase.
+      const definitivo = slugLibre(candidata.slug, [...ocupados, ...slugsConOtraClase(registro, candidata.clase)]);
+      ocupados.add(definitivo);
 
-    resultado.publicadas.push(slug);
-    publicadaComo.set(candidata.slug, definitivo);
-    if (candidata.duplicaA !== undefined || (candidata.parecidas ?? []).length > 0) {
-      resultado.avisos.push({
-        slug: definitivo,
-        ...(candidata.duplicaA !== undefined ? { duplicaA: candidata.duplicaA } : {}),
-        parecidas: candidata.parecidas ?? [],
+      const contenidoDeAntes = candidata.traduccionPropia === true ? await readFile(candidata.ruta, 'utf8') : undefined;
+      let publicadaEn: string;
+      if (definitivo === candidata.slug && temas.length === 0 && conSaltos === undefined) {
+        publicadaEn = await mover(candidata.ruta, rutas.citas);
+      } else {
+        publicadaEn = await reescribirConSlug(candidata, definitivo, rutas, temas, conSaltos?.texto);
+        if (definitivo !== candidata.slug) {
+          resultado.renombradas.push({ de: candidata.slug, a: definitivo });
+        }
+      }
+      if (contenidoDeAntes !== undefined) {
+        propiasEscritas.push({ slug: definitivo, de: candidata.ruta, publicada: publicadaEn, contenido: contenidoDeAntes });
+      }
+      publicadasParaObra.push(comoPublicada);
+      escritas.push({ slug: definitivo, temas: suyos, clase: candidata.clase });
+
+      if (plan !== undefined) {
+        const ficha = await aplicarFichaDeObra(rutas, plan);
+        if (!ficha.ok) resultado.fichasSinAsegurar.push({ slug, motivos: ficha.motivos });
+      }
+
+      resultado.publicadas.push(slug);
+      publicadaComo.set(candidata.slug, definitivo);
+      if (candidata.duplicaA !== undefined || (candidata.parecidas ?? []).length > 0) {
+        resultado.avisos.push({
+          slug: definitivo,
+          ...(candidata.duplicaA !== undefined ? { duplicaA: candidata.duplicaA } : {}),
+          parecidas: candidata.parecidas ?? [],
+        });
+      }
+      if (conSaltos !== undefined) resultado.conSaltos.push({ slug: definitivo, documento: conSaltos.documento });
+    }
+  } catch (fallo) {
+    // Historia 35.11 — lo ya publicado como traducción propia lleva su aprobación, si se puede.
+    // Si tampoco se puede anotar, el error que sube lo dice (`aprobarTrasInterrupcion`).
+    const error = await anotarTrasInterrupcion(
+      rutas,
+      escritas.map((e) => ({ slug: e.slug, clase: e.clase, fecha: hoy })),
+      fallo,
+    );
+    throw agentes === undefined
+      ? error
+      : await aprobarTrasInterrupcion(
+          rutas,
+          propiasEscritas.map((p) => ({ slug: p.slug, ...agentes, fecha: hoy })),
+          error,
+        );
+  }
+
+  /*
+   * Historia 35.11 — la aprobación de cada traducción propia publicada, en un solo añadido y antes
+   * que la clase. Si falla, cada una vuelve a `corpus/_revision/` con su contenido de antes, y no
+   * se anota su clase: publicada sin aprobación, rompería el build.
+   */
+  if (agentes !== undefined && propiasEscritas.length > 0) {
+    const entradas = propiasEscritas.map((p) => ({ slug: p.slug, ...agentes, fecha: hoy }));
+    try {
+      await registrarAprobaciones(rutas, entradas);
+      resultado.aprobaciones = entradas;
+    } catch (fallo) {
+      const { devueltas, sinDevolver, sinRestaurar } = await devolverAlaRevision(propiasEscritas);
+      const fuera = new Set(devueltas);
+      for (let i = escritas.length - 1; i >= 0; i--) if (fuera.has(escritas[i]!.slug)) escritas.splice(i, 1);
+      resultado.publicadas = resultado.publicadas.filter((slug) => {
+        const publicada = publicadaComo.get(slug);
+        return publicada === undefined || !fuera.has(publicada);
       });
+      // Lo que el parte contaba de las devueltas como publicadas deja de contarse.
+      resultado.renombradas = resultado.renombradas.filter((r) => !fuera.has(r.a));
+      resultado.conSaltos = resultado.conSaltos.filter((c) => !fuera.has(c.slug));
+      resultado.avisos = resultado.avisos.filter((a) => !fuera.has(a.slug));
+      for (const [candidata, publicada] of publicadaComo) if (fuera.has(publicada)) publicadaComo.delete(candidata);
+      resultado.aprobacionesSinAnotar = {
+        motivo: fallo instanceof Error ? fallo.message : String(fallo),
+        devueltas,
+        sinDevolver,
+        sinRestaurar,
+      };
     }
-    if (conSaltos !== undefined) resultado.conSaltos.push({ slug: definitivo, documento: conSaltos.documento });
+  }
+
+  /*
+   * Historia 35.1 — lo publicado se anota en el registro de clases, en un solo añadido al final.
+   * Si falla, las Citas ya están publicadas: el parte da la orden que las anota y sale con 1.
+   */
+  try {
+    await registrarClases(
+      rutas,
+      escritas.map((e) => ({ slug: e.slug, clase: e.clase, fecha: hoy })),
+    );
+  } catch (fallo) {
+    resultado.registroSinAnotar = fallo instanceof Error ? fallo.message : String(fallo);
+  }
+
+  // Historia 35.7 — las formas que esta pasada deja vedadas, en un solo añadido (sin repetir).
+  try {
+    resultado.vedadas = await registrarFormasVedadas(rutas, porVedar);
+  } catch (fallo) {
+    resultado.vedadasSinAnotar = fallo instanceof Error ? fallo.message : String(fallo);
   }
 
   /*
@@ -656,6 +1014,20 @@ export async function aprobar(
   }
 }
 
+/** Lo que la puerta de la atribuida necesita de una candidata ya leída (Historia 35.1b). */
+function candidataParaAtribuidas(c: CandidataEnRevision): CitaParaAtribuidas {
+  return {
+    slug: c.slug,
+    texto: typeof c.texto === 'string' ? c.texto : '',
+    ...(c.autor !== undefined ? { autor: c.autor } : {}),
+    ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
+    ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+    ...(c.obra !== undefined ? { procedencia: { obra: c.obra } } : {}),
+    ...(c.atestiguaciones !== undefined ? { atestiguaciones: c.atestiguaciones } : {}),
+    ...(c.variante !== undefined ? { variante: c.variante } : {}),
+  };
+}
+
 /**
  * Publica la candidata con otro slug, dejando fichero y frontmatter de acuerdo.
  *
@@ -669,7 +1041,7 @@ async function reescribirConSlug(
   rutas: Rutas,
   temas: string[] = [],
   conSaltos?: string,
-): Promise<void> {
+): Promise<string> {
   const leido = await readFile(candidata.ruta, 'utf8');
   // Historia 29.2 — solo cambia la línea `texto:`, como en la restitución.
   const bruto = conSaltos === undefined ? leido : conLaLineaDeTexto(leido, candidata.texto, conSaltos);
@@ -682,15 +1054,52 @@ async function reescribirConSlug(
   );
   const conTemas = conTemasDeclarados(conNuevoSlug, temas);
 
-  const destino = join(
-    rutas.citas,
-    `${nombreDeFicheroDeCita(candidata.autor, definitivo)}.md`,
-  );
+  /*
+   * Historia 35.2 — el prefijo del fichero es el de su dueño **al darla de alta**, que es el del
+   * slug: saber después el Autor de la Cita de un Personaje no cambia ni el slug ni el nombre.
+   * Se toma del fichero de la candidata mientras el slug definitivo lo conserve; si no, el dueño.
+   */
+  const partes = basename(candidata.ruta, '.md').split('--');
+  const delFichero = partes.length > 1 ? partes[0] : undefined;
+  const prefijo =
+    delFichero !== undefined && definitivo.startsWith(`${delFichero}-`) ? delFichero : dueñoDeCita(candidata).slug;
+  const destino = join(rutas.citas, `${nombreDeFicheroDeCita(prefijo, definitivo)}.md`);
 
   // Se escribe el destino antes de borrar el origen: si algo falla en medio, la
   // candidata sigue en revisión en lugar de haberse evaporado.
   await writeFile(destino, conTemas, 'utf8');
   await rm(candidata.ruta, { force: true });
+  return destino;
+}
+
+/**
+ * Historia 35.11 — devuelve a `corpus/_revision/` las traducciones propias publicadas cuyo registro
+ * de aprobaciones no se pudo escribir: cada una se **mueve** de vuelta a su fichero de candidata y
+ * recupera su contenido de antes (AD-2: nada se borra). Devuelve los slugs publicados que volvieron.
+ */
+async function devolverAlaRevision(
+  propias: readonly { slug: string; de: string; publicada: string; contenido: string }[],
+): Promise<{ devueltas: string[]; sinDevolver: string[]; sinRestaurar: string[] }> {
+  const devueltas: string[] = [];
+  const sinDevolver: string[] = [];
+  const sinRestaurar: string[] = [];
+  for (const propia of propias) {
+    try {
+      await rename(propia.publicada, propia.de);
+    } catch {
+      // La que no vuelve sigue publicada sin aprobación: el parte la nombra.
+      sinDevolver.push(propia.slug);
+      continue;
+    }
+    // Ya no está publicada, vuelva o no su contenido de antes.
+    devueltas.push(propia.slug);
+    try {
+      await writeFile(propia.de, propia.contenido, 'utf8');
+    } catch {
+      sinRestaurar.push(propia.slug);
+    }
+  }
+  return { devueltas, sinDevolver, sinRestaurar };
 }
 
 /**
@@ -731,7 +1140,17 @@ function conTemasDeclarados(bruto: string, temas: string[]): string {
 
   const unicos = [...new Set([...suyos, ...temas])];
   const bloque = ['temas:', ...unicos.map((t) => `  - ${JSON.stringify(t)}`)].join('\n');
-  return sinLosSuyos.replace(/^(autor:.*)$/m, `$1\n${bloque}`);
+  // Tras el Autor; sin él, tras el Personaje, su dueño (Historia 35.2).
+  const ancla = /^autor:/m.test(sinLosSuyos) ? /^(autor:.*)$/m : /^(personaje:.*)$/m;
+  return sinLosSuyos.replace(ancla, `$1\n${bloque}`);
+}
+
+/** El Autor y el Personaje de una candidata, los que declare, para resolver su Ficha de Obra. */
+function dueñosDe(candidata: Pick<CandidataEnRevision, 'autor' | 'personaje'>): { autor?: string; personaje?: string } {
+  return {
+    ...(candidata.autor !== undefined ? { autor: candidata.autor } : {}),
+    ...(candidata.personaje !== undefined ? { personaje: candidata.personaje } : {}),
+  };
 }
 
 /**
@@ -756,16 +1175,34 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
     noEncontradas: [],
     conSaltos: [],
     avisos: [],
+    vedadas: [],
   };
 
-  for (const slug of slugs) {
+  /*
+   * Historia 35.7 — una candidata de siempre rechazada no vuelve como atribuida: su forma se anota
+   * en `corpus/formas-vedadas.yml` **antes** de borrar nada, en un solo añadido. Si el registro no
+   * se deja leer o escribir, no se rechaza ninguna: lanza, y nada se ha borrado.
+   */
+  const encontradas: CandidataEnRevision[] = [];
+  for (const slug of [...new Set(slugs)]) {
     const candidata = lote.find((c) => c.slug === slug);
     if (candidata === undefined) {
       resultado.noEncontradas.push(slug);
       continue;
     }
+    encontradas.push(candidata);
+  }
+  const hoy = fechaLocal(new Date());
+  resultado.vedadas = await registrarFormasVedadas(
+    rutas,
+    encontradas
+      .filter((c) => !esAtribuida(c))
+      .map((c) => entradaVedada(c.texto ?? '', motivoDeLaCandidata(c), hoy, c.slug))
+      .filter((e): e is FormaVedada => e !== undefined),
+  );
+  for (const candidata of encontradas) {
     await rm(candidata.ruta, { force: true });
-    resultado.rechazadas.push(slug);
+    resultado.rechazadas.push(candidata.slug);
   }
 
   return resultado;

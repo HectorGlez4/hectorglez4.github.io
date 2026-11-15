@@ -43,6 +43,7 @@ import { tarjetaDeObraDe, textosDelEnlace } from './ayuda/tarjeta-de-obra.js';
 import { escribirCita, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { declararEdicion, quitarEdicion, reunirFichas } from '../../tools/lib/obras.ts';
 import { datosDelInforme, lineasDelInforme, estadosDe, textoDeTiendas } from '../../tools/lib/ingresos.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -454,13 +455,13 @@ describe('Historia 22.9 — el aviso de ediciones sin edición cotejada', () => 
       { slug: 'seneca-b', autor: 'seneca', procedencia: { obra: 'Cartas' }, fuente: { id: 'wikisource-es' } },
       { slug: 'seneca-c', autor: 'seneca', procedencia: { obra: 'Otra' } },
     ];
-    const avisos = avisosDeEdicionesSinCotejada(fichas, citas);
+    const avisos = avisosDeEdicionesSinCotejada(fichas, citas, CUALQUIER_AUTOR);
     expect(avisos).toHaveLength(1);
     expect(avisos[0]).toContain('corpus/obras/seneca--de-la-ira.yml');
     expect(avisos[0]).toContain('nunca va sola');
     // Y la Obra resuelta lleva sus ediciones, como lleva la nota.
-    expect(resolverObras(citas, fichas).get('seneca--cartas')?.ediciones).toHaveLength(1);
-    expect(resolverObras(citas, fichas).get('seneca--otra')).not.toHaveProperty('ediciones');
+    expect(resolverObras(citas, fichas, CUALQUIER_AUTOR).get('seneca--cartas')?.ediciones).toHaveLength(1);
+    expect(resolverObras(citas, fichas, CUALQUIER_AUTOR).get('seneca--otra')).not.toHaveProperty('ediciones');
   });
 });
 

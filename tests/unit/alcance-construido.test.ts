@@ -157,8 +157,8 @@ describe('Historia 26.8 — el build sano', () => {
       .filter((ruta) => readFileSync(ruta, 'utf8').includes(MARCA_DE_JORNADA));
     expect(fuentes.map((ruta) => relative(RAIZ, ruta))).toEqual(['src/components/LoQueRota.astro']);
     const componente = readFileSync(join(RAIZ, 'src/components/LoQueRota.astro'), 'utf8');
-    expect(componente).toMatch(new RegExp(`<section class=\\{clase\\} ${MARCA_DE_JORNADA} data-pagefind-ignore="all">`));
-    expect(componente).toMatch(new RegExp(`<div class=\\{clase\\} ${MARCA_DE_JORNADA} data-pagefind-ignore="all">`));
+    expect(componente).toMatch(new RegExp(`<section class=\\{nombreDeClase\\} ${MARCA_DE_JORNADA} data-pagefind-ignore="all">`));
+    expect(componente).toMatch(new RegExp(`<div class=\\{nombreDeClase\\} ${MARCA_DE_JORNADA} data-pagefind-ignore="all">`));
     // La Cita del Día y las Obras de la portada lo usan; ninguno de los dos nombra la marca.
     expect(readFileSync(join(RAIZ, 'src/components/CitaDelDia.astro'), 'utf8')).toContain(
       '<LoQueRota como="section" class="del-dia">',

@@ -14,18 +14,19 @@
  * ── De qué Autor es una ruta ─────────────────────────────────────────────────────────
  *
  * Una ruta es de Cita si, tras `rutaNormalizada`, es `/cita/<slug>`, esté la Cita publicada o
- * ya retirada. Su Autor sale del slug —el de `corpus/autores/` que sea prefijo más largo de
- * `<slug>-`, por `autorPorPrefijo`—, no del censo: una Cita retirada sigue diciendo qué Autor
- * se buscaba. Una ruta de Cita sin ningún prefijo de Autor va a `sinAutor` y se nombra en el
- * informe; **nunca se descarta en silencio**.
+ * ya retirada. Su dueño sale del slug —el de `corpus/autores/` o, desde la Historia 35.2, el
+ * de `corpus/personajes/` que sea prefijo más largo de `<slug>-`, por `dueñoPorPrefijo`—, no
+ * del censo: una Cita retirada sigue diciendo a quién se buscaba. La de un Personaje cuenta en
+ * su Personaje (`personajes`), nunca en un Autor que empiece igual. Una ruta de Cita sin ningún
+ * prefijo de dueño va a `sinAutor` y se nombra en el informe; **nunca se descarta en silencio**.
  *
  * Las tres cuentas son disjuntas: cada fila de Cita del host canónico cae en `citas`, en
- * `resto` o en `sinAutor`, y Σ `citas` + `resto` = Σ `autores`. La Página de Autor no suma a
- * su Autor: cuenta en la familia Autor, que es otra pregunta.
+ * `resto` o en `sinAutor`, y Σ `citas` + `resto` = Σ `autores` + Σ `personajes`. La Página de
+ * Autor no suma a su Autor: cuenta en la familia Autor, que es otra pregunta.
  */
 
 import { FAMILIAS, rutaNormalizada } from '../../src/lib/superficies.ts';
-import { autorPorPrefijo } from './autoria.ts';
+import { dueñoPorPrefijo } from './autoria.ts';
 import { type CensoPorFamilia, type FamiliaDelCenso } from './indexacion.ts';
 import {
   MESES_QUE_CONSERVA_LA_FUENTE,
@@ -134,6 +135,13 @@ export interface DemandaDeAutor {
   impresiones: number;
 }
 
+/** La demanda de un Personaje: las filas de sus Citas — Historia 35.2. */
+export interface DemandaDePersonaje {
+  personaje: string;
+  clics: number;
+  impresiones: number;
+}
+
 /** La demanda de una Cita con al menos `MIN_IMPRESIONES_POR_FILA` impresiones. */
 export interface DemandaDeCita {
   cita: string;
@@ -163,6 +171,8 @@ export interface Resto {
 export interface AgregadoDeDemanda {
   /** Por impresiones descendentes; a igualdad, por slug. */
   autores: DemandaDeAutor[];
+  /** Los Personajes, igual que los Autores (Historia 35.2). Vacía, no se escribe. */
+  personajes: DemandaDePersonaje[];
   /** Solo las de `MIN_IMPRESIONES_POR_FILA` o más, por impresiones descendentes. */
   citas: DemandaDeCita[];
   sinAutor: SinAutor;
@@ -217,7 +227,13 @@ const porImpresiones = <T extends { impresiones: number }>(clave: (x: T) => stri
  */
 export function agregarDemanda(
   filas: readonly FilaDeTrafico[],
-  opciones: { slugsDeAutores: readonly string[]; censo: CensoPorFamilia; dominio: string },
+  opciones: {
+    slugsDeAutores: readonly string[];
+    /** Los slugs de `corpus/personajes/` (Historia 35.2): comparten el espacio de los Autores. */
+    slugsDePersonajes?: readonly string[];
+    censo: CensoPorFamilia;
+    dominio: string;
+  },
 ): AgregadoDeDemanda {
   const { familias, fueraDelCenso } = agregarPorFamilia(
     filas,
@@ -237,6 +253,7 @@ export function agregarDemanda(
   }
 
   const autores = new Map<string, DemandaDeAutor>();
+  const personajes = new Map<string, DemandaDePersonaje>();
   const citas: DemandaDeCita[] = [];
   const citasConClic: DemandaDeCita[] = [];
   const sinAutor: SinAutor = { rutas: 0, clics: 0, impresiones: 0 };
@@ -244,18 +261,28 @@ export function agregarDemanda(
   const slugsSinAutor: string[] = [];
 
   for (const [cita, { clics, impresiones }] of porCita) {
-    const autor = autorPorPrefijo(cita, opciones.slugsDeAutores);
-    if (autor === undefined) {
+    const dueño = dueñoPorPrefijo(cita, {
+      autores: opciones.slugsDeAutores,
+      personajes: opciones.slugsDePersonajes ?? [],
+    });
+    if (dueño === undefined) {
       sinAutor.rutas += 1;
       sinAutor.clics += clics;
       sinAutor.impresiones += impresiones;
       slugsSinAutor.push(cita);
       continue;
     }
-    const suyo = autores.get(autor) ?? { autor, clics: 0, impresiones: 0 };
-    suyo.clics += clics;
-    suyo.impresiones += impresiones;
-    autores.set(autor, suyo);
+    if (dueño.tipo === 'personaje') {
+      const suyo = personajes.get(dueño.slug) ?? { personaje: dueño.slug, clics: 0, impresiones: 0 };
+      suyo.clics += clics;
+      suyo.impresiones += impresiones;
+      personajes.set(dueño.slug, suyo);
+    } else {
+      const suyo = autores.get(dueño.slug) ?? { autor: dueño.slug, clics: 0, impresiones: 0 };
+      suyo.clics += clics;
+      suyo.impresiones += impresiones;
+      autores.set(dueño.slug, suyo);
+    }
 
     if (clics > 0) citasConClic.push({ cita, clics, impresiones });
     if (impresiones >= MIN_IMPRESIONES_POR_FILA) {
@@ -269,6 +296,7 @@ export function agregarDemanda(
 
   return {
     autores: [...autores.values()].sort(porImpresiones((a) => a.autor)),
+    personajes: [...personajes.values()].sort(porImpresiones((p) => p.personaje)),
     citas: citas.sort(porImpresiones((c) => c.cita)),
     sinAutor,
     resto,
@@ -320,7 +348,8 @@ const sumaDe = (xs: readonly { clics: number; impresiones: number }[]) =>
 /**
  * Compone la entrada de una ventana, y se niega a lo que la serie no podría releer igual: una
  * ventana mal formada o al revés, una clase que no existe, y un reparto en el que Σ `citas` +
- * `resto` no sea Σ `autores` — que sería una Cita contada en un sitio y no en el otro.
+ * `resto` no sea Σ `autores` + Σ `personajes` — que sería una Cita contada en un sitio y no en
+ * el otro.
  */
 export function componerLecturaDeDemanda(entrada: {
   ventana: Ventana;
@@ -343,13 +372,13 @@ export function componerLecturaDeDemanda(entrada: {
   if (!CLASES_DE_VENTANA.includes(ventana.clase)) {
     throw new Error(`«${String(ventana.clase)}» no es una clase de ventana: ${CLASES_DE_VENTANA.join(', ')}.`);
   }
-  const deAutores = sumaDe(agregado.autores);
+  const deAutores = sumaDe([...agregado.autores, ...(agregado.personajes ?? [])]);
   const deCitas = sumaDe([...agregado.citas, agregado.resto]);
   if (deAutores.clics !== deCitas.clics || deAutores.impresiones !== deCitas.impresiones) {
     throw new Error(
       `En ${ventana.desde}–${ventana.hasta}, las Citas y el resto suman ${deCitas.impresiones} ` +
-        `impresiones y los Autores ${deAutores.impresiones}: alguna Cita quedaría contada en ` +
-        'un sitio y no en el otro.',
+        `impresiones y los Autores y Personajes ${deAutores.impresiones}: alguna Cita quedaría ` +
+        'contada en un sitio y no en el otro.',
     );
   }
   return {
@@ -402,6 +431,13 @@ export function lineasDeDemanda(lectura: LecturaDeDemanda): string[] {
     if (v.autores.length === 0) lineas.push('    (ninguna Cita con Autor tuvo impresiones)');
     for (const a of v.autores) {
       lineas.push(`    ${a.autor}: ${a.impresiones} impresiones, ${a.clics} clics`);
+    }
+
+    if ((v.personajes ?? []).length > 0) {
+      lineas.push('  Por Personaje, por impresiones:');
+      for (const p of v.personajes) {
+        lineas.push(`    ${p.personaje}: ${p.impresiones} impresiones, ${p.clics} clics`);
+      }
     }
 
     lineas.push('  Citas con al menos un clic:');

@@ -22,7 +22,7 @@
  * AD-5 — Derivación pura.
  */
 import { normalizar } from './normalizar.ts';
-import { recuentoDeAutores, recuentoDeObras } from './recuentos.ts';
+import { recuentoDeAutores, recuentoDeObras, recuentoDePersonajes } from './recuentos.ts';
 
 /** Los dos Directorios que filtran. */
 export type DirectorioFiltrable = 'autores' | 'obras';
@@ -42,17 +42,24 @@ export interface BloqueFiltrable {
   filas: readonly string[];
 }
 
-/** Un grupo de letra: sus bloques, en orden. */
+/**
+ * Un grupo de letra: sus bloques, en orden. Historia 35.5 — `personajes` marca los grupos de la
+ * sección «Personajes»: en `/autores/`, cada letra de la sección; en `/obras/`, la sección entera,
+ * con un bloque por Personaje. Casan igual que los demás; solo se cuentan aparte.
+ */
 export interface GrupoFiltrable {
   bloques: readonly BloqueFiltrable[];
+  personajes?: true;
 }
 
 /** Lo que queda de cada grupo, bloque y fila, en el mismo orden que el modelo. */
 export interface ResultadoDelFiltro {
   /** Lo tecleado normaliza a vacío: todo vuelve, y la región se vacía. */
   vacia: boolean;
-  /** Cuántas filas quedan: Autores en `/autores/`, Obras en `/obras/`. */
+  /** Cuántas filas quedan: Autores (y Personajes) en `/autores/`, Obras en `/obras/`. */
   filas: number;
+  /** Historia 35.5 — cuántas de esas filas son de los grupos de la sección «Personajes». */
+  personajes: number;
   grupos: { visible: boolean; bloques: { visible: boolean; filas: boolean[] }[] }[];
 }
 
@@ -62,28 +69,31 @@ export interface ResultadoDelFiltro {
  * el Corpus de hoy, pero no hay por qué hacerlo.
  */
 export function filtroDe(modelo: readonly GrupoFiltrable[]): (tecleado: string) => ResultadoDelFiltro {
-  const normalizado = modelo.map((grupo) =>
-    grupo.bloques.map((bloque) => ({
+  const normalizado = modelo.map((grupo) => ({
+    personajes: grupo.personajes === true,
+    bloques: grupo.bloques.map((bloque) => ({
       cabecera: bloque.cabecera === undefined ? undefined : normalizar(bloque.cabecera),
       filas: bloque.filas.map(normalizar),
     })),
-  );
+  }));
 
   return (tecleado) => {
     const consulta = normalizar(tecleado);
     const vacia = consulta === '';
     let filas = 0;
-    const grupos = normalizado.map((bloques) => {
-      const deBloques = bloques.map((bloque) => {
+    let personajes = 0;
+    const grupos = normalizado.map((grupo) => {
+      const deBloques = grupo.bloques.map((bloque) => {
         const todas = vacia || (bloque.cabecera !== undefined && bloque.cabecera.includes(consulta));
         const deFilas = bloque.filas.map((fila) => todas || fila.includes(consulta));
         const quedan = deFilas.filter(Boolean).length;
         filas += quedan;
+        if (grupo.personajes) personajes += quedan;
         return { visible: quedan > 0, filas: deFilas };
       });
       return { visible: deBloques.some((bloque) => bloque.visible), bloques: deBloques };
     });
-    return { vacia, filas, grupos };
+    return { vacia, filas, personajes, grupos };
   };
 }
 
@@ -97,8 +107,19 @@ function citado(tecleado: string): string {
  * el recuento con su punto final y sus singulares («14 autores.», «1 obra.») o, a cero, la frase
  * que dice qué no casó, con lo tecleado tal cual —recortado, con sus tildes y sus signos—. La
  * región lo recibe por `textContent`: lo tecleado es texto, nunca marcado.
+ *
+ * Historia 35.5 — con la sección «Personajes» en `/autores/`, `personajes` trae cuántos Personajes
+ * quedan, y `n` son solo los Autores: «3 autores y 1 personaje.» con los dos, solo el que quede con
+ * uno a cero («1 personaje.»), y a cero «Ningún autor ni personaje tiene «x» en el nombre.»
+ * [ASSUMPTION de la historia; las letras las fija Héctor]. Sin la sección (`undefined`), la de
+ * siempre. En `/obras/` las Obras de los Personajes son Obras y van en `n`.
  */
-export function fraseDelFiltro(directorio: DirectorioFiltrable, n: number, tecleado: string): string {
+export function fraseDelFiltro(directorio: DirectorioFiltrable, n: number, tecleado: string, personajes?: number): string {
+  if (directorio === 'autores' && personajes !== undefined) {
+    if (n > 0 && personajes > 0) return `${recuentoDeAutores(n)} y ${recuentoDePersonajes(personajes)}.`;
+    if (personajes > 0) return `${recuentoDePersonajes(personajes)}.`;
+    if (n === 0) return `Ningún autor ni personaje tiene «${citado(tecleado)}» en el nombre.`;
+  }
   if (n > 0) return `${directorio === 'autores' ? recuentoDeAutores(n) : recuentoDeObras(n)}.`;
   return directorio === 'autores'
     ? `Ningún autor tiene «${citado(tecleado)}» en el nombre.`

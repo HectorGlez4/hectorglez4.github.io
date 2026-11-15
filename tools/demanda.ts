@@ -50,7 +50,7 @@ import {
   type LecturaDeVentana,
   type VentanaSinLeer,
 } from './lib/demanda.ts';
-import { leerSerieDeDemanda, registrarLecturaDeDemanda, rutasDelCorpus } from './lib/corpus.ts';
+import { leerPersonajes, leerSerieDeDemanda, registrarLecturaDeDemanda, rutasDelCorpus } from './lib/corpus.ts';
 import { motivosDeArgumentosNoReconocidos, raizDeCorpusDe } from './lib/cli.ts';
 import { conjuntoDelCorpus } from './indexacion.ts';
 import { clienteDeSearchAnalytics, filasPorPagina, type Consultar } from './trafico.ts';
@@ -84,6 +84,8 @@ const USO = [
  */
 export async function leerDemanda(opciones: {
   conjunto: ConjuntoPublicable;
+  /** Los slugs de `corpus/personajes/` — Historia 35.2: sus Citas cuentan en su Personaje. */
+  slugsDePersonajes?: readonly string[];
   propiedad: string;
   /** El host canónico: una página de otro host no es de ningún Autor ni de ninguna familia. */
   dominio: string;
@@ -121,7 +123,12 @@ export async function leerDemanda(opciones: {
           ventana,
           momento,
           propiedad: opciones.propiedad,
-          agregado: agregarDemanda(filas, { slugsDeAutores, censo, dominio: opciones.dominio }),
+          agregado: agregarDemanda(filas, {
+            slugsDeAutores,
+            slugsDePersonajes: opciones.slugsDePersonajes ?? [],
+            censo,
+            dominio: opciones.dominio,
+          }),
           vacia: filas.length === 0,
         }),
       );
@@ -185,8 +192,10 @@ export async function principal(
   // 4 — el corpus y la serie ya registrada.
   const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
   let conjunto: ConjuntoPublicable;
+  let slugsDePersonajes: string[];
   try {
     conjunto = await conjuntoDelCorpus(rutas);
+    slugsDePersonajes = (await leerPersonajes(rutas)).map((p) => p.slug);
   } catch (fallo) {
     process.stderr.write(
       `No se pudo leer el corpus: ${fallo instanceof Error ? fallo.message : String(fallo)}\n` +
@@ -224,6 +233,7 @@ export async function principal(
   try {
     lectura = await leerDemanda({
       conjunto,
+      slugsDePersonajes,
       propiedad,
       dominio: DOMINIO,
       consultar,

@@ -10,15 +10,19 @@ import {
   LINEA_BASE_DE_LOS_DIRECTORIOS,
   PAGINAS_DE_DIRECTORIO,
   SUPERFICIES,
+  PAGINA_DE_PERSONAJE,
   axeLaCorre,
   anunciableEnElSitemap,
   caracterDe,
+  causaDelServicio,
   consecuenciasDe,
   consecuenciasDelCaracter,
   declararRutasIndexables,
   elBarridoLaCorre,
   esRutaDeDirectorio,
+  dependeDelContenido,
   esRutaDeObra,
+  esRutaDePersonaje,
   esServicioPorForma,
   etiquetaDeAxe,
   olvidarRutasIndexables,
@@ -26,6 +30,7 @@ import {
   rutaDeLaPortada,
   rutaDelDirectorioDeAutores,
   rutaDelDirectorioDeObras,
+  rutaDePersonaje,
   rutaNormalizada,
   superficieDeLineaBase,
   superficieDeclaradaDe,
@@ -67,6 +72,10 @@ const MUESTRAS = [
   '/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia',
   '/obra/baltasar-gracian/el-criticon',
   '/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia/2',
+  // Historia 35.3 — el Personaje, indexable (declarado abajo) y no, y su 2+.
+  '/personaje/batman',
+  '/personaje/joker',
+  '/personaje/batman/2',
 ];
 
 /*
@@ -76,7 +85,7 @@ const MUESTRAS = [
  * `obra-indexable.test.ts`.
  */
 beforeEach(() => {
-  declararRutasIndexables(['/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia/']);
+  declararRutasIndexables(['/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia/', '/personaje/batman/']);
 });
 afterEach(() => {
   olvidarRutasIndexables();
@@ -578,8 +587,9 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
    * Lo que desmentiría en el código el motivo de un criterio que axe no mide, uno por criterio.
    * 2.4.11 se da por cumplido porque nada fijo tapa el foco —ni `position: fixed` o `sticky`, ni
    * nada en la capa superior: un `popover` o un `<dialog>` abierto sin modal—; 2.5.7, porque nada
-   * se arrastra; 3.2.6 no aplica porque no hay mecanismo de ayuda —un correo con destinatario o un
-   * teléfono lo serían—; 3.3.7, porque ningún proceso pide datos —un formulario que no sea el de
+   * se arrastra; 3.2.6 se da por cumplido porque el único mecanismo de ayuda —un correo con
+   * destinatario o un teléfono lo serían— es la línea de retirada de la 35.8, un solo componente,
+   * y cualquier otro lo desmiente; 3.3.7, porque ningún proceso pide datos —un formulario que no sea el de
    * búsqueda lo sería—, y 3.3.8, porque no hay autenticación. Todo eso se deja ver en el marcado,
    * el estilo o los guiones, y el día que aparezca el título del barrido seguiría diciéndolo sin
    * que nada fallara.
@@ -621,6 +631,15 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
    * texto deja de estar, o deja de encender la señal, la prueba lo dice para que no se pudra.
    */
   const REVISADO_SIN_DESMENTIR: { fichero: string; criterio: string; texto: string; porque: string }[] = [
+    {
+      fichero: 'src/lib/atribucion.ts',
+      criterio: '3.2.6',
+      texto: 'href: `mailto:${direccion}?subject=${encodeURIComponent(asunto)}`,',
+      porque:
+        'Historia 35.8: la línea de retirada es el mecanismo de ayuda que hace aplicar 3.2.6; la pinta ' +
+        'un solo componente, LineaDeRetirada.astro, al pie de la Página de Cita atribuida y de la de ' +
+        'Personaje, en la misma posición relativa, y lo comprueban las pruebas de dist/ de esas páginas',
+    },
     {
       fichero: 'src/lib/medicion.ts',
       criterio: '2.5.7',
@@ -666,7 +685,7 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
       ['2.4.11', 'AA', 'ux'],
       ['2.5.7', 'AA', 'ux'],
       ['2.5.8', 'AA', 'axe'],
-      ['3.2.6', 'A', 'no-aplica'],
+      ['3.2.6', 'A', 'ux'],
       ['3.3.7', 'A', 'no-aplica'],
       ['3.3.8', 'AA', 'no-aplica'],
     ]);
@@ -744,7 +763,7 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
       // También la de un criterio A, aunque el barrido no pida su etiqueta y nunca la ejecute.
       const deNivelA = [...reglas, { ruleId: 'ayuda-movida', tags: ['wcag22a', 'wcag326'] }];
       expect(desajustesConAxe(deNivelA)).toEqual([
-        expect.stringMatching(/^3\.2\.6 se declara «no-aplica», pero axe ya lo mide con ayuda-movida: /),
+        expect.stringMatching(/^3\.2\.6 se declara «ux», pero axe ya lo mide con ayuda-movida: /),
         'ayuda-movida es de WCAG 2.2 y ningún criterio «axe» de la declaración la cubre',
       ]);
       const sinRegla = reglas.filter((r) => r.ruleId !== 'target-size');
@@ -1124,6 +1143,64 @@ describe('Historia 23.1 — la medición es una consecuencia más de la declarac
   });
 });
 
+describe('Historia 35.3 — la Página de Personaje', () => {
+  afterEach(() => {
+    olvidarRutasIndexables();
+  });
+
+  it('la reconoce su declaración, con la ruta que compone `rutaDePersonaje`', () => {
+    expect(rutaDePersonaje('batman')).toBe('/personaje/batman/');
+    expect(rutaDePersonaje('batman', 2)).toBe('/personaje/batman/2/');
+    expect(superficieDeclaradaDe('/personaje/batman')?.pagina).toBe(PAGINA_DE_PERSONAJE);
+    expect(superficieDeclaradaDe('/personaje/batman/2')?.pagina).toBe(PAGINA_DE_PERSONAJE);
+    expect(superficieDeclaradaDe('/personaje/batman/robin')).toBeUndefined();
+    expect(FAMILIAS.at(-1)).toBe('personaje');
+  });
+
+  it('sin la lista de rutas indexables, rompe ante un Personaje como ante una Obra', () => {
+    olvidarRutasIndexables();
+    expect(() => caracterDe('/personaje/batman')).toThrow(/rutas indexables no se ha declarado/u);
+    // La 2+ se decide por forma, sin lista.
+    expect(caracterDe('/personaje/batman/2')).toBe('servicio');
+    expect(causaDelServicio('/personaje/batman/2')).toBe('forma');
+  });
+
+  it('la página 1 de la lista es producto con la vista de superficie; la de fuera y las 2+, servicio sin vista', () => {
+    declararRutasIndexables(['/personaje/batman/']);
+    expect(caracterDe('/personaje/batman')).toBe('producto');
+    expect(consecuenciasDe('/personaje/batman').vistas).toEqual([EVENTOS.vistaDeSuperficie]);
+    expect('marcaDeObra' in consecuenciasDe('/personaje/batman')).toBe(false);
+    expect(causaDelServicio('/personaje/joker')).toBe('contenido');
+    expect(consecuenciasDe('/personaje/joker').vistas).toEqual([]);
+    expect(consecuenciasDe('/personaje/batman/2')).toMatchObject({ noIndexar: true, vistas: [] });
+    // Un slug enteramente numérico es un Personaje, no la página 1984 de nada.
+    expect(causaDelServicio('/personaje/1984')).toBe('contenido');
+  });
+
+  it('Historia 35.3b — un Personaje fuera de la lista se sirve por contenido, y depende del contenido como la Obra', () => {
+    declararRutasIndexables([]);
+    expect(causaDelServicio('/personaje/batman')).toBe('contenido');
+    expect(consecuenciasDe('/personaje/batman')).toMatchObject({ noIndexar: true, vistas: [] });
+    for (const ruta of ['/personaje/batman', '/personaje/batman/2/', '/obra/a/b/', '/obra/a/b/2/']) {
+      expect(dependeDelContenido(ruta), ruta).toBe(true);
+    }
+    for (const ruta of ['/autor/seneca/', '/autor/seneca/2/', '/tema/la-vida/', '/', '/obras/']) {
+      expect(dependeDelContenido(ruta), ruta).toBe(false);
+    }
+    expect(esRutaDePersonaje('/personaje/batman/2/')).toBe(true);
+    expect(esRutaDePersonaje('/obra/a/b/')).toBe(false);
+    expect(esRutaDeObra('/personaje/batman/')).toBe(false);
+  });
+
+  it('su unidad de línea base es la suya: ni comparte la del Autor ni declara otra', () => {
+    const personaje = superficieDeclaradaDe('/personaje/batman');
+    const autor = superficieDeclaradaDe('/autor/seneca');
+    expect(personaje?.lineaBase).toBeUndefined();
+    expect(superficieDeLineaBase(personaje!)).toBe(personaje!.nombre);
+    expect(superficieDeLineaBase(personaje!)).not.toBe(superficieDeLineaBase(autor!));
+  });
+});
+
 describe('Historia 23.10 — la superficie de línea base', () => {
   it('es la que declara la superficie, o ella misma por su nombre', () => {
     const portada = superficieDeclaradaDe('/')!;
@@ -1177,8 +1254,8 @@ describe('Historia 26.3 — el Directorio de Autores', () => {
 describe('Historia 26.7 — las familias tienen un solo dueño', () => {
   const RAIZ = join(import.meta.dirname, '..', '..');
 
-  it('son seis, en este orden, con una sola para los dos Directorios', () => {
-    expect(FAMILIAS).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio']);
+  it('son siete, en este orden, con una sola para los dos Directorios y el Personaje al final (35.3)', () => {
+    expect(FAMILIAS).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio', 'personaje']);
   });
 
   it('ningún otro fichero de src/, tools/, integraciones/ ni medicion/ declara la lista ni la unión', () => {

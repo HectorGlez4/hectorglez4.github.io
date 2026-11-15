@@ -18,8 +18,10 @@ import {
   type AutorAdmisible,
   type CitaAdmisible,
   type ObraAdmisible,
+  type PersonajeAdmisible,
 } from '../../src/lib/admision.ts';
 import type { FichaDeObra } from '../../src/lib/obras.ts';
+import { CLASE_ATRIBUIDA, CLASE_DE_SIEMPRE, CLASES, esClase, type Clase } from '../../src/lib/clase.ts';
 import type {
   ClaseDeObjetivo,
   ObjetivoDeTema,
@@ -163,10 +165,53 @@ export const FICHERO_DE_CANDIDATOS = 'candidatos-por-epoca.yml';
  */
 export const FICHERO_DE_DESCARTES = 'descartes-de-candidatos.yml';
 
+/**
+ * El registro de clases de Cita — Historia 35.1. Su nombre tiene un solo dueño.
+ *
+ * **Solo añade**: anota la clase con que se publicó cada Cita, y cambiar de clase no es
+ * reescribir una entrada sino retirar la Cita y dar de alta otra con otro slug (`slugLibre`).
+ * Lo escriben el alta, la aprobación y la siembra (`npx tsx tools/clases.ts sembrar`); el build
+ * lo lee solo para romper (`integraciones/clases.ts`) y ningún byte de `dist/` sale de él.
+ */
+export const FICHERO_DE_CLASES = 'clases-de-cita.yml';
+
+/**
+ * El registro de formas vedadas a la atribuida — Historia 35.7, AD-32. Solo añade; lo leen y lo
+ * escriben `tools/lib/formasVedadas.ts`, y el build lo lee solo para romper.
+ */
+export const FICHERO_DE_FORMAS_VEDADAS = 'formas-vedadas.yml';
+
+/**
+ * El registro de peticiones de corrección y retirada de una Cita atribuida — Historia 35.8,
+ * AD-35. Solo añade; lo leen y lo escriben `tools/lib/peticiones.ts` y `npm run peticion`, y
+ * ningún módulo de `src/` lo nombra (AD-24).
+ */
+export const FICHERO_DE_PETICIONES_DE_RETIRADA = 'peticiones-de-retirada.yml';
+
+/**
+ * El registro de auditorías de SM-C6 — Historia 35.8, AD-32. Solo añade; lo escribe
+ * `npm run peticion -- auditar`, y ningún módulo de `src/` lo nombra (AD-24).
+ */
+export const FICHERO_DE_AUDITORIAS = 'auditorias-de-atribuidas.yml';
+
+/**
+ * El registro de aprobaciones de la traducción propia — Historia 35.11, AD-32 v9.2. Solo añade
+ * `{slug, propone, aprueba, fecha}`; lo leen y lo escriben `tools/lib/aprobaciones.ts`, el alta,
+ * `revisar --aprobar` y `npm run atribuida -- texto`, y el build lo lee solo para romper
+ * (`integraciones/clases.ts`). Ningún módulo de `src/` lo nombra (AD-24).
+ */
+export const FICHERO_DE_APROBACIONES = 'aprobaciones-de-atribuidas.yml';
+
 export interface Rutas {
   raiz: string;
   citas: string;
   autores: string;
+  /**
+   * Los Personajes — Historia 35.2, AD-1. Colección de Astro con esta misma base en
+   * `src/content.config.ts`; comparten un solo espacio de slugs con los Autores, activos y
+   * retirados. Se versiona vacía con su `.gitkeep`: ningún agente siembra Personajes.
+   */
+  personajes: string;
   temas: string;
   /**
    * Las Colecciones — Historia 12.2, AD-18.
@@ -342,6 +387,15 @@ export interface Rutas {
    * decisión editorial sobre lo que **no** entra, y nada de eso se publica.
    */
   descartesDeCandidatos: string;
+  /** El registro de clases de Cita — Historia 35.1. Solo añade. */
+  clasesDeCita: string;
+  /** El registro de formas vedadas a la atribuida — Historia 35.7. Solo añade. */
+  formasVedadas: string;
+  /** El registro de peticiones de corrección y retirada — Historia 35.8. Solo añade. */
+  peticionesDeRetirada: string;
+  /** El registro de auditorías de SM-C6 — Historia 35.8. Solo añade. */
+  auditoriasDeAtribuidas: string;
+  aprobacionesDeAtribuidas: string;
   /**
    * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
    *
@@ -363,6 +417,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     raiz: raizCorpus,
     citas: join(raizCorpus, 'citas'),
     autores: join(raizCorpus, 'autores'),
+    personajes: join(raizCorpus, 'personajes'),
     temas: join(raizCorpus, 'temas'),
     colecciones: join(raizCorpus, 'colecciones'),
     coleccionesRetiradas: join(raizCorpus, '_colecciones-retiradas'),
@@ -385,6 +440,11 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     senalesExternas: join(raizCorpus, FICHERO_DE_SENALES),
     candidatosPorEpoca: join(raizCorpus, FICHERO_DE_CANDIDATOS),
     descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
+    clasesDeCita: join(raizCorpus, FICHERO_DE_CLASES),
+    formasVedadas: join(raizCorpus, FICHERO_DE_FORMAS_VEDADAS),
+    peticionesDeRetirada: join(raizCorpus, FICHERO_DE_PETICIONES_DE_RETIRADA),
+    auditoriasDeAtribuidas: join(raizCorpus, FICHERO_DE_AUDITORIAS),
+    aprobacionesDeAtribuidas: join(raizCorpus, FICHERO_DE_APROBACIONES),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }
@@ -442,6 +502,24 @@ export async function leerAutores(rutas: Rutas): Promise<AutorEnCorpus[]> {
       ...(parsearYaml(await readFile(ruta, 'utf8')) as AutorAdmisible & {
         tituloEnFuente?: string;
       }),
+      slug: slugDeFichero(ruta),
+      ruta,
+    })),
+  );
+}
+
+/** Un Personaje del Corpus, ya leído, con el slug de su fichero — Historia 35.2. */
+export interface PersonajeEnCorpus extends PersonajeAdmisible {
+  slug: string;
+  ruta: string;
+}
+
+/** Los Personajes de `corpus/personajes/`, sin juzgarlos: el esquema lo hace el build y la orden. */
+export async function leerPersonajes(rutas: Rutas): Promise<PersonajeEnCorpus[]> {
+  const ficheros = await ficherosDe(rutas.personajes, ['.yml', '.yaml']);
+  return Promise.all(
+    ficheros.map(async (ruta) => ({
+      ...(parsearYaml(await readFile(ruta, 'utf8')) as PersonajeAdmisible),
       slug: slugDeFichero(ruta),
       ruta,
     })),
@@ -638,7 +716,10 @@ export async function escribirFichaDeObra(
 /** El YAML de una ficha, con sus campos siempre en el mismo orden. Lo opcional sin valor se omite. */
 function yamlDeFicha(ficha: ObraAdmisible): string {
   return aYaml({
-    autor: ficha.autor,
+    // Historia 35.2 — el dueño: el Autor, o el Personaje con sus Personajes (y el Autor si se sabe).
+    ...(ficha.autor !== undefined ? { autor: ficha.autor } : {}),
+    ...(ficha.personaje !== undefined ? { personaje: ficha.personaje } : {}),
+    ...(ficha.personajes !== undefined ? { personajes: ficha.personajes } : {}),
     titulo: ficha.titulo,
     formas: ficha.formas,
     ...(ficha.distintaDe !== undefined && ficha.distintaDe.length > 0
@@ -908,6 +989,18 @@ export async function escribirAutor(
   return ruta;
 }
 
+/** Escribe la ficha de un Personaje entera — Historia 35.2. La escribe solo `tools/personaje.ts`. */
+export async function escribirPersonaje(
+  rutas: Rutas,
+  slug: string,
+  personaje: Record<string, unknown>,
+): Promise<string> {
+  await mkdir(rutas.personajes, { recursive: true });
+  const ruta = join(rutas.personajes, `${slug}.yml`);
+  await writeFile(ruta, aYaml(personaje), 'utf8');
+  return ruta;
+}
+
 /**
  * Fija campos escalares de un fichero de Autor **sin tocar nada más** — Historia 26.1.
  *
@@ -1085,14 +1178,15 @@ export async function mover(origen: string, destinoDir: string): Promise<string>
 }
 
 /**
- * El nombre de fichero que fija la espina: `{slug-autor}--{fragmento}.md`. Se deriva del
- * slug ya calculado, no del texto, para que fichero y URL no puedan divergir.
+ * El nombre de fichero que fija la espina: `{slug-del-dueño}--{fragmento}.md`. Se deriva del
+ * slug ya calculado, no del texto, para que fichero y URL no puedan divergir. El dueño es el
+ * Autor de la Cita o, sin él, su Personaje (Historia 35.2, `dueñoDeCita`).
  */
-export function nombreDeFicheroDeCita(slugAutor: string, slugCita: string): string {
-  const fragmento = slugCita.startsWith(`${slugAutor}-`)
-    ? slugCita.slice(slugAutor.length + 1)
+export function nombreDeFicheroDeCita(slugDueño: string, slugCita: string): string {
+  const fragmento = slugCita.startsWith(`${slugDueño}-`)
+    ? slugCita.slice(slugDueño.length + 1)
     : slugCita;
-  return `${slugAutor}--${fragmento}`;
+  return `${slugDueño}--${fragmento}`;
 }
 
 /**
@@ -1530,18 +1624,39 @@ export interface SesionDeSembrado {
   resultado: ResultadoDeLaSesion;
 }
 
+/**
+ * Una sesión de siembra de la Cita atribuida — Historia 35.10, FR-68. Dice su clase en un campo
+ * propio, `claseDeCita`, distinto del `clase` que nombra la del objetivo: la política del objetivo es
+ * de la clase de siempre y no la propone, así que no lleva `clase`, `propuesto` ni `hueco`. Su
+ * resultado medido son las Citas publicadas de las dos clases —la misma clave que mide siempre— y las
+ * atribuidas publicadas.
+ */
+export interface SesionDeSembradoAtribuida {
+  momento?: Date;
+  claseDeCita: typeof CLASE_ATRIBUIDA;
+  resultado: { citasPublicadas: number; atribuidasPublicadas: number };
+}
+
 /** Una entrada ya escrita en el registro, tal y como se relee. */
 export interface SesionRegistrada {
   fecha: string;
   hora?: string;
-  clase: string;
-  propuesto: string;
+  /** Historia 35.10 — solo en las de la atribuida; sin el campo, la sesión es de la clase de siempre. */
+  claseDeCita?: string;
+  /** Las de la atribuida no lo llevan: la política del objetivo no las propone. */
+  clase?: string;
+  propuesto?: string;
   hueco?: string;
   tema?: { slug: string; nombre: string; publicadas: number; faltan: number };
   tradicion?: { nombre: string; porcentaje?: number; suelo: number; autoresQueFaltan?: number };
   elegido?: string;
   motivo?: string;
-  resultado?: ResultadoDeLaSesion;
+  resultado?: ResultadoDeLaSesion & { atribuidasPublicadas?: number };
+}
+
+/** De qué clase de Cita es una sesión registrada: sin `claseDeCita`, de la de siempre (Historia 35.10). */
+export function claseDeCitaDeLaSesion(sesion: Pick<SesionRegistrada, 'claseDeCita'>): Clase {
+  return sesion.claseDeCita === CLASE_ATRIBUIDA ? CLASE_ATRIBUIDA : CLASE_DE_SIEMPRE;
 }
 
 /**
@@ -1630,7 +1745,7 @@ export async function leerSesionesDeSembrado(rutas: Rutas): Promise<SesionRegist
  */
 export async function registrarSesionDeSembrado(
   rutas: Rutas,
-  sesion: SesionDeSembrado,
+  sesion: SesionDeSembrado | SesionDeSembradoAtribuida,
 ): Promise<string> {
   const ruta = rutas.sesionesDeSembrado;
   const nombre = `corpus/${FICHERO_DE_SESIONES}`;
@@ -1650,18 +1765,26 @@ export async function registrarSesionDeSembrado(
   const cuantasHabia = analizarRegistro(nombre, anterior).length;
 
   const momento = sesion.momento ?? new Date();
-  const entrada: Record<string, unknown> = {
-    fecha: fechaLocal(momento),
-    hora: horaLocal(momento),
-    clase: sesion.clase,
-    propuesto: sesion.propuesto,
-    hueco: sesion.hueco,
-    tema: sesion.tema,
-    tradicion: sesion.tradicion,
-    elegido: sesion.elegido,
-    motivo: sesion.motivo,
-    resultado: { ...sesion.resultado },
-  };
+  const entrada: Record<string, unknown> =
+    'claseDeCita' in sesion
+      ? {
+          fecha: fechaLocal(momento),
+          hora: horaLocal(momento),
+          claseDeCita: sesion.claseDeCita,
+          resultado: { ...sesion.resultado },
+        }
+      : {
+          fecha: fechaLocal(momento),
+          hora: horaLocal(momento),
+          clase: sesion.clase,
+          propuesto: sesion.propuesto,
+          hueco: sesion.hueco,
+          tema: sesion.tema,
+          tradicion: sesion.tradicion,
+          elegido: sesion.elegido,
+          motivo: sesion.motivo,
+          resultado: { ...sesion.resultado },
+        };
 
   // `- ` ocupa el sitio de los dos primeros espacios de la primera clave: la entrada es un
   // elemento de la lista `sesiones` y el resto de sus claves cuelgan sangradas de él.
@@ -2348,10 +2471,12 @@ export const CABECERA_DE_DEMANDA = [
 /** Una entrada ya escrita en la serie de demanda, tal y como se relee. */
 export type LecturaDeVentanaRegistrada = Omit<
   LecturaDeVentana,
-  'autores' | 'citas' | 'familias' | 'slugsSinAutor' | 'citasConClic'
+  'autores' | 'personajes' | 'citas' | 'familias' | 'slugsSinAutor' | 'citasConClic'
 > & {
   /** Ausentes cuando están vacías: `aYaml` omite una lista o un objeto sin elementos. */
   autores?: LecturaDeVentana['autores'];
+  /** Los Personajes (Historia 35.2); las entradas anteriores no los traen. */
+  personajes?: LecturaDeVentana['personajes'];
   citas?: LecturaDeVentana['citas'];
   familias?: LecturaDeVentana['familias'];
 };
@@ -2439,6 +2564,8 @@ export async function registrarLecturaDeDemanda(
       propiedad: v.propiedad,
       vacia: v.vacia,
       autores: v.autores,
+      // Historia 35.2 — vacía se omite: con el Corpus real, sin Personajes, la serie no cambia.
+      ...(v.personajes.length > 0 ? { personajes: v.personajes } : {}),
       citas: v.citas,
       sinAutor: v.sinAutor,
       resto: v.resto,
@@ -2476,6 +2603,7 @@ export async function registrarLecturaDeDemanda(
     if (escrita.clase !== leida.clase) problemas.push('la clase');
     if ((escrita.vacia === true) !== (leida.vacia === true)) problemas.push('la marca «vacia»');
     if ((escrita.autores ?? []).length !== leida.autores.length) problemas.push('los Autores');
+    if ((escrita.personajes ?? []).length !== leida.personajes.length) problemas.push('los Personajes');
     if ((escrita.citas ?? []).length !== leida.citas.length) problemas.push('las Citas');
     if (escrita.sinAutor === undefined) problemas.push('«sinAutor»');
     if (escrita.resto === undefined) problemas.push('«resto»');
@@ -2928,8 +3056,9 @@ function bloqueDePublicacion(publicacion: PublicacionDeCanal): string {
  * Antes de escribir se valida el fichero y se compone en memoria lo que quedaría, así que un
  * fichero ilegible —o uno en el que la lista no es lo último— se niega sin tocarlo. Después
  * se relee y se comprueba que la última entrada es la nueva y que el recuento creció en uno.
+ * Desde la 35.8 lo usan también las peticiones de retirada y las auditorías de SM-C6.
  */
-async function añadirAlRegistro<T>(registro: {
+export async function añadirAlRegistro<T>(registro: {
   ruta: string;
   raiz: string;
   nombre: string;
@@ -3683,5 +3812,154 @@ export async function registrarDescarteDeCandidato(
   }
 
   await appendFile(ruta, añadido, 'utf8');
+  return ruta;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El registro de clases de Cita — Historia 35.1
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * La cabecera del registro de clases. Va aquí por lo mismo que la de peticiones: un Corpus de
+ * pruebas, o un clon al que le falte el fichero, tiene que poder anotar su primera Cita sin que
+ * nadie escriba la cabecera a mano.
+ */
+export const CABECERA_DE_CLASES = [
+  '# Clases de Cita — Historia 35.1, Épica 35, FR-13, FR-65',
+  '#',
+  '# QUÉ REGISTRA. La clase con que se publicó cada Cita: «siempre» —dominio público, cotejada—',
+  '# o «atribuida». Una línea por Cita: slug, clase y la jornada en que se anotó.',
+  '#',
+  '# SOLO AÑADE. Ninguna entrada se reescribe ni se borra: una Cita no cambia de clase. Para',
+  '# cambiarla se retira y se da de alta otra con otro slug, y las dos quedan aquí. `npm test`',
+  '# comprueba que el fichero del commit empieza, byte a byte, por el del commit padre.',
+  '#',
+  '# NO SE EDITA A MANO. Lo escriben el alta (tools/alta.ts) y la aprobación',
+  '# (tools/revisar.ts --aprobar), con la clase que derivan y nunca tecleada, y la siembra:',
+  '#',
+  '#   npx tsx tools/clases.ts sembrar     # anota como «siempre» las Citas publicadas que falten',
+  '#',
+  '# El build (integraciones/clases.ts) rompe si una Cita publicada no está aquí o está con otra',
+  '# clase. No es una colección: ninguna base de src/content.config.ts apunta aquí, ningún byte',
+  '# de dist/ sale de él y no fecha ni avisa ninguna superficie.',
+  '',
+  'clases:',
+  '',
+].join('\n');
+
+const CLAVE_DE_CLASES = 'clases';
+
+/** Una entrada del registro de clases, tal y como se relee. */
+export interface ClaseRegistrada {
+  slug: string;
+  clase: Clase;
+  fecha: string;
+}
+
+/**
+ * Las entradas de un registro de clases ya leído, comprobando que el fichero sea lo que dice ser:
+ * un fichero sin la clave `clases:` dejaría que lo añadido quedara en una lista huérfana.
+ */
+function analizarClases(nombre: string, contenido: string): ClaseRegistrada[] {
+  let leido: unknown;
+  try {
+    leido = parsearYaml(contenido);
+  } catch (fallo) {
+    throw new Error(
+      `${nombre} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}. ` +
+        'De este registro sale la clase de cada Cita publicada, así que no se lee a medias.',
+    );
+  }
+  if (leido === null || typeof leido !== 'object' || Array.isArray(leido) || !(CLAVE_DE_CLASES in leido)) {
+    throw new Error(
+      `${nombre}: falta la clave «${CLAVE_DE_CLASES}:» en la raíz del fichero. Las entradas cuelgan ` +
+        'de ella; sin la clave, lo que se añada no lo cuenta nadie. Restaure la cabecera del registro.',
+    );
+  }
+  const entradas = (leido as Record<string, unknown>)[CLAVE_DE_CLASES];
+  if (entradas === null || entradas === undefined) return [];
+  if (!Array.isArray(entradas)) {
+    throw new Error(`${nombre}: «${CLAVE_DE_CLASES}» tiene que ser una lista de entradas, y es ${typeof entradas}.`);
+  }
+  for (const [i, entrada] of entradas.entries()) {
+    const e = entrada as Record<string, unknown> | null;
+    const problema =
+      e === null || typeof e !== 'object' || Array.isArray(e)
+        ? 'no es una entrada'
+        : typeof e.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(e.slug)
+          ? 'no declara un slug con forma de slug'
+          : !esClase(e.clase)
+            ? `declara la clase ${JSON.stringify(e.clase)}, y las clases son ${CLASES.join(' y ')}`
+            : typeof e.fecha !== 'string' || !esJornada(e.fecha)
+              ? 'no declara una fecha AAAA-MM-DD que exista'
+              : undefined;
+    if (problema !== undefined) {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_CLASES}» ${problema} (${JSON.stringify(entrada)}).`,
+      );
+    }
+  }
+  return entradas as ClaseRegistrada[];
+}
+
+/**
+ * Las entradas del registro de clases. Un registro que no existe se lee como registro vacío, y
+ * uno que existe sin contenido —una primera escritura interrumpida, un fichero truncado—,
+ * también: sin una sola entrada no hay nada que leer a medias, y `registrarClases` le pone la
+ * cabecera al primer añadido. Si se leyera como «falta la clave», ninguna orden lo repararía.
+ */
+export async function leerRegistroDeClases(rutas: Rutas): Promise<ClaseRegistrada[]> {
+  if (!existsSync(rutas.clasesDeCita)) return [];
+  const contenido = await readFile(rutas.clasesDeCita, 'utf8');
+  if (contenido.trim() === '') return [];
+  return analizarClases(`corpus/${FICHERO_DE_CLASES}`, contenido);
+}
+
+/** Una entrada como se escribe: una línea, con el slug y la fecha entre comillas. */
+function lineaDeClase(entrada: ClaseRegistrada): string {
+  return `  - { slug: ${JSON.stringify(entrada.slug)}, clase: ${entrada.clase}, fecha: ${JSON.stringify(entrada.fecha)} }\n`;
+}
+
+/**
+ * Añade entradas al registro de clases. **Solo añade**, con un único `appendFile`, y como
+ * `registrarPeticionesDeRastreo`: se crea con `wx` si no existe, se lee, se compone en memoria
+ * el fichero que quedaría, se analiza, y solo si la lista crece exactamente en lo añadido se
+ * escriben esos bytes al final. Un lote vacío no escribe nada.
+ */
+export async function registrarClases(rutas: Rutas, entradas: readonly ClaseRegistrada[]): Promise<string> {
+  const ruta = rutas.clasesDeCita;
+  const nombre = `corpus/${FICHERO_DE_CLASES}`;
+  if (entradas.length === 0) return ruta;
+
+  const añadido = entradas.map(lineaDeClase).join('');
+  // Se juzga antes de tocar el disco: una entrada sin forma no crea ni el fichero.
+  analizarClases(nombre, `${CABECERA_DE_CLASES}${añadido}`);
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      await writeFile(ruta, CABECERA_DE_CLASES, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  /*
+   * Un fichero sin contenido (una primera escritura que se cortó, uno truncado) recibe la
+   * cabecera en el mismo añadido: sigue siendo solo añadir, y deja el registro con su clave.
+   */
+  const vacio = anterior.trim() === '';
+  const cuantasHabia = vacio ? 0 : analizarClases(nombre, anterior).length;
+  const salto = vacio ? CABECERA_DE_CLASES : anterior.endsWith('\n') ? '' : '\n';
+  const quedaria = analizarClases(nombre, `${anterior}${salto}${añadido}`);
+  if (quedaria.length !== cuantasHabia + entradas.length) {
+    throw new Error(
+      `${nombre}: añadir al final no deja las entradas colgando de «${CLAVE_DE_CLASES}:» (había ` +
+        `${cuantasHabia}, se añaden ${entradas.length} y quedarían ${quedaria.length}). El registro ` +
+        'se escribe solo por añadido, así que la lista tiene que ser lo último del fichero. No se ha escrito nada.',
+    );
+  }
+  await appendFile(ruta, `${salto}${añadido}`, 'utf8');
   return ruta;
 }

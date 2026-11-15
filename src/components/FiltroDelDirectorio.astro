@@ -29,6 +29,12 @@
  *
  * El guion no lee ni escribe la dirección ni el historial, no escucha `click` en la ventana y no
  * lleva contenido del Corpus. El contenedor va fuera de Pagefind (`data-pagefind-ignore="all"`).
+ *
+ * Historia 35.5 — la sección «Personajes» va dentro de `.listado`, marcada con `data-personajes`, y
+ * el filtro la alcanza: en `/autores/` sus grupos de letra casan por el nombre, en `/obras/` la
+ * sección es un grupo con un bloque por Personaje. Se oculta entera —su `h2` incluido— cuando no le
+ * queda nada; con texto se apartan las letras de los dos bloques (`nav.letras`) y el salto de la
+ * cabecera (`data-salto`), y el recuento cuenta aparte a los Personajes (`fraseDelFiltro`).
  */
 import CampoDeBusqueda from './CampoDeBusqueda.astro';
 import { ETIQUETA_DEL_FILTRO, type DirectorioFiltrable } from '../lib/filtroDelDirectorio.ts';
@@ -152,6 +158,7 @@ const { directorio } = Astro.props;
   /** Lo que se oculta o se muestra con cada fila, bloque y grupo del modelo, en su orden. */
   interface Pintable {
     grupo: HTMLElement;
+    personajes: boolean;
     bloques: { bloque?: HTMLElement; filas: HTMLElement[] }[];
   }
 
@@ -172,7 +179,13 @@ const { directorio } = Astro.props;
   function leer(directorio: DirectorioFiltrable, listado: HTMLElement) {
     const modelo: GrupoFiltrable[] = [];
     const pintables: Pintable[] = [];
+    // Historia 35.5 — los grupos de la sección «Personajes»: sus letras en `/autores/`, la sección en `/obras/`.
+    const dePersonajes = new Set([
+      ...listado.querySelectorAll<HTMLElement>('[data-personajes] section.grupo'),
+      ...listado.querySelectorAll<HTMLElement>('section.grupo[data-personajes]'),
+    ]);
     for (const grupo of listado.querySelectorAll<HTMLElement>('section.grupo')) {
+      const personajes = dePersonajes.has(grupo);
       const bloques =
         directorio === 'autores'
           ? [{ bloque: undefined, cabecera: undefined, filas: [...grupo.querySelectorAll<HTMLElement>('li.fila-de-bloque')] }]
@@ -183,12 +196,13 @@ const { directorio } = Astro.props;
               filas: [...bloque.querySelectorAll<HTMLElement>('.lista-de-obras > li')],
             }));
       modelo.push({
+        ...(personajes ? { personajes: true as const } : {}),
         bloques: bloques.map(({ cabecera, filas }) => ({
           ...(cabecera === undefined ? {} : { cabecera }),
           filas: filas.map((fila) => textoDeFila(directorio, fila)),
         })),
       });
-      pintables.push({ grupo, bloques: bloques.map(({ bloque, filas }) => ({ bloque, filas })) });
+      pintables.push({ grupo, personajes, bloques: bloques.map(({ bloque, filas }) => ({ bloque, filas })) });
     }
     return { modelo, pintables };
   }
@@ -212,8 +226,12 @@ const { directorio } = Astro.props;
     const { modelo, pintables } = leer(directorio, listado);
     const filtrar = filtroDe(modelo);
     const ritmo = ritmoDeTecleo(region, PAUSA_DE_TECLEO_MS);
-    const letras = listado.querySelector<HTMLElement>('#letras');
+    const letras = [...listado.querySelectorAll<HTMLElement>('nav.letras')];
     const volveres = [...listado.querySelectorAll<HTMLElement>('p.volver')];
+    // Historia 35.5 — la sección «Personajes» de `/autores/` y su salto; en `/obras/` la sección es un grupo.
+    const secciones = [...listado.querySelectorAll<HTMLElement>('[data-personajes]')];
+    const salto = raiz.parentElement?.querySelector<HTMLElement>('[data-salto]') ?? null;
+    const conPersonajes = pintables.some((p) => p.personajes);
 
     raiz.insertBefore(campo, region);
     raiz.insertBefore(sombra, region);
@@ -231,8 +249,12 @@ const { directorio } = Astro.props;
           deBloque.filas.forEach((fila, f) => (fila.hidden = !bloque.filas[f]));
         });
       });
-      if (letras !== null) letras.hidden = !resultado.vacia;
+      for (const nav of letras) nav.hidden = !resultado.vacia;
       for (const volver of volveres) volver.hidden = !resultado.vacia;
+      if (salto !== null) salto.hidden = !resultado.vacia;
+      for (const seccion of secciones) {
+        seccion.hidden = !resultado.grupos.some((grupo, g) => pintables[g].personajes && grupo.visible);
+      }
 
       const aCeroVisible = !resultado.vacia && resultado.filas === 0;
       aCero.hidden = !aCeroVisible;
@@ -244,7 +266,11 @@ const { directorio } = Astro.props;
         enlace.removeAttribute('href');
       }
 
-      const frase = resultado.vacia ? '' : fraseDelFiltro(directorio, resultado.filas, tecleado);
+      const frase = resultado.vacia
+        ? ''
+        : directorio === 'autores' && conPersonajes
+          ? fraseDelFiltro(directorio, resultado.filas - resultado.personajes, tecleado, resultado.personajes)
+          : fraseDelFiltro(directorio, resultado.filas, tecleado);
       sombra.textContent = frase;
       if (resultado.vacia) ritmo.vaciar();
       else ritmo.anunciar(frase);

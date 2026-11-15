@@ -70,7 +70,7 @@ export function entradasDelCanal(
     const dia = jornadaAnterior(jornada, atras);
     const seleccion = citaDelDia(aptas, dia, fijaciones);
     if (!seleccion) continue;
-    const autor = porSlug.get(seleccion.cita.autor);
+    const autor = seleccion.cita.autor === undefined ? undefined : porSlug.get(seleccion.cita.autor);
     // Una Cita sin su Autor en el conjunto no se publica —lo impide la admisión—, pero si
     // llegara aquí se salta en vez de romper el canal entero por una entrada.
     if (!autor) continue;

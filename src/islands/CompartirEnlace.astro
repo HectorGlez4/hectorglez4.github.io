@@ -43,17 +43,23 @@ import {
   textoParaCompartir,
 } from '../lib/compartir.ts';
 import { EVENTOS } from '../lib/medicion.ts';
-import type { Cita, Autor } from '../lib/publicado.ts';
+import type { Cita, Autor, Personaje } from '../lib/publicado.ts';
 
 interface Props {
   cita: Cita;
-  autor: Autor;
+  /** El Autor que declara la Cita, o `undefined` si no declara ninguno (Historia 35.4). */
+  autor: Autor | undefined;
+  /**
+   * El Personaje que la dice, si lo declara —Historia 35.4: lo nombra delante, por `firmaDeCita`—.
+   * Obligatoria, `undefined` si no declara ninguno, para que un uso nuevo no lo olvide.
+   */
+  personaje: Personaje | undefined;
   /** La canónica, absoluta: es lo que se comparte y lo único que el buscador indexa. */
   canonica: string;
 }
 
-const { cita, autor, canonica } = Astro.props;
-const texto = textoParaCompartir(cita, autor);
+const { cita, autor, personaje, canonica } = Astro.props;
+const texto = textoParaCompartir(cita, autor, personaje);
 ---
 
 <div class="isla" data-pagefind-ignore data-compartir data-texto={texto} data-url={canonica}>

@@ -10,7 +10,8 @@
  *     cierre «Las {n} citas de {título} ›» hacia la página 1 de la Obra;
  *   · **«Más de {Autor}»** — hasta `MAX_CITAS_RELACIONADAS` Citas del Autor sacadas de otras
  *     Obras, con la Tarjeta que lleva solo la Obra y el cierre «Las {n} citas de {Autor} ›»
- *     hacia su Página de Autor;
+ *     hacia su Página de Autor; desde la Historia 35.4, **«Más de {Personaje}»** si la Cita lo
+ *     declara (`dueñoDeLaRuta`), con su cierre a la Página de Personaje;
  *   · **«Temas»** — los chips de los Temas publicados de la Cita.
  *
  * Qué Citas, cuántas y los recuentos los decide `rutasDeSalidaDeCita` (`src/lib/publicado.ts`),
@@ -35,10 +36,11 @@
  * No hay enlace «Ver la ficha del Autor» aparte del cierre: la atribución de arriba ya lleva a
  * su página, y el siena en tres sitios de la misma pantalla deja de señalar.
  */
-import { problemaDeRutasDeSalida, type Autor, type RutasDeSalidaDeCita } from '../lib/publicado.ts';
-import { cierreDeLaMismaObra, cierreDeMasDelAutor } from '../lib/atribucion.ts';
+import { problemaDeRutasDeSalida, type RutasDeSalidaDeCita } from '../lib/publicado.ts';
+import type { Dueño } from '../lib/obras.ts';
+import { cierreDeLaMismaObra, cierreDeMasDelAutor, cierreDeMasDelPersonaje } from '../lib/atribucion.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
-import { rutaDeAutor, rutaDeTema } from '../lib/superficies.ts';
+import { rutaDeAutor, rutaDePersonaje, rutaDeTema } from '../lib/superficies.ts';
 import type { Zona } from '../lib/vocabulario.ts';
 import Chips from './Chips.astro';
 import FilaDeBloque from './FilaDeBloque.astro';
@@ -46,8 +48,16 @@ import Rotulo from './Rotulo.astro';
 import TarjetaDeCita from './TarjetaDeCita.astro';
 
 interface Props {
-  /** El Autor de la Cita: el de «Más de {Autor}» y su cierre. */
-  autor: Autor;
+  /**
+   * El dueño de las rutas de la Cita (`dueñoDeLaRuta`, Historia 35.4) con su nombre: su Personaje
+   * si lo declara; si no, su Autor. Es el de «Más de {…}» y su cierre.
+   */
+  dueño: Dueño & { nombre: string };
+  /**
+   * El Autor que declara la Cita que se lee (`cita.autor`, `undefined` si ninguno): con un dueño
+   * Personaje, la Obra de «De la misma obra» puede ser la suya (Historia 35.4). Obligatoria.
+   */
+  autorDeLaCita: string | undefined;
   /** Lo que pinta el pie, decidido por `rutasDeSalidaDeCita`. */
   rutas: RutasDeSalidaDeCita;
   /**
@@ -59,8 +69,8 @@ interface Props {
   zona: Zona;
 }
 
-const { autor, rutas, zona } = Astro.props;
-const { mismaObra, delAutor, temas } = rutas;
+const { dueño, autorDeLaCita, rutas, zona } = Astro.props;
+const { mismaObra, delDueño, temas } = rutas;
 
 /*
  * Un uso roto para la construcción: lo que diga `problemaDeRutasDeSalida` (un grupo vacío, más
@@ -70,12 +80,19 @@ const { mismaObra, delAutor, temas } = rutas;
  * «Siguiente» lo garantiza solo `rutasDeSalidaDeCita`: el componente no recibe ninguna de las dos,
  * y un uso nuevo (la portada, 28.2) la llama a ella.
  */
-const problema = problemaDeRutasDeSalida(autor, rutas);
+const problema = problemaDeRutasDeSalida(dueño, rutas, autorDeLaCita);
 if (problema !== undefined) {
   throw new Error(`RutasDeSalida: en ${Astro.url.pathname}, ${problema}`);
 }
 
-const hayAlgo = mismaObra !== undefined || delAutor !== undefined || temas.length > 0;
+const hayAlgo = mismaObra !== undefined || delDueño !== undefined || temas.length > 0;
+// Historia 35.4 — el cierre lleva a la página del dueño, y lo redacta su hermana de `atribucion.ts`.
+const cierre =
+  delDueño === undefined
+    ? undefined
+    : dueño.tipo === 'personaje'
+      ? { ruta: rutaDePersonaje(dueño.slug), texto: cierreDeMasDelPersonaje(dueño, delDueño.recuento) }
+      : { ruta: rutaDeAutor(dueño.slug), texto: cierreDeMasDelAutor(dueño, delDueño.recuento) };
 ---
 
 {
@@ -92,14 +109,14 @@ const hayAlgo = mismaObra !== undefined || delAutor !== undefined || temas.lengt
           </ul>
         </section>
       )}
-      {delAutor !== undefined && (
+      {delDueño !== undefined && cierre !== undefined && (
         <section class="mas-del-autor">
-          <Rotulo id="mas-del-autor">Más de {autor.nombre}</Rotulo>
+          <Rotulo id="mas-del-autor">Más de {dueño.nombre}</Rotulo>
           <ul class="tarjetas">
-            {delAutor.citas.map((otra) => (
+            {delDueño.citas.map((otra) => (
               <TarjetaDeCita cita={otra} atribucion="obra" zona={zona} />
             ))}
-            <FilaDeBloque href={rutaDeAutor(autor.slug)} zona={zona} avance>{cierreDeMasDelAutor(autor, delAutor.recuento)}</FilaDeBloque>
+            <FilaDeBloque href={cierre.ruta} zona={zona} avance>{cierre.texto}</FilaDeBloque>
           </ul>
         </section>
       )}

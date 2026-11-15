@@ -19,6 +19,12 @@
  *
  * Uso:
  *   npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco] [--con-duplicados]
+ *                         [--propone <agente> --aprueba <agente>]
+ *
+ * Historia 35.11 — un lote con alguna atribuida de `origen: traduccion-propia` exige `--propone` y
+ * `--aprueba`, dos agentes distintos (recortados y en minúsculas); sin ellos, iguales, o dados sin
+ * ninguna traducción propia en el lote, sale con 1 sin escribir nada, también en seco. La
+ * aprobación de cada traducción propia publicada se anota en `corpus/aprobaciones-de-atribuidas.yml`.
  *
  * Sale con 1 si alguna entrada se quedó sin escribir por no tener Tema publicado —también en
  * seco— o si alguna publicada se quedó sin él; con 2 si falta el lote o no es una lista; y con 0
@@ -38,14 +44,54 @@ import {
   escribirCita,
   leerAutores,
   leerCitas,
+  leerRegistroDeClases,
+  leerPersonajes,
   leerDocumentosDeclarados,
   leerFichasDeObra,
   leerTemas,
+  mover,
   nombreDeFicheroDeCita,
+  registrarClases,
   rutasDelCorpus,
+  fechaLocal,
+  type ClaseRegistrada,
   type Rutas,
 } from './lib/corpus.ts';
+import {
+  CLASE_ATRIBUIDA,
+  claseDe,
+  claseQueCorresponde,
+  esAtribuida,
+  ORIGEN_TRADUCCION_PROPIA,
+  type Clase,
+} from '../src/lib/clase.ts';
+import {
+  agentesDe,
+  aprobarTrasInterrupcion,
+  MOTIVO_AGENTES_SIN_TRADUCCION,
+  registrarAprobaciones,
+  type Agentes,
+} from './lib/aprobaciones.ts';
+import {
+  fallosDeAtribuidas,
+  fichaPlaneada,
+  motivoPuertaCerrada,
+  motivosDe,
+  planDaFichaAlAutor,
+  textoDeVariante,
+  type CitaParaAtribuidas,
+  type ValoresDeLaPuerta,
+} from './lib/atribuidas.ts';
+import type { FichaDeObra } from '../src/lib/obras.ts';
+import {
+  anotarTrasInterrupcion,
+  MOTIVO_CLASE_TECLEADA,
+  ORDEN_SEMBRAR_CLASES,
+  PublicacionInterrumpida,
+  slugsConOtraClase,
+} from './lib/clases.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra, type PlanDeFicha } from './lib/obras.ts';
+import { leerFormasVedadas } from './lib/formasVedadas.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './lib/alcance.ts';
 import type { TemaBajoUmbral } from '../src/lib/publicado.ts';
 
@@ -67,6 +113,27 @@ export interface EntradaDeLote {
    */
   fuente?: { id?: string; nombre?: string; licencia?: string; url?: string };
   aptaParaPortada?: boolean;
+  /**
+   * El Personaje que dice la Cita — Historia 35.1. Con él, la clase que corresponde es la
+   * atribuida, y hasta la Historia 35.1b la Cita se queda en revisión.
+   */
+  personaje?: string;
+  /**
+   * Historia 35.1b — las atestiguaciones de una atribuida, `{url, consultadaEl}`, y de dónde sale
+   * su letra. Las exige el esquema a la atribuida y se las prohíbe a la de siempre.
+   */
+  atestiguaciones?: { url?: string; consultadaEl?: string }[];
+  origen?: string;
+  /**
+   * Historia 35.11 — la frase de partida de la traducción propia, `{texto, lengua}`: solo con
+   * `origen: traduccion-propia`, y en ella obligatoria (la juzga el esquema).
+   */
+  partida?: { texto?: string; lengua?: string };
+  /**
+   * Historia 35.6 — la Variante de una atribuida, `{texto, region, origen}`. La juzga el esquema
+   * (solo la atribuida) y no entra en el slug, que sale solo de `texto`.
+   */
+  variante?: { texto?: string; region?: string; origen?: string };
 }
 
 export interface CitaPublicada {
@@ -113,6 +180,17 @@ export interface InformeDeAlta {
   /** Autores citados en el lote que no existen en el corpus. No se crean (FR-15). */
   autoresDesconocidos: string[];
   /**
+   * Personajes citados en el lote que no existen en `corpus/personajes/` — Historia 35.2. No se
+   * crean: la entrada que además trae Autor va a revisión con el motivo; la que no, a `sinDueño`.
+   */
+  personajesDesconocidos?: string[];
+  /**
+   * Entradas sin Autor cuyo Personaje no existe — Historia 35.2: no tienen dueño, ni prefijo ni
+   * fichero, y no se escriben en ningún sitio. Van con su posición en el lote y su texto para que
+   * se vea cuáles se quedaron fuera.
+   */
+  sinDueño?: { indice: number; texto: string; personaje: string }[];
+  /**
    * Publicadas cuya Ficha de Obra, resuelta antes de escribir la Cita, no se pudo escribir
    * después —un fallo de disco entre medias—. `npm run obra -- sembrar` la completa
    * (Historia 22.1). Vacío casi siempre.
@@ -148,6 +226,40 @@ export interface InformeDeAlta {
    * se escribieron con un espacio en su lugar (AD-29). No impiden nada; el parte lo dice.
    */
   saltosDescartados?: { texto: string; descartados: number }[];
+  /**
+   * Si las publicadas no se pudieron anotar en `corpus/clases-de-cita.yml` después de escribirlas
+   * —un fallo de disco—: el motivo. Ya están en `corpus/citas/`; la siembra las anota, y la orden
+   * sale con 1 — Historia 35.1.
+   */
+  registroSinAnotar?: string;
+  /**
+   * Historia 35.11 — por qué los agentes del alta no valen (falta uno, son el mismo, o se dan sin
+   * ninguna traducción propia en el lote): no se escribió nada, tampoco en seco, y la orden sale con 1.
+   */
+  agentesRechazados?: string;
+  /** Historia 35.11 — las aprobaciones anotadas en `corpus/aprobaciones-de-atribuidas.yml`. */
+  aprobaciones?: { slug: string; propone: string; aprueba: string; fecha: string }[];
+  /**
+   * Historia 35.11 — si el registro de aprobaciones no se pudo escribir tras publicar: el motivo, y
+   * las traducciones propias que se movieron a `corpus/_revision/` (AD-2), sin anotar su clase.
+   */
+  aprobacionesSinAnotar?: {
+    motivo: string;
+    devueltas: string[];
+    /** Las que no se pudieron mover: siguen publicadas sin aprobación. */
+    sinDevolver: string[];
+  };
+}
+
+/** Una entrada que la pasada publica (o publicaría, en el ensayo), con sus Temas y su clase. */
+interface Publicada {
+  indice: number;
+  texto: string;
+  slug: string;
+  temas: string[];
+  clase: Clase;
+  /** Historia 35.11 — si es una traducción propia, y dónde quedó escrita. */
+  traduccionPropia?: { ruta: string };
 }
 
 /**
@@ -159,9 +271,45 @@ export interface InformeDeAlta {
 export async function darDeAltaLote(
   lote: EntradaDeLote[],
   rutas: Rutas,
-  opciones: { seco?: boolean; conDuplicados?: boolean } = {},
+  /** `puerta`: los valores de la puerta de la atribuida (Historia 35.1b); por omisión, los del árbol. */
+  /** `agentes`: los de `--propone` y `--aprueba` (Historia 35.11), solo para la traducción propia. */
+  opciones: {
+    seco?: boolean;
+    conDuplicados?: boolean;
+    puerta?: ValoresDeLaPuerta;
+    agentes?: { propone?: string; aprueba?: string };
+  } = {},
 ): Promise<InformeDeAlta> {
+  /*
+   * Historia 35.11 — los agentes, antes de leer ni escribir nada (también en seco): con una
+   * traducción propia en el lote, los dos y distintos; sin ninguna, ninguno.
+   */
+  const conTraduccion = lote.some((e) => e.origen === ORIGEN_TRADUCCION_PROPIA);
+  const dados = opciones.agentes?.propone !== undefined || opciones.agentes?.aprueba !== undefined;
+  let agentes: Agentes | undefined;
+  const rechazoPorAgentes = (motivo: string): InformeDeAlta => ({
+    publicadas: [],
+    enRevision: [],
+    autoresDesconocidos: [],
+    posiblesDuplicados: [],
+    casiIguales: [],
+    rechazadasPorTema: [],
+    agentesRechazados: motivo,
+  });
+  if (conTraduccion) {
+    const juicio = agentesDe(opciones.agentes?.propone, opciones.agentes?.aprueba);
+    if (!juicio.ok) return rechazoPorAgentes(juicio.motivo);
+    agentes = juicio.agentes;
+  } else if (dados) {
+    return rechazoPorAgentes(MOTIVO_AGENTES_SIN_TRADUCCION);
+  }
+
   const autores = await leerAutores(rutas);
+  const slugsDePersonaje = new Set((await leerPersonajes(rutas)).map((p) => p.slug));
+  // Historia 35.1 — el registro de clases se lee antes de escribir nada: ilegible, nada se escribe.
+  const registro = await leerRegistroDeClases(rutas);
+  // Historia 35.7 — las formas vedadas a la atribuida, antes de escribir nada: ilegibles, nada se escribe.
+  const vedadas = await leerFormasVedadas(rutas);
   const temas = await leerTemas(rutas);
   const yaPublicadas = await leerCitas(rutas.citas);
   const enRevisionYa = await leerCitas(rutas.revision);
@@ -185,6 +333,7 @@ export async function darDeAltaLote(
   }
 
   const slugsDeAutor = new Set(autores.map((a) => a.slug));
+  const autorPorSlug = new Map(autores.map((a) => [a.slug, a]));
   const slugsDeTema = new Set(temas.map((t) => t.slug));
 
   /*
@@ -212,6 +361,33 @@ export async function darDeAltaLote(
     });
     return textoConSaltos(recibido, documentoParaLosSaltos(recibido, candidatos));
   }
+
+  /*
+   * Historia 35.1b — si una entrada derivará atribuida, antes de resolver nada: la atribuida va en
+   * una línea (no recibe saltos de su documento) y se compara con las demás del lote.
+   */
+  function derivaAtribuida(entrada: EntradaDeLote): boolean {
+    const referencia = entrada.autor ?? '';
+    const autor = autorPorSlug.get(slugsDeAutor.has(referencia) ? referencia : slugDeAutor(referencia));
+    return esAtribuida({
+      clase: claseQueCorresponde(entrada.personaje !== undefined ? { personaje: entrada.personaje } : {}, autor ?? {}),
+    });
+  }
+  const delLote: CitaParaAtribuidas[] = lote.map((entrada, indice) => ({
+    slug: `entrada ${indice + 1} del lote`,
+    texto: typeof entrada.texto === 'string' ? entrada.texto : '',
+    ...(textoDeVariante(entrada) !== undefined ? { variante: textoDeVariante(entrada) } : {}),
+    ...(derivaAtribuida(entrada) ? { clase: CLASE_ATRIBUIDA } : {}),
+  }));
+  const enRevisionParaAtribuidas: CitaParaAtribuidas[] = enRevisionYa
+    .filter((c) => typeof c.texto === 'string')
+    .map((c) => ({
+      slug: c.slug,
+      texto: c.texto,
+      ...(textoDeVariante(c) !== undefined ? { variante: textoDeVariante(c) } : {}),
+      ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+    }));
+  const publicadasParaAtribuidas: CitaParaAtribuidas[] = yaPublicadas.map(paraAtribuidas);
 
   /*
    * Historia 26.8 — antes de escribir nada se **ensaya** el lote entero (`recorrer` sin
@@ -243,8 +419,81 @@ export async function darDeAltaLote(
     }
     ensayo = await recorrer(false);
   }
-  const { informe, aPublicar } = opciones.seco ? ensayo : await recorrer(true);
+  /*
+   * Historia 35.1 — la pasada que escribe va dejando lo publicado en `enCurso`: si se interrumpe
+   * a medias (un fallo al escribir una Cita o su ficha), lo ya escrito se anota en el registro y
+   * el error que sube lo cuenta (`PublicacionInterrumpida`), en vez de «no se ha escrito nada».
+   */
+  const hoy = fechaLocal(new Date());
+  const enCurso: Publicada[] = [];
+  let pasada: Awaited<ReturnType<typeof recorrer>>;
+  if (opciones.seco) pasada = ensayo;
+  else {
+    try {
+      pasada = await recorrer(true, enCurso);
+    } catch (fallo) {
+      const error = await anotarTrasInterrupcion(
+        rutas,
+        enCurso.map((p) => ({ slug: p.slug, clase: p.clase, fecha: hoy })),
+        fallo,
+      );
+      // Historia 35.11 — lo ya publicado como traducción propia lleva su aprobación, si se puede; si
+      // no, el error que sube lo dice.
+      throw agentes === undefined
+        ? error
+        : await aprobarTrasInterrupcion(
+            rutas,
+            enCurso.filter((p) => p.traduccionPropia !== undefined).map((p) => ({ slug: p.slug, ...agentes, fecha: hoy })),
+            error,
+          );
+    }
+  }
+  const { informe } = pasada;
+  let { aPublicar } = pasada;
   if (!opciones.seco) {
+    /*
+     * Historia 35.11 — la aprobación de cada traducción propia publicada, en un solo añadido y antes
+     * que la clase. Si falla, cada una se mueve a `corpus/_revision/` (AD-2: nada se borra) y no se
+     * anota su clase: publicada sin aprobación, rompería el build.
+     */
+    const propias = aPublicar.filter((p) => p.traduccionPropia !== undefined);
+    if (agentes !== undefined && propias.length > 0) {
+      const aprobaciones = propias.map((p) => ({ slug: p.slug, ...agentes, fecha: hoy }));
+      try {
+        await registrarAprobaciones(rutas, aprobaciones);
+        informe.aprobaciones = aprobaciones;
+      } catch (fallo) {
+        const devueltas: string[] = [];
+        const sinDevolver: string[] = [];
+        for (const p of propias) {
+          try {
+            await mover(p.traduccionPropia!.ruta, rutas.revision);
+            devueltas.push(p.slug);
+          } catch {
+            // La que no se mueve sigue publicada sin aprobación: el parte la nombra.
+            sinDevolver.push(p.slug);
+          }
+        }
+        const fuera = new Set(devueltas);
+        aPublicar = aPublicar.filter((p) => !fuera.has(p.slug));
+        informe.publicadas = informe.publicadas.filter((c) => !fuera.has(c.slug));
+        informe.aprobacionesSinAnotar = {
+          motivo: fallo instanceof Error ? fallo.message : String(fallo),
+          devueltas,
+          sinDevolver,
+        };
+      }
+    }
+    /*
+     * Historia 35.1 — lo publicado se anota en el registro de clases, en un solo añadido al final.
+     * Si falla, las Citas ya están escritas: el parte da la orden que las anota y sale con 1.
+     */
+    const entradas: ClaseRegistrada[] = aPublicar.map((p) => ({ slug: p.slug, clase: p.clase, fecha: hoy }));
+    try {
+      await registrarClases(rutas, entradas);
+    } catch (fallo) {
+      informe.registroSinAnotar = fallo instanceof Error ? fallo.message : String(fallo);
+    }
     const sueltas = temaPublicadoConLaPasada(
       yaPublicadas,
       aPublicar.map((p) => ({ clave: p.slug, temas: p.temas })),
@@ -274,14 +523,20 @@ export async function darDeAltaLote(
    * Una pasada por el lote sin las entradas apartadas. Con `escribir`, escribe como siempre; sin
    * él, decide lo mismo sin tocar el disco. Devuelve el informe y lo que se publica, con sus Temas.
    */
-  async function recorrer(escribir: boolean): Promise<{
-    informe: InformeDeAlta;
-    aPublicar: { indice: number; texto: string; slug: string; temas: string[] }[];
-  }> {
-    const aPublicar: { indice: number; texto: string; slug: string; temas: string[] }[] = [];
+  async function recorrer(
+    escribir: boolean,
+    aPublicar: Publicada[] = [],
+  ): Promise<{ informe: InformeDeAlta; aPublicar: Publicada[] }> {
     const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
+    // Historia 35.1b — lo que esta pasada publica, para los topes de la atribuida; y los Autores
+    // a los que la pasada da una Ficha de Obra, que cuentan como con Obra.
+    const publicadasEnLaPasada: CitaParaAtribuidas[] = [];
+    const autoresConFichaEnLaPasada = new Set<string>();
+    // Y las fichas que la pasada crea: en seco no se escriben nunca, y aun escritas, los topes por
+    // Obra cuentan juntas las atribuidas de una Obra nueva desde la primera.
+    const fichasEnLaPasada: FichaDeObra[] = [];
     // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
-    const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
+    const publicadasParaObra: { autor?: string; personaje?: string; procedencia?: { obra?: string } }[] = [
       ...yaPublicadas,
     ];
 
@@ -297,8 +552,24 @@ export async function darDeAltaLote(
       const f = formaParaComparar(c.texto);
       yaEnCorpus.set(f.canonica, { slug: c.slug, donde: 'en revisión', forma: f });
     }
+    // Historia 35.6 — también su Variante, con el mismo slug: repetirla es repetir la Cita. Después
+    // de los textos y sin pisarlos: si la Variante de una coincide con el texto de otra, gana el texto.
+    for (const c of enRevisionYa) {
+      const v = textoDeVariante(c);
+      if (v === undefined) continue;
+      const fv = formaParaComparar(v);
+      if (fv.canonica !== '' && !yaEnCorpus.has(fv.canonica)) {
+        yaEnCorpus.set(fv.canonica, { slug: c.slug, donde: 'en revisión', forma: fv });
+      }
+    }
     // Las publicadas se indexan después para que ganen: si el mismo texto está en los dos
     // sitios, lo que el editor necesita saber es que ya está publicado.
+    for (const c of yaPublicadas) {
+      const v = textoDeVariante(c);
+      if (v === undefined) continue;
+      const fv = formaParaComparar(v);
+      if (fv.canonica !== '') yaEnCorpus.set(fv.canonica, { slug: c.slug, donde: 'publicadas', forma: fv });
+    }
     for (const c of yaPublicadas) {
       const f = formaParaComparar(c.texto);
       yaEnCorpus.set(f.canonica, { slug: c.slug, donde: 'publicadas', forma: f });
@@ -315,15 +586,41 @@ export async function darDeAltaLote(
 
     for (const [indice, entrada] of lote.entries()) {
       if (apartadas.has(indice)) continue;
-      const escrito = textoDelAlta(entrada);
+      // Historia 35.1b — la atribuida va en una línea: no recibe los saltos de su documento.
+      const escrito = derivaAtribuida(entrada)
+        ? { texto: entrada.texto ?? '', descartados: 0 }
+        : textoDelAlta(entrada);
       const texto = escrito.texto;
       const motivos: string[] = [];
 
-      // ── El Autor se resuelve antes que nada: sin él no hay slug que generar ──
+      /*
+       * ── El dueño se resuelve antes que nada: sin él no hay slug que generar ──
+       *
+       * Historia 35.2 — el dueño es el Autor o, sin él, el Personaje, que tiene que existir: una
+       * entrada sin Autor cuyo Personaje no existe no tiene prefijo ni fichero, y no se escribe.
+       */
       const referenciaAutor = entrada.autor ?? '';
       const slugAutor = slugsDeAutor.has(referenciaAutor)
         ? referenciaAutor
         : slugDeAutor(referenciaAutor);
+      const personaje = entrada.personaje;
+      const personajeConocido = personaje !== undefined && slugsDePersonaje.has(personaje);
+      if (personaje !== undefined && !personajeConocido) {
+        if (!(informe.personajesDesconocidos ?? []).includes(personaje)) {
+          informe.personajesDesconocidos = [...(informe.personajesDesconocidos ?? []), personaje];
+        }
+        // Sin Autor no hay dueño: nada se escribe de esta entrada, y el parte la nombra.
+        if (referenciaAutor === '') {
+          informe.sinDueño = [...(informe.sinDueño ?? []), { indice, texto, personaje }];
+          continue;
+        }
+        motivos.push(
+          `El Personaje «${personaje}» no existe en el corpus. Créelo antes con ` +
+            '«npx tsx tools/personaje.ts crear».',
+        );
+      }
+      const conAutor = referenciaAutor !== '';
+      const slugDueño = conAutor ? slugAutor : (personaje ?? '');
 
       // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
       const nueva = formaParaComparar(texto);
@@ -336,7 +633,15 @@ export async function darDeAltaLote(
       const obraDeLaEntrada = entrada.procedencia?.obra;
       const fichaDeLaEntrada =
         typeof obraDeLaEntrada === 'string'
-          ? fichaDeCita({ slug: '', autor: slugAutor, procedencia: { obra: obraDeLaEntrada } }, fichas)
+          ? fichaDeCita(
+              {
+                slug: '',
+                ...(conAutor ? { autor: slugAutor } : {}),
+                ...(personaje !== undefined ? { personaje } : {}),
+                procedencia: { obra: obraDeLaEntrada },
+              },
+              fichas,
+            )
           : undefined;
       /*
        * La Obra de la entrada: su ficha, o —si su Obra aún no tiene ficha, porque este lote la
@@ -345,7 +650,7 @@ export async function darDeAltaLote(
        */
       const formaDeLaEntrada = typeof obraDeLaEntrada === 'string' ? formaDeObra(obraDeLaEntrada) : '';
       const obraDeComparacion =
-        fichaDeLaEntrada?.nombre ?? (formaDeLaEntrada === '' ? undefined : `sin-ficha:${clave(slugAutor, formaDeLaEntrada)}`);
+        fichaDeLaEntrada?.nombre ?? (formaDeLaEntrada === '' ? undefined : `sin-ficha:${clave(slugDueño, formaDeLaEntrada)}`);
       // Se anotan en el informe solo si la entrada llega a publicarse: el parte dice «escritas igual».
       const casiDeLaEntrada: CasiIgual[] = [];
       for (const otra of obraDeComparacion === undefined ? [] : (publicadasPorObra.get(obraDeComparacion) ?? [])) {
@@ -360,7 +665,12 @@ export async function darDeAltaLote(
         });
       }
 
-      const yaEsta = repetidaOContenida(nueva, yaEnCorpus);
+      // Historia 35.6 — la entrada se mira también por su Variante, si la declara.
+      const varianteDeLaEntrada = textoDeVariante(entrada);
+      const nuevaVariante = varianteDeLaEntrada !== undefined ? formaParaComparar(varianteDeLaEntrada) : undefined;
+      const yaEsta =
+        repetidaOContenida(nueva, yaEnCorpus) ??
+        (nuevaVariante !== undefined ? repetidaOContenida(nuevaVariante, yaEnCorpus) : undefined);
       if (yaEsta && !opciones.conDuplicados) {
         // No se escribe y no se descarta: se señala y el editor decide. El sistema no
         // tiene criterio para saber si dos textos equivalentes son la misma Cita o dos
@@ -382,9 +692,9 @@ export async function darDeAltaLote(
         ];
       }
 
-      if (referenciaAutor === '') {
-        motivos.push('Regla incumplida: falta el Autor de la Cita.');
-      } else if (!slugsDeAutor.has(slugAutor)) {
+      if (!conAutor && personaje === undefined) {
+        motivos.push('Regla incumplida: falta el Autor o el Personaje de la Cita.');
+      } else if (conAutor && !slugsDeAutor.has(slugAutor)) {
         // FR-15 — se señala, no se crea. Un Autor creado aquí saldría sin año de
         // fallecimiento, y ese hueco bloquearía después la publicación de todas sus
         // Citas sin que nadie recuerde de dónde salió.
@@ -410,15 +720,45 @@ export async function darDeAltaLote(
         );
       }
 
+      /*
+       * ── La clase, derivada y nunca tecleada — Historia 35.1 ──
+       *
+       * Atribuida si la entrada declara Personaje o si su Autor tiene derechos vigentes; de siempre
+       * en lo demás. Una clase escrita en el lote no se obedece: se dice. Y la atribuida, con su
+       * puerta cerrada hasta la 35.1b, va a revisión con la clase puesta y sin estadoDerechos.
+       */
+      const autorLeido = conAutor ? autorPorSlug.get(slugAutor) : undefined;
+      const clase: Clase =
+        autorLeido === undefined
+          ? // Sin Autor leído: la de un Personaje es atribuida; sin nada, la de siempre (y el esquema la rechaza).
+            personaje !== undefined
+            ? claseQueCorresponde({ personaje }, {})
+            : claseDe({})
+          : claseQueCorresponde(personaje !== undefined ? { personaje } : {}, autorLeido);
+      const atribuida = esAtribuida({ clase });
+      if ('clase' in entrada) motivos.push(MOTIVO_CLASE_TECLEADA);
+      // Historia 35.1b — con la puerta cerrada, ninguna atribuida se publica, y se dice por qué.
+      const cerrada = atribuida ? motivoPuertaCerrada(opciones.puerta) : undefined;
+      if (cerrada !== undefined) motivos.push(cerrada);
+
       // ── Las reglas de admisión, las mismas que aplica el build ──
-      const slugBase = slugDeCita(slugAutor, texto);
+      const slugBase = slugDeCita(slugDueño, texto);
       const candidata = {
         texto,
-        autor: slugAutor,
+        ...(conAutor ? { autor: slugAutor } : {}),
         temas: temasResueltos,
-        slug: slugLibre(slugBase, slugsOcupados),
+        // Un slug registrado con la otra clase cuenta como ocupado: una Cita no cambia de clase.
+        slug: slugLibre(slugBase, [...slugsOcupados, ...slugsConOtraClase(registro, clase)]),
         procedencia: entrada.procedencia,
-        estadoDerechos: 'dominio-público' as const,
+        ...(atribuida ? { clase } : { estadoDerechos: 'dominio-público' as const }),
+        ...(entrada.personaje !== undefined ? { personaje: entrada.personaje } : {}),
+        // Historia 35.1b — se pasan tal cual: el esquema los exige a la atribuida y los prohíbe a la de siempre.
+        ...(entrada.atestiguaciones !== undefined ? { atestiguaciones: entrada.atestiguaciones } : {}),
+        ...(entrada.origen !== undefined ? { origen: entrada.origen } : {}),
+        // Historia 35.11 — la partida de la traducción propia, tal cual: el esquema la juzga.
+        ...(entrada.partida !== undefined ? { partida: entrada.partida } : {}),
+        // Historia 35.6 — la Variante, tal cual: el esquema la admite solo en la atribuida.
+        ...(entrada.variante !== undefined ? { variante: entrada.variante } : {}),
         // Se pasa tal cual y la valida la misma puerta que el resto: un `fuente:` a medias
         // manda la Cita a revisión con la regla incumplida escrita, no al corpus.
         ...(entrada.fuente !== undefined ? { fuente: entrada.fuente } : {}),
@@ -448,7 +788,7 @@ export async function darDeAltaLote(
       const sinDocumento = motivoParaNoPublicar(candidata);
       if (sinDocumento !== undefined) motivos.push(sinDocumento);
 
-      const nombreFichero = nombreDeFicheroDeCita(slugAutor, candidata.slug);
+      const nombreFichero = nombreDeFicheroDeCita(slugDueño, candidata.slug);
 
       /*
        * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
@@ -462,15 +802,47 @@ export async function darDeAltaLote(
       const obraDeclarada = validada.success ? validada.data.procedencia?.obra : undefined;
       let plan: PlanDeFicha | undefined;
       if (motivos.length === 0 && validada.success && typeof obraDeclarada === 'string') {
+        const dueños = {
+          ...(conAutor ? { autor: slugAutor } : {}),
+          ...(personaje !== undefined ? { personaje } : {}),
+        };
         plan = await resolverFichaDeObra(rutas, {
-          autor: slugAutor,
+          ...dueños,
           obra: obraDeclarada,
-          citasPublicadas: [
-            ...publicadasParaObra,
-            { autor: slugAutor, procedencia: { obra: obraDeclarada } },
-          ],
+          citasPublicadas: [...publicadasParaObra, { ...dueños, procedencia: { obra: obraDeclarada } }],
         });
         if (!plan.ok) motivos.push(...plan.motivos);
+      }
+
+      /*
+       * Historia 35.1b — con la puerta abierta, la atribuida se juzga con lo publicado más lo que
+       * esta pasada publica: topes, figura sin Obra (la ficha que la misma entrada crea cuenta) y
+       * duplicados entre clases contra lo publicado, `corpus/_revision/` y el lote. Un duplicado
+       * de la atribuida no se salta con `--con-duplicados`.
+       */
+      if (atribuida && cerrada === undefined && motivos.length === 0 && validada.success) {
+        const propia: CitaParaAtribuidas = paraAtribuidas(validada.data);
+        const fallos = fallosDeAtribuidas({
+          citas: [...publicadasParaAtribuidas, ...publicadasEnLaPasada, propia],
+          autores,
+          fichas: [
+            ...(await leerFichasDeObra(rutas)),
+            ...fichasEnLaPasada,
+            ...[fichaPlaneada(plan, conAutor ? slugAutor : undefined)].filter((f) => f !== undefined),
+          ],
+          autoresConFichaNueva: [
+            ...autoresConFichaEnLaPasada,
+            ...(planDaFichaAlAutor(plan) && conAutor ? [slugAutor] : []),
+          ],
+          comparables: [
+            ...enRevisionParaAtribuidas,
+            ...delLote.filter((_, i) => i !== indice && !apartadas.has(i)),
+          ],
+          juzgar: new Set([propia.slug]),
+          vedadas,
+          ...(opciones.puerta !== undefined ? { valores: opciones.puerta } : {}),
+        });
+        motivos.push(...motivosDe(fallos, propia.slug));
       }
 
       if (motivos.length > 0 || !validada.success) {
@@ -483,6 +855,9 @@ export async function darDeAltaLote(
         if (canonico !== '') {
           yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote', forma: nueva });
         }
+        if (nuevaVariante !== undefined && nuevaVariante.canonica !== '') {
+          yaEnCorpus.set(nuevaVariante.canonica, { slug: candidata.slug, donde: 'el propio lote', forma: nuevaVariante });
+        }
         continue;
       }
 
@@ -490,10 +865,25 @@ export async function darDeAltaLote(
         ? ''
         : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
       slugsOcupados.add(candidata.slug);
-      aPublicar.push({ indice, texto, slug: candidata.slug, temas: validada.data.temas });
+      aPublicar.push({
+        indice,
+        texto,
+        slug: candidata.slug,
+        temas: validada.data.temas,
+        clase,
+        ...(atribuida && validada.data.origen === ORIGEN_TRADUCCION_PROPIA ? { traduccionPropia: { ruta } } : {}),
+      });
+      publicadasEnLaPasada.push(paraAtribuidas(validada.data));
+      if (planDaFichaAlAutor(plan) && conAutor) autoresConFichaEnLaPasada.add(slugAutor);
+      const fichaNueva = fichaPlaneada(plan, conAutor ? slugAutor : undefined);
+      if (fichaNueva !== undefined) fichasEnLaPasada.push(fichaNueva);
       if (!opciones.seco) {
         // Solo lo que de verdad se publica cuenta para la grafía por omisión.
-        publicadasParaObra.push({ autor: slugAutor, procedencia: validada.data.procedencia });
+        publicadasParaObra.push({
+          ...(conAutor ? { autor: slugAutor } : {}),
+          ...(personaje !== undefined ? { personaje } : {}),
+          procedencia: validada.data.procedencia,
+        });
         if (plan !== undefined && escribir) {
           const ficha = await aplicarFichaDeObra(rutas, plan);
           if (!ficha.ok) {
@@ -507,6 +897,9 @@ export async function darDeAltaLote(
       // Lo aceptado entra en el índice: así un lote que repite la misma Cita dos veces se
       // detecta igual que si la segunda llegara mañana en otro lote.
       yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote', forma: nueva });
+      if (nuevaVariante !== undefined && nuevaVariante.canonica !== '') {
+        yaEnCorpus.set(nuevaVariante.canonica, { slug: candidata.slug, donde: 'el propio lote', forma: nuevaVariante });
+      }
       // Y la casi igual, igual: la siguiente entrada de su Obra se compara también con esta.
       if (obraDeComparacion !== undefined) {
         publicadasPorObra.set(obraDeComparacion, [
@@ -542,9 +935,45 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
     ...(datos.temas.length > 0 ? { temas: datos.temas } : {}),
     slug: datos.slug,
     procedencia: datos.procedencia,
-    estadoDerechos: datos.estadoDerechos,
+    // Historia 35.1 — la de siempre lleva estadoDerechos; la atribuida, su clase (y su Personaje).
+    ...(datos.estadoDerechos !== undefined ? { estadoDerechos: datos.estadoDerechos } : {}),
+    ...(esAtribuida(datos) ? { clase: claseDe(datos) } : {}),
+    ...(datos.personaje !== undefined ? { personaje: datos.personaje } : {}),
+    // Historia 35.1b — las atestiguaciones y el origen de la atribuida.
+    ...(datos.atestiguaciones !== undefined ? { atestiguaciones: datos.atestiguaciones } : {}),
+    ...(datos.origen !== undefined ? { origen: datos.origen } : {}),
+    // Historia 35.11 — la partida de la traducción propia, en el orden texto, lengua.
+    ...(datos.partida !== undefined ? { partida: { texto: datos.partida.texto, lengua: datos.partida.lengua } } : {}),
+    // Historia 35.6 — la Variante de la atribuida, en el orden texto, region, origen.
+    ...(datos.variante !== undefined
+      ? { variante: { texto: datos.variante.texto, region: datos.variante.region, origen: datos.variante.origen } }
+      : {}),
     ...(datos.fuente !== undefined ? { fuente: datos.fuente } : {}),
     ...(datos.aptaParaPortada ? { aptaParaPortada: true } : {}),
+  };
+}
+
+/** Lo que la puerta de la atribuida necesita de una Cita ya leída o validada (Historia 35.1b). */
+function paraAtribuidas(c: {
+  slug: string;
+  texto: string;
+  autor?: string;
+  personaje?: string;
+  clase?: unknown;
+  procedencia?: { obra?: string } | null;
+  atestiguaciones?: unknown;
+  variante?: unknown;
+}): CitaParaAtribuidas {
+  const variante = textoDeVariante(c);
+  return {
+    slug: c.slug,
+    texto: c.texto,
+    ...(variante !== undefined ? { variante } : {}),
+    ...(c.atestiguaciones !== undefined ? { atestiguaciones: c.atestiguaciones } : {}),
+    ...(c.autor !== undefined ? { autor: c.autor } : {}),
+    ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
+    ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+    ...(c.procedencia !== undefined && c.procedencia !== null ? { procedencia: c.procedencia } : {}),
   };
 }
 
@@ -556,9 +985,37 @@ export function sinTemaPublicado(informe: InformeDeAlta): boolean {
   return informe.rechazadasPorTema.length > 0 || (informe.publicadasSinTema ?? []).length > 0;
 }
 
+/**
+ * El parte de un alta que lanzó. Un registro de clases ilegible la niega antes de escribir nada;
+ * una pasada interrumpida tras publicar (`PublicacionInterrumpida`) no puede decir eso: dice qué
+ * quedó publicado y si se anotó — Historia 35.1.
+ */
+export function mensajeDeAltaFallida(fallo: unknown): string {
+  if (fallo instanceof PublicacionInterrumpida) return fallo.message;
+  return `${fallo instanceof Error ? fallo.message : String(fallo)}\nNo se ha escrito nada.`;
+}
+
+/**
+ * Si la orden sale con 1: una Cita sin Tema publicado, o lo publicado sin anotar en el registro
+ * de clases (Historia 35.1).
+ */
+export function altaConFallo(informe: InformeDeAlta): boolean {
+  return (
+    sinTemaPublicado(informe) ||
+    informe.registroSinAnotar !== undefined ||
+    informe.agentesRechazados !== undefined ||
+    informe.aprobacionesSinAnotar !== undefined
+  );
+}
+
 /** Informe legible en terminal. Sin colores: se lee igual en un registro de CI. */
 export function formatearInforme(informe: InformeDeAlta): string {
   const lineas: string[] = [];
+
+  // Historia 35.11 — sin agentes que valgan, no se ha escrito nada.
+  if (informe.agentesRechazados !== undefined) {
+    return `No se da de alta nada: ${informe.agentesRechazados}\nNo se ha escrito nada.`;
+  }
 
   lineas.push(`Publicadas: ${informe.publicadas.length}`);
   for (const c of informe.publicadas) {
@@ -586,6 +1043,34 @@ export function formatearInforme(informe: InformeDeAlta): string {
       `${suelta.slug}: publicada, pero se quedó sin ningún Tema publicado. Dele un Tema con ` +
         'página o retírela antes de construir.',
       ...suelta.motivos.map((m) => `  ${m}`),
+    );
+  }
+
+  for (const a of informe.aprobaciones ?? []) {
+    lineas.push(
+      '',
+      `${a.slug}: traducción propia, propuesta por «${a.propone}» y aprobada por «${a.aprueba}» (corpus/aprobaciones-de-atribuidas.yml).`,
+    );
+  }
+  if (informe.aprobacionesSinAnotar !== undefined) {
+    lineas.push(
+      '',
+      `corpus/aprobaciones-de-atribuidas.yml no se pudo escribir: ${informe.aprobacionesSinAnotar.motivo}`,
+      ...informe.aprobacionesSinAnotar.devueltas.map(
+        (slug) => `  ${slug} se movió a corpus/_revision/, sin anotar su clase.`,
+      ),
+      ...informe.aprobacionesSinAnotar.sinDevolver.map(
+        (slug) =>
+          `  ${slug} no se pudo mover: sigue publicada sin aprobación y el build no la deja pasar; muévala a corpus/_revision/.`,
+      ),
+    );
+  }
+
+  if (informe.registroSinAnotar !== undefined) {
+    lineas.push(
+      '',
+      `Las publicadas no se anotaron en corpus/clases-de-cita.yml: ${informe.registroSinAnotar}`,
+      `  Anótelas con «${ORDEN_SEMBRAR_CLASES}» antes de construir.`,
     );
   }
 
@@ -626,6 +1111,18 @@ export function formatearInforme(informe: InformeDeAlta): string {
   if (informe.autoresDesconocidos.length > 0) {
     lineas.push('', 'Autores que no existen en el corpus:');
     for (const a of informe.autoresDesconocidos) lineas.push(`  · ${a}`);
+  }
+
+  if ((informe.personajesDesconocidos ?? []).length > 0) {
+    lineas.push('', 'Personajes que no existen en el corpus (no se crean; antes, «npx tsx tools/personaje.ts crear»):');
+    for (const p of informe.personajesDesconocidos ?? []) lineas.push(`  · ${p}`);
+  }
+
+  if ((informe.sinDueño ?? []).length > 0) {
+    lineas.push('', 'Entradas sin Autor y con un Personaje que no existe: no tienen dueño y no se han escrito:');
+    for (const e of informe.sinDueño ?? []) {
+      lineas.push(`  · entrada ${e.indice + 1} (Personaje «${e.personaje}»): «${e.texto}»`);
+    }
   }
 
   return lineas.join('\n');
@@ -674,14 +1171,34 @@ export async function textosCanonicosDelCorpus(rutas: Rutas): Promise<Map<string
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const argumentos = process.argv.slice(2);
-  const fichero = argumentos.find((a) => !a.startsWith('--'));
+  // El lote es el primer argumento suelto que no es el valor de una opción.
+  const conValor = new Set(['--corpus', '--propone', '--aprueba']);
+  const fichero = argumentos.find((a, i) => !a.startsWith('--') && !conValor.has(argumentos[i - 1] ?? ''));
   const seco = argumentos.includes('--seco');
   const conDuplicados = argumentos.includes('--con-duplicados');
   const indiceCorpus = argumentos.indexOf('--corpus');
   const raizCorpus = indiceCorpus === -1 ? 'corpus' : argumentos[indiceCorpus + 1];
+  // Historia 35.11 — los dos agentes de una traducción propia, con valor.
+  const agentes: { propone?: string; aprueba?: string } = {};
+  for (const [bandera, campo] of [['--propone', 'propone'], ['--aprueba', 'aprueba']] as const) {
+    const i = argumentos.indexOf(bandera);
+    if (i === -1) continue;
+    if (argumentos.filter((x) => x === bandera).length > 1) {
+      process.stderr.write(`«${bandera}» está repetida: cada traducción propia la proponen y la aprueban un agente cada vez.\n`);
+      process.exit(2);
+    }
+    const valor = argumentos[i + 1];
+    if (valor === undefined || valor.startsWith('--')) {
+      process.stderr.write(`«${bandera}» necesita el nombre de un agente.\n`);
+      process.exit(2);
+    }
+    agentes[campo] = valor;
+  }
 
   if (!fichero) {
-    process.stderr.write('Uso: npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco]\n');
+    process.stderr.write(
+      'Uso: npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco] [--propone <agente> --aprueba <agente>]\n',
+    );
     process.exit(2);
   }
 
@@ -691,9 +1208,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(2);
   }
 
-  const informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados });
+  let informe: InformeDeAlta;
+  try {
+    informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados, agentes });
+  } catch (fallo) {
+    process.stderr.write(`${mensajeDeAltaFallida(fallo)}\n`);
+    process.exit(1);
+  }
   process.stdout.write(`${formatearInforme(informe)}\n`);
   if (seco) process.stdout.write('\n(Ejecución en seco: no se ha escrito nada.)\n');
-  // Historia 26.8 — una entrada sin Tema publicado no se escribe, y la orden lo dice con 1.
-  if (sinTemaPublicado(informe)) process.exit(1);
+  // Historia 26.8 — una entrada sin Tema publicado no se escribe, y la orden lo dice con 1; y lo
+  // publicado sin anotar en el registro de clases (35.1), también.
+  if (altaConFallo(informe)) process.exit(1);
 }

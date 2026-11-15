@@ -32,16 +32,16 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - Nombra las entidades en español según el glosario del PRD §3: `Cita`, `Autor`, `Tema`, `Procedencia`, `Colección`. Nunca `quote`, `frase` ni `author`, tampoco en identificadores de código.
 - Un campo opcional sin valor se omite del fichero; nunca cadena vacía ni `null`. La distinción entre procedencia completa, parcial y ausente es de presencia de campos.
 - Ningún componente lleva valores literales de color o tipografía — usa los tokens de `DESIGN.md` como propiedades personalizadas de CSS, también para el peso (`--peso-regular`, `--peso-fuerte`) y el interlineado (`--interlineado-*`, el del token cuyo cuerpo toma la regla), tampoco en el atajo `font` ni en una cadena `style` (Historia 26.12). Las únicas excepciones son de `DESIGN.md` § Typography: el `line-height: 1` de las letras de salto (`LetrasDeSalto.astro`, `a`) y `--interlineado-autor` (1,4) en `.fila-de-bloque a`, en el `.titulo` de `ListaDeObras` y en el de `TarjetaDeObra`, y en el `.titulo-de-obra` de la portada (Historia 28.3); las vigila `tests/unit/tipografia-en-tokens.test.ts`, y otra la decide Héctor con `bmad-ux`.
-- La familia serif se aplica solo a texto de Cita, nombre de Autor y nombre de Tema.
+- La familia serif se aplica solo a texto de Cita y a los nombres de Autor, Personaje, Tema y Colección.
 - El texto de Cita solo se recorta con `recortarPorPalabra` de `src/lib/recorte.ts` y los topes de `src/lib/umbrales.ts` (`MAX_CARACTERES_DE_TARJETA_DE_CITA`, `MAX_CARACTERES_DE_TITULO_Y_META`): corta en la última palabra entera, cuenta puntos de código sin los saltos de verso y, en título y meta, pasa a una línea con `enUnaLinea` después de recortar (Historia 34.1), así que un título o una meta en verso pasa del tope en los « / » que suma, a propósito. El tope solo se rebasa cuando ni la primera palabra cabe (sale entera, con «…», o tal cual si es todo el texto). Ningún `slice`/`substring`/`substr` sobre texto de Cita en `src/` ni en `public/islas/`; lo vigila `tests/unit/recorte.test.ts`.
 - El verso tiene **dos dueños** en las salidas, en `src/lib/verso.ts` (Historia 29.3): `versosDe` para lo que admite saltos y `enUnaLinea` (« / » entre versos) para lo que no —título de pestaña, meta descripción, `text` del JSON-LD, `description` del RSS—. El texto de una Cita lo pinta en el HTML **solo** `src/components/TextoDeCita.astro`, dentro del elemento de quien lo usa (Bloque de Cita, Tarjeta de Cita y material del Kit/lote): sin saltos emite `«{texto}»` tal cual, byte a byte como antes; con saltos, un `<span class="verso" style="display:block">` por verso con un espacio entre ellos (el que leen Pagefind y el nombre accesible) y el estilo en atributo, no en `<style>`. Nunca `<br>` en el Corpus ni « / » en el cuerpo de la página (`<main>`) o en un lienzo —en `<head>` sí, porque el título y la meta van por `enUnaLinea`—; ningún otro fichero de `src/` ni de `public/islas/` lee el salto (`tests/unit/verso.test.ts` enumera cada uso y nombra sus exenciones: los dos de `src/lib/biografia.ts`), salvo `src/lib/recorte.ts`, que lo compara carácter a carácter solo para no contarlo y para cortar delante de él, sin partirlo ni sustituirlo (Historia 34.1). Los dos repartos de los lienzos —`repartirEnLineas` de `src/lib/lienzo.ts` y el privado de `public/islas/imagen.js`, que no importa de `src/`— abren línea en cada salto y nunca unen dos versos. La Tarjeta Social de una Cita **en verso** que no cabe en 630 px baja al tramo siguiente, hasta `sm` (`cuerpoEnTarjeta` de `src/lib/tramos.ts`, decisión de Héctor del 2026-11-08); la prosa conserva su tramo, y si nada cabe el build se para nombrando la Cita. La Página de Cita, la Imagen y la Pieza no cambian de tramo.
 - Todo lo que se pliega usa `src/components/Desplegable.astro` (Historia 34.0): un `<details>` nativo cerrado al cargar, con el rótulo como único texto del `<summary>` —sin `h1`…`h6` dentro—, sin guion ni `data-zona`; lo de dentro declara su zona como si no estuviera plegado. Ningún componente escribe su propio `<details>`. Un desplegable sin contenido no se pinta: quien lo usa no lo renderiza, y el componente, ante un `slot` ausente o sin contenido —en blanco, solo comentarios o elementos sin texto; un medio o un control sí cuentan—, detiene la construcción nombrando el rótulo, y también ante un rótulo ausente o en blanco. Su `<style>` solo nombra su propio marcado (se emite por el grafo de importaciones aunque no se renderice), y `tests/e2e/accesibilidad.spec.ts` barre cada superficie también con todos los `<details>` abiertos; desde la 34.2 la Página de Autor pinta uno (la Lista de Obras plegada), y la sonda de `tests/e2e/desplegable.spec.ts` (puerto 4404 libre) sigue barriendo los casos que el sitio aún no tiene. El primer consumidor no lo importa desde un componente compartido: lo pasa por prop (`pliegue` de `ListaDeObras.astro`), para que la hoja no llegue a las páginas que no pliegan.
-- Un mensaje de estado («Copiado.», la búsqueda sin resultados de `/buscar/`, la imagen lista, el fallo del generador) se anuncia por una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores` de `tokens.css`; dentro del `<dialog>` si se anuncia con él abierto, porque lo de fuera es inerte). Para anunciar se vacía la región y se escribe el mensaje en el siguiente fotograma: el mismo texto escrito sobre sí mismo no se anuncia. Lo hace `anunciar` de `src/lib/anuncio.ts` —su único dueño—; una isla en línea lo lleva dentro por `guionQueAnuncia` y `set:html` (`define:vars` y `set:html` juntos pierden el cuerpo en Astro 7.2), y ningún guion en línea usa `requestAnimationFrame` fuera de él (Historia 23.1). Lo que cambia mientras se teclea —el recuento del filtro de los Directorios, y el de `/buscar/` desde la 27.2— va por el **segundo ritmo**, `ritmoDeTecleo` del mismo `src/lib/anuncio.ts`: se escribe tras `PAUSA_DE_TECLEO_MS` (`src/lib/umbrales.ts`) sin teclear y solo si la frase cambió, y vaciar el campo vacía la región al momento (Historia 26.6); el de `/buscar/` tras un selector se escribe al llegar la búsqueda, también solo si cambió (Historia 27.2). Pestaña nueva solo para donar, compartir y comprar, con `AVISO_DE_PESTAÑA_NUEVA` de `src/lib/accesibilidad.ts` —su único dueño— oculto dentro del nombre accesible; todo lo demás, en la misma pestaña (Historia 22.10).
+- Un mensaje de estado («Copiado.», la búsqueda sin resultados de `/buscar/`, la imagen lista, el fallo del generador) se anuncia por una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores` de `tokens.css`; dentro del `<dialog>` si se anuncia con él abierto, porque lo de fuera es inerte). Para anunciar se vacía la región y se escribe el mensaje en el siguiente fotograma: el mismo texto escrito sobre sí mismo no se anuncia. Lo hace `anunciar` de `src/lib/anuncio.ts` —su único dueño—; una isla en línea lo lleva dentro por `guionQueAnuncia` y `set:html` (`define:vars` y `set:html` juntos pierden el cuerpo en Astro 7.2), y ningún guion en línea usa `requestAnimationFrame` fuera de él (Historia 23.1). Lo que cambia mientras se teclea —el recuento del filtro de los Directorios (que desde la 35.5 alcanza también la sección «Personajes» y la cuenta aparte), y el de `/buscar/` desde la 27.2— va por el **segundo ritmo**, `ritmoDeTecleo` del mismo `src/lib/anuncio.ts`: se escribe tras `PAUSA_DE_TECLEO_MS` (`src/lib/umbrales.ts`) sin teclear y solo si la frase cambió, y vaciar el campo vacía la región al momento (Historia 26.6); el de `/buscar/` tras un selector se escribe al llegar la búsqueda, también solo si cambió (Historia 27.2). Pestaña nueva solo para donar, compartir y comprar, con `AVISO_DE_PESTAÑA_NUEVA` de `src/lib/accesibilidad.ts` —su único dueño— oculto dentro del nombre accesible; todo lo demás, en la misma pestaña (Historia 22.10).
 - La medición se llama `__medir(…)` a secas, nunca `window.__medir && …`: el arranque (`ARRANQUE_DE_MEDICION`) abre la cola en línea en toda página del armazón y es el único guion en línea que asigna `__medir`; el fichero `/medicion/{versión}.js` la vacía y la sustituye. Qué vista emite una página lo declara su superficie en `src/lib/superficies.ts` y sale al `data-vistas` del `<html>`; ninguna página la elige. La página 1 de toda Obra declara además, se indexe o no, la `vista-de-obra` (`vistaConMarca`, Historia 23.9), con su marca —`indexable` o `no-indexable`, de `MARCAS_DE_OBRA`— en el atributo `ATRIBUTO_DE_INDEXABLE` del `<html>`: la escribe `Armazon.astro` desde `consecuenciasDe`, de la misma lista de rutas indexables que su `noindex`, el fichero la lee una vez al activarse y la envía solo con la vista que declara la página —una `vista-de-obra` que pidiera una isla saldría con la marca nula—, y `astro:build:done` (`tools/lib/indexables.ts`) para la construcción si falta en una página 1 de Obra o trae un valor ajeno a `MARCAS_DE_OBRA`, contradice su `noindex`, aparece en otra página o no va junto a la `vista-de-obra` de `data-vistas`; ninguna isla la pide ni la lee, y no entra en SM-8. La `lectura` y el `primera` de cada acción los decide solo el fichero (Historia 23.5): ninguna isla los emite ni los calcula, ni conoce `METRICA_DE_ACCION`, y `__medir('lectura')` se descarta (`EVENTOS_SOLO_DEL_FICHERO`). Las dos acciones de citar (Historia 30.5) —`copiado-de-referencia`, al copiar una Referencia de «Cómo citar» en cualquiera de sus tres estilos, y `copiado-de-fragmento`, al copiar el Fragmento de «Inserta esta cita»— van fuera de `METRICA_DE_ACCION` y sin campos, y solo las pide la isla de Copiar de la Página de Cita, tras una copia buena y por la identidad del bloque (`data-inserta-esta-cita` o no); la lectura de la línea base las informa aparte, fuera del `acciones` de superficie y de toda tasa (`ACCIONES_DE_CITAR` de `tools/lib/lineaBase.ts`). Entraron retenidas en `PENDIENTES` de `tests/unit/vocabulario.test.ts` y se soltaron —a `EVENTOS_DEL_GUION`— en un commit aparte, tras desplegar el receptor desde la rama y commitear la huella: es el orden para todo evento nuevo que el guion aún no deba emitir. Las Marcas de llegada (`?de=` y `?via=`, `MARCAS_DE_LLEGADA`) las lee y las quita de la dirección solo el fichero, una vez y con el `history.state` que había (Historia 23.6), y viajan solo con las vistas que declara la página y con la lectura —una vista que pida una isla sale sin ellas—: ninguna isla las lee, y la única que escribe además en el historial es la de la búsqueda: solo `history.replaceState` con la marca de su búsqueda asentada (`MARCA_DE_BUSQUEDA_ASENTADA`, un booleano) en el objeto de estado, sin dirección, desde sus escuchas y nunca al analizarse, que corre antes que el fichero diferido (lo vigilan `tests/unit/medicion.test.ts` sobre `dist/` y, ejecutándola, el entorno simulado de `tests/unit/ayuda/busqueda.ts`). La `busqueda` y la `busqueda-sin-resultados` las emite solo esa isla al asentar un estado —enviar, pulsar un resultado, ocultarse; nunca por tecla ni por repintado— y una vez por estado y carga: qué emite, con qué tramo y si una llegada ya estaba registrada lo decide `asentamientoDeBusqueda` de `src/lib/medicion.ts`, que viaja a la isla por su texto con sus constantes del vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`), y el fichero no descarta ninguna `busqueda` ni lee el historial (Historia 23.8). La `salida-interna` (Historia 23.7) la emite también solo el fichero, desde una única escucha de `click` en la ventana y en burbuja: un enlace del mismo origen a otra ruta, con el botón principal, sin modificador, sin `defaultPrevented`, sin `download` y sin abrir en otra pestaña; como mucho una por carga, detrás de la lectura, con la ruta y la zona y nada más —ni el destino ni el texto pulsado—, y `__medir('salida-interna')` se descarta. La zona la pinta el build en el **contenedor**, nunca en el `<a>`: `data-zona` con un valor de `ZONAS` del vocabulario —prop `zona: Zona` obligatoria en `TarjetaDeCita`, `Chips`, `Paginacion`, `ListaDeObras`, `RutasDeSalida` y `Atribucion`; atributo en los contenedores propios de cada página—, y lo exento lleva `data-sin-zona` con un motivo de `EXENCIONES_DE_ZONA` (`src/lib/medicion.ts`); la escucha toma la declaración más cercana al enlace, y lo que inserta una isla la hereda. Ninguna isla emite la salida ni lee zonas. Ningún guion en línea lleva datos de contenido —slug, texto, Obra—: van en `data-*` (exención nombrada: `ImagenDelKit`, hasta la 25.4). Lo que una página descarga —`<script src>`, `<link rel="modulepreload">` o `import()`, y lo que un fichero de la lista arranca al ejecutarse, como el worker de Pagefind (`arranca`)— está en `GUIONES_EXTERNOS` de `src/lib/guiones.ts`, con su tope en `umbrales.ts` (Historia 23.1).
 
 ## Known pitfalls
 
-- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind, el barrido de accesibilidad y, desde la 23.1, la medición: si la página carga el fichero (`cargaLaMedicion`) y qué vista emite —una superficie `producto` declara su `vista`, y una prueba de `tests/unit/superficies.test.ts` falla si la omite—. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1). Desde la 22.4 la Página de Obra depende además de la **lista de rutas indexables**, que `superficies.ts` recibe por `declararRutasIndexables` y que se declara en **dos instancias** del módulo —`Armazon.astro` en las páginas e `integraciones/indexables.ts` en la configuración—; sin ella `caracterDe` lanza ante una Obra. Un guion o una prueba que pregunte por una ruta de Obra la declara antes (y la olvida después).
+- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind, el barrido de accesibilidad y, desde la 23.1, la medición: si la página carga el fichero (`cargaLaMedicion`) y qué vista emite —una superficie `producto` declara su `vista`, y una prueba de `tests/unit/superficies.test.ts` falla si la omite—. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1). Desde la 22.4 la Página de Obra depende además de la **lista de rutas indexables**, que `superficies.ts` recibe por `declararRutasIndexables` y que se declara en **dos instancias** del módulo —`Armazon.astro` en las páginas e `integraciones/indexables.ts` en la configuración—; sin ella `caracterDe` lanza ante una Obra. Desde la 35.3 la Página de Personaje es la segunda superficie `indexablePorContenido` y va en la misma lista (`personajesIndexables` de `src/lib/publicado.ts`, en las dos instancias); sin ella `caracterDe` lanza también ante un Personaje. Un guion o una prueba que pregunte por una ruta de Obra o de Personaje la declara antes (y la olvida después).
 - Una página nueva cuyo contenido dependa de la jornada —la Cita del Día, `FECHA_JORNADA`, `corpus/portada.json`— va también en `FICHEROS_QUE_ROTAN_CON_LA_JORNADA` de `tools/lib/peso.ts`, con su ruta exacta en `dist/`: si no, el paso del peso la juzga con el resto y su veredicto pasa a depender del día (AD-12). Una prueba de `tests/unit/peso.test.ts` sigue las importaciones de las páginas, las integraciones y la configuración y lo exige; no sabe seguir un alias de importación ni un `import.meta.glob`, y por eso los rechaza.
 - El tipo de un resultado de la búsqueda propia viaja como `data-pagefind-filter="tipo:…"`, y solo lo escribe `Armazon.astro` (en `<main>`, desde su prop `tipo`): ningún `data-pagefind-meta` lleva el tipo, porque desde Pagefind 1.5 la metadata se busca y «obra» devolvía toda Obra aunque no lo dijera (Historia 26.2). Todo `data-pagefind-meta` salvo `title` declara su peso en `OPCIONES_DE_PAGEFIND` de `src/lib/tipoDeResultado.ts`, el único sitio donde la búsqueda configura Pagefind, y una prueba de `dist/` de `tests/unit/publicable-y-alcanzable.test.ts` lo exige. Ojo: un peso 0 quita la puntuación, **no la coincidencia** —el metadato se sigue buscando—, así que un valor que no deba casar como texto va en un filtro o bajo `data-pagefind-ignore`, nunca en un metadato; `autor` pesa 0 y no estorba solo porque su texto ya está en el cuerpo indexado. `/buscar/` llama `options()` antes de cada `search()` y dentro del mismo `try`: un Pagefind de mentira que sustituya `pagefind.js` en una prueba exporta `options`, o toda búsqueda cae al reintento. **La portada responde solo por su título** (Historia 28.1): todo lo que pinta en `main` va bajo `data-pagefind-ignore="all"`, y como Pagefind descarta entero un `data-pagefind-body` sin ninguna palabra indexable, el título lo pone `Armazon.astro` —y nadie más— en un `<span hidden data-pagefind-meta="title:…">` con el nombre del sitio como texto, al final de `main`. Quitarlo, sacarlo de `main` o meter texto de la portada fuera del ignorado saca la portada del índice o la hace responder por lo que no es suyo; lo vigila el índice generado en `tests/unit/busqueda-con-filtros.test.ts`. La línea de cifras de la portada la redacta solo `lineaDeCifras` de `src/lib/publicado.ts`.
 - Todo `<script>` procesado de un componente sale como fichero de `/_astro/` y nunca en línea (`assetsInlineLimit` en `astro.config.mjs`, Historia 26.6): uno nuevo entra en `GUIONES_EXTERNOS` de `src/lib/guiones.ts` con su tope, o `medicion.test.ts` lo rechaza por no estar en la lista. Lo que importe del cliente viaja con él: `src/lib/umbrales.ts` lo importa el filtro de los Directorios, así que una constante calculada en lo alto de ese módulo lleva `/* @__PURE__ */` o engorda el guion (sin la marca en `CORTES_DE_SERIE` y `CORTES_DE_SM8`, el fichero arrastraba la lista de cortes entera: unos 540 bytes más).
@@ -158,6 +158,31 @@ distingue a un Autor del homónimo que el Corpus no desambigua —«Séneca» co
 Cuando el documento no declara autor —o firma «Anónimo», que es lo mismo—, el informe de
 `extraer` lo dice —«Autor sin cotejar»— para que se vea que la puerta no actuó.
 
+**Lo que se rechaza o se retira no vuelve como atribuida** (Historia 35.7, AD-32).
+`corpus/formas-vedadas.yml` **solo añade** `{forma, slug?, motivo, fecha}` —la forma canónica de
+`normalizar`, con `motivo` de `cotejo-fallido | sin-procedencia | retirada | cambio-de-clase`—, y lo
+escriben solas las órdenes: `revisar --rechazar` anota cada candidata de siempre antes de borrarla
+(`sin-procedencia` si no trae Procedencia, `cotejo-fallido` si no), la aprobación anota la de siempre
+que deja en revisión por el cotejo (sin Fuente) o por la Procedencia —sin repetir una entrada igual—,
+y `documentar --retirar` y la retirada por petición de `npm run peticion` (Historia 35.8, siempre
+`retirada`) anotan lo que retiran. El alta, la aprobación y `npm run atribuida` se niegan
+ante una atribuida cuyo texto o Variante coincide (`parecidoEntre`) con una forma de ahí, nombrando
+la entrada, y el build rompe por lo mismo (lo lee solo para romper). Una entrada `cambio-de-clase`
+no veda nada, ni una con `slug` a la Cita de ese slug. No se edita a mano ni se siembra con las
+candidatas de `corpus/_revision/`; con el registro ilegible, rechazar, aprobar y retirar se niegan
+sin escribir. Que solo añada lo comprueba `npm test` contra el primer padre, como el de clases, y
+un commit que solo lo toca no fecha ni avisa.
+
+**Lo que cuenta solo la clase de siempre** (Historia 35.7, AD-11): la línea de cifras de la portada
+(k, y «cada una» solo sin atribuidas), los destacados y el suelo, el hueco y el margen de
+`npm run huecos`/`objetivo`, el cruce por época (un Autor `vivo` no siembra ninguna), la aptitud de
+portada y sus fijaciones, la Pieza (pregunta 27) y la procedencia completa de `tools/auditoria.ts` y
+de la sesión registrada (SM-C1), y la deuda de cotejo de la auditoría. La auditoría da aparte las
+atribuidas publicadas y las bajas por cambio de clase; con `formas-vedadas.yml` ilegible escribe el
+informe sin esa cifra —nunca un cero— y sale con 1. El `citasPublicadas` de la sesión registrada
+sigue contando las dos clases, para que la serie mida lo mismo. `MIN_CITAS_POR_TEMA` sigue contando
+las dos.
+
 **Las biografías no son obras, y no se siembran.** La semblanza de un Autor sale de una Fuente
 **mutable** —Wikipedia en español—, que solo entra por revisión: la misma orden, con el enlace
 permanente de una revisión (`oldid=N`), y sin él se niega con código 1 sin pedir nada:
@@ -192,6 +217,516 @@ español, revisión N · licencia», enlazada al permanente y a la escritura de 
 La ficha —años, semblanza, atribución y Lista de Obras— va solo en la página 1; las 2+ llevan
 el nombre y el listado. Meta y JSON-LD dicen hechos del Corpus; qué superficie la porta lo decide
 `src/lib/atribucion.ts`. La Tarjeta de Autor, de todos, lleva solo nombre, años y Citas documentadas.
+
+## La Cita atribuida
+
+El Corpus conoce dos clases de Cita (Historia 35.1, AD-32). La **de siempre** —dominio público,
+cotejada— **no lleva** el campo `clase` y declara `estadoDerechos: dominio-público`; escribir
+`clase: siempre` es error del esquema. La **atribuida** —la frase de un Personaje o de un Autor con
+derechos vigentes— lleva `clase: atribuida` y nunca `estadoDerechos`; `personaje` (un slug de
+`corpus/personajes/`, «Los Personajes», abajo) solo lo admite ella. Toda Cita lleva Autor o Personaje,
+al menos uno, y desde la Historia 35.4 se publica también la de un Personaje sin Autor. El Autor lleva su
+`añoFallecimiento` **o** `vivo: true` (+`añoNacimiento` opcional), uno de los dos: sus años se
+escriben «N. 1950» —«n. 1950» dentro de una frase; sin nacimiento, ninguno, ni hueco— y no hay `deathDate`.
+
+`src/lib/clase.ts` es el **único lector** del campo (`esAtribuida`, `claseDe`) y el único que decide
+los derechos (`derechosVigentes` y su complemento `esDeDominioPublico`); la cadena `'atribuida'`
+solo la escriben él y `src/lib/admision.ts` (lo vigila `tests/unit/clase.test.ts`, con las demás
+`clase` del código exentas por nombre y motivo). Con `PLAZO_DE_PROTECCION_AÑOS` en `undefined`, un
+Autor tiene derechos si y solo si vive; con plazo, también el fallecido cuyo plazo llega a
+`AÑO_DE_REFERENCIA`, y con plazo y sin año la función lanza. **Las dos constantes las fija Héctor**
+(`src/lib/umbrales.ts`, en `undefined`; la propuesta del año es 2026): ningún agente les da valor, y
+las pruebas que se lo dan parchean la copia.
+
+**La clase no se teclea.** El alta y la aprobación la derivan (`claseQueCorresponde`) y la escriben
+con lo demás; una `clase` en el lote manda la entrada a revisión. Mientras la puerta de la atribuida
+esté cerrada («La puerta de la atribuida», abajo), lo que deriva atribuida va o se queda en
+`corpus/_revision/` con el motivo que nombra las constantes sin valor: **nada se publica atribuido por
+orden**. `tools/extraer.ts` deriva la clase igual: de un Autor con derechos vigentes escribe `clase`
+en vez de `estadoDerechos`, y el texto en una línea.
+
+**El registro `corpus/clases-de-cita.yml` solo añade**: una línea por Cita publicada, con su slug, su
+clase y la jornada. Lo escriben el alta y la aprobación —un solo `appendFile` al final de la pasada—
+y la siembra; **ningún agente lo edita a mano**, ni reescribe ni borra una entrada: cambiar de clase
+es retirar la Cita y dar de alta otra con otro slug (un slug registrado con la otra clase cuenta como
+ocupado en `slugLibre`). `npm test` comprueba que el fichero empieza, byte a byte, por el del primer
+padre del commit (en el CI, con `fetch-depth: 0`). **Solo mira ese par**: en un empuje de varios
+commits, una reescritura en uno anterior pasa si el último solo añade, y en una fusión no ve las
+entradas que trae el segundo padre. Antes de empujar varios commits que tocan el registro, compruébalo
+contra la principal: `git show origin/main:corpus/clases-de-cita.yml` tiene que ser prefijo exacto del
+fichero de la punta. El build (`integraciones/clases.ts`) lo lee solo
+para romper —una Cita publicada sin entrada, con otra clase, un slug con dos, una de siempre de un
+Autor que no es de dominio público, una atribuida sin derechos—; no es familia de AD-27, no fecha ni
+avisa y ningún byte de `dist/` sale de él. Un registro ilegible niega el alta y la aprobación con 1
+sin escribir nada (uno vacío, de una primera escritura cortada, se lee vacío y el siguiente añadido le
+pone la cabecera); si falla al anotar tras publicar, el parte da la orden y sale con 1, y si la pasada
+se interrumpe a medias —al mover o escribir una Cita—, lo ya publicado se anota y el error lo nombra
+(`PublicacionInterrumpida` de `tools/lib/clases.ts`) en vez de decir «no se ha escrito nada».
+
+```
+npx tsx tools/clases.ts sembrar     # anota como «siempre» las Citas publicadas que falten. Idempotente.
+```
+
+**Tras cada puesta al día de una rama con la principal se corre `npx tsx tools/clases.ts sembrar`**,
+como `proponer-claves`: las Citas sembradas entretanto en la principal llegan sin anotar y el build no
+las deja pasar. Se niega con 1, sin escribir, si una Cita que falta es atribuida (esa la anota su
+alta); 2 con un argumento desconocido o repetido. Las pruebas de build siembran el registro del fixture
+(`sembrarClases` de `tests/unit/ayuda/construir.ts`, por omisión).
+
+**Al fundir dos ramas que anotaron, el registro choca al final del fichero**: las dos añadieron tras
+la misma última línea, y git no sabe en qué orden. No se resuelve a mano entremezclando entradas: se
+toma **la versión del primer padre** del commit de fusión (`git checkout --ours
+corpus/clases-de-cita.yml` en un `git merge`, al poner al día una rama con la principal o al fundir en
+la principal desde ella) y se corre `npx tsx tools/clases.ts sembrar`, que añade al final las que
+falten. **En un `git rebase` los lados se invierten**: `--ours` es la rama sobre la que se reaplica (la
+principal) y `--theirs` el commit propio, así que ahí se toma `--ours` igualmente —lo que ya está en
+la principal no se toca— y se siembra. Así el fichero empieza, byte a byte, por el del primer padre,
+que es lo que comprueba `npm test`. Lo que cuesta: las entradas de la otra rama vuelven con la jornada
+de la siembra, no con la suya —la jornada del registro es la de la anotación, no un dato que lea nada—.
+La siembra solo anota la clase de siempre: si la otra rama traía una entrada `atribuida`, se niega con
+1, y esa entrada —la única excepción a «nadie lo edita a mano», porque ninguna orden puede volver a
+derivarla— se copia al final tal cual, carácter a carácter, desde el lado que la trajo.
+
+### La puerta de la atribuida (Historia 35.1b)
+
+La atribuida no se coteja: se publica por su propia puerta, y la puerta la gobiernan **cinco
+constantes que fija Héctor** y que el repositorio versiona en `undefined` —`MAX_CARACTERES_DE_ATRIBUIDA`,
+`MAX_ATRIBUIDAS_POR_OBRA`, `MAX_ATRIBUIDAS_POR_DUEÑO`, `MIN_ATESTIGUACIONES_DE_ATRIBUIDA`
+(`src/lib/umbrales.ts`) y `BUZON_DE_PETICIONES` (`src/lib/dominio.ts`)—. **Ningún agente les da
+valor**, ni siembra atribuidas, Autores vivos, Personajes ni atestiguaciones en el Corpus real. Con
+alguna sin valor la puerta está **cerrada**: el build rompe ante cada atribuida de `corpus/citas/`
+nombrando su fichero y cada constante que falta, y el alta y `revisar --aprobar` la dejan en
+`corpus/_revision/` con ese mismo motivo (`motivoPuertaCerrada`). Un valor que no es un entero
+positivo —`0`, negativo, decimal— o un buzón en blanco cuenta como sin valor. Las pruebas la abren en
+la copia (`conLaPuertaAbierta` de `tests/unit/ayuda/construir.ts`, que sustituye el valor que tengan y
+lanza si no encuentra la declaración de alguna) o por parámetro (`puerta` de `darDeAltaLote` y de
+`aprobar`); ninguna fija el valor del árbol.
+
+- **El esquema** (`src/lib/admision.ts`, `reglasDeClase`) exige a la atribuida `atestiguaciones`
+  —lista no vacía de `{url (http/https), consultadaEl (jornada)}`— y `origen` (`original`, `doblaje`,
+  `traduccion-publicada` o, desde la 35.10, `traduccion-propia`, `ORIGENES`), su texto en una sola línea aunque traiga Fuente, y la rechaza
+  con `aptaParaPortada: true` (pregunta 22). Con `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` con valor, la
+  atestiguan al menos tantos **dominios registrables** distintos. La de siempre con `atestiguaciones`
+  u `origen` es error que nombra el fichero. Una `url` con usuario o contraseña no vale. Las órdenes
+  repiten el mínimo de dominios en `fallosDeAtribuidas` con el valor de su `puerta`, para que abrirla
+  por parámetro lo aplique igual que el esquema con el del árbol. Las atestiguaciones no se pintan: van
+  en `CAMPOS_QUE_NO_FECHAN.cita` y no viajan a `publicado.ts` ni a `dist/`. **El `origen` y la
+  `partida` tampoco, ni siquiera `traduccion-propia`** (Historia 35.11, UX v9.3, AD-27 v9.2): ninguna
+  superficie dice que el texto es traducción del sitio —ni línea, ni sello, ni hueco—, los dos van en
+  `CAMPOS_QUE_NO_FECHAN.cita` y un cambio solo de ellos no fecha nada. La línea de la 35.10
+  (`TraduccionPropia.astro`, `lineaDeTraduccionPropia`) se retiró.
+- **La traducción propia** (`origen: traduccion-propia`, FR-68 v9.2, AD-32 v9.2) lleva, obligatoria,
+  `partida: {texto, lengua}` —la frase que dijo su dueño en su lengua, tal cual la traen sus
+  atestiguaciones, con el mismo mínimo de dominios; `lengua` de `LENGUAS_DE_PARTIDA` (`en`, `fr`, `it`,
+  `de`, `pt`, `ja`, códigos de trabajo que amplía Héctor); el texto en una línea; sin otras claves—, que
+  con cualquier otro origen y en la de siempre se rechaza. El campo de la 35.10, `textoOriginal`, ya no
+  existe. **La proponen y la aprueban dos agentes distintos** (`--propone`/`--aprueba` del alta y de
+  `revisar --aprobar`, recortados y comparados en minúsculas; los dos en blanco, uno solo o el mismo, 1
+  sin escribir nada, también en seco; dados sin ninguna traducción propia en la pasada, 1), y lo anota
+  `corpus/aprobaciones-de-atribuidas.yml` (abajo). La atribuida con otro origen la aprueba una persona
+  por convención, sin puerta.
+- **El dominio lo cuenta solo `dominioDeAtestiguacion`** de `src/lib/atestiguaciones.ts`: eTLD+1 con
+  `tldts` (7.4.19, versión exacta), solo la lista ICANN —dos `*.github.io` cuentan uno—, y no cuentan
+  una dirección sin dominio registrable, los de `DOMINIOS_QUE_NO_ATESTIGUAN` (`brainyquote.com`; un
+  espejo nuevo lo añade Héctor en un diff de ese fichero) ni el propio `DOMINIO`. Sin red: ninguna
+  atestiguación se descarga ni se coteja. **`tldts` lo usan solo el esquema y las órdenes**, nunca un
+  guion del cliente (`GUIONES_EXTERNOS` no crece).
+- **Lo que relaciona ficheros** lo juzga `fallosDeAtribuidas` de `tools/lib/atribuidas.ts`, puro y con
+  los valores por parámetro, sobre lo publicado más lo que la pasada publica: el texto sobre su tope
+  en puntos de código, más atribuidas de las que admite una Obra cuyo dueño tiene derechos vigentes o
+  un dueño (Autor o, sin él, Personaje) con derechos vigentes —cada fallo con recuento y tope—, la
+  **figura pública sin Obra** —una atribuida de Autor y sin Personaje solo si ese Autor es `autor` de
+  alguna Ficha de Obra activa; en el alta y en la aprobación cuentan las que crea la pasada, y también
+  para el tope por Obra (`fichaPlaneada`), aun en seco; «pregunta 23»— y los
+  **duplicados entre clases** con `parecidoEntre` (sus tres clases), contra lo publicado de las dos
+  clases y, en las órdenes, contra `corpus/_revision/` y el lote: cualquier coincidencia la niega,
+  también con `--con-duplicados`. El build (`integraciones/clases.ts`) lo repite contra `corpus/citas/`,
+  nombrando el fichero de la Cita o, en el tope por Obra, el de la ficha. El dueño de una Obra es el
+  de `dueñoDeFicha`: el Personaje en la ficha de un Personaje, aunque traiga `autor` informativo.
+- **El cotejo salta la atribuida** (`cotejar` y `motivoParaNoPublicar` de `tools/lib/cotejo.ts`): no
+  se le exige Fuente aunque la declare, no cuenta como cotejada y, en `pendientes-de-cotejo.yml`, rompe
+  el build. Con Fuente la conserva y pinta su Línea de la Fuente; sin ella, nada. `aprobar` no le
+  restituye saltos de verso. La atribuida necesita un Tema publicado como toda Cita.
+- **No sale en portada**: `npx tsx tools/portada.ts marcar` y `npm run jornada -- fijar` se niegan
+  ante una atribuida con 1, nombrando la Cita y «pregunta 22».
+
+### La Variante de España (Historia 35.6)
+
+Una frase con dos doblajes —Latinoamérica y España— es **una** Cita, no dos: la atribuida declara
+`variante: { texto, region, origen }` (una como mucho; `region` del conjunto cerrado
+`REGIONES_DE_VARIANTE` de `src/lib/variante.ts`, hoy `espana`; `origen` de `ORIGENES_DE_VARIANTE`,
+todos salvo `traduccion-propia`). El esquema
+(`reglasDeClase`) la prohíbe en la de siempre y le exige una línea, como al texto. **No crea slug**
+—el slug y la URL salen solo del texto principal (AD-4)—, y el tope de caracteres y los duplicados
+entre clases la juzgan como al texto (`fallosDeAtribuidas`, que compara las formas {texto, variante}
+de la atribuida contra las de toda otra Cita; el build, el alta y la aprobación); el aviso FR-14 del
+alta y de `revisar` mira también las Variantes. La Página de Cita la pinta en una línea, «En España:
+«…»», tras la Línea de la Fuente y antes de Copiar (`src/components/Variante.astro`, presentación en
+atributo `style` con tokens y sin bloque `<style>`; la frase la compone solo `lineaDeVariante` de
+`src/lib/atribucion.ts`), dentro de `data-pagefind-body` y nunca en un metadato: la búsqueda propia la
+encuentra en la misma `/cita/{slug}/`. No sale en lo copiado, compartido, la Imagen, el Fragmento, la
+Tarjeta Social, la meta ni el JSON-LD. Fecha solo la Página de Cita (`CAMPOS_QUE_PINTA`).
+
+### Cambiar una atribuida publicada (Historia 35.6, AD-35)
+
+**Una atribuida publicada no se edita a mano**: el esquema no ve su Ficha de Obra, sus topes, los
+duplicados entre clases ni su clase. Se cambia con su orden, la única:
+
+```
+npm run atribuida -- obra <slug> "<obra>"                 # le añade la Obra (y asegura su ficha)
+npm run atribuida -- autor <slug> <slug-de-autor>          # le añade el Autor
+npm run atribuida -- personaje <slug> <slug-de-personaje>  # le añade el Personaje
+npm run atribuida -- variante <slug> "<texto>" --region espana --origen doblaje
+npm run atribuida -- texto <slug> "<texto>" [--propone <agente> --aprueba <agente>]
+npm run atribuida -- texto <slug> "<versión>" --origen <origen> --atestiguacion <url> [--atestiguacion <url>...]
+```
+
+`obra`, `autor` y `personaje` **solo añaden** (con el campo ya declarado, 1); la clase tiene que seguir
+siendo atribuida, y si la Cita ya tenía Obra, la ficha que resuelve tiene que ser la misma: un Autor
+cuya ficha reclama la misma forma mudaría la Obra, y se niega. `texto` y `variante` exigen que lo
+nuevo se parezca al texto **o** a la Variante publicados por encima de `MIN_PARECIDO_PARA_CORREGIR`
+(`parecidoDeTextos`); un texto igual a la Variante —o una Variante igual al texto— **intercambia** los
+dos con sus dos `origen`, sin tocar la región, y lo tecleado entra con su letra (puede corregir la
+puntuación de la guardada). En el intercambio por `variante`, `--region` y `--origen` son los de la
+Variante **que resulta** —la región de la actual y el `origen` del texto principal actual—, y con otros
+se niega. Un cambio que deja la Cita como estaba se niega con 1 («Nada que cambiar»). El esquema veda
+una Variante en blanco o igual (forma canónica) a su propio texto. El slug y el nombre del fichero no cambian nunca. Lo
+nuevo pasa por el esquema y por `fallosDeAtribuidas` contra lo publicado y `corpus/_revision/`. La
+puerta se carga como en el alta (`opciones.puerta`, por omisión la del árbol): **cerrada, toda
+invocación válida sale con 1 sin escribir**. Códigos: 2 la forma (suborden desconocida, argumentos de
+menos o de más, bandera desconocida, repetida, vacía o sin valor, `variante` sin `--region` o `--origen`), 1 lo
+que dice; en ningún caso se escribe nada. Se escribe la Cita y después la ficha; si la ficha falla, la
+Cita vuelve a su contenido original. Vive en `tools/lib/cambioDeAtribuida.ts`; ningún agente la corre
+sobre el Corpus real.
+
+**La traducción propia tiene dos caminos por `texto`** (Historia 35.11, AD-35 v9.2), y **ninguna
+orden posterior al alta la crea**: `texto --origen traduccion-propia` y `variante` con ese origen se
+niegan con 1.
+
+- **Sustituirla** por la versión en español que circula, en cuanto aparece una: `--origen` (cualquiera
+  menos `traduccion-propia`) con una o más `--atestiguacion <url>`, que **reemplazan** a las de antes
+  con `consultadaEl` de hoy (las de antes atestiguaban la partida). Se quita la `partida`, el slug no
+  cambia y **no se mira el parecido** —es otra letra de la misma frase—, pero sí los topes, el mínimo
+  de dominios y los duplicados; no se anota ninguna aprobación, y con `--propone`/`--aprueba` se niega.
+  Sin `--atestiguacion`, 1; `--atestiguacion` sin `--origen`, 2.
+- **Retraducirla** conservando el origen: el parecido de siempre y `--propone`/`--aprueba`, dos agentes
+  distintos (sin ellos o iguales, 1). La aprobación se anota **después** de escribir la Cita; si el
+  registro falla, la Cita vuelve a su contenido original y sale con 1.
+- `--origen`, `--atestiguacion` o los agentes sobre una atribuida que no es traducción propia, 1.
+
+**`documentar` no toca una atribuida**: `npm run documentar -- <slug> …` y `--retirar` se niegan con 1
+nombrando `npm run atribuida`, y los modos por lote (`--restituir-traduccion`, `--restituir-saltos`) la
+saltan y la cuentan en su parte («Atribuidas saltadas»).
+
+### Corregir o retirar una Cita atribuida (Historia 35.8, FR-69, AD-35)
+
+**La línea de retirada.** Al pie de toda Página de Cita atribuida —tras las Rutas de salida, lo
+último visible; solo la sigue el bloque oculto de filtros— y de toda página de Personaje —también
+las 2+, tras el listado y su paginación— va «¿Esta cita está mal atribuida o te afecta? Pide que se
+corrija o se retire.» («¿Alguna cita de esta página…» en la de Personaje). La segunda frase es un
+`mailto:` a `BUZON_DE_PETICIONES` con `?subject=` y el slug codificado, en la misma pestaña, y la
+dirección va también como texto, entre paréntesis. La pinta solo `src/components/LineaDeRetirada.astro`,
+con la redacción de `lineaDeRetirada` de `src/lib/atribucion.ts`, que **para la construcción sin
+buzón** o con uno que no es una dirección de correo (`usuario@dominio`, sin espacios, `?`, `&` ni `#`). Sin guion, sin zona ni exención (no es enlace interno), bajo `data-pagefind-ignore="all"` y
+con la presentación en `style` —un `<style>` de componente cambiaría el CSS de toda Página de Cita—.
+Una prueba de `dist/` (`tests/unit/personaje-donde-el-autor.test.ts`) exige la línea en toda Página
+de Cita atribuida y de Personaje y en ninguna otra. Desde aquí WCAG 3.2.6 es `ux`, no `no-aplica`
+(`CRITERIOS_QUE_AÑADE_WCAG_22`): un segundo mecanismo de ayuda —otro correo con destinatario, un
+teléfono— lo desmiente, y la prueba de señales de `tests/unit/superficies.test.ts` lo dice.
+
+**El registro** es `corpus/peticiones-de-retirada.yml`, que **solo añade** dos clases de entrada:
+`peticion` `{id, fecha, cita, solicitante, peticion, motivo?}` y `resolucion` `{peticion, fecha,
+resolucion}`. Lo escribe solo su orden:
+
+```
+npm run peticion                                   # por mes, las vencidas y SM-C6. NO escribe nada.
+npm run peticion -- anotar <slug> --solicitante persona-afectada|titular-de-derechos|otro \
+                          --peticion corregir|retirar [--motivo "…"] [--fecha AAAA-MM-DD]
+npm run peticion -- resolver <id> corregida|retirada|rechazada [--fecha AAAA-MM-DD]
+npm run peticion -- auditar <AAAA-MM> [--resultado <slug>=bien|mal-atribuida|sin-fuente …]
+                          [--resultado-de-traduccion <slug>=bien|mal-atribuida|sin-fuente|mal-traducida …]
+```
+
+**Ningún campo admite contacto**: el repositorio es público, y un `--motivo` con forma de correo, de
+teléfono, de usuario de red social («@ana») o con la palabra «arroba» (`tieneContacto` de
+`tools/lib/peticiones.ts`) se rechaza con 1; un año, unos años o una fecha no son un teléfono. La Cita
+se valida contra lo publicado o contra el registro de clases —una atribuida ya retirada se resuelve;
+una de siempre se rechaza con 1—, y la petición no puede ser anterior a su primera entrada
+`atribuida` en el registro de clases. El `id` es correlativo; anotar dos veces lo mismo el mismo día
+se admite con un aviso. El registro se juzga también entre entradas: una `resolucion` sigue a su
+petición en la lista y no la antecede en fecha. Códigos: 2 por la forma (bandera desconocida o
+repetida, argumentos de menos o de más, fecha o mes sin forma, motivo vacío, un valor fuera de su
+conjunto); 1 por lo que dice (fecha futura o anterior a la clasificación, registro o Corpus ilegible,
+id inexistente o ya resuelto, resolución anterior a su petición, una de las cuatro constantes con un
+valor imposible). En ninguno se escribe nada.
+
+**Retirar por petición** lo hacen la petición de retirar de un **titular de derechos**, en el mismo
+gesto de anotarla —la resolución queda para después—, y `resolver <id> retirada` sobre cualquier otra
+si la Cita sigue publicada: mueve el fichero a `corpus/_revision/` (AD-2), anota su forma en
+`formas-vedadas.yml` con `retirada`, pone al día el título de su Ficha de Obra y, después, anota la
+entrada; si algo falla, la Cita vuelve y la Ficha recupera el título que tenía (la forma vedada se
+queda, porque su registro solo añade, y con su slug no veda a esa misma Cita). **No se niega por NFR-5**: informa de lo que quedaría fuera de
+alcance con su Tema y su recuento, y eso se resuelve en el mismo commit antes de fusionar, porque el
+build sigue rompiendo. `rechazada` sobre una retirada primero no la devuelve: devolverla es moverla de
+vuelta a mano, con su commit. **El fichero retirado se añade a mano con `git add`** —`_revision/` no se
+versiona y git es su única copia— y su texto sigue en el historial de git (pregunta 25, de Héctor).
+
+**La consulta** lista por mes y nombra las peticiones sin resolver pasado
+`PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS`; sin valor, las lista sin juzgar y lo dice. Da por mes, para
+SM-C6, las atribuidas publicadas al cierre —del registro de clases menos las retiradas o cambiadas de
+clase que fecha `formas-vedadas.yml`, salvo que hoy se publiquen **como atribuidas**, sin leer git—,
+las peticiones y las retiradas por cada cien («sin tasa» sin atribuidas, nunca 0 %) y la proporción
+mal atribuida de la última auditoría del mes, con sus sin fuente. Una retirada cuenta solo si el gesto
+movió la Cita —lo prueba su forma vedada `retirada` con su slug y la fecha del gesto— y una vez por
+Cita. **Salta**
+(`juicioDeSmC6`) en el segundo de dos meses cerrados seguidos con al menos
+`MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6` atribuidas si las peticiones por cada cien suben, o si la proporción
+pasa de `MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6` en los dos; sin esas constantes informa y no juzga, sin
+dos meses cerrados seguidos o por debajo del mínimo dice cuál de las dos, y el freno no lo propone: lo
+decide Héctor.
+
+**La auditoría** de un mes cerrado: la muestra son las `MUESTRA_DE_AUDITORIA_SM_C6` atribuidas al
+cierre con menor SHA-256 de `{slug}|{mes}` (sin valor, lo dice y no elige); con un `--resultado` por
+cada slug de la muestra, que decide una persona, anota en `corpus/auditorias-de-atribuidas.yml` —solo
+añade— `{mes, muestra, resultados, auditadoEl}`. Un slug ajeno o una muestra incompleta, 1.
+
+**La segunda muestra, solo de traducción propia** (Historia 35.11, SM-C6 v9.2): las
+`MUESTRA_DE_AUDITORIA_SM_C6` atribuidas al cierre cuyo fichero de hoy —en `corpus/citas/` o
+`corpus/_revision/`— declara `origen: traduccion-propia` (una sustituida deja de contar), con menor
+SHA-256 de `traduccion|{slug}|{mes}`; sus resultados van con `--resultado-de-traduccion <slug>=…`, que
+admite además `mal-traducida` (en `--resultado`, 2), y se anotan en la misma entrada como
+`muestraDeTraduccion` y `resultadosDeTraduccion` (los dos o ninguno). Una Cita puede salir en las dos
+muestras y se juzga en cada una por separado; un slug ajeno o un resultado que falta, 1. La consulta da
+la columna de traducciones al cierre y de la proporción mal traducida, y la juzga **aparte**
+(`juicioDeTraduccionSmC6`): salta en el segundo de dos meses cerrados seguidos con al menos
+`MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6` traducciones propias si la proporción pasa de
+`MAX_PROPORCION_MAL_TRADUCIDA_SM_C6` en los dos; sin valor, informa y lo dice.
+
+Los dos registros se versionan con su cabecera y la lista vacía, `npm test` comprueba que solo añaden
+frente a `HEAD^1`, no fechan ni avisan, y ningún módulo de `src/` los lee (AD-24). **Ningún agente
+anota peticiones que no ha recibido ni auditorías que no ha hecho**, ni da valor a
+`BUZON_DE_PETICIONES` ni a las cinco constantes de `umbrales.ts` (con
+`MAX_PROPORCION_MAL_TRADUCIDA_SM_C6`): son de Héctor.
+
+### Las aprobaciones de la traducción propia (Historia 35.11, AD-32 v9.2)
+
+`corpus/aprobaciones-de-atribuidas.yml` **solo añade** `{slug, propone, aprueba, fecha}`, una línea
+por aprobación (`tools/lib/aprobaciones.ts`: `registrarAprobaciones` por `appendFile`, juzgando el
+añadido en memoria antes y releyendo después). Lo escriben solo el alta y `revisar --aprobar` que
+publican una traducción propia y `npm run atribuida -- texto` que la retraduce, siempre **después** de
+escribir la Cita y antes que `clases-de-cita.yml`; si falla, la Cita vuelve —la aprobada, a
+`corpus/_revision/` con su contenido de antes; la dada de alta, movida a `corpus/_revision/`; la
+retraducida, a su contenido original—, no se anota su clase, el parte lo dice y sale con 1. **Nunca se
+escribe a mano.** El build (`integraciones/clases.ts`) lo lee **solo para romper**, en un solo sentido:
+toda traducción propia publicada tiene una entrada suya, ninguna suya dice el mismo agente dos veces, y
+alguna apareció en el registro en el mismo commit que el último cambio de `texto` de la Cita, en uno
+posterior o sin commitear (si el texto está sin commitear, también la entrada); lo lee de git
+(`historialDeLosFicheros`, `cambiaronLosCampos(…, ['texto'])`) solo si hay alguna traducción propia
+publicada, y sin historial fiable comprueba solo la existencia y los agentes y avisa con el motivo. Una
+entrada de una Cita retirada o sustituida no rompe nada. Se versiona con su cabecera y `aprobaciones:`
+vacío, `npm test` comprueba que solo añade frente a `HEAD^1`, no es familia de AD-27 y ningún módulo de
+`src/` lo nombra (AD-24). Son **cinco registros de actos** que solo añaden —clases, formas vedadas,
+peticiones, auditorías y aprobaciones—, y **tres los lee el build** para romper: clases, formas vedadas
+y aprobaciones.
+
+## Una sesión de sembrado de la Cita atribuida
+
+La atribuida no se siembra desde las obras ni se coteja (Historia 35.10, FR-68): se siembra desde
+una **semilla de prueba** de BrainyQuote, acotada y declarada como prueba (§5 enmendado). Los
+Personajes y Autores que admite van en `SEMILLA_DE_ATRIBUIDAS` de `src/lib/umbrales.ts`, cada uno
+con su página de BrainyQuote (`{slug, pagina}`, `https://` de `brainyquote.com`). **La llena Héctor
+en un diff; el repositorio la versiona vacía y ningún agente le da valor ni corre la siembra sobre
+el Corpus real.** Con ella vacía, o ante un Personaje o Autor fuera de ella, las dos órdenes se
+niegan con 1, y lo dicen: **no hay búsqueda abierta**, la siembra a escala espera a la respuesta de
+la pregunta 18 y generalizar la semilla es otra decisión de Héctor.
+
+```
+npm run atribuida -- semilla <slug> [--salida semillas/<slug>.json]   # la página, una sola vez
+npm run atribuida -- proponer <lote.yaml> [--corpus corpus]            # las candidatas, a _revision/
+npx tsx tools/revisar.ts --aprobar <slug> [<slug>...] --temas <tema>    # aprobar: una persona
+npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida         # la sesión, con su clase
+```
+
+- **`semilla`** es la única orden de la atribuida que pide algo a la red (AD-22, en la cáscara
+  `tools/atribuida.ts`): la página declarada, **una vez** —si la salida ya existe no la vuelve a pedir
+  y sale con 1—, sin seguir redirecciones, y escribe en `semillas/` (ignorado por git; nunca dentro de
+  `corpus/`) la lista **en inglés** de frases y quién las dice. Nada de eso se publica ni atestigua:
+  `brainyquote.com` está en `DOMINIOS_QUE_NO_ATESTIGUAN`. El lector de la página (`frasesDeLaPagina`
+  de `tools/lib/siembraAtribuida.ts`, anclas `title="view quote"` y `title="view author"`) es un
+  supuesto sin contrastar con la página real: si no reconoce ninguna frase, sale con 1 sin escribir.
+- **El texto en español sale de una versión que ya circula** —un doblaje o una traducción
+  publicada—, con su `origen` (`original`, `doblaje`, `traduccion-publicada`), y **solo como último
+  recurso, si no circula ninguna, de la traducción del sitio** (FR-68 v9.2, Historia 35.11): quien
+  compone el lote traduce la frase lo más fiel posible y la marca `origen: traduccion-propia`, con su
+  `partida: {texto, lengua}` —la frase que dijo su dueño, tal cual la traen sus atestiguaciones—.
+  **La página no lo dice** (UX v9.3): ni línea, ni sello, ni hueco. **La proponen y la aprueban dos
+  agentes distintos**: `revisar --aprobar … --propone <agente> --aprueba <agente>` (o el alta con las
+  mismas banderas), y la aprobación queda en `corpus/aprobaciones-de-atribuidas.yml`. En cuanto
+  circule una versión en español, la sustituye una persona con
+  `npm run atribuida -- texto <slug> "<versión>" --origen … --atestiguacion …`, sin cambiar el slug. La
+  `partida` no se pinta ni fecha, con cualquier otro origen se rechaza, y la traducción propia **no declara Variante** (el esquema
+  rechaza el par, también en `npm run atribuida -- variante`): una Variante es una versión que circula,
+  y con ella el texto sería esa versión. La Variante tampoco admite ese
+  origen (`ORIGENES_DE_VARIANTE`): es la letra que circula en otra región. La clase de siempre **nunca
+  se traduce** (§4.11). Una candidata sin `texto` sigue rechazada: el español lo escribe alguien. La
+  atribuida con cualquier otro origen **la aprueba una persona** (por convención, sin puerta). El lote es una lista YAML de candidatas con
+  `texto`, `personaje` y/o `autor` (slugs que ya existen: se dan de alta con sus órdenes, nunca
+  tecleando el campo), `obra`, `año` o `referencia` (la Procedencia que el esquema exige), `origen`,
+  `atestiguaciones` (`{url, consultadaEl}`), `partida` con la traducción propia, y si acaso
+  `variante` y `temas`. Sin `clase`: se deriva.
+- **`proponer` es la puerta de calidad, y nunca publica.** Juzga cada candidata con el esquema de la
+  35.1b y la Variante de la 35.6 (`citaAdmisible`), cuenta sus dominios con `dominiosQueAtestiguan`
+  —sin BrainyQuote, sus espejos ni el propio dominio; ninguno que cuente la rechaza siempre—, resuelve
+  la Obra con `resolverFichaDeObra` en solo lectura y rechaza la que choca (`fallosDeDuplicados`, la
+  misma `parecidoEntre`) con una publicada de cualquiera de las dos clases, una candidata de
+  `corpus/_revision/`, una anterior del mismo lote o `corpus/formas-vedadas.yml`; también la que llega
+  sin `texto`, sin Personaje ni Autor, con uno que no existe o fuera de la semilla, o que sería de la
+  clase de siempre. Cada rechazo sale nombrado con su motivo. Las que pasan van a `corpus/_revision/`
+  —nunca a `corpus/citas/`, ni crean ficha de Obra ni anotan registro alguno—: **aprobarlas es siempre
+  de una persona** —y la traducción propia, de dos agentes distintos—, con `revisar --aprobar`, y con
+  la puerta cerrada siguen en revisión. Sin valor de
+  `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` informa los dominios de cada una sin juzgar el mínimo y lo dice
+  nombrando la constante. Códigos: 2 la forma (sin lote, ilegible o que no es una lista); 1 lo que dice
+  (con algún rechazo, o un registro ilegible); con el lote rechazado entero no escribe nada.
+- **La sesión se registra con su clase**: `--clase-de-cita atribuida` anota en
+  `corpus/sesiones-de-sembrado.yml` `claseDeCita: atribuida` y el resultado medido —`citasPublicadas`
+  (las dos clases, como siempre) y `atribuidasPublicadas`—, sin `clase`, `propuesto` ni `hueco`: la
+  política del objetivo es de la clase de siempre y no la propone. Las entradas sin el campo se leen
+  como de la clase de siempre (`claseDeCitaDeLaSesion` de `tools/lib/corpus.ts`). Otro valor, la bandera
+  sin `--registrar` o con `--anular`, 2; un reintento del mismo día con el mismo resultado, 1.
+- Las pruebas (`tests/unit/siembra-atribuida.test.ts`) usan el doble de red y llenan la lista solo en
+  una copia del proyecto; ninguna pide nada a la red ni escribe en el Corpus real.
+
+## Los Personajes
+
+Un Personaje (Batman) dice Citas atribuidas sin ser un Autor (Historia 35.2, AD-1, AD-33). Vive en
+`corpus/personajes/{slug}.yml` con `nombre` y `universo`, obligatorios; su clave de orden
+(`ordenAlfabetico`, `ordenRevisado`, con los validadores del Autor) y su semblanza: la de AD-26
+—`semblanza` y `biografia` juntas, cotejada literal contra esa revisión como la del Autor
+(`integraciones/cotejo.ts`)— **o** `semblanzaPropia: { texto, responde }`, nunca las dos. **No lleva
+años ni `vivo`**: el esquema (`personajeAdmisible`, estricto) los rechaza con su mensaje, porque sus
+derechos están siempre vigentes. `corpus/personajes/` se versiona vacío con su `.gitkeep`: **ningún
+agente siembra Personajes, claves ni semblanzas** en el Corpus real; mientras esté vacío, el cargador
+avisa de que no encuentra ficheros, como hacían las Colecciones, y no es ningún fallo.
+
+**Un solo espacio de slugs con los Autores**, activos y retirados: el prefijo de una Cita y de su
+ficha es el de su **dueño** —su Autor o, sin él, su Personaje (`slugDeCita`, `nombreDeFicheroDeCita`)—
+y `dueñoPorPrefijo` lo busca en la unión. `tools/personaje.ts crear` se niega ante un slug ocupado y
+`tools/autor.ts crear` ante el de un Personaje; el build (`integraciones/personajes.ts`) rompe con un
+Personaje que tiene el slug de un Autor, nombrando los dos ficheros, y con una Cita cuyo `personaje`
+no está en `corpus/personajes/`. La clave del Personaje **publicado** —alguna Cita lo declara
+(`personajesPublicados`)— la exige `integraciones/claves.ts`, con la orden del Personaje en el fallo.
+
+```
+npx tsx tools/personaje.ts crear "<nombre>" --universo "<universo>"   # propone la clave; no la teclea nadie
+npx tsx tools/personaje.ts listar
+npx tsx tools/personaje.ts proponer-claves
+npx tsx tools/personaje.ts clave <slug> ["<clave>"]                   # la única que escribe ordenRevisado
+npx tsx tools/personaje.ts semblanza <slug> "<texto>" --responde "<quién>"
+npx tsx tools/personaje.ts biografia <slug> <documento> [--semblanza "<texto>"]
+```
+
+Códigos: 2 la forma de la invocación, 1 lo que dice; en ninguno se escribe nada. `biografia` lee la
+revisión del documento (`biografiaDeclarable`, el núcleo que comparte con `tools/autor.ts`) y pide la
+semblanza si el Personaje no la tiene, porque van juntas. **`clave`, `semblanza` y `biografia` sobre el
+Corpus real son de Héctor, nunca de un agente**, como `tools/autor.ts clave`. Las claves de Personaje
+se proponen con el mismo núcleo que las del Autor (`proponerClavesDe`, `fijarClaveDe` de
+`tools/lib/gestion.ts`).
+
+El alta acepta una entrada con `personaje` y sin `autor`: su dueño es el Personaje, que tiene que
+existir —si no, la entrada no tiene dueño y no se escribe en ningún sitio—, y con la puerta de la
+atribuida cerrada (35.1b) va a `corpus/_revision/{personaje}--…md`, sin `autor` y con `clase:
+atribuida`. Desde la 35.4 la Cita publicada sin Autor y la Obra de Personaje con Citas publicadas se
+construyen («El Personaje va donde va el Autor», abajo).
+
+**La Página de Personaje** (Historia 35.3, UX-DR134) vive en `/personaje/{slug}/` (`rutaDePersonaje`,
+`PAGINA_DE_PERSONAJE` en `src/lib/superficies.ts`) y calca la de Autor: en la página 1, el `h1` con el
+nombre en la serif, «personaje de {universo}» donde el Autor lleva sus años, la semblanza —de su
+biografía con `AtribucionDeSemblanza`, o la propia con «Semblanza de {responde}.»— **siempre** bajo
+`data-pagefind-ignore` (`semblanzaEn` la deja solo en `ficha-de-personaje`), la Lista de Obras
+(«Obras en este Corpus», `obrasDelPersonaje`), el rótulo «Citas» y el listado (`citasDePersonaje`, el
+orden de `citasDeAutor`); las 2+, el `h1` y el listado, `noindex` por forma. Pestaña «Frases de
+{nombre}» (`tituloDePersonaje`) y meta «{n} frases de {nombre}, personaje de {universo}.»
+(`descripcionDePersonaje`); JSON-LD `CollectionPage` sin `Person`; desde la 35.5, «Buscar en
+{Personaje}» en la página 1, bajo «Citas» y encima del listado (`BuscarEn` con `personaje`); y sin
+ningún Modelo (`SUPERFICIES_SIN_INGRESO`). «personaje de {universo}» tiene un dueño,
+`universoDePersonaje` de `src/lib/atribucion.ts`, que usan la ficha, la meta y la Tarjeta Social. Se
+publica la de todo Personaje que una Cita publicada declara, y **existir no es indexarse** (Historia
+35.3b): la página 1 es `indexablePorContenido`, con la lista de `personajesIndexables` —los
+Personajes con al menos `MIN_CITAS_POR_PERSONAJE` (2, `src/lib/umbrales.ts`) Citas que los declaran;
+el umbral se aplica ahí y solo ahí, y de ahí lo heredan las dos instancias de `superficies.ts`, el
+sitemap, Pagefind, la vista, el rastreo y el aviso—. Bajo el umbral es la misma página, sin marca ni
+aviso, con `noindex, follow`, fuera del sitemap y de Pagefind y sin vista de superficie
+(`causaDelServicio` = `contenido`); nunca se declara en la ficha. **Toda** página de Personaje —la 1 y
+las 2+, se indexe o no— declara su Tarjeta Social, `/tarjeta/personaje/{slug}.png`
+(`src/pages/tarjeta/personaje/[slug].png.ts`): la plantilla de listado del Autor con el nombre en la
+serif y «personaje de {universo}» como único hecho (`datosDeTarjetaDePersonaje` de
+`src/lib/tarjeta.ts`), sin semblanza ni recuento. La
+Atribución de una Cita con `personaje` nombra al Personaje y enlaza a su página (zona `atribucion`);
+sin él, el marcado es el de siempre. El grafo de NFR-5 (`grafoDelModelo`) gana su listado, su página 1
+→ sus Obras y cada Cita → su Personaje, y la búsqueda propia el tipo `personaje` («Personaje» en
+`ETIQUETAS_DE_RESULTADO`). Para AD-27 `personaje` es familia de fichero y de ruta: su página la
+componen su fichero (`nombre`, `universo`, la semblanza y la biografía), sus Citas y los títulos de
+sus Obras, y su `nombre` compone además la Página de Cita, los listados y la Obra de la que es dueño, y
+su clave los Directorios.
+
+**El Personaje va donde va el Autor** (Historia 35.4, AD-33, UX-DR135–137). El nombre lo compone una
+sola función, `firmaDeCita` de `src/lib/atribucion.ts`, en orden fijo Personaje, Obra, Autor: el de la
+primera línea (el Personaje si lo hay; si no, el Autor) y, detrás, el título de la Obra resuelta, «de
+{Autor}» **solo** con Personaje y Autor, y el año de la Procedencia de esa Cita. La usan lo copiado
+(«— Batman, {título}, de Séneca, 2000.», y por él lo compartido y el `data-texto-plano`), la procedencia
+de la Imagen y de la Tarjeta Social de Cita (`procedenciaCompuesta`), el Fragmento («— Batman,
+<cite>{título}</cite>, de Séneca.», sin año), `nombreEnAtribucion` y la línea de Obra de la Atribución
+(`lineaDeProcedencia`): «{título}, de <a>{Autor}</a>, {año}.» con el Autor `enlace-en-tinta` a su
+página, y sin Obra «de <a>{Autor}</a>, {año}.», sin «Sin obra documentada»; los dos párrafos con zona
+`atribucion`, y el `cite` del `blockquote` apunta a quien nombra la primera línea. Sin Personaje, todo
+sale byte a byte como antes. El título de pestaña y la meta de la Página de Cita llevan el Autor si lo
+hay; si no, el Personaje. El JSON-LD de Cita conserva `creator` para el Autor, solo si lo hay (el
+`author` de la espina está diferido a Héctor), y añade `spokenByCharacter` (`Person` con `name` y
+`url`, sin fechas); su `isPartOf` es `CreativeWork` si la Obra es de un Personaje. La Tarjeta de Cita
+`autor-y-obra` (Tema, Colección) recibe además `personaje` —obligatorio en la llamada, el que declara
+la Cita— y lo pinta en el sitio del Autor, sin el Autor; la construcción se para si no casa. Una Cita
+sin Autor no cuenta para ningún Autor (meta, huecos, salud, la Cita del Día, la sindicación, la Pieza),
+no lleva filtro `autor` de Pagefind (`FiltrosDeLaCita`); `clavesDeOrden` agrupa por dueño (`dueñoDeCita`, o el de su Obra) sobre
+Autores y Personajes. La Página de Obra de un Personaje (1 y 2+) dice «de <a href=/personaje/…>{Personaje}</a>
+· {año}» con zona `atribucion` y el mismo `data-pagefind-meta="autor"`, lleva su nombre en el título y
+la meta, un JSON-LD `about` `CreativeWork` con `character` y sin `author`, y su Tarjeta Social «{n}
+citas de {Personaje}, {año}»; desde la 35.5 lleva «Buscar en esta obra» con `personaje` y `obra`.
+
+**Los Personajes en los Directorios y en la búsqueda** (Historia 35.5, AD-33, UX-DR140–142). Los dos
+Directorios devuelven aparte su sección «Personajes» (`personajes` de `directorioDeAutores` y
+`directorioDeObras`, `src/lib/directorios.ts`), que la página pinta **tras la A–Z, dentro del mismo
+`.listado`** y marcada con `data-personajes`, para que el filtro la alcance. En `/autores/`: el `h2`
+«Personajes» (`#personajes`, destino del salto `data-salto` que va bajo el `h1`), sus letras
+(`nav#letras-de-personajes`, anclas `personajes-letra-…` de `anclaDeLetra` con
+`PREFIJO_DE_LAS_ANCLAS_DE_PERSONAJES`), un `h3` por letra (`GrupoDeLetra` con `nivel` y `volver`) y la
+misma `FilaDeAutor` con «personaje de {universo}» donde van los años (`hechosDeFilaDePersonaje`). En
+`/obras/`, la sección es un `section.grupo` con un bloque por Personaje: las Obras que no caen bajo
+ningún Autor, bajo su Personaje dueño; la de un Personaje dicha con un Autor va solo bajo el Autor, y
+`directorioDeObras` **lanza** si una Obra publicada no cae en ninguna sección. El orden y las
+iniciales salen de `agruparPorClave` (que lanza nombrando «el Personaje» y `tools/personaje.ts
+proponer-claves`). Las cifras —`autores`, `citas`, `obras`, y con ellas la meta y la Tarjeta Social—
+son de la A–Z: un Personaje no se cuenta nunca como Autor. Sin Personajes no hay sección, salto ni
+hueco. El filtro de los Directorios casa también con los Personajes, oculta la sección entera cuando
+no le queda nada, aparta con texto las letras de los dos bloques y el salto, y en `/autores/` cuenta
+aparte: «{a} autores y {p} personajes.», «1 personaje.», y a cero «Ningún autor ni personaje tiene
+«x» en el nombre.» (`fraseDelFiltro` con `personajes`; letras [ASSUMPTION] que fija Héctor). El grafo
+de NFR-5 gana `/autores/` → todo Personaje publicado y `/obras/` → toda Obra publicada.
+
+En `/buscar/`, el estado gana **`personaje=`** —`?q=&autor=&personaje=&obra=&tema=`, el dueño delante
+de su `obra` (`PARAMETROS_DE_LA_BUSQUEDA`)—, y el selector de Autor un `optgroup` «Personajes» tras los
+Autores: el valor de cada opción es el slug, y el grupo de la opción elegida dice si es Autor o
+Personaje. Pagefind filtra por `personaje:` (`FILTROS_DE_CITA`, escrito por `FiltrosDeLaCita` desde
+`filtrosDeLaBusqueda`; con Autor, la Cita lleva los dos), y el metadato `autor` de la Cita lleva el
+nombre del Personaje si lo declara —sin metadato nuevo—. El mapa de rótulos (`/buscar/obras.json`)
+nombra al dueño por la sintaxis de su clave: el slug a secas es un Autor, `personaje:{slug}`
+(`PREFIJO_DE_PERSONAJE`, `claveDelDueño` de `src/lib/busqueda.ts`) un Personaje, cada lista es la
+Lista de Obras de su dueño, y un par lleva un tercer elemento con la clave del dueño de la ficha solo
+cuando no es el de la lista; sin Personajes, el mapa sale idéntico. La resolución (`resolverEstado`)
+descarta el `personaje` que no es opción y el que llega junto a un `autor`; una `obra` sola toma el
+dueño de su ficha (`dueñoDeLaObra`), y una que no está en la lista del dueño elegido (`ofreceLaObra`)
+se descarta. Para la medición, el Personaje cuenta como `autor` (`combinacionDeFiltros`) y su clave de
+estado lleva `personaje:{slug}` en el hueco del Autor: el vocabulario no cambia.
 
 ## Leer el estado de indexación
 
@@ -239,15 +774,17 @@ frente a Autor de la misma lectura y, desde `PRIMER_DESPLIEGUE_DE_OBRAS` más
 `SEMANAS_HASTA_JUZGAR_SM11`, «toca juzgar SM-11: lo decide Héctor».
 
 **Los Directorios** (`/autores/` y `/obras/`) son una familia propia, `directorio` (Historia
-26.7): nunca Autor ni Obra. Las seis familias las declara solo `src/lib/superficies.ts`
-(`FAMILIAS`), y cada serie deriva de ahí su subconjunto con nombre (`FAMILIAS_DE_LA_SERIE`, las
-seis, aquí). El Directorio se mide con su censo de lo publicado y se anota con
+26.7): nunca Autor ni Obra. Las siete familias —la séptima, `personaje`, desde la Historia 35.3—
+las declara solo `src/lib/superficies.ts` (`FAMILIAS`), y cada serie deriva de ahí su subconjunto con
+nombre (`FAMILIAS_DE_LA_SERIE`, las siete, aquí). El Directorio se mide con su censo de lo publicado y se anota con
 `censo: publicadas`; son dos URL, así que se lee entera. Mientras rija SM-11 no le quita
 presupuesto a Autor ni a Obra: su suelo no se reserva por delante de ellas, sino que sale de lo
 que queda tras leerlas enteras, y con un presupuesto tan justo que no sobre ni una petición lo
 paga el suelo de Cita (dos por debajo del mínimo); si no queda nada, va a `sinLeer` con su motivo. **El `publicadas` de la entrada sigue sumando
-solo las cuatro de siempre** —Cita, Autor, Tema y Colección—: la Obra y el Directorio van cada
-una en su familia, para que el total siga siendo comparable. Una lectura fallida va a `sinLeer`
+solo las cuatro de siempre** —Cita, Autor, Tema y Colección—: la Obra, el Directorio y el Personaje
+(«Personaje», con su censo de lo publicado —también los `noindex` bajo `MIN_CITAS_POR_PERSONAJE`—;
+sin Personajes publicados no tiene URL) van cada uno en
+su familia, para que el total siga siendo comparable. Una lectura fallida va a `sinLeer`
 con su motivo, jamás a cero, y las entradas anteriores, sin `directorio`, se siguen leyendo.
 
 ## Leer el tráfico orgánico
@@ -280,7 +817,8 @@ casa —la portada, páginas 2+, Citas retiradas, otro host como `www.`— se su
 `fueraDelCenso`, que se escribe y se informa: nunca se descarta en silencio. La familia Obra no
 se cuenta todavía (`FAMILIAS_DEL_TRAFICO` son todas menos `obra`), ni una familia sin URL
 publicadas. Los Directorios (`/autores/` y `/obras/`) cuentan desde la Historia 26.7 en su
-familia, `directorio` («Directorio» en el informe), y no en Autor ni en Obra. **Cada pasada
+familia, `directorio` («Directorio» en el informe), y no en Autor ni en Obra; las Páginas de
+Personaje, desde la 35.3, en `personaje` («Personaje»), con su censo de lo publicado. **Cada pasada
 reatribuye los meses pasados con el censo de hoy**: una Cita retirada desde entonces pasa a
 `fueraDelCenso`, y lo que de los Directorios estaba en `fueraDelCenso` pasa a `directorio` en
 cada mes que se relee tras la 26.7 —los 16 en una pasada sin `--meses`; con `--meses N`, solo
@@ -326,15 +864,21 @@ calcula con el calendario local de quien ejecuta la orden.
 
 **Atribución por el prefijo más largo.** Una ruta es de Cita si, normalizada, es
 `/cita/<slug>` del host canónico —decodificada y en minúsculas—, esté publicada o retirada.
-Su Autor es el slug de `corpus/autores/` que, seguido de guion, sea el prefijo más largo del
-slug —`seneca-el-viejo-…` no es de `seneca`, y un slug igual al del Autor no es suyo—, por `autorPorPrefijo` de `tools/lib/autoria.ts`, el mismo dueño que usa retirar un
-Autor. Una ruta de Cita sin prefijo de Autor va a `sinAutor` y el informe la nombra. Una Cita
+Su dueño es el slug de `corpus/autores/` —o, desde la Historia 35.2, de `corpus/personajes/`— que,
+seguido de guion, sea el prefijo más largo del slug en la unión de los dos —`seneca-el-viejo-…` no es
+de `seneca`, `bruce-wayne-…` es del Personaje y no del Autor `bruce`, y un slug igual al del dueño no
+es suyo—, por `dueñoPorPrefijo` de `tools/lib/autoria.ts`, el mismo dueño que usa retirar un Autor. La
+de un Personaje cuenta en su Personaje (`personajes` de la entrada, que se omite vacía: las entradas
+anteriores no la traen) y el informe la da «Por Personaje»; Σ `citas` + `resto` = Σ `autores` + Σ
+`personajes`. Se cuentan los Autores activos, como antes —no los retirados—, más los Personajes. Una
+ruta de Cita sin prefijo de dueño va a `sinAutor` y el informe la nombra. Una Cita
 con menos de `MIN_IMPRESIONES_POR_FILA` (5) impresiones no se versiona en `citas`: se suma en
 `resto` —cuyo `filas` cuenta Citas, no filas de la fuente—, y sí cuenta en su Autor. El reparto por familia es el de la serie de tráfico
 (`agregarPorFamilia`, con su `fueraDelCenso`), así que una Cita retirada cuenta en su Autor y,
 por familia, fuera del censo. Los Directorios (`/autores/` y `/obras/`) no son ruta de Cita: no
 cuentan en ningún Autor y, por familia, cuentan en `directorio` (Historia 26.7;
-`FAMILIAS_DE_LA_DEMANDA`, todas menos `obra`) **en las ventanas leídas desde entonces**. La
+`FAMILIAS_DE_LA_DEMANDA`, todas menos `obra`) **en las ventanas leídas desde entonces**; las
+Páginas de Personaje, desde la 35.3, en `personaje` («Personaje»). La
 demanda no relee lo registrado —`--rellenar` solo pide los meses que faltan—, así que las
 ventanas anteriores a la 26.7 conservan los Directorios en `fueraDelCenso`: la serie mezcla las
 dos atribuciones y no se comparan sin decirlo.
@@ -358,7 +902,11 @@ npm run obra -- curar-primero   # informa. NO escribe nada.
 ```
 
 Lee las Citas publicadas, los Autores, las fichas de Obra y esta serie, y lista las Obras
-publicadas **con edición cotejada** —las demás se cuentan, sin listarlas—, cada una con su
+publicadas **con edición cotejada** y, desde la Historia 35.9 (FR-62 v9.1), las **con derechos
+vigentes** —cuyas ediciones van solas (FR-70); también la de un Personaje sin Autor, cuyas Citas
+cuentan por su Personaje, con el filtro de `obrasDelConjunto`—, cuya línea lo dice («con derechos
+vigentes: sus ediciones van solas»); las demás, de dominio público y sin cotejada, se cuentan sin
+listarlas («Fuera por no tener edición cotejada ni derechos vigentes»). Cada una sale con su
 ficha, su título, su Autor, cuántas ediciones declara y, si alguna lo es, cuántas son de una
 tienda sin marca. La
 regla vive solo en `tools/lib/curarPrimero.ts`, pura y con los efectos inyectados (AD-22). Ordena
@@ -468,8 +1016,11 @@ que la orden lee sin nombrar ninguna ruta. Ningún módulo de `src/`, `integraci
 (2026-10-25, la jornada UTC en que la 23 llegó al sitio en vivo; se lo dio la 23.11, en un commit
 aparte),
 `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` (vacía; la anota él el día de la 25.3 y de la 25.7) y
-`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7) y `DESPLIEGUE_DE_CITAR_Y_LLEVARSE` (sin
-valor; la jornada UTC en que termina «Desplegar» de la Épica 30, que pone él en un commit aparte).
+`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7), `DESPLIEGUE_DE_CITAR_Y_LLEVARSE` (sin
+valor; la jornada UTC en que termina «Desplegar» de la Épica 30, que pone él en un commit aparte) y
+`DESPLIEGUE_DE_LA_ATRIBUIDA` (sin valor; la jornada UTC del primer día con una Cita atribuida
+publicada en vivo, nunca la del merge; su corte parte `sm8` y `continuacion-de-cita`, y SM-C5 la
+declara entre sus llegadas — Historia 35.7).
 Ningún agente les da valor. Los **cortes de
 serie** viven en `CORTES_DE_SERIE_DECLARADOS`, una lista de constantes de despliegue sin ninguna
 fecha escrita —`CORTES_DE_SERIE` filtra las que llegaron y `CORTES_DE_SM8` es su proyección—: un
@@ -518,7 +1069,9 @@ no tener el registro. Mientras la familia Obra esté congelada (`CONGELACION_DE_
 Directorios (`/autores/` y `/obras/`) se anota —el sitio la publica, y `/obras/` no es una Obra:
 la congelación no la alcanza— y la consulta la cuenta en su familia, «Directorio» (Historia
 26.7, `FAMILIAS_DEL_RASTREO`); «sin familia» queda para la portada y para una Obra, que el
-rastreo no cuenta todavía.
+rastreo no cuenta todavía. Una Página de Personaje indexable se anota y cuenta en «Personaje»; la
+que se sirve `noindex` por estar bajo `MIN_CITAS_POR_PERSONAJE` se rechaza con 1, con un motivo que
+nombra ese umbral y no el de la Obra (Historia 35.3b).
 
 ## Anotar lo que se publica en el canal
 
@@ -559,8 +1112,8 @@ comprobar que la última entrada es la nueva; un fichero ilegible —o una entra
 red, un formato o una fecha imposibles— se niega sin tocarlo. La consulta desglosa a dónde
 enlaza cada semana y red —Cita, Autor, Colección, Directorio, portada, «otra», «ya no se publica» y
 «sin enlace»— con la familia sacada del censo (`FAMILIAS_DEL_CANAL`; un enlace a los Directorios
-—`/autores/` y `/obras/`— sale como «Directorio» desde la 26.7, y uno a un Tema o a una Obra,
-como «otra»), cuenta los días con `foto` y los enlaces marcados, y
+—`/autores/` y `/obras/`— sale como «Directorio» desde la 26.7, uno a una Página de Personaje como
+«Personaje» desde la 35.3, y uno a un Tema o a una Obra, como «otra»), cuenta los días con `foto` y los enlaces marcados, y
 da por red la racha actual y la máxima de semanas ISO **consecutivas** con foto los 7 días y
 todo enlace marcado: «La 18.2 se cierra con 4: lleva N». Ningún módulo de `src/lib/` lo lee
 (AD-24), y el fichero se versiona con su cabecera y la lista vacía: ningún agente anota
@@ -722,6 +1275,12 @@ código 1, sin mover nada, si la retirada deja otra Cita a más de tres saltos d
 —un Tema que cae bajo `MIN_CITAS_POR_TEMA`—, nombrándola con su Tema y su recuento (NFR-5,
 Historia 26.8); para comprobarlo lee el Corpus entero, y un fichero ilegible también la niega.
 
+**Retirar anota la forma** en `corpus/formas-vedadas.yml` (Historia 35.7), con un motivo derivado y
+nunca tecleado: `cambio-de-clase` si el Autor de la Cita ya no es de dominio público —vive, o su plazo
+corre: la Cita vuelve como atribuida con otro slug—, y `retirada` en lo demás. El parte lo dice; si
+el registro no se deja leer, o no se puede anotar, no se retira nada (la Cita vuelve a su sitio). El
+motivo tecleado sigue yendo solo al commit.
+
 ## Retirar un Autor
 
 Un Autor que sale del Corpus se retira con su orden, **nunca con un `git mv` a mano**:
@@ -746,8 +1305,11 @@ código 1 y sin mover nada, mientras algo del Corpus apunte al Autor, y lo dice 
   build; se retira antes con `npm run obra -- retirar`— o retirada en `corpus/_obras-retiradas/`;
 - un miembro de Colección, publicada o despublicada, o una fijación de `corpus/portada.json`,
   que sea Cita suya. Estos son slugs sueltos que pueden no resolver ya a ninguna Cita, así que
-  se atribuyen por el prefijo del slug de Autor **más largo**: `seneca-el-viejo-…` no es de
-  `seneca`. Una portada ilegible también bloquea, porque no se puede afirmar que no apunte a él.
+  se atribuyen por el prefijo **más largo** de la unión de Autores (activos y retirados) y
+  Personajes (`dueñoPorPrefijo`, Historia 35.2): `seneca-el-viejo-…` no es de `seneca`, y
+  `bruce-wayne-…` es del Personaje y no del Autor `bruce`. Una Cita que existe se juzga por el
+  Autor que declara: la de un Personaje sin Autor no es de ninguno. Una portada ilegible también
+  bloquea, porque no se puede afirmar que no apunte a él.
 
 Sin `--motivo` sale con código 2. El motivo va en el mensaje, y de ahí al del commit (AD-10).
 
@@ -760,11 +1322,31 @@ descartado o da la orden exacta que falta:
 ## Las fichas de Obra
 
 Cada Obra con Citas publicadas tiene una **Ficha de Obra** en
-`corpus/obras/{slug-autor}--{slug-obra}.yml`, con `autor`, `titulo`, `formas` y, opcional,
-`distintaDe` (Historias 22.1 y 22.2, AD-25). La identidad de la Obra es el par (Autor, forma
+`corpus/obras/{slug-del-dueño}--{slug-obra}.yml`, con `autor`, `titulo`, `formas` y, opcional,
+`distintaDe` (Historias 22.1 y 22.2, AD-25). La identidad de la Obra es el par (dueño, forma
 canónica de `normalizar`); el título es presentación. El nombre del fichero sale del título
 **una sola vez**, al crear la ficha, sin la truncación de los documentos de Fuente, y no se
 recalcula nunca: será la URL de la Página de Obra.
+
+**La Obra tiene un solo dueño** (Historia 35.2, AD-25 v9.1): su Autor o un Personaje. La ficha de un
+Personaje declara `personaje` (el dueño) y `personajes` —la lista de los Personajes de la Obra, sin
+repetidos, que **incluye** al dueño— y `autor` solo si se sabe, como dato informativo que no cambia el
+dueño ni el nombre; la de un Autor declara `autor` y no lleva ni `personaje` ni `personajes`. Lo
+deciden solo `dueñoDeFicha` (el Personaje si lo declara, si no el Autor) y `dueñoDeCita` (el Autor si
+lo declara, si no el Personaje) de `src/lib/obras.ts`. Una Cita resuelve su ficha **en dos pasos**
+(`fichasDeCita`): primero las que nombran a su Autor —como dueño o como `autor` informativo— y reclaman
+su forma; si ninguna, las de Personaje cuyo `personajes` incluye el suyo. Dos candidatas en el mismo
+paso rompen el build nombrando la Cita y las dos fichas, y dos fichas de Personaje con la misma forma
+lo rompen nombrándolas. Crear una ficha le da el dueño de la Cita (`personaje` y `personajes: [p]` si
+no tiene Autor); `titular`, `separar`, `reunir` y `retirar` conservan `personaje` y `personajes`, y
+`reunir` se niega entre dueños distintos. `esObraIndexable` recibe el recuento del dueño: las Citas
+del Autor o, para la de un Personaje, las que declaran ese Personaje. La ruta no cambia
+(`rutaDeObra`, por los dos segmentos del nombre), así que saberse después el Autor no mueve la URL.
+Desde la Historia 35.4 una ficha de Personaje que resuelve Citas publicadas tiene su Página de Obra,
+con la Cabecera «de {Personaje}» («Los Personajes», arriba); sin Citas publicadas, avisa como
+cualquier ficha. Una Cita atribuida no tiene posición
+en el orden del libro aunque su Obra tenga documento (`posicionesDeCitas` la omite): va al final, por
+slug.
 
 ```
 npm run obra -- sembrar                                      # crea las que falten. Idempotente.
@@ -881,7 +1463,9 @@ npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"
 Se niega con 1, sin escribir, si la ficha no existe; si el documento no es un `.txt` de
 `corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está en
 la unión de `documentosDeCita` de sus Citas publicadas); si su forma de líneas es `indeterminada`;
-si `desde` —colapsado— no se localiza; si la Fuente de su cabecera no es de `FUENTES`, no permite
+si `desde` —colapsado— no se localiza; si la Obra tiene derechos vigentes (Historia 35.9, AD-30 v9.1:
+`derechosDeLaObra`, decidido primero por `ofreceIncipit` con su motivo `derechos-vigentes`, antes
+de mirar el documento); si la Fuente de su cabecera no es de `FUENTES`, no permite
 reutilizar o es mutable, o su `url:` no es `http(s)` (va tal cual al `href`); si el nombre del
 documento designa en `corpus/fuentes/` otro fichero que el tecleado (la ficha guarda solo el
 nombre); o si la ficha ya declara ese mismo incipit. Con 2, la forma (otra cantidad de argumentos,
@@ -894,8 +1478,10 @@ orden del libro ni del primer documento. El build lo repite desde el cargador `i
 solo los documentos que las fichas declaran y **rompe** con «Regla incumplida» nombrando la ficha si
 el documento falta, no se deja analizar o es biografía, si su forma es `indeterminada`, si `desde`
 ya no se localiza o si la Fuente o el `url:` de su cabecera no valen (lo mismo que la orden); no repite el casado, para que retirar la última Cita de ese documento no rompa la
-construcción siguiente. El corte es de `incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de
-frase o de verso**: unidades enteras mientras quepan en `MAX_CARACTERES_DEL_INCIPIT`, parado antes
+construcción siguiente. Desde la 35.9 el cargador no ofrece el incipit de una Obra con derechos
+vigentes, y `integraciones/obras.ts` **rompe** ante la ficha con derechos vigentes que lo declare,
+nombrándola (`fallosDeIncipitConDerechos`): son las tres puertas del veto. El corte es de
+`incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de frase o de verso**: unidades enteras mientras quepan en `MAX_CARACTERES_DEL_INCIPIT`, parado antes
 del pie de licencia de Wikisource; si se ofrece lo decide solo `ofreceIncipit` (sin tope, no; si la
 primera frase o el primer verso no cabe, no). La página 1 de la Obra lo pinta en
 `src/components/ComoEmpieza.astro` —el `Desplegable.astro` «Cómo empieza», cerrado, entre la
@@ -965,8 +1551,8 @@ de la Procedencia de **esa** Cita; la Tarjeta de Cita de los listados lleva el t
 El `isPartOf` del JSON-LD describe la Obra y lleva el año de la Obra, y sin él va sin fecha.
 
 Cada uso de `TarjetaDeCita.astro` declara su `atribucion`, un conjunto cerrado y sin valor por
-omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor y en «Más de
-{Autor}», y `ninguna` en el Listado de Obra y en «De la misma obra» —los dos bloques del pie de
+omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor, en Personaje (35.3) y
+en «Más de {Autor}», y `ninguna` en el Listado de Obra y en «De la misma obra» —los dos bloques del pie de
 la Página de Cita, que pinta `RutasDeSalida.astro` (24.6)—. Un uso nuevo se declara además en la
 prueba de `tests/unit/tarjeta-de-cita.test.ts`.
 Un valor fuera del conjunto —o ninguno—, o `autor-y-obra` sin el `autor` que declara la Cita,
@@ -1126,7 +1712,20 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
 - **Página de Obra** = su ficha (`autor`, `titulo`, `formas`, `nota`, `ediciones`), sus Citas, su
   Autor y **sus documentos**: la unión de `documentosDeCita` de sus Citas sobre los nombres de
   `corpus/fuentes/`, más el documento de su `incipit` si lo declara (32.3), sea o no de sus Citas.
-  `nota` y `ediciones` solo fechan la Página de Obra.
+  `nota` y `ediciones` solo fechan la Página de Obra. **Desde la 35.9**, la Obra de un Autor con año
+  de fallecimiento —no la de un Autor vivo ni la de un Personaje, que tienen derechos siempre— compone
+  además `src/lib/umbrales.ts` (`FICHERO_DE_LOS_UMBRALES`, sin familia de fichero) con un solo campo
+  derivado, su veredicto de derechos (`derechosEnLosUmbrales` de `tools/lib/cambios.ts`, con
+  `derechosVigentes` sobre `PLAZO_DE_PROTECCION_AÑOS` y `AÑO_DE_REFERENCIA` de cada versión, leídas por
+  `versionDeUmbrales`), y con ella las Páginas de Cita de sus atribuidas. Un commit que solo mueva una
+  de las dos constantes fecha (`integraciones/historial.ts` lee el historial de ese fichero) y avisa
+  (`tools/avisar.ts` lo toma como cambio del rango) **solo** las Obras cuyo veredicto cambia con el
+  Corpus de hoy y esas Páginas de Cita: la portada no, porque el fichero no tiene familia. Una versión
+  con plazo y sin año cuenta como cambio sin lanzar, y también una declaración que `versionDeUmbrales`
+  no sabe leer —un decimal, un `as`, una expresión, una declaración en varias líneas; una comentada no
+  cuenta—: nunca se lee en silencio como «sin valor». Que el fichero no exista es lo mismo que sus
+  constantes sin valor: crearlo o borrarlo fecha lo mismo que darles o quitarles ese valor, y nada si
+  no tienen ninguno. La regla de indexables (`reglaCambiada`) no cambia.
 - **Lo que la relación todavía no compone**, y no conviene dar por exhaustivo (diferido en el spec
   de la 24.8): la Página de Obra pinta el nombre de los Temas de sus Citas y no compone sus
   ficheros de Tema —renombrar un Tema no la fecha ni la avisa; decidirlo es de Héctor—; el título
@@ -1174,7 +1773,11 @@ commit y `corpus/` está limpio —sin una siembra a medias—, o una copia de `
 se lista con `git ls-tree` y nunca se extrae. Sin `--sitemap` pide el sitemap publicado para
 saber qué Obras se indexan.
 
-Para el aviso, el estado de una Obra es uno: **indexable o no**. Una Obra tocada se avisa si
+Para el aviso, el estado de una Obra es uno: **indexable o no**, y desde la 35.3b el aviso trata
+igual a toda superficie `indexablePorContenido` —la Obra y el Personaje, por `dependeDelContenido` de
+`src/lib/superficies.ts`—: lo que sigue de la Obra vale para el Personaje, cuya lista de antes sale de
+`personajesIndexablesEnDisco` sobre la misma copia, y un cambio de `MIN_CITAS_POR_PERSONAJE` en el
+rango se dice como el de los umbrales de la Obra. Una Obra tocada se avisa si
 es indexable después —lo dice el sitemap desplegado, `{SITIO}/sitemap-0.xml`, o
 `--sitemap <fichero>`— o si lo era antes; una hermana, solo si entra o sale de la lista
 indexable. La lista de antes sale de `obrasDelCorpusEnDisco` sobre una copia temporal del
@@ -1203,7 +1806,9 @@ Ninguna hace commit; las dos se niegan con 1 y sin escribir si no hay nada que h
 Tras las acciones —Copiar, Imagen y compartir— y antes de las Rutas de salida (Historia 30.1:
 nada se intercala entre la Atribución, con su Línea de la Fuente, y Copiar), la Página de
 Cita dice de qué Obra sale: `src/components/TarjetaDeObra.astro`, con el rótulo «De la obra»,
-el título de la ficha sin enlace, «{Autor} · {año} · {n} citas» y una o dos Filas de bloque:
+el título de la ficha sin enlace, «{dueño} · {año} · {n} citas» —el dueño de la Obra (`obra.dueño`):
+su Autor o, desde la 35.4, su Personaje; la prop es `dueño` y la construcción se para si no es el de la
+Obra— y una o dos Filas de bloque:
 «Siguiente…» cuando hay a dónde ir (24.5) y, siempre, la de la página 1 de la Obra —se indexe o
 no, esté congelada o no—. **Solo en `src/pages/cita/[slug].astro`**:
 no va dentro de `BloqueDeCita.astro` porque ese bloque lo comparten la portada y el 404, que no
@@ -1214,9 +1819,12 @@ Obra no pinta nada, ni rótulo ni hueco, y las Rutas de salida siguen a comparti
   pasará `3`. `Rotulo.astro` admite `nivel`, por omisión `2`.
 - Lo que dice lo compone `contenidoDeTarjetaDeObra` de `src/lib/atribucion.ts`, con el año y el
   recuento de la Obra resuelta: el componente no cuenta nada. La fila dice «Ver la obra y dónde
-  leerla» si `edicionCotejada` —alguna Cita de la Obra tiene Fuente— y «Ver la obra» si no; las
-  `ediciones` de la ficha y la afiliación no cuentan, y la tarjeta sale idéntica con el Modelo
-  encendido o apagado. No aloja ningún Modelo (sin `data-ingreso`) ni lleva guion.
+  leerla» si `edicionCotejada` —alguna Cita de la clase de siempre de la Obra tiene Fuente; desde la
+  35.9 la de una atribuida no cuenta— y «Ver la obra» si no; las `ediciones` de la ficha y la
+  afiliación no cuentan, y la tarjeta sale idéntica con el Modelo encendido o apagado. Por eso la
+  Obra con derechos vigentes (Historia 35.9, FR-70), que vende sus ediciones solas, dice «Ver la
+  obra ›» aunque su página diga dónde conseguirla (decisión de Héctor del 2026-11-06). No aloja
+  ningún Modelo (sin `data-ingreso`) ni lleva guion.
 - La fila es `src/components/FilaDeBloque.astro`, escrita una vez con el trato de la Lista de
   Obras y que reutilizarán «Siguiente» (24.5), los cierres (24.6), los Directorios y la portada:
   `zona` obligatoria del vocabulario (aquí `tarjeta-de-obra`, en el `<li>`) y el glifo de avance
@@ -1277,8 +1885,10 @@ de salida a la edición, en el pasaje: la canónica es texto— y fuera del JSON
 
 - **La composición es solo de `src/lib/atribucion.ts`** (AD-28): `referenciaDeCita` (segmentos,
   con la Obra en cursiva y un segmento vacío para la fecha), `referenciasDeCita`,
-  `nombreEnReferencia` y `partesDelNombre`, `citaTieneComoCitar` (hoy `true`; la 35.4 añade ahí la
-  Cita atribuida), `fechaDeConsulta` y `MARCADOR_DE_FECHA_DE_CONSULTA`. Las formas literales de
+  `nombreEnReferencia` y `partesDelNombre`, `citaTieneComoCitar` (toda Cita salvo la atribuida,
+  `!esAtribuida`, Historia 35.4: la atribuida no lleva «Cómo citar» ni pasaje —`ofrecePasaje` lo niega
+  primero, con el motivo `atribuida`—, y de los desplegables solo «Inserta esta cita»),
+  `fechaDeConsulta` y `MARCADOR_DE_FECHA_DE_CONSULTA`. Las formas literales de
   APA, MLA y Chicago son un supuesto que revisa Héctor, fijado por la tabla de
   `tests/unit/atribucion.test.ts`. Lo que no consta se omite; nada lee `procedencia.obra`.
 - `src/components/ComoCitar.astro` pinta las Referencias **ya compuestas** y no sabe si son de
@@ -1308,7 +1918,9 @@ La página 1 de toda Obra —se indexe o no— lleva su «Cómo citar»: un desp
 los Temas (o «Buscar en esta obra», sin ellos) y antes de la nota, en su propio contenedor
 `data-pagefind-ignore="all"` a 5 × `--unidad` (decisión 1b, delegada por Héctor el 2026-11-14, en
 la 32.4: arriba echaba de la primera pantalla la primera Tarjeta). Las 2+ no lo llevan. Lo pregunta
-`obraTieneComoCitar` (`src/lib/obras.ts`; hoy `true`, la 35.9 añade las exclusiones).
+`obraTieneComoCitar` (`src/lib/obras.ts`): toda Obra salvo la que tiene derechos vigentes —desde
+la 35.9, `!obra.derechosVigentes`, que cubre también la de todo Personaje—, porque una Referencia sin
+edición identificable no sirve a quien cita (FR-65, FR-70).
 
 - Lo compone `referenciaDeObra`/`referenciasDeObra` de `src/lib/atribucion.ts`, hermanas de
   `referenciaDeCita`: Autor (`nombreEnReferencia`), título de la ficha, año de la Obra, la edición
@@ -1370,8 +1982,9 @@ readonly>` con el Fragmento, el botón «Copiar el fragmento» `hidden` y su reg
   escapado con `escapar` de `src/lib/lienzo.ts`, sin guion, imagen, estilo, clase ni recurso del
   sitio. Una canónica que no sea `http(s)` absoluta o lleve `?…` o `#…` detiene la construcción:
   el Fragmento nunca lleva `?de=` ni `?via=`. El marcado literal es un supuesto que revisa Héctor,
-  fijado por la tabla de `tests/unit/atribucion.test.ts`. El nombre sale de `nombreEnAtribucion`,
-  la misma función que pinta la Atribución (la 35.4 pondrá ahí el Personaje).
+  fijado por la tabla de `tests/unit/atribucion.test.ts`. El nombre sale de `firmaDeCita`, la misma
+  que pinta la Atribución: con Personaje, «— {Personaje}, <cite>{Obra}</cite>, de {Autor}.» (Historia
+  35.4), y el `<label>` dice «su personaje» en vez de «su autor» (prop `conPersonaje`).
 - El enlace del Fragmento es **texto del campo**, no un `<a>` de la página: sin zona ni exención.
 - `--mono` y `--codigo` (con `--interlineado-codigo`) son **solo** del campo del Fragmento; fuera de
   `tokens.css` e `InsertaEstaCita.astro` no los nombra nadie (`tests/unit/inserta-esta-cita.test.ts`).
@@ -1391,7 +2004,12 @@ cada uno con su `h2` (`Rotulo.astro`): **«De la misma obra»** —hasta `MAX_CI
 (3) Citas de su Obra, en el orden del libro, con la Tarjeta de Cita `ninguna`, zona `misma-obra`,
 y el cierre «Las {n} citas de {título} ›» a la página 1 de la Obra—, **«Más de {Autor}»** —hasta
 `MAX_CITAS_RELACIONADAS` (4) del Autor **sin las de su Obra**, con la Tarjeta `obra`, zona
-`rutas-de-salida`, y el cierre «Las {n} citas de {Autor} ›» a su Página de Autor— y **«Temas»**
+`rutas-de-salida`, y el cierre «Las {n} citas de {Autor} ›» a su Página de Autor; desde la 35.4,
+**«Más de {Personaje}»** si la Cita lo declara, con `citasDePersonaje`, el recuento de las Citas que lo
+declaran y `cierreDeMasDelPersonaje` a su página: el dueño de las rutas es `dueñoDeLaRuta` de
+`src/lib/publicado.ts` (el Personaje si lo hay, si no el Autor; a propósito no es `dueñoDeCita`), que
+`RutasDeSalida.astro` recibe por `dueño`, que «Siguiente cita sobre…» exige distinto y que
+`problemaDeRutasDeSalida` coteja— y **«Temas»**
 (chips, `chip-de-tema`). Como mucho `MAX_CITAS_DE_LA_MISMA_OBRA` + `MAX_CITAS_RELACIONADAS`
 tarjetas (hoy, siete); ninguna es la propia ni la de «Siguiente», ni
 sale en los dos grupos. El orden de tabulación es el del marcado.
@@ -1424,7 +2042,8 @@ sale en los dos grupos. El orden de tabulación es el del marcado.
 ### El Directorio de Obras (Historia 26.4)
 
 `/obras/` lista **toda** Obra de `obrasPublicadas` —también las `noindex` y con congelación, sin
-marca que las distinga— bajo su Autor, en el orden de `/autores/` y con la Lista de Obras de su
+marca que las distinga— bajo su Autor (desde la 35.5, la de un Personaje sin Autor bajo su Personaje,
+en la sección «Personajes» tras la A–Z), en el orden de `/autores/` y con la Lista de Obras de su
 Página de Autor (el mismo componente y `ordenDeLaListaDeObras` de `src/lib/obras.ts`). Es una
 sola página, sin 2+, y crece con cada Obra. Por eso `npm run build` informa siempre, desde
 `integraciones/directorios.ts`, «El Directorio de Obras pesa N bytes»; si pasa de
@@ -1840,7 +2459,8 @@ esquema rechaza toda edición: ninguna ficha puede declarar una.
    código 1 y sin escribir si la familia Obra está congelada (`CONGELACION_DE_OBRAS`, SM-11), si
    la tienda no es del conjunto o si el esquema la rechaza (otro dominio, un puerto, el
    parámetro de la marca en cualquier capitalización); con 2, la forma de la invocación. Si la
-   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará. Una tienda
+   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará —salvo si tiene
+   derechos vigentes, donde se pintará sola (35.9) y no avisa—. Una tienda
    sin marca admite ediciones con las mismas reglas, y el parte dice que la edición no se
    pintará hasta que Héctor declare la marca y encienda el Modelo.
    `quitar-edicion <ficha> <n>` la quita (1 si no hay esa posición).
@@ -1852,7 +2472,20 @@ esquema rechaza toda edición: ninguna ficha puede declarar una.
    (`revisarDeclaracionDeIngreso`; `urlDeEdicion` solo acepta por su tipo una `TiendaConMarca`).
    Una edición solo se pinta en una Obra con alguna Cita cotejada —la edición en venta nunca va
    sola (FR-54)—; si no la hay, el build avisa «Ediciones sin edición cotejada» nombrando la
-   ficha. Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
+   ficha. **La excepción es la Obra con derechos vigentes** (Historia 35.9, FR-70, AD-20 y AD-25
+   v9.1): la de todo Personaje, la de un Autor vivo y, con plazo, la de un fallecido cuyo plazo
+   corre. Lo decide `derechosDeLaObra` de `src/lib/obras.ts` (el dueño de la ficha juzgado por
+   `derechosVigentes` de `src/lib/clase.ts`; nunca la ficha), y la Obra resuelta lo lleva en
+   `derechosVigentes`. Su página 1 no tiene «Gratis», ni frase de lo tomado, ni «Ninguna de sus citas
+   tiene todavía documento cotejado.», ni «Cómo empieza», ni «Cómo citar», y su línea de Ficha técnica
+   va sin traductor; con el Modelo encendido y admitido y sin congelación, «Dónde leer esta obra» —el
+   mismo rótulo y el mismo `Desplegable`— lleva **solo** sus ediciones en venta, por formato y por
+   tienda, en un `data-ingreso`; si no, no hay desplegable ni hueco (`dondeLeer` da `ventaSola` y la
+   página decide que exista), y el build no avisa de ella. Lo cotejado es de la clase de siempre: la
+   Fuente de una atribuida no hace línea de «Gratis», no cuenta en `fuentes` ni en `edicionCotejada`
+   ni encabeza la edición, y sí cuenta en el total de la frase de lo tomado.
+
+   Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
    ediciones o sin ellas: lo construye en cuatro variantes `tests/unit/ediciones-en-venta.test.ts`.
    **Con la familia Obra congelada** (`congelacionVigente()`, SM-11) ninguna Página de Obra pinta
    ediciones aunque el Modelo esté encendido: la página no las compone, la ficha las conserva y

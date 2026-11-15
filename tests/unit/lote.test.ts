@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { citaDelDia } from '../../src/lib/citaDelDia.ts';
+import { aptasParaPortada, citaDelDia } from '../../src/lib/citaDelDia.ts';
 import { materialDelKit } from '../../src/lib/kit.ts';
 import { materialDelLote } from '../../src/lib/lote.ts';
 import { fijacionesDeclaradas } from '../../src/lib/portada.ts';
@@ -110,6 +110,13 @@ describe('Historia 13.1 — una fijación que ya no vale se ve antes de que lleg
     expect(lote[0].honrada).toBe(false);
     // Y lo que enseña es lo que saldrá de verdad: la Cita de la rotación, no un hueco.
     expect(lote[0].material!.delDia.cita.slug).toBe(citaDelDia(APTAS, MANANA)!.cita.slug);
+  });
+
+  it('la fijación a una atribuida marcada a mano no se honra: /lote la enseña muda (35.7, pregunta 22)', () => {
+    const marcada = { ...cita('atribuida', 'Una frase atribuida marcada a mano.'), clase: 'atribuida' } as unknown as Cita;
+    const lote = materialDelLote(aptasParaPortada([...APTAS, marcada]), { [MANANA]: 'atribuida' }, HOY);
+    expect(lote[0].fijadaA).toBe('atribuida');
+    expect(lote[0].honrada).toBe(false);
   });
 
   it('y aun así compone el mismo material que el Kit compondría ese día', () => {

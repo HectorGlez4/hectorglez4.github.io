@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { seleccionDeColeccion } from '../../src/lib/coleccionEnPieza.ts';
+import { MOTIVO_DE_ATRIBUIDA_FUERA_DE_LA_PIEZA, seleccionDeColeccion } from '../../src/lib/coleccionEnPieza.ts';
 import { MINIMO_DE_CITAS } from '../../src/lib/pieza.ts';
 import { colgarObras, type FichaDeObra } from '../../src/lib/obras.ts';
 import {
@@ -11,6 +11,7 @@ import {
 } from '../../src/lib/publicado.ts';
 import { SUPERFICIES, rutaDeColeccion, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { MAX_CARACTERES_IMAGEN, MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /**
  * Historia 13.3 — qué Citas de una Colección entran en su Pieza, sobre lo puro.
@@ -54,7 +55,7 @@ const cita = (slug: string, texto: string, autor = 'seneca'): Cita =>
         aptaParaPortada: false,
       },
     ],
-    [FICHA],
+    [FICHA], CUALQUIER_AUTOR,
   )[0];
 
 const breve = (i: number): Cita =>
@@ -193,6 +194,23 @@ describe('Historia 13.3 — se excluye, pero se dice con su motivo', () => {
 
     expect(seleccion.citas.map((c) => c.slug)).not.toContain('huerfana');
     expect(seleccion.fuera.find((f) => f.slug === 'huerfana')!.motivo).toContain('sin atribución');
+  });
+
+  it('una Cita que dice un Personaje queda fuera con su motivo: la Pieza no la firma (35.4)', () => {
+    const atribuida: Cita = { ...cita('atribuida', 'Nada hay más parecido a un hombre que otro hombre.'), personaje: 'batman' };
+    const seleccion = seleccionDeColeccion(publicada([atribuida, ...nBreves()]), autores);
+
+    expect(seleccion.citas.map((c) => c.slug)).not.toContain('atribuida');
+    expect(seleccion.fuera.find((f) => f.slug === 'atribuida')!.motivo).toContain('Personaje');
+  });
+
+  it('una atribuida queda fuera con el motivo de la pregunta 27, antes que cualquier otro (35.7)', () => {
+    const atribuida: Cita = { ...cita('atribuida', frase(400)), clase: 'atribuida' };
+    const seleccion = seleccionDeColeccion(publicada([atribuida, ...nBreves()]), autores);
+
+    expect(seleccion.citas.map((c) => c.slug)).not.toContain('atribuida');
+    expect(seleccion.fuera.find((f) => f.slug === 'atribuida')!.motivo).toBe(MOTIVO_DE_ATRIBUIDA_FUERA_DE_LA_PIEZA);
+    expect(MOTIVO_DE_ATRIBUIDA_FUERA_DE_LA_PIEZA).toContain('pregunta 27');
   });
 
   it('un Autor cuya ficha no trae nombre queda fuera por la misma razón', () => {

@@ -187,7 +187,16 @@ describe('Historia 26.8 — dos jornadas, un mismo sitio', () => {
   it('mismos veredictos y mismos avisos', () => {
     expect(veredictos(hoy.salida).length).toBeGreaterThanOrEqual(2);
     expect(veredictos(manana.salida)).toEqual(veredictos(hoy.salida));
-    expect(avisos(manana.salida)).toEqual(avisos(hoy.salida));
+    /*
+     * Los cargadores de colección corren a la vez, y desde la Historia 35.2 hay dos vacías en el
+     * fixture (`colecciones` y `personajes`) cuyos avisos de «No files found» salen en cualquier
+     * orden: esos se comparan como conjunto, y todos los demás, en secuencia.
+     */
+    const delCargador = (linea: string) => linea.includes('No files found');
+    const enOrden = (salida: string) => avisos(salida).filter((l) => !delCargador(l));
+    const sinOrden = (salida: string) => avisos(salida).filter(delCargador).sort();
+    expect(enOrden(manana.salida)).toEqual(enOrden(hoy.salida));
+    expect(sinOrden(manana.salida)).toEqual(sinOrden(hoy.salida));
   });
 
   it('el mismo HTML, salvo el subárbol data-jornada de la portada y el 404, y /kit y /lote', async () => {

@@ -14,7 +14,7 @@
 
 import { textoParaCopiar } from './atribucion.ts';
 import type { IdDeDestino } from './destinos.ts';
-import type { Cita, Autor } from './publicado.ts';
+import type { Cita, Autor, Personaje } from './publicado.ts';
 
 // Se reexportan para quien ya los consumía por aquí. El conjunto cerrado vive en
 // `destinos.ts` y no aquí: ver la nota de ese módulo — el receptor lo importa desde un
@@ -116,6 +116,12 @@ export function rotuloDeDestino(destino: Destino): string {
  * que no distinguen ambos campos— para que las aplicaciones que previsualizan enlaces
  * puedan encontrarlo.
  */
-export function textoParaCompartir(cita: Cita, autor: Autor): string {
-  return textoParaCopiar(cita, autor);
+export function textoParaCompartir(
+  cita: Cita,
+  autor: Pick<Autor, 'nombre'> | undefined,
+  /** El Personaje que declara la Cita, o `undefined`. Obligatorio, como en `textoParaCopiar`. */
+  personaje: Pick<Personaje, 'nombre'> | undefined,
+): string {
+  // Historia 35.4 — los mismos quienes que lo copiado: el Personaje delante, si lo hay.
+  return textoParaCopiar(cita, autor, personaje);
 }

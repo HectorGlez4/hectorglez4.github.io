@@ -21,6 +21,18 @@
  * compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos
  * del Corpus, salvo la nota, que escribe Héctor a mano.
  *
+ * Historia 35.4 — la Obra de un Personaje es esta misma página con su dueño: la Cabecera dice «de
+ * {Personaje}» enlazado a su página, el título y la meta llevan su nombre y el JSON-LD describe una
+ * `CreativeWork` con su `character`. Desde la 35.5 lleva también «Buscar en esta obra», con el
+ * Personaje en lugar del Autor (`?personaje=&obra=`).
+ *
+ * Historia 35.9 (FR-70, AD-20 y AD-25 v9.1) — la Obra con derechos vigentes (`obra.derechosVigentes`,
+ * que decide su dueño: todo Personaje, el Autor vivo y, con plazo, el fallecido cuyo plazo corre) no
+ * ofrece «Gratis», ni la frase de lo tomado, ni «Cómo empieza», ni «Cómo citar», y su línea de Ficha
+ * técnica va sin traductor. «Dónde leer esta obra» existe solo con ediciones en venta que pintar
+ * —afiliación encendida y admitida, sin congelación—, y entonces van solas; si no, no hay
+ * desplegable ni hueco.
+ *
  * El parámetro se llama `page` porque `paginate()` lo exige por nombre, como en la Página de
  * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
  */
@@ -40,9 +52,11 @@ import CopiarReferencia from '../../../../islands/CopiarReferencia.astro';
 import {
   autoresPublicados,
   citasDeLasObras,
+  personajesPublicados,
   conjuntoPublicable,
   incipitsDeLasObras,
   obrasPublicadas,
+  mensajeDeDueñoSinPagina,
   temasDeLaObra,
   temasPublicados,
 } from '../../../../lib/publicado.ts';
@@ -61,7 +75,7 @@ import { descripcionDeObra, referenciasDeObra } from '../../../../lib/atribucion
 import { ROTULO_BUSCAR_EN_ESTA_OBRA } from '../../../../lib/busqueda.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
 import { tituloDeObra } from '../../../../lib/marca.ts';
-import { rutaDeAutor, rutaDeTema } from '../../../../lib/superficies.ts';
+import { rutaDeAutor, rutaDePersonaje, rutaDeTema } from '../../../../lib/superficies.ts';
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -69,6 +83,10 @@ export const getStaticPaths = (async ({ paginate }) => {
   // El Autor de la Cabecera es uno **publicado**: su nombre enlaza a su página.
   const autores = new Map(
     autoresPublicados(conjunto.autores, conjunto.citas).map((a) => [a.slug, a]),
+  );
+  // Historia 35.4 — y el Personaje dueño de una Obra, también uno publicado: enlaza a su página.
+  const personajes = new Map(
+    personajesPublicados(conjunto.personajes, conjunto.citas).map((p) => [p.slug, p]),
   );
   const publicados = temasPublicados(conjunto.temas, conjunto.citas);
 
@@ -79,20 +97,29 @@ export const getStaticPaths = (async ({ paginate }) => {
   const incipits = await incipitsDeLasObras();
 
   return obrasPublicadas(conjunto).flatMap((obra) => {
-    const autor = autores.get(obra.autor);
-    // No debería pasar —la integridad del conjunto y la puerta de las fichas lo impiden—, pero
-    // si pasara, la Cabecera enlazaría a un 404 sin que nada lo dijera: el build se para aquí.
-    if (autor === undefined) {
-      throw new Error(
-        `La Obra «${obra.nombre}» es de «${obra.autor}», que no tiene Página de Autor publicada: ` +
-          'su Cabecera enlazaría a un 404.',
-      );
+    // El dueño de la Cabecera (`obra.dueño`): su Autor o su Personaje, los dos publicados.
+    const autor = obra.dueño.tipo === 'autor' ? autores.get(obra.dueño.slug) : undefined;
+    const personaje = obra.dueño.tipo === 'personaje' ? personajes.get(obra.dueño.slug) : undefined;
+    const dueño =
+      autor !== undefined
+        ? ({ tipo: 'autor', autor } as const)
+        : personaje !== undefined
+          ? ({ tipo: 'personaje', personaje } as const)
+          : undefined;
+    /*
+     * Un dueño sin página: la Cabecera enlazaría a un 404 sin que nada lo dijera, y el build se
+     * para aquí. Un Autor siempre la tiene —las Citas que resuelven su ficha lo declaran—, pero
+     * la ficha de un Personaje la resuelven también las Citas de los demás de su `personajes`,
+     * y si ninguna declara al dueño, el dueño no tiene página (Historia 35.4).
+     */
+    if (dueño === undefined) {
+      throw new Error(mensajeDeDueñoSinPagina(obra));
     }
     const { autor: segmentoDeAutor, obra: segmentoDeObra } = segmentosDeObra(obra.nombre);
     const citas = porObra.get(obra.nombre) ?? [];
     const paginas = paginate(citas, {
       params: { autor: segmentoDeAutor, slug: segmentoDeObra },
-      props: { obra, autor, temas: temasDeLaObra(citas, publicados) },
+      props: { obra, dueño, temas: temasDeLaObra(citas, publicados) },
       pageSize: CITAS_POR_PAGINA,
     });
     // «Dónde leer» (22.6) y el traductor de la edición que encabeza (32.2, la línea de Ficha
@@ -100,10 +127,12 @@ export const getStaticPaths = (async ({ paginate }) => {
     // página 1: las 2+ no los pintan.
     // El incipit (32.3), también solo para la página 1, y la edición que encabeza (32.5), de la
     // que la Referencia de Obra toma su rótulo y su traductor: la misma regla que el traductor.
-    const resumen = dondeLeer(citas);
-    const traductor = traductorDeLaEdicionQueEncabeza(citas);
+    // Historia 35.9 — la Obra con derechos vigentes no tiene edición gratuita ni traductor que
+    // nombrar: `dondeLeer` no le da líneas, y la Ficha técnica y la Referencia van sin edición.
+    const resumen = dondeLeer(citas, { derechosVigentes: obra.derechosVigentes });
+    const traductor = obra.derechosVigentes ? undefined : traductorDeLaEdicionQueEncabeza(citas);
     const incipit = incipits.get(obra.nombre);
-    const edicion = edicionQueEncabeza(citas);
+    const edicion = obra.derechosVigentes ? undefined : edicionQueEncabeza(citas);
     return paginas.map((pagina, i) =>
       i === 0 ? { ...pagina, props: { ...pagina.props, dondeLeer: resumen, traductor, incipit, edicion } } : pagina,
     );
@@ -111,7 +140,9 @@ export const getStaticPaths = (async ({ paginate }) => {
 }) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
-const { obra, autor, temas, page: pagina } = Astro.props;
+const { obra, dueño, temas, page: pagina } = Astro.props;
+const nombreDelDueño = dueño.tipo === 'autor' ? dueño.autor.nombre : dueño.personaje.nombre;
+const rutaDelDueño = dueño.tipo === 'autor' ? rutaDeAutor(dueño.autor.slug) : rutaDePersonaje(dueño.personaje.slug);
 const resumenDondeLeer = 'dondeLeer' in Astro.props ? Astro.props.dondeLeer : undefined;
 const traductor = 'traductor' in Astro.props ? Astro.props.traductor : undefined;
 const incipit = 'incipit' in Astro.props ? Astro.props.incipit : undefined;
@@ -124,12 +155,12 @@ const tarjeta = `/tarjeta/obra/${segmentos.autor}/${segmentos.obra}.png`;
 const canonica = new URL(ruta, Astro.site).href;
 const primera = pagina.currentPage === 1;
 /*
- * «Dónde leer esta obra» va en toda página 1, se indexe o no. La congelación de la familia Obra
- * oculta las ediciones en venta (33.2, AD-25), no el desplegable.
+ * Historia 32.5 — «Cómo citar», solo en la página 1; si la Obra lo tiene lo dice `obraTieneComoCitar`
+ * (35.9: no en la de derechos vigentes, que incluye la de todo Personaje). La guarda del Autor solo
+ * estrecha el tipo: la Referencia nombra al Autor, y la Obra de un Personaje ya no la lleva.
  */
-const conDondeLeer = primera && resumenDondeLeer !== undefined;
-/* Historia 32.5 — «Cómo citar», solo en la página 1; si la Obra lo tiene lo dice `obraTieneComoCitar`. */
-const conComoCitar = primera && obraTieneComoCitar(obra);
+const autorDeLaReferencia = dueño.tipo === 'autor' ? dueño.autor : undefined;
+const conComoCitar = primera && autorDeLaReferencia !== undefined && obraTieneComoCitar(obra);
 const conIncipit = primera && incipit !== undefined;
 
 /*
@@ -151,11 +182,21 @@ const enVenta =
         ),
       }
     : undefined;
+/*
+ * «Dónde leer esta obra» va en toda página 1, se indexe o no. La congelación de la familia Obra
+ * oculta las ediciones en venta (33.2, AD-25), no el desplegable. Historia 35.9 — salvo en la Obra
+ * con derechos vigentes (`ventaSola`), donde el desplegable existe solo si hay ediciones en venta
+ * que pintar: sin ellas, ni `<summary>`, ni rótulo, ni hueco (FR-70).
+ */
+const conDondeLeer =
+  primera &&
+  resumenDondeLeer !== undefined &&
+  (resumenDondeLeer.ventaSola !== true || (enVenta?.grupos.length ?? 0) > 0);
 ---
 
 <Armazon
-  titulo={tituloDeObra(autor.nombre, obra.titulo, pagina.currentPage)}
-  descripcion={descripcionDeObra(autor, obra, pagina.currentPage)}
+  titulo={tituloDeObra(nombreDelDueño, obra.titulo, pagina.currentPage)}
+  descripcion={descripcionDeObra({ nombre: nombreDelDueño }, obra, pagina.currentPage)}
   ruta={ruta}
   tipo="obra"
   tarjeta={tarjeta}
@@ -163,7 +204,7 @@ const enVenta =
   <DatosDeObra
     slot="cabeza"
     obra={obra}
-    autor={autor}
+    dueño={dueño}
     citas={pagina.data}
     canonica={canonica}
     tramo={{ actual: pagina.currentPage, porPagina: CITAS_POR_PAGINA }}
@@ -183,7 +224,7 @@ const enVenta =
         */}
       {/* Historia 23.7 — el Autor de la Cabecera de Obra sale por la zona de la Atribución. */}
       <p class="de" data-zona="atribucion">
-        de <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta" data-pagefind-meta="autor">{autor.nombre}</a>{
+        de <a href={rutaDelDueño} class="enlace-en-tinta" data-pagefind-meta="autor">{nombreDelDueño}</a>{
           obra.año !== undefined && (
             <>
               <span aria-hidden="true"> · </span><span class="oculto">, </span>{obra.año}
@@ -239,7 +280,15 @@ const enVenta =
        * que es su interfaz pública (nunca el título). Las 2+ no lo llevan.
        */
       primera && (
-        <BuscarEn id="buscar-en-esta-obra" rotulo={ROTULO_BUSCAR_EN_ESTA_OBRA} filtros={{ autor: autor.slug, obra: obra.nombre }} />
+        <BuscarEn
+          id="buscar-en-esta-obra"
+          rotulo={ROTULO_BUSCAR_EN_ESTA_OBRA}
+          filtros={
+            dueño.tipo === 'autor'
+              ? { autor: dueño.autor.slug, obra: obra.nombre }
+              : { personaje: dueño.personaje.slug, obra: obra.nombre }
+          }
+        />
       )
     }
 
@@ -263,9 +312,9 @@ const enVenta =
        * de las Referencias. La isla de copiar (`CopiarReferencia`, empaquetada) pone la fecha del
        * visitante y copia, y su guion va fuera del contenedor.
        */
-      conComoCitar && (
+      conComoCitar && autorDeLaReferencia !== undefined && (
         <div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 5)">
-          <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeObra(obra, autor, edicion, canonica)} /></Desplegable>
+          <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeObra(obra, autorDeLaReferencia, edicion, canonica)} /></Desplegable>
         </div>
       )
     }

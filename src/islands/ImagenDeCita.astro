@@ -101,24 +101,35 @@
  * fichero se sirve tal cual y tiene tope de bytes (`MAX_BYTES_GUION_DE_IMAGEN`).
  */
 import { guionQueAnuncia } from '../lib/anuncio.ts';
-import { procedenciaCompuesta, textoParaCopiar } from '../lib/atribucion.ts';
+import { firmaDeCita, procedenciaCompuesta, textoParaCopiar } from '../lib/atribucion.ts';
 import { DESTINO_OPACO } from '../lib/compartir.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import { MARCA } from '../lib/marca.ts';
 import { tramoDe } from '../lib/tramos.ts';
-import type { Cita, Autor } from '../lib/publicado.ts';
+import type { Cita, Autor, Personaje } from '../lib/publicado.ts';
 
 interface Props {
   cita: Cita;
-  autor: Autor;
+  /** El Autor que declara la Cita, o `undefined` si no declara ninguno (Historia 35.4). */
+  autor: Autor | undefined;
+  /**
+   * El Personaje que la dice, si lo declara —Historia 35.4: lo nombra delante, por `firmaDeCita`—.
+   * Obligatoria, `undefined` si no declara ninguno, para que un uso nuevo no lo olvide.
+   */
+  personaje: Personaje | undefined;
 }
 
-const { cita, autor } = Astro.props;
+const { cita, autor, personaje } = Astro.props;
 const tramo = tramoDe(cita.texto);
 
 // Historia 22.3 — compuesta por `atribucion.ts` con el título de la Obra resuelta; la isla
 // (`public/islas/imagen.js`) la recibe ya compuesta en `data-procedencia`.
-const procedencia = procedenciaCompuesta(cita) ?? '';
+const quienes = { autor, personaje };
+// Historia 35.4 — el nombre de la imagen es el de la primera línea (`firmaDeCita`): el Personaje
+// si lo hay; con Personaje y Autor, «de {Autor}» va en la procedencia.
+const nombre = firmaDeCita(cita, quienes).nombre;
+const procedencia = procedenciaCompuesta(cita, quienes) ?? '';
+const textoPlano = textoParaCopiar(cita, autor, personaje);
 
 // Historia 22.10 — el `id` que nombra al diálogo sale del slug, como el respaldo de Copiar:
 // dos islas en una página no pueden compartirlo.
@@ -259,12 +270,12 @@ descargar.addEventListener('click', async () => {
       data-pagefind-ignore
       data-imagen
       data-texto={cita.texto}
-      data-autor={autor.nombre}
+      data-autor={nombre}
       data-procedencia={procedencia}
       data-tamano={tramo.pixelesEnImagen}
       data-nombre={cita.slug}
       data-marca={MARCA}
-      data-texto-plano={textoParaCopiar(cita, autor)}
+      data-texto-plano={textoPlano}
     >
       <button type="button" class="abrir" id={idDeLaAccion} data-abrir>
         Descargar como imagen
@@ -292,7 +303,7 @@ descargar.addEventListener('click', async () => {
         <div class="fallo" data-fallo hidden>
           <p data-frase>No se ha podido preparar la imagen. Puedes copiar el texto de la cita.</p>
           <button type="button" class="abrir" data-copiar-texto>Copiar el texto</button>
-          <textarea data-fallo-texto readonly rows="4" aria-label="Texto de la cita" hidden>{textoParaCopiar(cita, autor)}</textarea>
+          <textarea data-fallo-texto readonly rows="4" aria-label="Texto de la cita" hidden>{textoPlano}</textarea>
         </div>
 
         <button type="button" class="descargar" data-descargar>

@@ -39,6 +39,7 @@
  */
 
 import { DOMINIO } from '../src/lib/dominio.ts';
+import { esRutaDeObra } from '../src/lib/superficies.ts';
 import type { ConjuntoPublicable } from '../src/lib/publicado.ts';
 import { conjuntoDelCorpus } from './lib/alcance.ts';
 import {
@@ -233,7 +234,12 @@ export async function leerIndexacion(opciones: {
 }): Promise<{ lectura: LecturaDeIndexacion; plan: PlanDeInspeccion }> {
   const momento = opciones.momento ?? new Date();
   const obras = opciones.obras ?? { motivo: 'no se leyó el sitemap publicado' };
-  const censo = censoDeLaSerie(opciones.conjunto, 'rutas' in obras ? obras.rutas : []);
+  /*
+   * Historia 35.3b — la lista del sitemap trae también los Personajes indexables (la comparte el
+   * aviso, que juzga igual Obra y Personaje): el censo de la familia Obra son solo sus Obras.
+   */
+  const rutasDeObra = 'rutas' in obras ? obras.rutas.filter((ruta) => esRutaDeObra(ruta)) : [];
+  const censo = censoDeLaSerie(opciones.conjunto, rutasDeObra);
   /*
    * Mientras rija SM-11, Autor y Obra se leen enteras: la comparación de la misma jornada
    * entre las dos no admite muestra. El resto del presupuesto se reparte entre las demás.
@@ -265,7 +271,7 @@ export async function leerIndexacion(opciones: {
    * del primer despliegue—: lo más probable es que se leyera otro fichero, y se dice.
    */
   if ('motivo' in obras) sinLeer.push({ familia: 'obra', motivo: obras.motivo });
-  else if (obras.rutas.length === 0) sinLeer.push({ familia: 'obra', motivo: 'el sitemap no trae ninguna Obra' });
+  else if (rutasDeObra.length === 0) sinLeer.push({ familia: 'obra', motivo: 'el sitemap no trae ninguna Obra' });
 
   /*
    * El presupuesto que no llega a una familia no es un fallo de la fuente, pero tampoco es

@@ -297,12 +297,105 @@ describe('Historia 11.3 — el resultado medido lo deriva la orden del Corpus', 
     expect(despues.resultado).toMatchObject({ citasPublicadas: 3, procedenciaCompleta: 66.7 });
   });
 
+  it('Historia 35.7 — citasPublicadas suma las atribuidas; procedenciaCompleta se mide sin ellas', async () => {
+    const corpus = await corpusDePrueba({ citasPorTema: { 'el-tiempo': 2 }, conProcedencia: 2 });
+    // Una atribuida con su Procedencia parcial: si contara para SM-C1, lo bajaría a 66,7.
+    await writeFile(
+      join(corpus, 'citas', 'el-tiempo-atribuida.md'),
+      ['---', 'slug: "autor-0-atribuida"', 'texto: "Una atribuida de prueba."', 'autor: "autor-0"',
+        'clase: "atribuida"', 'temas:', '  - el-tiempo', 'procedencia:', '  año: 2000', '---', ''].join('\n'),
+      'utf8',
+    );
+    await correr(['--corpus', corpus, '--registrar']);
+    const [sesion] = await sesionesRegistradas(corpus);
+    expect(sesion.resultado).toMatchObject({ citasPublicadas: 3, procedenciaCompleta: 100 });
+  });
+
   it('y la orden lo enseña al registrar, con la coma decimal en su sitio', async () => {
     const corpus = await corpusDePrueba({ citasPorTema: { 'el-tiempo': 3 }, conProcedencia: 1 });
     const { salida } = await correr(['--corpus', corpus, '--registrar']);
     expect(salida).toContain('Resultado medido del Corpus');
     expect(salida).toContain('33,3 %');
     expect(salida).not.toContain('33.3');
+  });
+});
+
+describe('Historia 35.10 — la sesión de siembra de la atribuida dice su clase', () => {
+  async function conUnaAtribuida() {
+    const corpus = await corpusDePrueba({ citasPorTema: { 'el-tiempo': 2 }, conProcedencia: 2 });
+    await writeFile(
+      join(corpus, 'citas', 'el-tiempo-atribuida.md'),
+      ['---', 'slug: "autor-0-atribuida"', 'texto: "Una atribuida de prueba."', 'autor: "autor-0"',
+        'clase: "atribuida"', 'temas:', '  - el-tiempo', '---', ''].join('\n'),
+      'utf8',
+    );
+    return corpus;
+  }
+
+  it('--registrar --clase-de-cita atribuida anota claseDeCita y las atribuidas, sin la política', async () => {
+    const corpus = await conUnaAtribuida();
+    const { codigo, salida } = await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);
+    expect(codigo).toBe(0);
+    expect(salida).toContain('Atribuidas publicadas:       1');
+    const [sesion] = await sesionesRegistradas(corpus);
+    expect(sesion.claseDeCita).toBe('atribuida');
+    expect(sesion.resultado).toEqual({ citasPublicadas: 3, atribuidasPublicadas: 1 });
+    for (const campo of ['clase', 'propuesto', 'hueco', 'tema', 'tradicion', 'motivo', 'elegido']) {
+      expect(sesion).not.toHaveProperty(campo);
+    }
+  });
+
+  it('con --json da la sesión atribuida como datos: su clase y su resultado (pasada de revisión 2)', async () => {
+    const corpus = await conUnaAtribuida();
+    const { codigo, salida } = await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida', '--json']);
+    expect(codigo).toBe(0);
+    const datos = JSON.parse(salida) as { sesion: { claseDeCita: string; resultado: unknown } };
+    expect(datos.sesion.claseDeCita).toBe('atribuida');
+    expect(datos.sesion.resultado).toEqual({ citasPublicadas: 3, atribuidasPublicadas: 1 });
+  });
+
+  it('un reintento con el mismo resultado no se anota dos veces', async () => {
+    const corpus = await conUnaAtribuida();
+    await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);
+    const { codigo } = await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);
+    expect(codigo).toBe(1);
+    expect(await sesionesRegistradas(corpus)).toHaveLength(1);
+  });
+
+  it('las entradas sin el campo se leen como de la clase de siempre', async () => {
+    const { claseDeCitaDeLaSesion } = await import('../../tools/lib/corpus.ts');
+    expect(claseDeCitaDeLaSesion({})).toBe('siempre');
+    expect(claseDeCitaDeLaSesion({ claseDeCita: 'atribuida' })).toBe('atribuida');
+    const corpus = await conUnaAtribuida();
+    await correr(['--corpus', corpus, '--registrar']);
+    await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);
+    const [siempre, atribuida] = await sesionesRegistradas(corpus);
+    expect(siempre).not.toHaveProperty('claseDeCita');
+    expect(claseDeCitaDeLaSesion(siempre)).toBe('siempre');
+    expect(claseDeCitaDeLaSesion(atribuida)).toBe('atribuida');
+  });
+
+  it.each([
+    ['otro valor', ['--registrar', '--clase-de-cita', 'siempre']],
+    ['sin valor', ['--registrar', '--clase-de-cita']],
+    ['sin --registrar', ['--clase-de-cita', 'atribuida']],
+    ['con --anular', ['--clase-de-cita', 'atribuida', '--anular', 'porque sí']],
+    ['repetida', ['--registrar', '--clase-de-cita', 'atribuida', '--clase-de-cita', 'atribuida']],
+  ])('%s es la forma de la invocación: sale con 2 y no escribe nada', async (_, extra) => {
+    const corpus = await conUnaAtribuida();
+    const { codigo } = await correr(['--corpus', corpus, ...extra]);
+    expect(codigo).toBe(2);
+    expect(existsSync(join(corpus, FICHERO_DE_SESIONES))).toBe(false);
+  });
+
+  it('con --ayuda gana la ayuda: 0 y no escribe nada, aunque la clase vaya mal', async () => {
+    const corpus = await conUnaAtribuida();
+    for (const extra of [['--clase-de-cita', 'atribuida'], ['--clase-de-cita', 'siempre']]) {
+      const { codigo, salida } = await correr(['--corpus', corpus, '--ayuda', ...extra]);
+      expect(codigo, extra.join(' ')).toBe(0);
+      expect(salida).toMatch(/--clase-de-cita atribuida/u);
+    }
+    expect(existsSync(join(corpus, FICHERO_DE_SESIONES))).toBe(false);
   });
 });
 

@@ -118,6 +118,25 @@ describe('Historia 11.4 — la tradición se teclea con la orden', () => {
     expect(listado.salida).toContain('latinoamericana');
     expect(listado.salida).toContain('sin declarar');
   });
+
+  it('listar dice «vivo» de un Autor vivo, nunca «†undefined» — Historia 35.1', async () => {
+    const corpus = await corpusVacio();
+    // `crear` no admite todavía `--vivo` (diferido de la 35.1): la ficha se escribe a mano en la copia.
+    await writeFile(
+      join(corpus, 'autores', 'ana-ejemplo.yml'),
+      'nombre: "Ana Ejemplo"\nvivo: true\nañoNacimiento: 1950\nsemblanza: "Escritora."\nordenAlfabetico: "Ejemplo"\n',
+      'utf8',
+    );
+    await correr(corpus, ['crear', '--nombre', 'Séneca', '--fallecimiento', '65', '--semblanza', 'Filósofo estoico.']);
+
+    const listado = await correr(corpus, ['listar']);
+
+    expect(listado.codigo, listado.error).toBe(0);
+    const linea = (slug: string) => listado.salida.split('\n').find((l) => l.startsWith(`${slug}\t`)) ?? '';
+    expect(linea('ana-ejemplo')).toContain('\tvivo\t');
+    expect(linea('ana-ejemplo')).not.toContain('†');
+    expect(linea('seneca')).toContain('†65');
+  });
 });
 
 describe('Historia 11.4 — la orden ya no se traga lo que no entiende', () => {

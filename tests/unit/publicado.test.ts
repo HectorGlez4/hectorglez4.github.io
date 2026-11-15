@@ -12,11 +12,17 @@ import {
   temasDeLaCita,
   temasPublicados,
   verificarIntegridad,
+  citasDePersonaje,
+  grafoDelModelo,
+  obrasDelPersonaje,
+  personajesIndexables,
   type Cita,
   type Autor,
+  type Personaje,
   type Tema,
 } from '../../src/lib/publicado.ts';
-import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import type { ObraResuelta } from '../../src/lib/obras.ts';
+import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_PERSONAJE, MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 
@@ -108,6 +114,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
       autores: [autor('a')],
       temas: [tema('t')],
       colecciones: [],
+      personajes: [],
     };
     const rutas = rutasPublicadas(conjunto);
     expect(rutas).toContain('/');
@@ -122,6 +129,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
       autores: [autor('a')],
       temas: [tema('t')],
       colecciones: [],
+      personajes: [],
     };
     const rutas = rutasPublicadas(conjunto);
     expect(rutas.filter((r) => r === '/autores/')).toHaveLength(1);
@@ -132,7 +140,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
     expect(rutas.indexOf('/obras/')).toBe(rutas.indexOf('/autores/') + 1);
     expect(rutasIndexables(conjunto)).toContain('/obras/');
     // Páginas estáticas: también con el Corpus vacío.
-    expect(rutasPublicadas({ citas: [], autores: [], temas: [], colecciones: [] })).toEqual(['/', '/autores/', '/obras/']);
+    expect(rutasPublicadas({ citas: [], autores: [], temas: [], colecciones: [], personajes: [] })).toEqual(['/', '/autores/', '/obras/']);
   });
 
   it('un Tema bajo umbral no aparece entre las rutas', () => {
@@ -141,6 +149,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
       autores: [autor('a')],
       temas: [tema('t')],
       colecciones: [],
+      personajes: [],
     });
     expect(rutas).not.toContain('/tema/t/');
   });
@@ -171,6 +180,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
         [declarada(citasDeLaColeccion.map((c) => c.slug))],
         citasDeLaColeccion,
       ),
+      personajes: [],
     });
     expect(rutas).toContain('/coleccion/frases-cortas/');
   });
@@ -184,6 +194,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
         [declarada(citasDeLaColeccion.slice(0, MIN_CITAS_POR_COLECCION - 1).map((c) => c.slug))],
         citasDeLaColeccion,
       ),
+      personajes: [],
     });
     expect(rutas).not.toContain('/coleccion/frases-cortas/');
   });
@@ -198,6 +209,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
         [declarada(citasDeLaColeccion.map((c) => c.slug))],
         citasDeLaColeccion,
       ),
+      personajes: [],
     });
     expect(rutas.filter((r) => /^\/coleccion\//.test(r))).toEqual(['/coleccion/frases-cortas/']);
   });
@@ -211,6 +223,7 @@ describe('Historia 2.1 — integridad referencial', () => {
         autores: [autor('a')],
         temas: [tema('t')],
         colecciones: [],
+        personajes: [],
       }),
     ).not.toThrow();
   });
@@ -222,6 +235,7 @@ describe('Historia 2.1 — integridad referencial', () => {
         autores: [autor('a')],
         temas: [],
         colecciones: [],
+        personajes: [],
       }),
     ).toThrow(/fantasma.*no existe/s);
   });
@@ -233,6 +247,7 @@ describe('Historia 2.1 — integridad referencial', () => {
         autores: [autor('a')],
         temas: [],
         colecciones: [],
+        personajes: [],
       }),
     ).toThrow(/fantasma.*no existe/s);
   });
@@ -244,6 +259,7 @@ describe('Historia 2.1 — integridad referencial', () => {
         autores: [],
         temas: [],
         colecciones: [],
+        personajes: [],
       });
       expect.unreachable('debería haber roto');
     } catch (error) {
@@ -272,6 +288,99 @@ describe('Historia 2.1 / AD-11 — nadie filtra colecciones por su cuenta', () =
     // Solo `import type` (que se borra al compilar) y un `import()` dentro de la fachada.
     expect(codigo).not.toMatch(/^import \{[^}]*\} from 'astro:content'/m);
     expect(codigo).toMatch(/import type \{[^}]*\} from 'astro:content'/);
+  });
+});
+
+describe('Historia 35.3 — el Personaje en el conjunto publicable', () => {
+  const personaje = (slug: string, nombre = slug): Personaje => ({ slug, nombre, universo: 'Un universo' });
+  const dicha = (slug: string, de: string, temas: string[] = ['t'], obra?: ObraResuelta): Cita => ({
+    ...cita(slug, 'a', temas),
+    personaje: de,
+    ...(obra === undefined ? {} : { obra }),
+  });
+  const obra = (nombre: string, dueño: ObraResuelta['dueño']): ObraResuelta => ({
+    nombre,
+    dueño,
+    titulo: nombre,
+    fuentes: [],
+    edicionCotejada: false,
+    derechosVigentes: false,
+    temas: [],
+    recuento: 1,
+  });
+  const conjunto = (citas: Cita[], personajes: Personaje[]) => ({
+    citas,
+    autores: [autor('a')],
+    temas: [tema('t')],
+    colecciones: [],
+    personajes,
+  });
+
+  /** `n` Citas dichas por un Personaje, con slugs propios. */
+  const dichas = (n: number, de: string) => Array.from({ length: n }, (_, i) => dicha(`a-${de}-${i}`, de));
+
+  it('se publica, y se indexa en el umbral, el Personaje que alguna Cita declara; el que no, no tiene ruta', () => {
+    const c = conjunto(
+      [...nCitas(MIN_CITAS_POR_TEMA, 't'), ...dichas(MIN_CITAS_POR_PERSONAJE, 'batman')],
+      [personaje('batman'), personaje('joker')],
+    );
+    const rutas = rutasPublicadas(c);
+    expect(rutas).toContain('/personaje/batman/');
+    expect(rutas).not.toContain('/personaje/joker/');
+    expect(rutas.indexOf('/personaje/batman/')).toBe(rutas.indexOf('/autor/a/') + 1);
+    expect(rutasIndexables(c)).toContain('/personaje/batman/');
+    expect(personajesIndexables(c.personajes, c.citas).map((p) => p.slug)).toEqual(['batman']);
+  });
+
+  it('Historia 35.3b — bajo MIN_CITAS_POR_PERSONAJE se publica y no se indexa; las Citas de otro Personaje no cuentan', () => {
+    const bajo = MIN_CITAS_POR_PERSONAJE - 1;
+    const c = conjunto(
+      [
+        ...nCitas(MIN_CITAS_POR_TEMA, 't'),
+        // Joker llega al umbral él solo; las suyas no suben a Batman.
+        ...dichas(MIN_CITAS_POR_PERSONAJE, 'joker'),
+        ...dichas(Math.max(bajo, 1), 'batman'),
+      ],
+      [personaje('batman'), personaje('joker')],
+    );
+    expect(rutasPublicadas(c)).toContain('/personaje/batman/');
+    expect(personajesIndexables(c.personajes, c.citas).map((p) => p.slug)).toEqual(
+      bajo >= 1 ? ['joker'] : ['batman', 'joker'],
+    );
+    if (bajo >= 1) expect(rutasIndexables(c)).not.toContain('/personaje/batman/');
+    expect(rutasIndexables(c)).toContain('/personaje/joker/');
+  });
+
+  it('sus Citas, en el orden de las de Autor; una Cita con Autor y Personaje está en las dos páginas', () => {
+    const citas = [dicha('a-z', 'batman'), dicha('a-b', 'batman'), dicha('a-m', 'joker')];
+    expect(citasDePersonaje(citas, 'batman').map((c) => c.slug)).toEqual(['a-b', 'a-z']);
+    expect(citasDeAutor(citas, 'a')).toHaveLength(3);
+  });
+
+  it('sus Obras: la del Autor que la Cita resuelve y la de dueño Personaje (puro), con las sin obra al pie', () => {
+    const delAutor = obra('a--la-obra', { tipo: 'autor', slug: 'a' });
+    const propia = obra('batman--el-caballero', { tipo: 'personaje', slug: 'batman' });
+    const citas = [dicha('a-1', 'batman', ['t'], delAutor), dicha('a-2', 'batman', ['t'], propia), dicha('a-3', 'batman')];
+    const { obras, sinObra } = obrasDelPersonaje(citas, 'batman');
+    expect(obras.map((o) => o.nombre).sort()).toEqual(['a--la-obra', 'batman--el-caballero']);
+    expect(sinObra).toBe(1);
+    expect(obrasDelPersonaje(citas, 'joker')).toEqual({ obras: [], sinObra: 0 });
+  });
+
+  it('el grafo del modelo: su listado, su página 1 → sus Obras y cada Cita que lo declara → su página', () => {
+    const delAutor = obra('a--la-obra', { tipo: 'autor', slug: 'a' });
+    const citas = [...nCitas(MIN_CITAS_POR_TEMA, 't'), dicha('a-1', 'batman', ['t'], delAutor), dicha('a-2', 'batman')];
+    const c = conjunto(citas, [personaje('batman')]);
+    const grafo = grafoDelModelo(c, new Map([['a--la-obra', [{ slug: 'a-1' }]]]));
+    expect(grafo.get('/personaje/batman')).toEqual(
+      expect.arrayContaining(['/cita/a-1', '/cita/a-2', '/obra/a/la-obra', '/']),
+    );
+    expect(grafo.get('/cita/a-1')).toContain('/personaje/batman');
+    expect(grafo.get('/cita/c0')).not.toContain('/personaje/batman');
+  });
+
+  it('una Cita que declara un Personaje que no existe rompe la integridad', () => {
+    expect(() => verificarIntegridad(conjunto([dicha('x', 'fantasma')], []))).toThrow(/Personaje «fantasma» no existe/u);
   });
 });
 

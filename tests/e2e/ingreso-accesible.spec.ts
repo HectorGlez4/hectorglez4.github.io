@@ -6,10 +6,12 @@ import { join, resolve } from 'node:path';
 import { MARCA_DE_INGRESO, modeloDe } from '../../src/lib/ingreso.ts';
 import { ETIQUETAS_DEL_BARRIDO, rutaDeCita } from '../../src/lib/superficies.ts';
 import {
+  ATESTIGUADA,
   AUTOR_VALIDO,
   RAIZ,
   TEMA_VALIDO,
   citaValida,
+  conLaPuertaAbierta,
   construirConCorpus,
   fuenteConDonacionesEncendidas,
   fuenteConModeloEncendido,
@@ -138,10 +140,43 @@ const CORPUS = {
     `    url: "https://www.${TIENDA_DE_PRUEBA.dominio}/e/Y"`,
     '',
   ].join('\n'),
+  /*
+   * Historia 35.9 — una Obra con derechos vigentes, de una Autora viva, con una atribuida y dos
+   * ediciones en venta: con la afiliación encendida, «Dónde leer esta obra» las lleva solas. La
+   * puerta de la atribuida se abre en la copia (`conLaPuertaAbierta`).
+   */
+  'autores/viva.yml': 'nombre: "Autora Viva"\nvivo: true\nsemblanza: "Escritora de hoy."\nordenAlfabetico: "Viva"\n',
+  'citas/viva--una.md': citaValida({
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    fuente: undefined,
+    ...ATESTIGUADA,
+    slug: 'viva-la-tarde-se-dobla-sola',
+    texto: 'La tarde se dobla sola cuando nadie la mira.',
+    autor: 'viva',
+    procedencia: { obra: 'Obra de la autora', año: 2010 },
+  }),
+  'obras/viva--obra-de-la-autora.yml': [
+    'autor: "viva"',
+    'titulo: "Obra de la autora"',
+    'formas:',
+    '  - "obra de la autora"',
+    'ediciones:',
+    `  - tienda: "${TIENDA_DE_PRUEBA.clave}"`,
+    '    formato: "impresa"',
+    `    url: "https://www.${TIENDA_DE_PRUEBA.dominio}/dp/V"`,
+    `  - tienda: "${TIENDA_DE_PRUEBA.clave}"`,
+    '    formato: "electronica"',
+    `    url: "https://www.${TIENDA_DE_PRUEBA.dominio}/e/W"`,
+    '',
+  ].join('\n'),
 };
 
 /** La Página de Obra de esas dos Citas: la única superficie que admite la afiliación. */
 const OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
+
+/** Historia 35.9 — la de la Autora viva: sus ediciones en venta van solas. */
+const OBRA_CON_DERECHOS = '/obra/viva/obra-de-la-autora/';
 
 /** La jornada se fija: la Cita del Día rota con el calendario, no con lo que se mide aquí. */
 const JORNADA = '2026-08-20';
@@ -226,7 +261,7 @@ test.beforeAll(async () => {
 
   const construido = await construirConCorpus(CORPUS, {
     jornada: JORNADA,
-    ficheros: { 'src/lib/ingreso.ts': encendida },
+    ficheros: conLaPuertaAbierta({}, { 'src/lib/ingreso.ts': encendida }),
     // `/buscar/` es una de las tres superficies y sin índice no es la página que se publica.
     conBusqueda: true,
   });
@@ -252,6 +287,11 @@ test.beforeAll(async () => {
   expect(
     deLaObra.includes(`${MARCA_DE_INGRESO}="afiliacion-de-libros"`),
     'la Página de Obra se construyó sin las ediciones en venta: no hay nada que barrer.',
+  ).toBe(true);
+  const conDerechos = await readFile(paginaEnDist(dist, OBRA_CON_DERECHOS), 'utf8');
+  expect(
+    conDerechos.includes(`${MARCA_DE_INGRESO}="afiliacion-de-libros"`),
+    'la Obra con derechos vigentes se construyó sin sus ediciones en venta: no hay venta sola que barrer.',
   ).toBe(true);
 
   servidor = spawn('node', [join(new URL('..', import.meta.url).pathname, 'servidor.mjs')], {
@@ -620,5 +660,26 @@ test.describe('las ediciones en venta encendidas pasan el barrido de accesibilid
       .analyze();
     const resumen = violations.flatMap((v) => v.nodes.map((n) => `${v.id} — ${n.target.join(' ')}`));
     expect(resumen, resumen.join('\n')).toEqual([]);
+  });
+});
+
+/**
+ * Historia 35.9 — la venta sola, barrida con la afiliación encendida (FR-70): la Obra con derechos
+ * vigentes no tiene «Gratis», y «Dónde leer esta obra» lleva solo «Electrónica» e «Impresa».
+ */
+test.describe('la Obra con derechos vigentes, con sus ediciones solas, pasa el barrido de accesibilidad', () => {
+  const bloque = (page: Page) => page.locator(`[${MARCA_DE_INGRESO}="afiliacion-de-libros"]`);
+
+  test('cerrada y abierta, y con solo sus dos grupos de venta', async ({ page }) => {
+    await irA(page, OBRA_CON_DERECHOS);
+    await auditar(page, OBRA_CON_DERECHOS, 'con «Dónde leer esta obra» cerrado');
+    const desplegable = page.locator('details.desplegable', { has: bloque(page) });
+    await expect(desplegable).toHaveCount(1);
+    await desplegable.locator(':scope > summary').click();
+    await expect(bloque(page)).toBeVisible();
+    await auditar(page, OBRA_CON_DERECHOS, 'con «Dónde leer esta obra» abierto');
+    await expect(desplegable.locator('p.rotulo-de-grupo')).toHaveText(['Electrónica', 'Impresa']);
+    await expect(desplegable).not.toContainText('Gratis');
+    await expect(page.locator('details.desplegable')).toHaveCount(1);
   });
 });

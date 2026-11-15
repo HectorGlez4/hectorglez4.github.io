@@ -2,8 +2,9 @@
  * `/buscar/obras.json` — el mapa de rótulos de las Obras de la búsqueda — Historia 27.3, FR-7,
  * AD-11, AD-25.
  *
- * Por slug de Autor, sus Obras como pares `[nombre de ficha, título]` en el orden de su Lista de
- * Obras: lo compone `filtrosDeLaBusqueda`, la misma función que escribe el filtro `obra` de cada
+ * Por slug de Autor —y, desde la Historia 35.5, por `personaje:{slug}` de cada Personaje—, sus
+ * Obras como pares `[nombre de ficha, título]` en el orden de su Lista de Obras (con la clave del
+ * dueño de la ficha detrás cuando no es el de la lista; sin Personajes, nunca): lo compone `filtrosDeLaBusqueda`, la misma función que escribe el filtro `obra` de cada
  * Página de Cita (27.1), así que un nombre de este mapa y un valor de `filters()` no pueden salir
  * de dos cálculos. La isla de `/buscar/` (`src/components/Busqueda.astro`) lo pide **al elegir un
  * Autor**, junto a `filters()` de Pagefind, y nunca va en el HTML: lo que el HTML lleva lo

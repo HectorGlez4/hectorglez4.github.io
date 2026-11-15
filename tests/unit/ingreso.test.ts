@@ -665,6 +665,18 @@ describe('Historia 17.5 — la Página de Autor no aloja ningún Modelo', () => 
   const AUTOR = 'autor/[slug]/[...page].astro';
   const DIRECTORIO_DE_AUTORES = 'autores.astro';
   const DIRECTORIO_DE_OBRAS = 'obras.astro';
+  const PERSONAJE = 'personaje/[slug]/[...page].astro';
+
+  it('Historia 35.3 — cualquier Modelo admitido en la Página de Personaje se rechaza, y no es de lectura', () => {
+    expect(SUPERFICIES_DE_LECTURA).not.toContain(PERSONAJE);
+    for (const modelo of MODELOS) {
+      const fallos = revisarDeclaracionDeIngreso([{ ...modelo, admitidoEn: [PERSONAJE] }]);
+      expect(
+        fallos.some((f) => f.includes(PERSONAJE) && f.includes('no aloja ningún Modelo')),
+        modelo.id,
+      ).toBe(true);
+    }
+  });
 
   it('Historias 26.3 y 26.4 — cualquier Modelo admitido en un Directorio se rechaza', () => {
     for (const directorio of [DIRECTORIO_DE_AUTORES, DIRECTORIO_DE_OBRAS]) {
@@ -697,7 +709,7 @@ describe('Historia 17.5 — la Página de Autor no aloja ningún Modelo', () => 
 
   it('la regla nombra una superficie que existe, y si desaparece del censo se dice', () => {
     // Historias 26.3 y 26.4 — los dos Directorios tampoco alojan ninguno.
-    expect(SUPERFICIES_SIN_INGRESO).toEqual([AUTOR, DIRECTORIO_DE_AUTORES, DIRECTORIO_DE_OBRAS]);
+    expect(SUPERFICIES_SIN_INGRESO).toEqual([AUTOR, DIRECTORIO_DE_AUTORES, DIRECTORIO_DE_OBRAS, PERSONAJE]);
     for (const pagina of SUPERFICIES_SIN_INGRESO) {
       expect(SUPERFICIES.map((s) => s.pagina)).toContain(pagina);
     }

@@ -3,6 +3,7 @@
  *
  *   npx tsx tools/revisar.ts [--autor <slug>] [--primeras <n>]     lista lo pendiente
  *   npx tsx tools/revisar.ts --aprobar <slug> [<slug>...] [--temas <tema> [<tema>...]]
+ *                            [--propone <agente> --aprueba <agente>]
  *   npx tsx tools/revisar.ts --rechazar <slug> [<slug>...]
  *
  * `--temas` declara los Temas de todo lo que se apruebe en esa pasada, y es aquí porque es
@@ -16,6 +17,11 @@
  * publicado y lo que la misma pasada aprueba. La que no, sigue en `corpus/_revision/`, intacta,
  * con sus Temas y sus recuentos en el parte, y la orden sale con 1. Las candidatas que salen de
  * `extraer` no traen Temas: casi siempre hace falta `--temas`.
+ *
+ * **La traducción propia lleva dos agentes** (Historia 35.11, FR-68 v9.2): una pasada que aprueba
+ * una atribuida con `origen: traduccion-propia` exige `--propone` y `--aprueba`, distintos
+ * (recortados y en minúsculas), y anota la aprobación en `corpus/aprobaciones-de-atribuidas.yml`;
+ * sin ellos, iguales, o dados sin ninguna traducción propia en la pasada, sale con 1 sin escribir.
  *
  * La cola sale ordenada de más a menos prometedora (Historia 19.6), y `--primeras` corta
  * por arriba **diciendo cuántas quedan debajo**: con veintiún mil candidatas pendientes,
@@ -37,6 +43,7 @@ import {
   textoDeParecida,
   textoDeRepetida,
 } from './lib/revision.ts';
+import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from './lib/clases.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 
@@ -70,6 +77,26 @@ const temas = slugsTras('--temas');
 if (temas.length > 0 && aAprobar.length === 0) {
   process.stderr.write('«--temas» solo acompaña a «--aprobar»: rechazar no declara Temas.\n');
   process.exit(2);
+}
+
+// Historia 35.11 — los dos agentes de una traducción propia: solo con «--aprobar», y con valor.
+const agentes: { propone?: string; aprueba?: string } = {};
+for (const [bandera, campo] of [['--propone', 'propone'], ['--aprueba', 'aprueba']] as const) {
+  if (!argumentos.includes(bandera)) continue;
+  if (argumentos.filter((x) => x === bandera).length > 1) {
+    process.stderr.write(`«${bandera}» está repetida: cada traducción propia la proponen y la aprueban un agente cada vez.\n`);
+    process.exit(2);
+  }
+  if (aAprobar.length === 0) {
+    process.stderr.write(`«${bandera}» solo acompaña a «--aprobar»: los dos agentes son de la traducción propia que se aprueba.\n`);
+    process.exit(2);
+  }
+  const valor = valorTras(bandera);
+  if (valor === undefined) {
+    process.stderr.write(`«${bandera}» necesita el nombre de un agente.\n`);
+    process.exit(2);
+  }
+  agentes[campo] = valor;
 }
 
 if (aAprobar.length === 0 && aRechazar.length === 0) {
@@ -111,7 +138,19 @@ const lineas: string[] = [];
 let fallo = false;
 
 if (aAprobar.length > 0) {
-  const resultado = await aprobar(rutas, aAprobar, temas);
+  let resultado: Awaited<ReturnType<typeof aprobar>>;
+  try {
+    resultado = await aprobar(rutas, aAprobar, temas, { agentes });
+  } catch (error) {
+    // Historia 35.1 — un registro de clases ilegible niega la aprobación antes de mover nada; una
+    // pasada interrumpida tras publicar alguna dice cuáles y si se anotaron.
+    process.stderr.write(
+      error instanceof PublicacionInterrumpida
+        ? `${error.message}\n`
+        : `${error instanceof Error ? error.message : String(error)}\nNo se ha publicado ninguna candidata.\n`,
+    );
+    process.exit(1);
+  }
 
   if (resultado.temasDesconocidos !== undefined) {
     // Nada se ha publicado: el lote entero se detiene ante un Tema que no existe.
@@ -119,6 +158,12 @@ if (aAprobar.length > 0) {
       `Tema desconocido: ${resultado.temasDesconocidos.map((t) => `«${t}»`).join(', ')}.\n` +
         'No se ha publicado ninguna candidata. Los Temas se crean con: npx tsx tools/tema.ts crear "…"\n',
     );
+    process.exit(1);
+  }
+
+  if (resultado.agentesRechazados !== undefined) {
+    // Historia 35.11 — nada se ha escrito: la traducción propia lleva dos agentes, y solo ella.
+    process.stderr.write(`No se aprueba nada: ${resultado.agentesRechazados}\nNo se ha publicado ninguna candidata.\n`);
     process.exit(1);
   }
 
@@ -192,12 +237,61 @@ if (aAprobar.length > 0) {
     fallo = true;
     lineas.push(`  ? ${slug} — no está entre las candidatas pendientes.`);
   }
+  if (resultado.registroSinAnotar !== undefined) {
+    // Historia 35.1: publicadas, pero sin anotar en el registro de clases; el build no las deja pasar.
+    fallo = true;
+    lineas.push(
+      `  ! Las publicadas no se anotaron en corpus/clases-de-cita.yml: ${resultado.registroSinAnotar}`,
+      `      Anótelas con «${ORDEN_SEMBRAR_CLASES}» antes de construir.`,
+    );
+  }
+  // Historia 35.7 — las formas de siempre que esta pasada deja vedadas a la atribuida.
+  for (const vedada of resultado.vedadas) {
+    lineas.push(`  ⊘ ${vedada.slug ?? vedada.forma}: su forma queda vedada a la atribuida (${vedada.motivo}) en corpus/formas-vedadas.yml.`);
+  }
+  if (resultado.vedadasSinAnotar !== undefined) {
+    fallo = true;
+    lineas.push(`  ! Las formas vedadas no se anotaron en corpus/formas-vedadas.yml: ${resultado.vedadasSinAnotar}`);
+  }
+  // Historia 35.11 — la aprobación de cada traducción propia, o por qué volvió a revisión.
+  for (const a of resultado.aprobaciones ?? []) {
+    lineas.push(`  ✎ ${a.slug}: traducción propia, propuesta por «${a.propone}» y aprobada por «${a.aprueba}» (corpus/aprobaciones-de-atribuidas.yml).`);
+  }
+  if (resultado.aprobacionesSinAnotar !== undefined) {
+    fallo = true;
+    lineas.push(
+      `  ! corpus/aprobaciones-de-atribuidas.yml no se pudo escribir: ${resultado.aprobacionesSinAnotar.motivo}`,
+      ...resultado.aprobacionesSinAnotar.devueltas.map((slug) =>
+        resultado.aprobacionesSinAnotar!.sinRestaurar.includes(slug)
+          ? `      ${slug} vuelve a corpus/_revision/, sin anotar su clase, pero con el contenido publicado: no se pudo restaurar el de antes.`
+          : `      ${slug} vuelve a corpus/_revision/ con su contenido de antes, sin anotar su clase.`,
+      ),
+      ...resultado.aprobacionesSinAnotar.sinDevolver.map(
+        (slug) =>
+          `      ${slug} no se pudo mover de vuelta: sigue publicada sin aprobación y el build no la deja pasar; muévala a corpus/_revision/.`,
+      ),
+    );
+  }
 }
 
 if (aRechazar.length > 0) {
-  const resultado = await rechazar(rutas, aRechazar);
+  let resultado: Awaited<ReturnType<typeof rechazar>>;
+  try {
+    resultado = await rechazar(rutas, aRechazar);
+  } catch (error) {
+    // Historia 35.7 — sin poder anotar las formas vedadas, no se rechaza ninguna. Lo que la misma
+    // invocación ya aprobó sí está escrito, así que su parte sale igual antes del 1.
+    if (lineas.length > 0) process.stdout.write(`${lineas.join('\n')}\n`);
+    process.stderr.write(
+      `${error instanceof Error ? error.message : String(error)}\nNo se ha rechazado ninguna candidata.\n`,
+    );
+    process.exit(1);
+  }
   lineas.push(`Rechazadas: ${resultado.rechazadas.length}`);
   for (const slug of resultado.rechazadas) lineas.push(`  – ${slug}`);
+  for (const vedada of resultado.vedadas) {
+    lineas.push(`  ⊘ ${vedada.slug ?? vedada.forma}: su forma queda vedada a la atribuida (${vedada.motivo}) en corpus/formas-vedadas.yml.`);
+  }
   for (const slug of resultado.noEncontradas) {
     fallo = true;
     lineas.push(`  ? ${slug} — no está entre las candidatas pendientes.`);

@@ -1,0 +1,34 @@
+---
+/**
+ * Datos estructurados de la Página de Personaje — Historia 35.3.
+ *
+ * Calca `DatosDeAutor.astro` sin su `about`: una `CollectionPage` cuya entidad principal es la
+ * lista de Citas de esta página (`listaDeCitas`). Sin `Person`, sin fechas ni `sameAs`: un
+ * Personaje no es una persona, y lo que la página declara de él lo dice ya su `h1`. El
+ * `spokenByCharacter` lo declara la Página de Cita (Historia 35.4).
+ *
+ * Se emite como `application/ld+json`, que no es JavaScript ejecutable: no toca AD-6.
+ */
+import type { Cita } from '../lib/publicado.ts';
+import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
+
+interface Props {
+  /** Las Citas de **esta** página, no las del Personaje entero. */
+  citas: readonly Cita[];
+  canonica: string;
+  tramo: TramoDeLaLista;
+}
+
+const { citas, canonica, tramo } = Astro.props;
+
+const datos = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': canonica,
+  url: canonica,
+  inLanguage: 'es',
+  mainEntity: listaDeCitas(citas, canonica, tramo),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(datos)} is:inline />

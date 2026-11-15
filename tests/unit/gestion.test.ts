@@ -129,6 +129,22 @@ describe('Historia 1.7 — Autores', () => {
     const contenido = await readFile(join(rutas.autores, 'seneca.yml'), 'utf8');
     expect(contenido).toContain('Lucio Anneo Séneca');
   });
+
+  it('Historia 35.1 — editar con --fallecimiento registra la muerte de un Autor vivo: deja de ser vivo', async () => {
+    const rutas = await corpusVacio();
+    await writeFile(
+      join(rutas.autores, 'ana-ejemplo.yml'),
+      'nombre: "Ana Ejemplo"\nvivo: true\nañoNacimiento: 1950\nsemblanza: "Escritora."\n',
+      'utf8',
+    );
+    const resultado = await editarAutor(rutas, 'ana-ejemplo', { añoFallecimiento: 2025 });
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    const ficha = parsearYaml(await readFile(join(rutas.autores, 'ana-ejemplo.yml'), 'utf8'));
+    expect(ficha.añoFallecimiento).toBe(2025);
+    expect(ficha.añoNacimiento).toBe(1950);
+    expect(ficha).not.toHaveProperty('vivo');
+  });
 });
 
 describe('Historia 1.7 — Temas', () => {
@@ -216,6 +232,18 @@ describe('Historia 1.7 — marcado de Cita apta para portada', () => {
     const [fichero] = await ficherosPublicados(rutas);
     const contenido = await readFile(join(rutas.citas, fichero), 'utf8');
     expect(contenido).toContain('aptaParaPortada: true');
+  });
+
+  it('Historia 35.1b — una atribuida no se marca: no es apta para portada (pregunta 22)', async () => {
+    const { rutas } = await corpusConUnaCita();
+    const fichero = join(rutas.citas, 'ana--una-atribuida.md');
+    const contenido =
+      '---\ntexto: "Una frase atribuida."\nautor: "ana"\nslug: "ana-una-atribuida"\nclase: "atribuida"\n---\n';
+    await writeFile(fichero, contenido, 'utf8');
+    const resultado = await marcarAptaParaPortada(rutas, 'ana-una-atribuida', true);
+    expect(resultado.ok).toBe(false);
+    expect(resultado.ok ? '' : resultado.motivos.join('\n')).toMatch(/«ana-una-atribuida» es atribuida.*pregunta 22/u);
+    expect(await readFile(fichero, 'utf8')).toBe(contenido);
   });
 
   it('al desmarcar el campo se omite, no se escribe como false', async () => {
@@ -831,6 +859,58 @@ describe('AD-2 — retirar un Autor mueve su ficha, y solo cuando nada apunta a 
     const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
 
     expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+  });
+
+  /*
+   * Historia 35.2 — Autores y Personajes comparten un solo espacio de slugs: `bruce-wayne-…` es
+   * del Personaje `bruce-wayne` y no del Autor `bruce`, también en la orden que retira (no solo
+   * en `dueñoPorPrefijo`, que `autoria.test.ts` fija aparte).
+   */
+  async function corpusConBruce(conPersonaje: boolean): Promise<Rutas> {
+    const rutas = await corpusVacio();
+    await writeFile(join(rutas.autores, 'bruce.yml'), ficha('Bruce'), 'utf8');
+    if (conPersonaje) {
+      await mkdir(rutas.personajes, { recursive: true });
+      await writeFile(
+        join(rutas.personajes, 'bruce-wayne.yml'),
+        'nombre: "Bruce Wayne"\nuniverso: "DC Comics"\n',
+        'utf8',
+      );
+    }
+    await coleccion(rutas.colecciones, 'murcielagos', ['bruce-wayne-la-noche']);
+    await writeFile(
+      rutas.portada,
+      JSON.stringify({ fijaciones: { '2026-10-01': 'bruce-wayne-el-alba' } }),
+      'utf8',
+    );
+    return rutas;
+  }
+
+  it('Historia 35.2 — no atribuye al Autor `bruce` lo que es del Personaje `bruce-wayne`', async () => {
+    const rutas = await corpusConBruce(true);
+    // Una candidata del Personaje sin Autor tampoco es del Autor.
+    await writeFile(
+      join(rutas.revision, 'bruce-wayne--sin-autor.md'),
+      ['---', 'texto: "Soy la noche."', 'personaje: "bruce-wayne"', 'slug: "bruce-wayne-sin-autor"', 'clase: "atribuida"', '---', ''].join('\n'),
+      'utf8',
+    );
+
+    const resultado = await retirarAutor(rutas, 'bruce', MOTIVO);
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+    expect(existsSync(join(rutas.autoresRetirados, 'bruce.yml'))).toBe(true);
+  });
+
+  it('Historia 35.2 — sin el Personaje en el Corpus, los mismos slugs sí son del Autor', async () => {
+    const rutas = await corpusConBruce(false);
+
+    const resultado = await retirarAutor(rutas, 'bruce', MOTIVO);
+
+    expect(resultado.ok).toBe(false);
+    const motivos = !resultado.ok ? resultado.motivos.join('\n') : '';
+    expect(motivos).toContain('bruce-wayne-la-noche');
+    expect(motivos).toContain('bruce-wayne-el-alba');
+    expect(existsSync(join(rutas.autores, 'bruce.yml'))).toBe(true);
   });
 
   it('nunca sobrescribe una ficha ya retirada con el mismo nombre', async () => {

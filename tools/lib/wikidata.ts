@@ -747,6 +747,11 @@ export async function leerFichasTecnicasDelCorpus(raizDelCorpus: string): Promis
       problemas.push(`${ficha.ruta} declara wikidata ${entidad} r${revision}: ${lectura.motivo}`);
       continue;
     }
+    // Historia 35.2 — la ficha de un Personaje puede no declarar Autor: no hay con quién cotejar.
+    if (ficha.autor === undefined) {
+      problemas.push(`${ficha.ruta}: no declara Autor con el que cotejar la entidad de Wikidata ${entidad}.`);
+      continue;
+    }
     const nombre = nombres.get(ficha.autor);
     if (nombre === undefined) {
       problemas.push(`${ficha.ruta}: su Autor «${ficha.autor}» no existe.`);

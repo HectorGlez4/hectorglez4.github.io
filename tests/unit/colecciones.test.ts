@@ -656,6 +656,7 @@ describe('Historia 12.2 — el umbral no tiene un segundo camino', () => {
       autores: [],
       temas: [],
       colecciones: coleccionesPublicadas([coleccion(slugs)], citas),
+      personajes: [],
     };
     expect(conjunto.colecciones.map((c) => c.slug)).toEqual(['frases-cortas']);
 

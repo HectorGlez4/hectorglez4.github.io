@@ -28,10 +28,12 @@ const autor = (slug: string, clave: string | undefined): Autor => ({
 
 const obra = (autorSlug: string, slug: string, recuento: number): ObraResuelta => ({
   nombre: `${autorSlug}--${slug}`,
+  dueño: { tipo: 'autor', slug: autorSlug },
   autor: autorSlug,
   titulo: `Título ${slug}`,
   fuentes: [],
   edicionCotejada: false,
+  derechosVigentes: false,
   temas: [],
   recuento,
 });
@@ -187,6 +189,15 @@ describe('Historia 28.3 — obrasDelDia, los bordes', () => {
 
   it('lanza si una Obra es de un Autor que no recibe', () => {
     expect(() => obrasDelDia([obra('fantasma', 'x', 2)], MUCHOS, jornada(0))).toThrow(/fantasma/);
+  });
+
+  it('Historia 35.4 — la Obra de un Personaje va por su Autor si se sabe; sin Autor no entra en la ronda', () => {
+    const X = autor('xenia', 'Xenia');
+    const conAutor: ObraResuelta = { ...obra('batman', 'con-autor', 3), dueño: { tipo: 'personaje', slug: 'batman' }, autor: 'xenia' };
+    const sinAutor: ObraResuelta = { ...obra('batman', 'sin-autor', 5), dueño: { tipo: 'personaje', slug: 'batman' } };
+    delete sinAutor.autor;
+    expect(nombres(obrasDelDia([conAutor, sinAutor], [X], jornada(0)))).toEqual([conAutor.nombre]);
+    expect(obrasDelDia([sinAutor], [X], jornada(0))).toEqual([]);
   });
 
   it('la Obra de la Cita del Día, si la regla la elige, sigue entre las Obras', () => {

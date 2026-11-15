@@ -300,3 +300,36 @@ describe('Historia 27.1 — la clave de orden de la búsqueda', () => {
     });
   });
 });
+
+describe('Historia 35.4 — la clave de orden va con el dueño de la Obra', () => {
+  /*
+   * Batman («Batman») va antes que Séneca («Séneca»). La Obra «El caballero» es de Batman, y la
+   * resuelven una Cita suya sin Autor y una con Séneca y Batman (ninguna ficha de Séneca reclama la
+   * forma): las dos caen en el rango de Batman, seguidas y en el orden del libro, y la de siempre de
+   * Séneca en el suyo.
+   */
+  const DUEÑOS: AutorParaLaClave[] = [
+    { slug: 'seneca', ordenAlfabetico: 'Séneca' },
+    { slug: 'batman', ordenAlfabetico: 'Batman' },
+  ];
+  const CABALLERO = { ...obra('batman--el-caballero', 'El caballero', 2), dueño: { tipo: 'personaje', slug: 'batman' } as const };
+  const BREVEDAD = { ...obra('seneca--brevedad', 'Brevedad', 1), dueño: { tipo: 'autor', slug: 'seneca' } as const };
+  const MIXTAS: CitaParaLaClave[] = [
+    { slug: 'seneca-con-batman', autor: 'seneca', personaje: 'batman', obra: CABALLERO },
+    { slug: 'seneca-sola', autor: 'seneca', obra: BREVEDAD },
+    { slug: 'batman-solo', personaje: 'batman', obra: CABALLERO },
+    { slug: 'batman-suelto', personaje: 'batman' },
+  ];
+  const LIBRO = new Map([
+    ['batman--el-caballero', [{ slug: 'batman-solo' }, { slug: 'seneca-con-batman' }]],
+    ['seneca--brevedad', [{ slug: 'seneca-sola' }]],
+  ]);
+
+  it('una Obra de Personaje no se parte en dos rangos aunque alguna de sus Citas declare Autor', () => {
+    const claves = clavesDeOrden(DUEÑOS, MIXTAS, LIBRO);
+    expect(enOrden(claves)).toEqual(['batman-solo', 'seneca-con-batman', 'batman-suelto', 'seneca-sola']);
+    const B = MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN;
+    for (const slug of ['batman-solo', 'seneca-con-batman', 'batman-suelto']) expect(Number(claves.get(slug)), slug).toBeLessThan(B);
+    expect(Number(claves.get('seneca-sola'))).toBeGreaterThanOrEqual(B);
+  });
+});

@@ -55,3 +55,65 @@ describe('Historia 19.1 — tools/auditoria.ts --json', () => {
     });
   });
 });
+
+/**
+ * Historia 35.7 — SM-C1 sobre la clase de siempre, y las atribuidas y las bajas por cambio de
+ * clase, aparte (FR-16 v9.1): en la terminal y en `--json`.
+ */
+describe('Historia 35.7 — tools/auditoria.ts, la atribuida aparte', () => {
+  it('cuenta la procedencia sin la atribuida y da las dos cifras aparte', async () => {
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-auditoria-'));
+    temporales.push(raiz);
+    const corpus = join(raiz, 'corpus');
+    for (const dir of ['citas', 'autores', 'temas', '_revision', 'fuentes']) {
+      await mkdir(join(corpus, dir), { recursive: true });
+    }
+    await writeFile(
+      join(corpus, 'autores', 'seneca.yml'),
+      'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo estoico.\nordenAlfabetico: Séneca\n',
+      'utf8',
+    );
+    await writeFile(join(corpus, 'citas', 'seneca--una.md'), citaValida({ temas: [] }), 'utf8');
+    await writeFile(
+      join(corpus, 'citas', 'seneca--atribuida.md'),
+      citaValida({ temas: [], slug: 'seneca-atribuida', texto: 'Una frase que se le atribuye sin más.', clase: 'atribuida', procedencia: { año: 2000 } }),
+      'utf8',
+    );
+    await writeFile(
+      join(corpus, 'formas-vedadas.yml'),
+      'formas:\n  - { forma: "una frase vieja", slug: "seneca-vieja", motivo: cambio-de-clase, fecha: "2026-11-14" }\n',
+      'utf8',
+    );
+    const correr = (args: string[]) =>
+      ejecutar('npx', ['tsx', join(RAIZ, 'tools/auditoria.ts'), ...args, '--corpus', corpus], { cwd: RAIZ });
+
+    const json = JSON.parse((await correr(['--json'])).stdout) as {
+      publicadas: { total: number; porcentajeCompleta: number };
+      atribuidas: number;
+      bajasPorCambioDeClase: number;
+      cotejo: { conDocumento: number };
+    };
+    expect(json.publicadas.total).toBe(1);
+    // La atribuida trae Fuente y aun así no cuenta como cotejada con su documento.
+    expect(json.cotejo.conDocumento).toBe(1);
+    expect(json.atribuidas).toBe(1);
+    expect(json.bajasPorCambioDeClase).toBe(1);
+
+    const { stdout } = await correr([]);
+    expect(stdout).toMatch(/Atribuidas publicadas: +1 /u);
+    expect(stdout).toMatch(/Bajas por cambio de clase: +1 /u);
+    expect(stdout).toContain('léase como una bajada de SM-C1');
+    expect(stdout).toMatch(/Citas de siempre publicadas: 1 /u);
+
+    // Con el registro ilegible el informe sale sin la cifra de bajas —nunca un cero— y con 1.
+    await writeFile(join(corpus, 'formas-vedadas.yml'), 'formas: [roto\n', 'utf8');
+    const ilegible = await correr(['--json']).then(
+      () => ({ code: 0, stdout: '' }),
+      (fallo: { code: number; stdout: string }) => fallo,
+    );
+    expect(ilegible.code).toBe(1);
+    const parcial = JSON.parse(ilegible.stdout) as { bajasPorCambioDeClase?: number; bajasSinLeer?: string };
+    expect(parcial.bajasPorCambioDeClase).toBeUndefined();
+    expect(parcial.bajasSinLeer).toMatch(/formas-vedadas/u);
+  });
+});

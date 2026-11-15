@@ -97,6 +97,21 @@ export const CITAS_POR_PAGINA = 50;
 export const MIN_CITAS_OBRA_INDEXABLE = 2;
 
 /**
+ * Citas publicadas que necesita un Personaje para que su página se **indexe** — Historia 35.3b
+ * (FR-66, NFR-1 v9.1).
+ *
+ * **Inclusivo**: con al menos esto, se indexa. Todo Personaje con una Cita publicada tiene página
+ * —es el destino de su nombre en la Atribución—, pero la de una sola frase repite la Página de
+ * esa Cita con otro título. Con menos, la página se sirve con `noindex, follow`, fuera del sitemap,
+ * del índice de Pagefind y sin vista de superficie. Cuenta las Citas que declaran el Personaje
+ * (`citasDePersonaje`), no las de su Obra ni las de su universo.
+ *
+ * Quien lo aplica es `personajesIndexables` (`src/lib/publicado.ts`), y nadie más. El valor lo fija
+ * la historia mientras Héctor no dé otro; ninguna prueba lo fija.
+ */
+export const MIN_CITAS_POR_PERSONAJE = 2;
+
+/**
  * Proporción de las Citas de su Autor a partir de la cual una Obra **no** se indexa — FR-52.
  *
  * **Excluyente**: una Obra con el 90 % exacto de las Citas de su Autor ya no se indexa. Una
@@ -244,6 +259,23 @@ export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
 export const DESPLIEGUE_DEL_PASAJE: string | undefined = undefined;
 
 /**
+ * La llegada en vivo de la Cita atribuida — la Épica 35, AD-9, AD-13, Historia 35.7.
+ *
+ * Es la jornada UTC del **primer día en que hay una Cita atribuida publicada en vivo**: el
+ * despliegue que sigue a que Héctor dé valor a los topes y al buzón de la puerta y apruebe la
+ * primera. **Nunca la del merge**: con la puerta cerrada, el merge no cambia ninguna página. Si el
+ * merge y la primera atribuida llegan en el mismo despliegue, es la misma jornada. `undefined`
+ * mientras no haya llegado; **le da valor Héctor, en un commit aparte, y ningún agente la elige.**
+ *
+ * La primera atribuida cambia la Página de Cita —la atribuida no lleva «Cómo citar», pasaje ni
+ * edición— y trae la Página de Personaje, que emite su vista de superficie: su entrada en
+ * `CORTES_DE_SERIE_DECLARADOS` parte SM-8 y la continuación de la Página de Cita (con SM-C5), y
+ * nada más —ni la lectura, cuya unidad nueva no tiene serie de antes, ni la búsqueda, sin evento
+ * ni tramo nuevos—.
+ */
+export const DESPLIEGUE_DE_LA_ATRIBUIDA: string | undefined = undefined;
+
+/**
  * La jornada UTC del primer día en que una Página de Obra enseña «Cómo empieza» en el sitio en
  * vivo — Historia 32.3, AD-9, AD-13.
  *
@@ -325,8 +357,9 @@ export interface CorteLlegado extends CorteDeSerie {
  * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
  * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
  * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
- * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2); la del
- * incipit de la 32 parte solo la continuación de la Página de Obra (Historia 32.3).
+ * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2); la
+ * de la primera atribuida (35.7), SM-8 y la continuación de la Página de Cita; la del incipit de
+ * la 32 parte solo la continuación de la Página de Obra (Historia 32.3).
  * Cada entrada nombra su constante en `deDondeLlega`, y una prueba lo coteja con su `jornada:`.
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
@@ -353,6 +386,12 @@ export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
     deDondeLlega: 'DESPLIEGUE_DEL_PASAJE',
     que: '“Lee el pasaje” en la Página de Cita',
     series: ['continuacion-de-cita'],
+  },
+  {
+    jornada: DESPLIEGUE_DE_LA_ATRIBUIDA,
+    deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA',
+    que: 'la primera Cita atribuida publicada',
+    series: ['sm8', 'continuacion-de-cita'],
   },
   {
     jornada: DESPLIEGUE_DEL_INCIPIT,
@@ -740,8 +779,14 @@ export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
  * para el rótulo de cada Obra del selector de `/buscar/`, y el trozo pasa a medir 552. El filtro
  * mide **3.515 bytes** (2026-10-29): 2.963 de su fichero y 552 del trozo. Tope, con la misma
  * regla: 3.515 más unos 400.
+ *
+ * Historia 35.5 — el filtro alcanza la sección «Personajes»: lee qué grupos son de la sección,
+ * oculta la sección entera, aparta las letras de los dos bloques y el salto, y cuenta aparte a los
+ * Personajes (`fraseDelFiltro` con sus letras y `recuentoDePersonajes`, que pasa al trozo). Mide
+ * **4.329 bytes** (2026-11-13): 3.706 de su fichero y 623 del trozo, medidos por
+ * `tests/unit/medicion.test.ts` sobre el Corpus real. Tope, con la misma regla: 4.329 más unos 400.
  */
-export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
+export const MAX_BYTES_GUION_DEL_FILTRO = 4729;
 
 /**
  * La búsqueda de `/buscar/`, el `<script>` de `src/components/Busqueda.astro` que Astro emite como
@@ -818,10 +863,17 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
  * quitarlo (`mostrarFallo`, `quitarFallo`) desde el fallo de `buscar`, `sinDatos`, `pintar` y la
  * búsqueda vacía, con la frase que anuncia la región (`ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA`, de
  * `src/lib/busqueda.ts`): **17.896 bytes** (2026-10-29), el fichero de entrada con el trozo de
- * `recuentos`, medidos por `tests/unit/medicion.test.ts`. **Tope vigente**, con la misma regla:
- * 17.896 más unos 400.
+ * `recuentos`, medidos por `tests/unit/medicion.test.ts`. Tope de entonces, con la misma regla:
+ * 17.896 más unos 400 (18.296, que ya no rige).
+ *
+ * Historia 35.5 — rederivado con la misma regla. El Personaje en el estado de `/buscar/`
+ * (`personaje=`), el grupo «Personajes» del selector de Autor —el dueño elegido sale del grupo de la
+ * opción—, la clave de dueño del mapa de rótulos (`claveDelDueño`, `dueñoDeLaObra`, `ofreceLaObra`)
+ * y la resolución con sus descartes nuevos: **19.211 bytes** (2026-11-13), 18.588 del fichero de
+ * entrada y 623 del trozo de `recuentos`, medidos sobre el Corpus real. **Tope vigente**: 19.211 más
+ * unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 18296;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 19611;
 
 /**
  * Tope del guion de copiar la Referencia de la Página de Obra — Historia 32.5, AD-6, AD-9.
@@ -1419,3 +1471,127 @@ export const PESO_VOCAL_SUELTA = 2;
 
 /** Nombre propio en interior de frase: 10,5 % contra 23,9 %, razón 0,44. Suele ser el traductor nombrando a un tercero. */
 export const PESO_NOMBRE_PROPIO_INTERIOR = 1;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La Cita atribuida — Historia 35.1, AD-1, AD-32
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Cuántos años después de la muerte de su Autor sigue protegida una obra — Historia 35.1.
+ *
+ * **Lo fija Héctor; ningún agente le da valor.** Con `undefined`, los derechos de un Autor
+ * vigentes son solo los del Autor vivo (`vivo: true`), y un Autor fallecido es de dominio
+ * público como lo ha sido siempre. Con valor, un Autor fallecido en `añoFallecimiento` tiene
+ * derechos vigentes mientras `añoFallecimiento + PLAZO_DE_PROTECCION_AÑOS ≥ AÑO_DE_REFERENCIA`,
+ * y una Cita de la clase de siempre suya rompe el build. Lo decide solo `derechosVigentes` de
+ * `src/lib/clase.ts`. Con plazo y sin `AÑO_DE_REFERENCIA`, esa función lanza.
+ *
+ * Es un literal a propósito: el filtro de los Directorios importa este módulo, y un literal no
+ * arrastra nada al guion del cliente.
+ */
+export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;
+
+/**
+ * El año contra el que se mide el plazo de protección — Historia 35.1, AD-9, AD-12.
+ *
+ * **Lo fija Héctor en un diff**; la propuesta del agente es **2026**. Es una constante y nunca
+ * la fecha del build: un veredicto de derechos que dependiera del día de construir rompería la
+ * reproducibilidad por commit (AD-12) y movería la clase de una Cita sin que nadie lo decidiera.
+ * Solo se lee si `PLAZO_DE_PROTECCION_AÑOS` tiene valor.
+ */
+export const AÑO_DE_REFERENCIA: number | undefined = undefined;
+
+/*
+ * La puerta de la atribuida — Historia 35.1b, AD-32.
+ *
+ * Las cuatro constantes que siguen y `BUZON_DE_PETICIONES` (`src/lib/dominio.ts`) son la puerta:
+ * **las fija Héctor; ningún agente les da valor**. Mientras alguna de las cinco esté en
+ * `undefined`, la puerta está cerrada: el build rompe ante cada atribuida de `corpus/citas/`
+ * nombrando las que faltan, y el alta y `revisar --aprobar` la dejan en `corpus/_revision/`
+ * con ese mismo motivo (`tools/lib/atribuidas.ts`). Son literales a propósito: el filtro de los
+ * Directorios importa este módulo, y un literal no arrastra nada al guion del cliente.
+ */
+
+/**
+ * El texto más largo de una atribuida, en puntos de código — Historia 35.1b. Lo fija Héctor.
+ * Una más larga no se publica (y, cuando exista, también se juzga la variante, 35.6).
+ */
+export const MAX_CARACTERES_DE_ATRIBUIDA: number | undefined = undefined;
+
+/**
+ * Cuántas atribuidas admite, como mucho, una Obra cuyo dueño tiene derechos vigentes —
+ * Historia 35.1b. Lo fija Héctor. Se cuenta sobre todo el Corpus más lo que la pasada publica.
+ */
+export const MAX_ATRIBUIDAS_POR_OBRA: number | undefined = undefined;
+
+/**
+ * Cuántas atribuidas admite, como mucho, un dueño —el Autor o, sin él, el Personaje— con
+ * derechos vigentes — Historia 35.1b. Lo fija Héctor.
+ */
+export const MAX_ATRIBUIDAS_POR_DUEÑO: number | undefined = undefined;
+
+/**
+ * Cuántos dominios registrables distintos tienen que atestiguar una atribuida — Historia 35.1b.
+ * Lo fija Héctor. Cuenta solo `dominioDeAtestiguacion` (`src/lib/atestiguaciones.ts`): BrainyQuote
+ * y el propio dominio no atestiguan, y dos subdominios del mismo dominio cuentan uno.
+ */
+export const MIN_ATESTIGUACIONES_DE_ATRIBUIDA: number | undefined = undefined;
+
+/** Una entrada de la semilla de prueba: el Personaje o Autor y su página de BrainyQuote. */
+export interface EntradaDeSemilla {
+  /** El slug de un Personaje de `corpus/personajes/` o de un Autor de `corpus/autores/`. */
+  slug: string;
+  /** La página de BrainyQuote de la que salen sus frases en inglés (`https://www.brainyquote.com/…`). */
+  pagina: string;
+}
+
+/**
+ * La semilla de prueba de la Cita atribuida — Historia 35.10, FR-68 (§5 enmendado).
+ *
+ * Los únicos Personajes y Autores que admiten `npm run atribuida -- semilla` y `-- proponer`.
+ * **La llena Héctor en un diff; ningún agente**: el repositorio la versiona vacía, y vacía las dos
+ * órdenes se niegan con 1. No hay búsqueda abierta: la siembra a escala espera a la respuesta de
+ * la pregunta 18, y generalizar la semilla es otra decisión de Héctor. Ninguna página la lee.
+ */
+export const SEMILLA_DE_ATRIBUIDAS: readonly EntradaDeSemilla[] = [];
+
+/*
+ * El canal de corrección y retirada y SM-C6 — Historia 35.8, FR-69, AD-32, AD-35.
+ *
+ * Las cuatro constantes que siguen **las fija Héctor; ningún agente les da valor**. Las lee solo
+ * `npm run peticion` (`tools/peticion.ts`), nunca el sitio: sin valor, la orden lista y lo
+ * dice, pero no juzga plazo, no elige muestra ni juzga SM-C6. Son literales, como las de arriba.
+ */
+
+/**
+ * Cuántos días puede seguir sin resolver una petición de corregir o retirar antes de que la
+ * consulta la nombre como vencida — Historia 35.8, FR-69. Lo fija Héctor.
+ */
+export const PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS: number | undefined = undefined;
+
+/**
+ * Cuántas atribuidas publicadas al cierre de un mes se auditan contra una fuente que las documente
+ * — Historia 35.8, SM-C6. La muestra la eligen sin mano las de menor SHA-256 de `{slug}|{mes}`.
+ * Lo fija Héctor.
+ */
+export const MUESTRA_DE_AUDITORIA_SM_C6: number | undefined = undefined;
+
+/**
+ * Cuántas atribuidas publicadas tiene que tener un mes para que SM-C6 lo juzgue — Historia 35.8.
+ * Por debajo no se juzga, y el cero no se lee como calidad. Lo fija Héctor.
+ */
+export const MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6: number | undefined = undefined;
+
+/**
+ * La proporción mal atribuida de la auditoría (entre 0 y 1) por encima de la cual SM-C6 salta, en
+ * dos meses seguidos — Historia 35.8. Lo fija Héctor.
+ */
+export const MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6: number | undefined = undefined;
+
+/**
+ * La proporción mal traducida de la segunda muestra de la auditoría —solo traducción propia— (entre
+ * 0 y 1) por encima de la cual SM-C6 salta, en dos meses cerrados seguidos y sobre su propia
+ * población — Historia 35.11, SM-C6 v9.2. Se juzga aparte de la mal atribuida, con el mismo mínimo.
+ * Lo fija Héctor.
+ */
+export const MAX_PROPORCION_MAL_TRADUCIDA_SM_C6: number | undefined = undefined;

@@ -10,9 +10,11 @@
 
 import { porcentajeEnEspañol } from '../src/lib/formato.ts';
 import { auditar, sinTraduccionDeclarada, type CitaParaAuditar } from '../src/lib/salud.ts';
+import { esAtribuida } from '../src/lib/clase.ts';
 import { leerAutores, leerCensoDeCotejo, leerCitas, rutasDelCorpus } from './lib/corpus.ts';
 import { resumenDeCotejo } from './lib/cotejo.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
+import { bajasPorCambioDeClase, leerFormasVedadas } from './lib/formasVedadas.ts';
 
 const argumentos = process.argv.slice(2);
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
@@ -34,7 +36,13 @@ const informe = auditar(publicadas as unknown as CitaParaAuditar[]);
  * aquí: esta herramienta no tiene pruebas, y un recuento que miente en silencio en el
  * informe que existe para medir SM-C1 es peor que no tener informe.
  */
-const cotejo = resumenDeCotejo(publicadas, await leerCensoDeCotejo(rutas));
+// Historia 35.7 — la deuda de cotejo es de la clase de siempre: una atribuida con Fuente no está
+// «cotejada con su documento» (la línea de cifras tampoco la cuenta), y contarla aquí mezclaría
+// las dos clases en el mismo informe que da SM-C1 sin ellas.
+const cotejo = resumenDeCotejo(
+  publicadas.filter((c) => !esAtribuida(c)),
+  await leerCensoDeCotejo(rutas),
+);
 
 /*
  * Historia 19.1 — las Citas de obra traducida que no declaran traducción. Una cifra, no un
@@ -49,6 +57,20 @@ const traducidasSinTraduccion = sinTraduccionDeclarada(
   deTradicionOtra,
 );
 
+/*
+ * Historia 35.7 — SM-C1 se calcula solo sobre la clase de siempre (`auditar` deja fuera la
+ * atribuida), y el informe da aparte cuántas atribuidas hay publicadas y cuántas bajas por cambio
+ * de clase anota `corpus/formas-vedadas.yml` desde que existe (FR-16 v9.1). Un registro ilegible
+ * no tumba el informe: la cifra se omite y se dice por qué, nunca se escribe cero.
+ */
+let bajasPorCambio: number | undefined;
+let falloDeVedadas: string | undefined;
+try {
+  bajasPorCambio = bajasPorCambioDeClase(await leerFormasVedadas(rutas));
+} catch (fallo) {
+  falloDeVedadas = fallo instanceof Error ? fallo.message : String(fallo);
+}
+
 if (argumentos.includes('--json')) {
   process.stdout.write(
     `${JSON.stringify(
@@ -57,6 +79,7 @@ if (argumentos.includes('--json')) {
         enRevision: enRevision.length,
         cotejo,
         traducidasSinTraduccion,
+        ...(bajasPorCambio !== undefined ? { bajasPorCambioDeClase: bajasPorCambio } : { bajasSinLeer: falloDeVedadas }),
       },
       null,
       2,
@@ -69,7 +92,7 @@ if (argumentos.includes('--json')) {
     'Salud del Corpus',
     '════════════════',
     '',
-    `Citas publicadas:            ${total.total}`,
+    `Citas de siempre publicadas: ${total.total}  (SM-C1 no cuenta las atribuidas; la línea de cifras del sitio, sí)`,
     `Con procedencia completa:    ${total.completa}  ` +
       `(${porcentajeEnEspañol(total.porcentajeCompleta)} %)`,
     `Con procedencia parcial:     ${total.parcial}`,
@@ -102,6 +125,15 @@ if (argumentos.includes('--json')) {
       : 'Son las anteriores a la v3, sin documento de Fuente. Las saca del censo la 11.4.',
     `Traducidas sin traducción:   ${traducidasSinTraduccion.total}  (con documento, de Autor de tradición «otra»; una cifra, no un error)`,
     '',
+    // Historia 35.7 — la atribuida, aparte (FR-16 v9.1).
+    `Atribuidas publicadas:       ${informe.atribuidas}  (fuera de SM-C1: ni en el numerador ni en el denominador)`,
+    bajasPorCambio !== undefined
+      ? `Bajas por cambio de clase:   ${bajasPorCambio}  (de corpus/formas-vedadas.yml)`
+      : `Bajas por cambio de clase:   sin leer — ${falloDeVedadas}`,
+    ...(bajasPorCambio !== undefined && bajasPorCambio > 0
+      ? ['Cada baja por cambio de clase es una Cita que salió de SM-C1: léase como una bajada de SM-C1.']
+      : []),
+    '',
     'Por Autor — de peor a mejor salud',
     '─────────────────────────────────',
   ];
@@ -116,4 +148,14 @@ if (argumentos.includes('--json')) {
   }
 
   process.stdout.write(`${lineas.join('\n')}\n`);
+}
+
+/*
+ * Historia 35.7 — con `corpus/formas-vedadas.yml` ilegible el informe se escribe igual, sin la
+ * cifra de bajas (ausencia antes que cero), pero la orden sale con 1: el registro no se deja
+ * leer, y quien encadena órdenes por su código tiene que verlo.
+ */
+if (falloDeVedadas !== undefined) {
+  process.stderr.write(`${falloDeVedadas}\n`);
+  process.exitCode = 1;
 }
