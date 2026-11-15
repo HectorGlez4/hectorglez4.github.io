@@ -249,10 +249,11 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
         expect(posicion(despues), `${ruta}: ${despues}`).toBeGreaterThan(formulario);
       }
       // Historia 25.6 — el sitio de «Compartir en», sin hueco: lo siguiente al formulario es la
-      // sección de Temas (o, sin Temas, el contenedor de «Cómo citar»; decisión 1b).
+      // sección de Temas (o, sin Temas, el contenedor de «Cómo citar»; decisión 1b), cada una en su
+      // Panel de bloque desde la 36.2.
       const fin = pagina.indexOf('</form>', formulario) + '</form>'.length;
       expect(pagina.slice(fin).trimStart(), ruta).toMatch(
-        /^(?:<section class="temas"|<div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Cómo citar<)/,
+        /^(?:<div class="panel panel-tema [^"]*"[^>]*><section class="temas"|<div class="panel panel-herramientas [^"]*"[^>]*><div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Cómo citar<)/,
       );
     }
   });

@@ -27,7 +27,8 @@ const NAV = 'nav.salidas[aria-label="Seguir leyendo"]';
 /** Lo que pinta el pie de la página abierta: grupos, rótulos, tarjetas y cierres. */
 async function leerPie(page: Page) {
   return page.locator(NAV).evaluate((nav) =>
-    [...nav.querySelectorAll(':scope > section')].map((seccion) => ({
+    // Historia 36.1 — cada grupo, dentro de su Panel de bloque.
+    [...nav.querySelectorAll(':scope > .panel > section')].map((seccion) => ({
       clase: seccion.className.split(/\s+/)[0],
       rotulo: { etiqueta: seccion.querySelector('.rotulo')?.tagName.toLowerCase(), texto: seccion.querySelector('.rotulo')?.textContent?.trim() },
       tarjetas: [...seccion.querySelectorAll('li.tarjeta a')].map((a) => ({

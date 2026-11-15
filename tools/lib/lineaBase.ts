@@ -474,6 +474,8 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
         { deDondeLlega: 'DESPLIEGUE_DEL_PASAJE', marca: 'el primer despliegue con valor en MAX_CARACTERES_DEL_PASAJE, no el merge' },
         // Historia 35.7 — la Página de Cita atribuida, sin «Cómo citar» ni pasaje.
         { deDondeLlega: 'DESPLIEGUE_DE_LA_ATRIBUIDA', marca: 'la primera Cita atribuida publicada en vivo, no el merge' },
+        // Historia 36.1 — los paneles: cambia el aspecto de lo que sigue a la Cita.
+        { deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES', marca: 'el despliegue en vivo de la Épica 36, no el merge' },
       ],
     },
     palanca: 'quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor',
@@ -494,6 +496,8 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
           deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT',
           marca: 'el primer despliegue con valor en MAX_CARACTERES_DEL_INCIPIT y una ficha con incipit, no el merge',
         },
+        // Historia 36.1 — el listado de la Obra pasa a Fichas de Cita (AD-19: la tarjeta es una sola).
+        { deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES', marca: 'el despliegue en vivo de la Épica 36, no el merge' },
       ],
     },
     // PRD §7, SM-C4 (v9): «si baja, se juzga lo que se movió». Qué se mueve lo decide Héctor.

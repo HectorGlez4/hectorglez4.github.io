@@ -98,10 +98,11 @@ const paginaConstruida = (proyecto: string, ruta: string) => readFileSync(rutaCo
 const BREVEDAD = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
 const IRA = '/obra/seneca/de-la-ira/';
 /**
- * La apertura del contenedor de «Cómo citar», al pie y a 5 × `--unidad` de lo que lo precede, sin
- * el `>`: Astro le añade la clase de ámbito de la página.
+ * La apertura del contenedor de «Cómo citar», al pie y —desde la 36.2— dentro del Panel de bloque
+ * de las herramientas, que pone el aire (`.pagina > :not(.panel) + .panel` o la regla de entre
+ * paneles), sin el `>`: Astro le añade la clase de ámbito de la página.
  */
-const APERTURA = '<div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 5)"';
+const APERTURA = '<div class="panel panel-herramientas cierre-fila"';
 /** La del contenedor de arriba (32.4): «Dónde leer esta obra» y, si hay incipit, «Cómo empieza». */
 const APERTURA_DE_ARRIBA = '<div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 2)"';
 

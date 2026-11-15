@@ -1,0 +1,180 @@
+---
+/**
+ * Panel de bloque — DESIGN.md v9.3 § Primitivas, dirección «Fichas», Historia 36.1.
+ *
+ * El contenedor de cada bloque secundario de la Página de Cita y de la de Autor (la 36.2 lo lleva
+ * a Obra, Personaje, Tema y Colección): un fondo plano con el tinte de lo que el bloque es —Obra,
+ * Autor, Tema o herramientas—, el radio `--radio-panel` y su relleno, sin contorno ni sombra. La
+ * Cita principal nunca va en uno: es lo único de su página que flota sobre el papel. Un bloque, un
+ * panel: nunca anidados, y un bloque ausente no deja panel —quien lo usa no lo pinta—.
+ *
+ * **No es un punto de referencia.** Es un `<div>` sin rol, sin nombre accesible y sin `data-zona`
+ * ni `data-sin-zona`: envuelve el bloque que ya existía —su `section`, con su `h2` de
+ * `Rotulo.astro` y su `aria-labelledby` si lo llevaba— sin añadir ni quitar ninguna región, y la
+ * zona de cada enlace sigue declarándose donde se declaraba, en su `<li>` o en el `ul` de chips.
+ * El color tampoco es la única señal: el bloque lo nombra su rótulo.
+ *
+ * **Posee el trato de dentro.** `Rotulo`, `Desplegable`, `FilaDeBloque`, `Chips` y `ListaDeObras`
+ * los comparten la portada, los Directorios y `/obras/`, que no toman paneles: fuera de un panel
+ * tienen que salir idénticos. Por eso ninguno sabe de paneles, y lo que cambian dentro de uno lo
+ * dice esta hoja con `:global` acotado bajo `.panel`, que con el ámbito del componente gana en
+ * especificidad a la regla propia de cada uno:
+ *
+ *   · el Rótulo de panel —el mismo `h2`, sin mayúsculas, a 0,06em y en la tinta de su familia—,
+ *     y su contenido a una `--unidad`;
+ *   · las Filas de bloque con la divisoria de su familia y sin filete bajo la última;
+ *   · los Desplegables planos, con la divisoria entre ellos o tras la lista que los precede, y el
+ *     `<summary>` con el trato del Rótulo de panel en tinta;
+ *   · la divisoria de la Lista de Obras en `--filete-obra`;
+ *   · el Chip de Tema sobre blanco con el contorno de Tema.
+ *
+ * La familia va en `panel-{familia}` y no en la clase a secas: `.autor` y `.obra` ya son las de la
+ * Atribución y de la Tarjeta de Cita, y un panel que las llevara casaría con sus selectores.
+ *
+ * Nunca un cuerpo ni un interlineado: el Rótulo de panel toma los de `author`, que ya trae el
+ * rótulo, y la guardia de tipografía exige que cuerpo e interlineado vayan en pareja.
+ */
+interface Props {
+  /** De qué familia es el bloque, y con ella su tinte. Obligatoria, sin valor por omisión. */
+  familia: 'obra' | 'autor' | 'tema' | 'herramientas';
+  /**
+   * Con qué cierra el bloque: una Fila de bloque —o un `<summary>`—, que ya trae su alto, deja una
+   * `--unidad` abajo; chips o texto, tres. Obligatoria: solo quien lo usa sabe qué hay al final.
+   */
+  cierre: 'fila' | 'texto';
+}
+
+const { familia, cierre } = Astro.props;
+
+/*
+ * Sin valor por omisión también al construir: `astro build` no comprueba tipos, y un panel sin
+ * familia saldría sin tinte en silencio.
+ */
+const FAMILIAS = ['obra', 'autor', 'tema', 'herramientas'] as const satisfies readonly Props['familia'][];
+const CIERRES = ['fila', 'texto'] as const satisfies readonly Props['cierre'][];
+if (!FAMILIAS.includes(familia) || !CIERRES.includes(cierre)) {
+  throw new Error(
+    `PanelDeBloque: en ${Astro.url.pathname}, familia=${JSON.stringify(familia)} y cierre=${JSON.stringify(cierre)}; ` +
+      `la familia es una de ${FAMILIAS.join(', ')} y el cierre, ${CIERRES.join(' o ')}, sin valor por omisión (Historia 36.1).`,
+  );
+}
+---
+
+<div class={`panel panel-${familia} cierre-${cierre}`}><slot /></div>
+
+<style>
+  .panel {
+    max-width: var(--medida-prosa);
+    border-radius: var(--radio-panel);
+    padding: calc(var(--unidad) * 3) calc(var(--unidad) * 2) calc(var(--unidad) * 3);
+  }
+
+  .panel.cierre-fila {
+    padding-bottom: var(--unidad);
+  }
+
+  .panel + .panel {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .panel.panel-obra {
+    background: var(--contenedor-obra);
+  }
+
+  .panel.panel-autor {
+    background: var(--contenedor-autor);
+  }
+
+  .panel.panel-tema {
+    background: var(--contenedor-tema);
+  }
+
+  .panel.panel-herramientas {
+    background: var(--contenedor);
+  }
+
+  /*
+   * El Rótulo de panel: el mismo `h2`, que deja de ser la versalita gris del Rótulo de sección.
+   * Solo el encabezado de `Rotulo.astro` —`h2` o `h3`—: «Cómo citar» lleva sus propios
+   * `p.rotulo` (APA, MLA…) dentro del panel de las herramientas, y no son Rótulos de panel.
+   */
+  .panel :global(:is(h2, h3).rotulo) {
+    text-transform: none;
+    letter-spacing: 0.06em;
+  }
+
+  .panel.panel-obra :global(:is(h2, h3).rotulo) {
+    color: var(--sobre-contenedor-obra);
+  }
+
+  .panel.panel-autor :global(:is(h2, h3).rotulo) {
+    color: var(--sobre-contenedor-autor);
+  }
+
+  .panel.panel-tema :global(:is(h2, h3).rotulo) {
+    color: var(--sobre-contenedor-tema);
+  }
+
+  /* Lo que sigue al rótulo, a una `--unidad`. */
+  .panel :global(:is(h2, h3).rotulo + *) {
+    margin-top: var(--unidad);
+  }
+
+  /* Las Filas de bloque: la divisoria de su familia entre ellas, ninguna bajo la última. */
+  .panel.panel-obra :global(.fila-de-bloque) {
+    border-bottom-color: var(--filete-obra);
+  }
+
+  .panel.panel-autor :global(.fila-de-bloque) {
+    border-bottom-color: var(--filete-autor);
+  }
+
+  .panel :global(.fila-de-bloque:last-child) {
+    border-bottom: none;
+  }
+
+  /* Los Desplegables, planos: el fondo es del panel, y sin filete encima del primero ni debajo del último. */
+  .panel :global(.desplegable) {
+    border-block: none;
+  }
+
+  .panel.panel-herramientas :global(.desplegable + .desplegable) {
+    border-block-start: var(--grosor-filete) solid var(--filete);
+  }
+
+  .panel.panel-obra :global(.lista-de-obras + .desplegable) {
+    border-block-start: var(--grosor-filete) solid var(--filete-obra);
+  }
+
+  /* El `<summary>` dentro de un panel: el trato del Rótulo de panel, en tinta. */
+  .panel :global(.desplegable > summary) {
+    text-transform: none;
+    letter-spacing: 0.06em;
+    color: var(--tinta);
+  }
+
+  /* La Lista de Obras: su divisoria, en la de la Obra. */
+  .panel.panel-obra :global(.lista-de-obras li:not([hidden]) ~ li:not([hidden])) {
+    border-top-color: var(--filete-obra);
+  }
+
+  /* El Chip de Tema, sobre blanco y con el contorno de Tema (4,53:1 sobre el tinte). */
+  .panel.panel-tema :global(.chip) {
+    background: var(--contenedor-minimo);
+    border: var(--grosor-filete) solid var(--contorno-tema);
+  }
+
+  .panel.panel-tema :global(.chip:hover) {
+    background: var(--contenedor-bajo);
+  }
+
+  /*
+   * Con colores forzados (Alto contraste de Windows) el fondo desaparece, y con él el límite del
+   * panel: un contorno transparente, que no ocupa sitio y que el modo forzado pinta.
+   */
+  @media (forced-colors: active) {
+    .panel {
+      outline: var(--grosor-filete) solid transparent;
+    }
+  }
+</style>

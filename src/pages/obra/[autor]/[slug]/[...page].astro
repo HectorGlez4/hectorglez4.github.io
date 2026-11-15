@@ -17,6 +17,9 @@
  * 32.5; al pie por la decisión delegada por Héctor del 2026-11-14, para la primera pantalla) y, si
  * la ficha la trae, su nota (Historia 22.6). El salto «Dónde leer esta obra ↓» de la 24.7 se
  * retiró con la 32.4.
+ * Historia 36.2 (UX v9.3, «Fichas»; decisión 3, delegada por Héctor el 2026-11-14) — ningún Panel de
+ * bloque por encima del listado, que está en Fichas sobre el papel: al pie, los Temas en el panel
+ * del Tema y «Cómo citar» en el de las herramientas; la nota, sobre el papel. Las 2+, sin panel.
  * Páginas 2+: solo Cabecera y Listado, y `noindex` por forma. Nada de prosa
  * compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos
  * del Corpus, salvo la nota, que escribe Héctor a mano.
@@ -47,6 +50,7 @@ import FichaTecnica from '../../../../components/FichaTecnica.astro';
 import Rotulo from '../../../../components/Rotulo.astro';
 import DatosDeObra from '../../../../components/DatosDeObra.astro';
 import Paginacion from '../../../../components/Paginacion.astro';
+import PanelDeBloque from '../../../../components/PanelDeBloque.astro';
 import TarjetaDeCita from '../../../../components/TarjetaDeCita.astro';
 import CopiarReferencia from '../../../../islands/CopiarReferencia.astro';
 import {
@@ -293,11 +297,19 @@ const conDondeLeer =
     }
 
     {
+      /*
+       * Historia 36.2 — los paneles de la Página de Obra van solo al pie (decisión 3, delegada por
+       * Héctor el 2026-11-14): por encima del listado, nada cambia —Cabecera, Ficha técnica y los
+       * desplegables de arriba siguen sobre el papel—, porque un panel ahí sacaba la primera Tarjeta
+       * de la primera pantalla de 360 × 640 (SM-C4). Los Temas, en el Panel de bloque del Tema.
+       */
       primera && temas.length > 0 && (
-        <section class="temas" aria-labelledby="temas-de-la-obra">
-          <Rotulo id="temas-de-la-obra">Temas</Rotulo>
-          <Chips enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))} zona="chip-de-tema" />
-        </section>
+        <PanelDeBloque familia="tema" cierre="texto">
+          <section class="temas" aria-labelledby="temas-de-la-obra">
+            <Rotulo id="temas-de-la-obra">Temas</Rotulo>
+            <Chips enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))} zona="chip-de-tema" />
+          </section>
+        </PanelDeBloque>
       )
     }
 
@@ -306,16 +318,20 @@ const conDondeLeer =
        * Historia 32.5, UX-DR129 — «Cómo citar», plegado, solo en la página 1 y si la Obra lo tiene:
        * al pie, tras los Temas (o «Buscar en esta obra», sin Temas) y antes de la nota. Lo bajó del
        * contenedor de arriba la decisión 1b, delegada por Héctor el 2026-11-14: con él como tercer
-       * desplegable la primera Tarjeta del listado salía de la primera pantalla de 360 × 640. A
-       * 5 × `--unidad` de lo que lo precede, el ritmo de los bloques del pie, en un atributo
-       * `style`. Fuera de Pagefind y del JSON-LD; sin enlaces ni `data-zona`: la canónica es texto
-       * de las Referencias. La isla de copiar (`CopiarReferencia`, empaquetada) pone la fecha del
-       * visitante y copia, y su guion va fuera del contenedor.
+       * desplegable la primera Tarjeta del listado salía de la primera pantalla de 360 × 640.
+       * Historia 36.2 — en el Panel de bloque de las herramientas (decisión 3): a 2 × `--unidad` del
+       * de los Temas (la regla de entre paneles) o, sin él, a 5 × de «Buscar en esta obra». El panel
+       * solo lleva su clase; Pagefind lo deja fuera por el contenedor de dentro. Fuera del JSON-LD;
+       * sin enlaces ni `data-zona`: la canónica es texto de las Referencias. La isla de copiar
+       * (`CopiarReferencia`, empaquetada) pone la fecha del visitante y copia, y su guion va fuera
+       * de todo panel.
        */
       conComoCitar && autorDeLaReferencia !== undefined && (
-        <div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 5)">
-          <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeObra(obra, autorDeLaReferencia, edicion, canonica)} /></Desplegable>
-        </div>
+        <PanelDeBloque familia="herramientas" cierre="fila">
+          <div data-pagefind-ignore="all">
+            <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeObra(obra, autorDeLaReferencia, edicion, canonica)} /></Desplegable>
+          </div>
+        </PanelDeBloque>
       )
     }
     {conComoCitar && <CopiarReferencia />}
@@ -393,23 +409,29 @@ const conDondeLeer =
   /*
    * Historia 27.8, UX-DR95 — «Buscar en esta obra», a 5 × `--unidad` de la paginación o, sin ella,
    * de la última tarjeta: el margen es del formulario, así vale en los dos casos sin tocar
-   * `Paginacion.astro`, que comparten Autor, Tema y Colección. Va aquí, y no junto a `.temas`, que
-   * declara lo mismo: dos reglas iguales seguidas las funde el minificador en una sola lista de
-   * selectores, y la regla de `.temas` dejaría de existir por sí sola en la hoja emitida.
+   * `Paginacion.astro`, que comparten Autor, Tema y Colección. La del primer panel del pie (36.2)
+   * declara lo mismo, y el minificador puede fundir las dos en una sola lista de selectores.
    */
   .pagina > :global(.buscar-en) {
     margin-top: calc(var(--unidad) * 5);
   }
 
+  /* Historia 36.1 — en Fichas, que ya se separan por su caja: sin filete encima del listado. */
   .listado {
     list-style: none;
     margin: calc(var(--unidad) * 4) 0 0;
     padding: 0;
-    border-top: var(--grosor-filete) solid var(--filete);
   }
 
-  /* UX-DR42, UX-DR95 — 5 × `--unidad` a «Temas» desde lo que lo preceda: «Buscar en esta obra». */
-  .temas {
+  /*
+   * UX-DR42, UX-DR95, Historia 36.2 — el primer panel del pie («Temas» o, sin ellos, «Cómo citar»),
+   * a 5 × `--unidad` de lo que lo precede: hoy «Buscar en esta obra». El selector no nombra al
+   * vecino —todo panel hijo de `.pagina` que no sigue a otro panel—, para que lo que llegue entre el
+   * formulario y los paneles («Compartir en», 25.6) no le quite el aire. Por encima del listado no
+   * hay ningún panel (decisión 3). Entre los dos paneles manda la regla de la primitiva
+   * (2 × `--unidad`), y la sección de Temas no lleva margen propio dentro del suyo.
+   */
+  .pagina > :global(:not(.panel) + .panel) {
     margin-top: calc(var(--unidad) * 5);
   }
 

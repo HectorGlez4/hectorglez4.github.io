@@ -741,7 +741,9 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     expect(filas[1].href, completa).toMatch(/^\/obra\//);
     expect(filas.map((f) => f.target), completa).toEqual([null, null]);
     expect(filas[0].trato, completa).toBe(filas[1].trato);
-    expect(filas[0].filete, completa).toBe(filas[1].filete);
+    // Historia 36.1 — en el panel de la Obra: la divisoria de la Obra entre las dos, ninguna bajo la última.
+    expect(filas[0].filete, completa).toMatch(/^1px \| solid \| /);
+    expect(filas[1].filete, completa).toMatch(/^0px \| none \| /);
     // La siguiente existe y es de la misma Obra: su propia tarjeta lleva a la misma página.
     const respuesta = await page.goto(filas[0].href!);
     expect(respuesta?.status(), filas[0].href!).toBe(200);
@@ -760,7 +762,9 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       const sonda = document.createElement('div');
       sonda.style.cssText =
         'width: var(--unidad); max-width: var(--medida-prosa); color: var(--tinta); background-color: var(--filete); ' +
-        'border-top: var(--grosor-filete) solid; min-height: var(--zona-de-toque); font-family: var(--sans)';
+        'border-top: var(--grosor-filete) solid; min-height: var(--zona-de-toque); font-family: var(--sans); ' +
+        'border-bottom: var(--grosor-filete) solid var(--filete-obra); outline: 1px solid var(--contenedor-obra); ' +
+        'border-top-left-radius: var(--radio-panel)';
       seccion.parentElement!.append(sonda);
       const s = getComputedStyle(sonda);
       const tokens = {
@@ -771,6 +775,9 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
         grosor: s.borderTopWidth,
         toque: s.minHeight,
         sans: s.fontFamily,
+        fileteObra: s.borderBottomColor,
+        contenedorObra: s.outlineColor,
+        radioPanel: s.borderTopLeftRadius,
       };
       const tamaño = (token: string) => {
         sonda.style.fontSize = `var(${token})`;
@@ -783,6 +790,8 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
 
       const css = (selector: string) => getComputedStyle(seccion.querySelector(selector) ?? seccion);
       const sec = getComputedStyle(seccion);
+      // Historia 36.1 — el Panel de bloque de la Obra que la envuelve.
+      const pan = getComputedStyle(seccion.parentElement!);
       const titulo = css('.titulo');
       const hechos = css('.hechos');
       const filas = css('ul.filas');
@@ -800,6 +809,15 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
           fondo: sec.backgroundColor,
           radio: sec.borderTopLeftRadius,
           recorta: recorta(sec),
+        },
+        panel: {
+          clase: seccion.parentElement!.className.split(/\s+/).filter((c) => !c.startsWith('astro-')).slice(0, 2),
+          margen: parseFloat(pan.marginTop),
+          fondo: pan.backgroundColor,
+          radio: pan.borderTopLeftRadius,
+          relleno: [pan.paddingTop, pan.paddingRight, pan.paddingBottom, pan.paddingLeft].map(parseFloat),
+          filete: pan.borderTopWidth,
+          sombra: pan.boxShadow,
         },
         titulo: {
           margen: parseFloat(titulo.marginTop),
@@ -843,14 +861,25 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       };
     });
     const { tokens: t } = medida;
+    // Historia 36.1 — sin filete de apertura ni aire propio: el panel de la Obra los sustituye,
+    // a 4 × `--unidad` de lo de arriba, con su tinte, su radio y su relleno, sin contorno ni sombra.
     expect(medida.seccion).toEqual({
-      margen: t.unidad * 4,
-      filete: [t.grosor, 'solid', t.filete],
-      relleno: t.unidad * 3,
+      margen: 0,
+      filete: ['0px', 'none', t.tinta],
+      relleno: 0,
       maximo: t.medida,
       fondo: 'rgba(0, 0, 0, 0)',
       radio: '0px',
       recorta: false,
+    });
+    expect(medida.panel).toEqual({
+      clase: ['panel', 'panel-obra'],
+      margen: t.unidad * 4,
+      fondo: t.contenedorObra,
+      radio: t.radioPanel,
+      relleno: [t.unidad * 3, t.unidad * 2, t.unidad, t.unidad * 2],
+      filete: '0px',
+      sombra: 'none',
     });
     expect(medida.titulo).toMatchObject({
       margen: t.unidad,
@@ -876,11 +905,12 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       margen: t.unidad * 2,
       viñeta: 'none',
       relleno: '0px',
-      filete: [t.grosor, 'solid', t.filete],
+      filete: ['0px', 'none', t.tinta],
     });
     expect(medida.fila.interlineado).toBeCloseTo(t.md * 1.4, 1);
     expect({ ...medida.fila, interlineado: undefined }).toEqual({
-      filete: [t.grosor, 'solid', t.filete],
+      // La primera fila de la cara completa: la divisoria de la Obra debajo (36.1).
+      filete: [t.grosor, 'solid', t.fileteObra],
       display: 'flex',
       alineado: 'center',
       alto: t.toque,
@@ -1404,7 +1434,8 @@ test.describe('Historia 24.6 — el pie de la Página de Cita', () => {
       tokens.md = parseFloat(getComputedStyle(sonda).fontSize);
       sonda.remove();
       const n = getComputedStyle(nav);
-      const secciones = [...nav.querySelectorAll(':scope > section')] as HTMLElement[];
+      // Historia 36.1 — cada grupo, en su Panel de bloque: el aire entre grupos es el de entre paneles.
+      const paneles = [...nav.querySelectorAll(':scope > .panel')] as HTMLElement[];
       return {
         tokens,
         ancho: window.innerWidth,
@@ -1414,7 +1445,8 @@ test.describe('Historia 24.6 — el pie de la Página de Cita', () => {
           filete: [n.borderTopWidth, n.borderTopStyle, n.borderTopColor],
           maximo: n.maxWidth,
         },
-        entreGrupos: secciones.slice(1).map((sec) => parseFloat(getComputedStyle(sec).marginTop)),
+        entreGrupos: paneles.slice(1).map((p) => parseFloat(getComputedStyle(p).marginTop)),
+        grupos: paneles.map((p) => p.querySelectorAll(':scope > section').length),
         listas: [...nav.querySelectorAll('ul.tarjetas')].map((ul) => {
           const u = getComputedStyle(ul);
           const rotulo = ul.parentElement!.querySelector('.rotulo')!.getBoundingClientRect();
@@ -1439,19 +1471,21 @@ test.describe('Historia 24.6 — el pie de la Página de Cita', () => {
       };
     });
     const { tokens: t } = medida;
+    // Historia 36.1 — el pie conserva su apertura, pero el filete y su aire los sustituyen los paneles.
     expect(medida.nav).toEqual({
       margen: t.unidad * (medida.ancho >= 600 ? 12 : 8),
-      relleno: t.unidad * 3,
-      filete: [t.grosor, 'solid', t.filete],
+      relleno: 0,
+      filete: ['0px', 'none', t.tinta],
       maximo: t.medida,
     });
+    expect(medida.grupos.every((n) => n === 1)).toBe(true);
     expect(medida.entreGrupos.length).toBeGreaterThanOrEqual(1);
-    for (const m of medida.entreGrupos) expect(m).toBe(t.unidad * 4);
+    for (const m of medida.entreGrupos) expect(m).toBe(t.unidad * 2);
     expect(medida.listas).toHaveLength(2);
     for (const l of medida.listas) {
-      expect(l).toEqual({ hueco: t.unidad * 2, viñeta: 'none', relleno: '0px', filete: [t.grosor, 'solid', t.filete] });
+      expect(l).toEqual({ hueco: t.unidad, viñeta: 'none', relleno: '0px', filete: ['0px', 'none', t.tinta] });
     }
-    for (const hueco of medida.chips) expect(hueco).toBe(t.unidad * 2);
+    for (const hueco of medida.chips) expect(hueco).toBe(t.unidad);
     expect(medida.cierres).toHaveLength(2);
     for (const c of medida.cierres) expect(c).toEqual({ tamaño: t.md, color: t.tinta, subrayado: 'none' });
     expect(medida.arriba, 'el pie va por debajo de la última acción').toBeGreaterThanOrEqual(medida.islas);

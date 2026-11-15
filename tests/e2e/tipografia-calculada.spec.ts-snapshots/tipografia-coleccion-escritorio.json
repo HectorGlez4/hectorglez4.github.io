@@ -30,10 +30,10 @@
     "600 | 1.650": 35
   },
   "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.fragmento": {
-    "600 | 1.300": 33
+    "400 | 1.450": 33
   },
   "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.fragmento > span.verso": {
-    "600 | 1.300": 6
+    "400 | 1.450": 6
   },
   "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.obra": {
     "400 | 1.500": 35

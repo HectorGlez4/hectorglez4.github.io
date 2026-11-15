@@ -307,6 +307,23 @@ export const DESPLIEGUE_DEL_INCIPIT: string | undefined = undefined;
  */
 export const DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO: string | undefined = '2026-11-15';
 
+/**
+ * La llegada en vivo de los paneles de la Página de Cita y de la de Autor — la Épica 36, AD-9,
+ * AD-13, Historia 36.1.
+ *
+ * Es la jornada UTC en que termina el trabajo «Desplegar» de Actions que lleva la Épica 36 al
+ * sitio en vivo —nunca la del merge—, con la misma forma que las de arriba: `undefined` mientras
+ * no haya llegado. **Le da valor Héctor, en un commit aparte, y ningún agente la elige.**
+ *
+ * Con ella cambia el aspecto de lo que sigue a la Cita —la Tarjeta de Obra, las herramientas y las
+ * Rutas de salida, en paneles y con Fichas de Cita—, que es lo que miden la continuación de la
+ * Página de Cita (SM-4, y su complemento SM-3) y SM-C5; y, porque la Tarjeta de Cita es una sola
+ * (AD-19), también el listado de la Página de Obra, que pasa a Fichas y es lo que mide SM-C4. Su
+ * entrada en `CORTES_DE_SERIE_DECLARADOS` parte las dos continuaciones, `continuacion-de-cita` y
+ * `continuacion-de-obra`, y nada más.
+ */
+export const DESPLIEGUE_DE_LOS_PANELES: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -359,7 +376,8 @@ export interface CorteLlegado extends CorteDeSerie {
  * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
  * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2); la
  * de la primera atribuida (35.7), SM-8 y la continuación de la Página de Cita; la del incipit de
- * la 32 parte solo la continuación de la Página de Obra (Historia 32.3).
+ * la 32 parte solo la continuación de la Página de Obra (Historia 32.3), y la de los paneles de
+ * la 36, las continuaciones de la Página de Cita y de la de Obra (Historia 36.1).
  * Cada entrada nombra su constante en `deDondeLlega`, y una prueba lo coteja con su `jornada:`.
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
@@ -398,6 +416,12 @@ export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
     deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT',
     que: '«Cómo empieza» en la página 1 de Obra',
     series: ['continuacion-de-obra'],
+  },
+  {
+    jornada: DESPLIEGUE_DE_LOS_PANELES,
+    deDondeLlega: 'DESPLIEGUE_DE_LOS_PANELES',
+    que: 'los paneles de la Épica 36: la Tarjeta de Obra, las herramientas y las Rutas de salida de la Página de Cita en Panel de bloque, y las Fichas de Cita en ella y en los listados',
+    series: ['continuacion-de-cita', 'continuacion-de-obra'],
   },
 ];
 

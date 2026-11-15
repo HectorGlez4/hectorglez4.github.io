@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-15-2026 18:00
+last_updated: 11-15-2026 22:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -538,9 +538,9 @@ development_status:
   35-10-la-siembra-acotada-desde-brainyquote: review  # v9-ralph 2026-11-14: dos pasadas, 31 parches; con la traducción propia que decidió Héctor el 14/11 (FR-68 enmendado; la planificación v9.2 ya la recoge y la 35.11 la ajustó); semilla vacía, la siembra real es de Héctor
   35-11-la-traducción-propia-como-la-decidió-héctor: review  # v9-ralph 2026-11-15: la traducción propia como la decidió Héctor (sin línea en la página, partida {texto, lengua}, doble aprobación con corpus/aprobaciones-de-atribuidas.yml, sustitución por atribuida texto, segunda muestra de SM-C6); dos pasadas de revisión; supuestos aceptados por delegación de Héctor (14/11): orden de commits, LENGUAS_DE_PARTIDA, población por el fichero de hoy; pendientes de bmad-architecture en el spec
   epic-35-retrospective: optional
-  epic-36: backlog  # UX v9.3 (2026-11-14): se construye tras fundir las Épicas 29 a 35
-  36-1-los-paneles-de-la-página-de-cita-y-de-la-de-autor: backlog
-  36-2-el-mismo-patrón-en-obra-personaje-tema-y-colección: backlog
+  epic-36: in-progress  # UX v9.3 (2026-11-14): se construye tras fundir las Épicas 29 a 35
+  36-1-los-paneles-de-la-página-de-cita-y-de-la-de-autor: review  # v9-ralph 2026-11-15: paneles en la Página de Cita y en la página 1 de Autor (PanelDeBloque, tokens v9.3, TarjetaDeCita como Ficha en todos los listados por AD-19); corte DESPLIEGUE_DE_LOS_PANELES sin valor (continuación de Cita y de Obra); dos pasadas de revisión; supuestos de UX aceptados por delegación de Héctor (14/11), pendientes de bmad-ux; NFR-7 en la puerta de la épica
+  36-2-el-mismo-patrón-en-obra-personaje-tema-y-colección: review  # v9-ralph 2026-11-15: el mismo patrón en Obra y Personaje (decisión delegada 3 de Héctor, 14/11: sin panel encima del listado de Obra; Temas y «Cómo citar» en panel al pie; Personaje calca Autor); Tema y Colección ya en Fichas desde la 36.1; dos pasadas de revisión; pendiente de Héctor asentarlo en DESIGN.md (bmad-ux); NFR-7 en la puerta de la épica
   epic-36-retrospective: optional
 
 action_items:

@@ -1334,9 +1334,10 @@ test.describe('Historia 2.8 — responsive', () => {
           conTarjetas: lista !== null && lista.querySelector(':scope > li.tarjeta') !== null,
         })),
     );
-    // El margen negativo de la tarjeta (`margin-inline: -1 × --unidad`) la saca un `--unidad` por
-    // cada lado de la fila que la cierra: dentro de una lista con tarjetas, eso no es otra columna.
-    // Una lista solo de Filas de bloque (la Tarjeta de Obra) sigue con el píxel de siempre.
+    // Dentro de una lista con tarjetas, la tolerancia horizontal es de un `--unidad`: la nació el
+    // margen negativo que la Tarjeta de Cita llevaba hasta la 36.1 y se conserva como holgura; una
+    // diferencia así entre la Ficha y la fila que la cierra no es otra columna. Una lista solo de
+    // Filas de bloque (la Tarjeta de Obra) sigue con el píxel de siempre.
     const unidad = await page.evaluate(() => {
       const sonda = document.createElement('div');
       sonda.style.width = 'var(--unidad)';
@@ -1354,9 +1355,9 @@ test.describe('Historia 2.8 — responsive', () => {
      * cajas quedan separadas por el eje en el que no se cruzan.
      *
      * Las filas de un mismo `ul` de Tarjetas de Cita o de Filas de bloque —con el ancho entero
-     * de la columna y el filete entre una y otra, el único separador del sistema— no se miden
-     * entre sí: son enlaces de bloque de `EXPERIENCE.md` y su separación es el filete, no un
-     * hueco. Basta con que no se solapen (Historia 24.5: «Siguiente…» sobre «Ver la obra»; 24.6:
+     * de la columna— no se miden entre sí: son enlaces de bloque de `EXPERIENCE.md`, y su
+     * separación es el filete entre Filas o, desde la 36.1, el hueco de una `--unidad` entre
+     * Fichas de Cita, que mide `tests/e2e/paneles.spec.ts`. Basta con que no se solapen (Historia 24.5: «Siguiente…» sobre «Ver la obra»; 24.6:
      * las tarjetas y el cierre de cada grupo del pie, que sustituyen a las Citas hermanas). La
      * exención se nombra por componente, no por «cualquier lista», para que una botonera en `ul`
      * no se cuele por ella.
@@ -1858,7 +1859,12 @@ test.describe('Historia 32.4 — la página 1 de la Obra, reordenada', () => {
   const ANCLA = 'donde-leer-esta-obra';
   const DESPLEGABLES = 'header.cabecera-de-obra + div[data-pagefind-ignore="all"]';
   const DONDE_LEER = `${DESPLEGABLES} > details.desplegable:first-child`;
-  const COMO_CITAR = 'div[data-pagefind-ignore="all"]:has(> details.desplegable [data-como-citar])';
+  /*
+   * Historia 36.2 (decisión 3) — al pie, cada bloque en su Panel de bloque: el aire se mide entre
+   * los paneles, que son lo que se ve.
+   */
+  const PANEL_DE_TEMAS = '.panel.panel-tema:has(> .temas)';
+  const PANEL_DE_COMO_CITAR = '.panel.panel-herramientas:has([data-como-citar])';
 
   test('ninguna Página de Obra lleva el salto ni su ancla', async ({ page }) => {
     for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, OBRAS.segunda, OBRAS.tituloLargo]) {
@@ -2004,19 +2010,22 @@ test.describe('Historia 32.4 — la página 1 de la Obra, reordenada', () => {
    * Al fusionar la Épica 25, «Compartir en» (25.6) va entre el formulario y los Temas, a 5 × de cada
    * uno: «formulario → Temas 40» pasa a medirse como formulario → «Compartir en» 40 y «Compartir
    * en» → Temas 40, nunca a otra distancia (diferido en el spec de la 27.8).
+   *
+   * Historia 36.2 (decisión 3) — los Temas y «Cómo citar» van en sus paneles: el del Tema a 5 × del
+   * formulario, y el de las herramientas a 2 × de él (la regla de entre paneles de la primitiva).
    */
-  test('el pie: 5 × hasta «Buscar en esta obra», 5 × hasta los Temas, 5 × hasta «Cómo citar»; «Gratis» a 2 × y 1 ×', async ({ page }) => {
+  test('el pie: 5 × hasta «Buscar en esta obra», 5 × hasta el panel de los Temas, 2 × hasta el de «Cómo citar»; «Gratis» a 2 × y 1 ×', async ({ page }) => {
     const { conPaginacion, sinPaginacion } = PIE();
     await page.goto(conPaginacion);
     cerca(await hueco(page, 'nav.paginacion', 'form.buscar-en'), 40, `${conPaginacion}, Paginación → «Buscar en esta obra»`);
-    cerca(await hueco(page, 'form.buscar-en', '.temas'), 40, `${conPaginacion}, «Buscar en esta obra» → Temas`);
-    cerca(await hueco(page, '.temas', COMO_CITAR), 40, `${conPaginacion}, Temas → «Cómo citar»`);
+    cerca(await hueco(page, 'form.buscar-en', PANEL_DE_TEMAS), 40, `${conPaginacion}, «Buscar en esta obra» → Temas`);
+    cerca(await hueco(page, PANEL_DE_TEMAS, PANEL_DE_COMO_CITAR), 16, `${conPaginacion}, Temas → «Cómo citar»`);
 
     await page.goto(sinPaginacion);
     expect(await page.locator('nav.paginacion').count(), sinPaginacion).toBe(0);
     cerca(await hueco(page, 'ul.listado', 'form.buscar-en'), 40, `${sinPaginacion}, listado → «Buscar en esta obra»`);
-    cerca(await hueco(page, 'form.buscar-en', '.temas'), 40, `${sinPaginacion}, «Buscar en esta obra» → Temas`);
-    cerca(await hueco(page, '.temas', COMO_CITAR), 40, `${sinPaginacion}, Temas → «Cómo citar»`);
+    cerca(await hueco(page, 'form.buscar-en', PANEL_DE_TEMAS), 40, `${sinPaginacion}, «Buscar en esta obra» → Temas`);
+    cerca(await hueco(page, PANEL_DE_TEMAS, PANEL_DE_COMO_CITAR), 16, `${sinPaginacion}, Temas → «Cómo citar»`);
     await page.locator(`${DONDE_LEER} > summary`).click();
     cerca(await hueco(page, `${DONDE_LEER} > summary`, `${DONDE_LEER} .grupo`), 16, `${sinPaginacion}, <summary> → «Gratis»`);
     cerca(
@@ -2048,9 +2057,11 @@ test.describe('Historia 32.4 — la página 1 de la Obra, reordenada', () => {
         }
         nota.textContent = 'Una nota de una línea, como las que escribe Héctor.';
         document.querySelector(selector)!.after(nota);
-      }, COMO_CITAR);
+      }, PANEL_DE_COMO_CITAR);
     }
-    cerca(await hueco(page, COMO_CITAR, '.nota-de-la-ficha'), 32, `${ruta}, «Cómo citar» → nota`);
+    // Historia 36.2 — desde el borde del panel de «Cómo citar», y la nota fuera de él.
+    cerca(await hueco(page, PANEL_DE_COMO_CITAR, '.nota-de-la-ficha'), 32, `${ruta}, «Cómo citar» → nota`);
+    expect(await page.locator('.panel .nota-de-la-ficha').count(), `${ruta}, la nota fuera de todo panel`).toBe(0);
     const nota = await page.locator('.nota-de-la-ficha').evaluate((n) => {
       const s = getComputedStyle(n);
       return { filete: s.borderTopWidth, estilo: s.borderTopStyle, relleno: parseFloat(s.paddingTop) };

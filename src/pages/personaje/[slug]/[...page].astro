@@ -13,6 +13,10 @@
  * «Citas» y encima del listado, como «Buscar en {Autor}»: lleva a `/buscar/?personaje=`. Su Tarjeta Social (35.3b) es la
  * de listado, `/tarjeta/personaje/{slug}.png`, en todas sus páginas.
  * Las 2+ llevan el `h1` y el listado, y son `noindex` por forma (`superficies.ts`).
+ *
+ * Historia 36.2 (UX v9.3, «Fichas») — los paneles de la de Autor: en la página 1, la Ficha en el
+ * panel del Autor y la Lista de Obras en el de la Obra; el listado, en Fichas sobre el papel. Las 2+,
+ * sin panel.
  */
 import Armazon from '../../../components/Armazon.astro';
 import DatosDePersonaje from '../../../components/DatosDePersonaje.astro';
@@ -23,6 +27,7 @@ import AtribucionDeSemblanza from '../../../components/AtribucionDeSemblanza.ast
 import ListaDeObras from '../../../components/ListaDeObras.astro';
 import Desplegable from '../../../components/Desplegable.astro';
 import Rotulo from '../../../components/Rotulo.astro';
+import PanelDeBloque from '../../../components/PanelDeBloque.astro';
 import BuscarEn from '../../../components/BuscarEn.astro';
 import { rotuloBuscarEnPersonaje } from '../../../lib/busqueda.ts';
 import {
@@ -104,26 +109,44 @@ const pieDeObras =
     tramo={{ actual: pagina.currentPage, porPagina: CITAS_POR_PAGINA }}
   />
   <div class="pagina contenedor">
-    <header class="ficha">
-      <h1>{personaje.nombre}</h1>
-      {primera && <p class="universo">{universoDePersonaje(personaje)}</p>}
-      {
-        semblanza !== undefined && (
-          <div data-pagefind-ignore>
-            <p class="semblanza">{semblanza}</p>
-            {atribucion !== undefined && <AtribucionDeSemblanza atribucion={atribucion} />}
-          </div>
-        )
-      }
-    </header>
+    {
+      /*
+       * Historia 36.2 — calca la de Autor (36.1): en la página 1, la Ficha va en el Panel de bloque
+       * del Autor, con el nombre en su tinta; las 2+ no tienen Ficha —solo el `h1`—, y su `h1` queda
+       * sobre el papel.
+       */
+      primera ? (
+        <PanelDeBloque familia="autor" cierre="texto">
+          <header class="ficha">
+            <h1>{personaje.nombre}</h1>
+            <p class="universo">{universoDePersonaje(personaje)}</p>
+            {
+              semblanza !== undefined && (
+                <div data-pagefind-ignore>
+                  <p class="semblanza">{semblanza}</p>
+                  {atribucion !== undefined && <AtribucionDeSemblanza atribucion={atribucion} />}
+                </div>
+              )
+            }
+          </header>
+        </PanelDeBloque>
+      ) : (
+        <header class="ficha">
+          <h1>{personaje.nombre}</h1>
+        </header>
+      )
+    }
 
     {
+      /* Historia 36.2 — la Lista de Obras, en el Panel de bloque de la Obra, como en la de Autor. */
       primera && (conLista || pieDeObras !== undefined) && (
-        <section class="obras-del-personaje" aria-labelledby="sus-obras" data-pagefind-ignore>
-          <Rotulo id="sus-obras">Obras en este Corpus</Rotulo>
-          <ListaDeObras obras={susObras.obras} zona="lista-de-obras" pliegue={Desplegable} />
-          {pieDeObras !== undefined && <p class="sin-obra">{pieDeObras}</p>}
-        </section>
+        <PanelDeBloque familia="obra" cierre={pieDeObras !== undefined ? 'texto' : 'fila'}>
+          <section class="obras-del-personaje" aria-labelledby="sus-obras" data-pagefind-ignore>
+            <Rotulo id="sus-obras">Obras en este Corpus</Rotulo>
+            <ListaDeObras obras={susObras.obras} zona="lista-de-obras" pliegue={Desplegable} />
+            {pieDeObras !== undefined && <p class="sin-obra">{pieDeObras}</p>}
+          </section>
+        </PanelDeBloque>
       )
     }
 
@@ -181,13 +204,19 @@ const pieDeObras =
     max-width: var(--medida-prosa);
   }
 
+  /* Historia 36.2 — en su panel: el aire de encima es el de entre paneles (2 × `--unidad`). */
   .obras-del-personaje {
-    margin-top: calc(var(--unidad) * 5);
     max-width: var(--medida-prosa);
   }
 
+  /* La lista, a una `--unidad` del rótulo, como todo contenido de un Rótulo de panel (36.1). */
   .obras-del-personaje > :global(.lista-de-obras) {
-    margin-top: calc(var(--unidad) * 2);
+    margin-top: var(--unidad);
+  }
+
+  /* Historia 36.2 — el nombre, en la tinta del panel del Autor, como en la de Autor (36.1). */
+  :global(.panel-autor) h1 {
+    color: var(--sobre-contenedor-autor);
   }
 
   .sin-obra {
@@ -207,11 +236,11 @@ const pieDeObras =
     color: var(--tinta-apagada);
   }
 
+  /* Historia 36.1 — en Fichas, que ya se separan por su caja: sin filete encima del listado. */
   .listado {
     list-style: none;
     margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
-    border-top: var(--grosor-filete) solid var(--filete);
   }
 
   /* Historia 35.5 — «Buscar en {Personaje}», a 2 × `--unidad` del rótulo, como en la de Autor. */

@@ -35,6 +35,13 @@
  *
  * No hay enlace «Ver la ficha del Autor» aparte del cierre: la atribución de arriba ya lleva a
  * su página, y el siena en tres sitios de la misma pantalla deja de señalar.
+ *
+ * **Cada grupo en su Panel de bloque** (Historia 36.1, DESIGN.md v9.3): «De la misma obra» en el
+ * de la Obra, «Más de {Autor}» —o de {Personaje}— en el del Autor y «Temas» en el de Tema, a
+ * 2 × `--unidad` uno de otro, con su Rótulo de panel y sin el filete del pie ni el de cada lista:
+ * el panel los sustituye. Las Citas van en Ficha de Cita, y el cierre es la última Fila de bloque
+ * del panel, a una `--unidad` de la última ficha y sin divisoria encima. El panel envuelve la
+ * `section` de siempre, sin rol ni zona: el `nav` sigue siendo el único punto de referencia.
  */
 import { problemaDeRutasDeSalida, type RutasDeSalidaDeCita } from '../lib/publicado.ts';
 import type { Dueño } from '../lib/obras.ts';
@@ -44,6 +51,7 @@ import { rutaDeAutor, rutaDePersonaje, rutaDeTema } from '../lib/superficies.ts'
 import type { Zona } from '../lib/vocabulario.ts';
 import Chips from './Chips.astro';
 import FilaDeBloque from './FilaDeBloque.astro';
+import PanelDeBloque from './PanelDeBloque.astro';
 import Rotulo from './Rotulo.astro';
 import TarjetaDeCita from './TarjetaDeCita.astro';
 
@@ -99,7 +107,7 @@ const cierre =
   hayAlgo && (
     <nav class="salidas" aria-label="Seguir leyendo" data-pagefind-ignore="all">
       {mismaObra !== undefined && (
-        <section class="de-la-misma-obra">
+        <PanelDeBloque familia="obra" cierre="fila"><section class="de-la-misma-obra">
           <Rotulo id="de-la-misma-obra">De la misma obra</Rotulo>
           <ul class="tarjetas">
             {mismaObra.citas.map((otra) => (
@@ -107,10 +115,10 @@ const cierre =
             ))}
             <FilaDeBloque href={rutaDeLaObra(mismaObra.obra)} zona="misma-obra" avance>{cierreDeLaMismaObra(mismaObra.obra)}</FilaDeBloque>
           </ul>
-        </section>
+        </section></PanelDeBloque>
       )}
       {delDueño !== undefined && cierre !== undefined && (
-        <section class="mas-del-autor">
+        <PanelDeBloque familia="autor" cierre="fila"><section class="mas-del-autor">
           <Rotulo id="mas-del-autor">Más de {dueño.nombre}</Rotulo>
           <ul class="tarjetas">
             {delDueño.citas.map((otra) => (
@@ -118,16 +126,16 @@ const cierre =
             ))}
             <FilaDeBloque href={cierre.ruta} zona={zona} avance>{cierre.texto}</FilaDeBloque>
           </ul>
-        </section>
+        </section></PanelDeBloque>
       )}
       {temas.length > 0 && (
-        <section class="temas-de-la-cita">
+        <PanelDeBloque familia="tema" cierre="texto"><section class="temas-de-la-cita">
           <Rotulo id="temas-de-la-cita">Temas</Rotulo>
           <Chips
             enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))}
             zona="chip-de-tema"
           />
-        </section>
+        </section></PanelDeBloque>
       )}
     </nav>
   )
@@ -141,8 +149,6 @@ const cierre =
    */
   .salidas {
     margin-top: calc(var(--unidad) * 8);
-    padding-top: calc(var(--unidad) * 3);
-    border-top: var(--grosor-filete) solid var(--filete);
     max-width: var(--medida-prosa);
   }
 
@@ -152,15 +158,18 @@ const cierre =
     }
   }
 
-  section + section {
-    margin-top: calc(var(--unidad) * 4);
-  }
-
-  /* Como el listado de la Página de Autor: filete encima de la primera, y cada fila pone el suyo debajo. */
+  /*
+   * Historia 36.1 — el filete del pie y el de cada lista los sustituye el panel, y el aire entre
+   * grupos es el de entre paneles (2 × `--unidad`, en `PanelDeBloque`). Las Fichas, a una
+   * `--unidad` del rótulo y entre sí; el cierre, a una de la última ficha.
+   */
   .tarjetas {
     list-style: none;
     padding: 0;
-    margin: calc(var(--unidad) * 2) 0 0;
-    border-top: var(--grosor-filete) solid var(--filete);
+    margin: var(--unidad) 0 0;
+  }
+
+  .tarjetas > :global(.fila-de-bloque) {
+    margin-top: var(--unidad);
   }
 </style>

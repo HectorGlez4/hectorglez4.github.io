@@ -24,6 +24,7 @@ import AtribucionDeSemblanza from '../../../components/AtribucionDeSemblanza.ast
 import ListaDeObras from '../../../components/ListaDeObras.astro';
 import Desplegable from '../../../components/Desplegable.astro';
 import Rotulo from '../../../components/Rotulo.astro';
+import PanelDeBloque from '../../../components/PanelDeBloque.astro';
 import {
   autoresPublicados,
   citasDeAutor,
@@ -114,27 +115,41 @@ const pieDeObras =
     documentadas={documentadas}
   />
   <div class="pagina contenedor">
-    <header class="ficha">
-      <h1>{autor.nombre}</h1>
-      {primera && años !== undefined && <p class="años">{años}</p>}
-      {
-        semblanza !== undefined &&
-          (enElIndice ? (
-            <p class="semblanza">{semblanza}</p>
-          ) : (
-            /*
-             * Fuera del índice de Pagefind, con su atribución debajo: un resultado de búsqueda
-             * la recortaría en un fragmento sin atribución.
-             */
-            <div data-pagefind-ignore>
-              <p class="semblanza">{semblanza}</p>
-              {autor.atribucion !== undefined && (
-                <AtribucionDeSemblanza atribucion={autor.atribucion} />
-              )}
-            </div>
-          ))
-      }
-    </header>
+    {
+      /*
+       * Historia 36.1 — en la página 1, la Ficha de Autor va en el Panel de bloque del Autor, con el
+       * nombre en su tinta; las 2+ no tienen Ficha —solo el `h1`—, y su `h1` queda sobre el papel.
+       */
+      primera ? (
+        <PanelDeBloque familia="autor" cierre="texto">
+          <header class="ficha">
+            <h1>{autor.nombre}</h1>
+            {años !== undefined && <p class="años">{años}</p>}
+            {
+              semblanza !== undefined &&
+                (enElIndice ? (
+                  <p class="semblanza">{semblanza}</p>
+                ) : (
+                  /*
+                   * Fuera del índice de Pagefind, con su atribución debajo: un resultado de búsqueda
+                   * la recortaría en un fragmento sin atribución.
+                   */
+                  <div data-pagefind-ignore>
+                    <p class="semblanza">{semblanza}</p>
+                    {autor.atribucion !== undefined && (
+                      <AtribucionDeSemblanza atribucion={autor.atribucion} />
+                    )}
+                  </div>
+                ))
+            }
+          </header>
+        </PanelDeBloque>
+      ) : (
+        <header class="ficha">
+          <h1>{autor.nombre}</h1>
+        </header>
+      )
+    }
 
     {
       /*
@@ -142,11 +157,13 @@ const pieDeObras =
        * del catálogo. Es parte de la ficha, así que solo la lleva la página 1 (17.4).
        */
       primera && (conLista || pieDeObras !== undefined) && (
-        <section class="obras-del-autor" aria-labelledby="su-obra" data-pagefind-ignore>
-          <Rotulo id="su-obra">Su obra en este Corpus</Rotulo>
-          <ListaDeObras obras={suObra.obras} zona="lista-de-obras" pliegue={Desplegable} />
-          {pieDeObras !== undefined && <p class="sin-obra">{pieDeObras}</p>}
-        </section>
+        <PanelDeBloque familia="obra" cierre={pieDeObras !== undefined ? 'texto' : 'fila'}>
+          <section class="obras-del-autor" aria-labelledby="su-obra" data-pagefind-ignore>
+            <Rotulo id="su-obra">Su obra en este Corpus</Rotulo>
+            <ListaDeObras obras={suObra.obras} zona="lista-de-obras" pliegue={Desplegable} />
+            {pieDeObras !== undefined && <p class="sin-obra">{pieDeObras}</p>}
+          </section>
+        </PanelDeBloque>
       )
     }
 
@@ -212,14 +229,22 @@ const pieDeObras =
     max-width: var(--medida-prosa);
   }
 
+  /* Historia 36.1 — en su panel: el aire de encima es el de entre paneles (2 × `--unidad`). */
   .obras-del-autor {
-    margin-top: calc(var(--unidad) * 5);
     max-width: var(--medida-prosa);
   }
 
-  /* La lista, a 2 × `--unidad` del rótulo: el espacio de encima es de quien la usa (26.4). */
+  /*
+   * La lista, a una `--unidad` del rótulo, como todo contenido de un Rótulo de panel (36.1): el
+   * espacio de encima es de quien la usa (26.4).
+   */
   .obras-del-autor > :global(.lista-de-obras) {
-    margin-top: calc(var(--unidad) * 2);
+    margin-top: var(--unidad);
+  }
+
+  /* Historia 36.1 — el nombre, en la tinta del panel del Autor; cuerpo y familia sin cambio. */
+  :global(.panel-autor) h1 {
+    color: var(--sobre-contenedor-autor);
   }
 
   .sin-obra {
@@ -244,11 +269,11 @@ const pieDeObras =
     margin-top: calc(var(--unidad) * 2);
   }
 
+  /* Historia 36.1 — en Fichas, que ya se separan por su caja: sin filete encima del listado. */
   .listado {
     list-style: none;
     margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
-    border-top: var(--grosor-filete) solid var(--filete);
   }
 
   /* En la página 1, el listado empieza 3 × `--unidad` bajo «Buscar en {Autor}». */

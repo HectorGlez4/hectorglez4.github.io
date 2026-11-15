@@ -145,6 +145,19 @@ OBRAS_DE_D.forEach((obra, i) => {
     obra,
   );
 });
+// Historia 36.2 — D dice además una Cita sin obra: su Lista de Obras lleva el pie y el panel cierra
+// en `texto` (atribuida con solo el año en su Procedencia y sin Fuente: ninguna Obra la reclama).
+CORPUS['citas/vivo--c-de-d-sin-obra.md'] = citaValida({
+  texto: textoPropio('De D sin obra', 777),
+  slug: 'vivo-c-de-d-sin-obra',
+  autor: 'vivo',
+  personaje: 'd',
+  clase: 'atribuida',
+  estadoDerechos: undefined,
+  ...ATESTIGUADA,
+  procedencia: { año: 2000 },
+  fuente: undefined,
+});
 for (let i = 1; i <= CITAS_POR_PAGINA; i += 1) {
   CORPUS[`citas/vivo--de-a-${pad(i)}.md`] = atribuida(
     `vivo-de-a-${pad(i)}`,
@@ -273,6 +286,51 @@ describe('Historia 35.3 — la Página de Personaje construida', () => {
     );
     // La línea de procedencia no cambia: el título de la Obra sigue enlazando a su página.
     expect(cita).toMatch(/<p class="procedencia"[^>]*><a href="\/obra\/vivo\/obras-de-la-autora\/"/u);
+  });
+
+  it('Historia 36.2 — la semblanza y su atribución, dentro del panel del Autor; las 2+, sin ningún panel', () => {
+    for (const [ruta, firma] of [
+      ['/personaje/b/', 'Semblanza de Héctor González.'],
+      ['/personaje/c/', 'Semblanza tomada de'],
+    ] as const) {
+      const panel = /<div class="panel panel-autor cierre-texto"[^>]*>\s*<header class="ficha"[\s\S]*?<\/header>\s*<\/div>/u.exec(main(ruta))?.[0];
+      expect(panel, ruta).toBeDefined();
+      expect(panel, ruta).toContain('class="semblanza"');
+      expect(panel, ruta).toContain(firma);
+    }
+    const segunda = main('/personaje/a/2/');
+    expect(segunda).not.toContain('class="panel ');
+    expect(segunda).toMatch(/<header class="ficha"[^>]*>\s*<h1[^>]*>Personaje A<\/h1>\s*<\/header>/u);
+  });
+
+  it('Historia 36.2 — la hoja de la página: el nombre en la tinta del panel del Autor y la Lista de Obras a una unidad de su rótulo', () => {
+    const reglas = [...html('/personaje/a/').matchAll(/<style>([\s\S]*?)<\/style>/gu)].flatMap((m) =>
+      [...m[1].matchAll(/([^{}]+)\{([^{}]*)\}/gu)].map((r) => ({
+        selectores: r[1]
+          .replace(/\[data-astro-cid-[\w-]+\]/gu, '')
+          .split(',')
+          .map((x) => x.replace(/\s+/gu, ' ').replace(/\s*>\s*/gu, '>').trim()),
+        cuerpo: r[2],
+      })),
+    );
+    const de = (selector: string) =>
+      reglas
+        .filter((r) => r.selectores.includes(selector))
+        .map((r) => r.cuerpo)
+        .join(';');
+    expect(de('.panel-autor h1'), '.panel-autor h1').toMatch(/color:\s*var\(--sobre-contenedor-autor\)/u);
+    expect(de('.obras-del-personaje>.lista-de-obras')).toMatch(/margin-top:\s*var\(--unidad\)/u);
+    expect(reglas.some((r) => r.selectores.includes('.obras-del-personaje')), 'la regla existe').toBe(true);
+    expect(de('.obras-del-personaje')).not.toMatch(/margin-top/u);
+  });
+
+  it('Historia 36.2 — con Citas sin obra, la Lista de Obras y su pie van en el panel de la Obra, que cierra en `texto`', () => {
+    const panel = /<div class="panel panel-obra cierre-texto"[^>]*>\s*<section class="obras-del-personaje"[\s\S]*?<\/section>\s*<\/div>/u.exec(
+      main('/personaje/d/'),
+    )?.[0];
+    expect(panel).toBeDefined();
+    expect(panel).toMatch(/<p class="sin-obra"[^>]*>Y una cita sin obra documentada\.<\/p>/u);
+    expect(main('/personaje/a/')).toContain('<div class="panel panel-obra cierre-fila"');
   });
 
   it('la semblanza de una biografía, fuera de Pagefind y con su atribución visible (AD-26, AD-28)', () => {

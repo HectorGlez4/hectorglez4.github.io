@@ -48,10 +48,10 @@
     "600 | 1.650": 50
   },
   "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.fragmento": {
-    "600 | 1.300": 49
+    "400 | 1.450": 49
   },
   "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.fragmento > span.verso": {
-    "600 | 1.300": 3
+    "400 | 1.450": 3
   },
   "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.obra": {
     "400 | 1.500": 50

@@ -20,21 +20,6 @@
   "header.cabecera.contenedor > nav > ul.principal > li > span.punto": {
     "400 | 1.650": 2
   },
-  "main > div.contenedor.pagina > div > details.desplegable > div.contenido > div.como-citar > div.estilo > button.copiar-referencia > span": {
-    "400 | 1.600": 3
-  },
-  "main > div.contenedor.pagina > div > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia": {
-    "400 | 1.600": 3
-  },
-  "main > div.contenedor.pagina > div > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia > i": {
-    "400 | 1.600": 4
-  },
-  "main > div.contenedor.pagina > div > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia > span": {
-    "400 | 1.600": 3
-  },
-  "main > div.contenedor.pagina > div > details.desplegable > div.contenido > div.como-citar > div.estilo > p.rotulo": {
-    "600 | 1.500": 3
-  },
   "main > div.contenedor.pagina > div > details.desplegable > div.contenido > div.grupo > p.linea": {
     "400 | 1.500": 1
   },
@@ -48,10 +33,37 @@
     "600 | 1.500": 1
   },
   "main > div.contenedor.pagina > div > details.desplegable > summary > span": {
-    "600 | 1.400": 2
+    "600 | 1.400": 1
   },
   "main > div.contenedor.pagina > div > details.desplegable > summary > span > span.glifo > span.giro": {
-    "600 | 1.400": 2
+    "600 | 1.400": 1
+  },
+  "main > div.contenedor.pagina > div.cierre-fila.panel.panel-herramientas > div > details.desplegable > div.contenido > div.como-citar > div.estilo > button.copiar-referencia > span": {
+    "400 | 1.600": 3
+  },
+  "main > div.contenedor.pagina > div.cierre-fila.panel.panel-herramientas > div > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia": {
+    "400 | 1.600": 3
+  },
+  "main > div.contenedor.pagina > div.cierre-fila.panel.panel-herramientas > div > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia > i": {
+    "400 | 1.600": 4
+  },
+  "main > div.contenedor.pagina > div.cierre-fila.panel.panel-herramientas > div > details.desplegable > div.contenido > div.como-citar > div.estilo > p.referencia > span": {
+    "400 | 1.600": 3
+  },
+  "main > div.contenedor.pagina > div.cierre-fila.panel.panel-herramientas > div > details.desplegable > div.contenido > div.como-citar > div.estilo > p.rotulo": {
+    "600 | 1.500": 3
+  },
+  "main > div.contenedor.pagina > div.cierre-fila.panel.panel-herramientas > div > details.desplegable > summary > span": {
+    "600 | 1.400": 1
+  },
+  "main > div.contenedor.pagina > div.cierre-fila.panel.panel-herramientas > div > details.desplegable > summary > span > span.glifo > span.giro": {
+    "600 | 1.400": 1
+  },
+  "main > div.contenedor.pagina > div.cierre-texto.panel.panel-tema > section.temas > h2.rotulo": {
+    "600 | 1.400": 1
+  },
+  "main > div.contenedor.pagina > div.cierre-texto.panel.panel-tema > section.temas > ul.chips > li > a.chip": {
+    "400 | 1.650": 5
   },
   "main > div.contenedor.pagina > form.buscar-en > div.campo-de-busqueda > button.buscar": {
     "400 | normal": 1
@@ -68,13 +80,7 @@
   "main > div.contenedor.pagina > header.cabecera-de-obra > p.de > a.enlace-en-tinta": {
     "400 | 1.600": 1
   },
-  "main > div.contenedor.pagina > section.temas > h2.rotulo": {
-    "600 | 1.400": 1
-  },
-  "main > div.contenedor.pagina > section.temas > ul.chips > li > a.chip": {
-    "400 | 1.650": 5
-  },
   "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.fragmento": {
-    "600 | 1.300": 14
+    "400 | 1.450": 14
   }
 }

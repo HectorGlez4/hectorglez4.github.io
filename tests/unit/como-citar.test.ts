@@ -89,6 +89,9 @@ function hijosDelArticle(html: string): { que: string; elemento: Elemento }[] {
             ? 'compartir'
             : clases.includes('tarjeta-de-obra')
               ? 'tarjeta'
+              // Historia 36.1 — el único Panel de bloque hijo del `article` es el de la Tarjeta de Obra.
+              : clases.includes('panel-obra')
+              ? 'tarjeta'
               : clases.includes('desplegables')
                 ? 'desplegables'
                 : clases.includes('salidas')
