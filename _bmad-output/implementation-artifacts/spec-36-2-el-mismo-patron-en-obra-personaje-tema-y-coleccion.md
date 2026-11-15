@@ -199,3 +199,17 @@ Puerta de la etapa s-36 (Épica 36, Fichas: 36.1 y 36.2), sobre `v9/epica-36`.
 - **Punta a punta** (`npm run test:e2e`, los dos proyectos, receptor local en 8787): 1490 pasan, 185 se omiten, 1 falla —`como-citar.spec.ts:223` (escritorio; el último `copiado-de-referencia` aún no había llegado al leer), el conocido de la principal y por tiempos—. Repetido el fichero en los dos proyectos: 28/28.
 - **NFR-7.** La etapa reviste la Página de Cita, la de Obra y la de Autor, así que aplica: las cinco páginas medidas difieren de la principal (Cita 44.301 → 47.267 bytes, Obra 50.577 → 53.323, Autor 51.418 → 54.212, portada y `/buscar/` +308) y la hoja `_slug_` cambia. `dist/` de `origin/main` (árbol aparte bajo `tmp-wt/`, retirado después) y de la rama, los dos con `MEDICION_ENDPOINT=http://localhost:8787/` y `FECHA_JORNADA=2026-11-15`; Lighthouse 13.5.0 móvil (`simulate`, Chrome sin cabeza), servido con el `tests/servidor.mjs` de la rama, `SERVIDOR_CACHE_CONTROL=max-age=600`, `SERVIDOR_GZIP=1`, receptor 204 en 8787, 10 corridas alternas por página. Medias en ms, principal → rama: Cita LCP 1654 → 1653, FCP 911 → 926 (+15); Obra p1 (*Don Quijote*) LCP 1652 → 1652, FCP 845 → 871 (+26); Autor p1 (Cervantes) LCP 1501 → 1502, FCP 770 → 770; portada LCP 1502 → 1501, FCP 770 → 770; `/buscar/` LCP 1652 → 1652, FCP 936 → 951 (+16). Todo dentro de max(100 ms, 5 %) y la Cita bajo 2500 ms: veredicto **no peor**, sin desempate. Registro: `.claude/v9-ralph/logs/s-36/nfr7-gate1/serie-simulate.log`.
 - Nada se arregló en esta puerta, nada se empujó y todos los servidores quedaron parados.
+
+## Verificación en el sitio en vivo — 2026-11-15
+
+Fusión 25a75e2724, Publicar 43719735011 verde («Desplegar» 2026-11-15T14:17:30Z). Solo curl.
+
+| Historia | URL | Qué se buscó | Resultado |
+|---|---|---|---|
+| 36.1 | /cita/antonio-machado-caminante-no-hay-camino-se-hace-camino/ | `div.panel` (Tarjeta de Obra, herramientas, Rutas de salida) | 4 paneles |
+| 36.1 | /autor/miguel-de-cervantes/ | Ficha en panel Autor, Lista de Obras en panel Obra | 2 paneles |
+| 36.2 | /obra/miguel-de-cervantes/don-quijote/ | ningún panel antes del listado; Temas y «Cómo citar» al pie | 2 paneles, el primero tras `ul.listado` |
+| 36.1/36.2 | / | la portada sigue plana | 0 paneles |
+| 36.2 | /personaje/… | Personaje en paneles | sin datos que enseñar (no hay Personajes) |
+
+`DESPLIEGUE_DE_LOS_PANELES` se queda sin valor: su jornada la asienta Héctor (corte de serie de continuación de Cita y de Obra); el bucle no se la da, porque el spec la define como constante de despliegue pendiente y su valor es de Héctor.
