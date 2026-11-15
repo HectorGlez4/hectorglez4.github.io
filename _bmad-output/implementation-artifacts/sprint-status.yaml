@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-15-2026 12:00
+last_updated: 11-15-2026 18:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -534,7 +534,7 @@ development_status:
   35-6-la-variante-de-españa-y-la-única-orden-que-cambia-una-atribu: review  # v9-ralph 2026-11-15: la Variante de España de la atribuida y npm run atribuida, la única orden que cambia una atribuida (la puerta sigue cerrada en el árbol); dos pasadas de revisión; supuestos para Héctor en el spec
   35-7-lo-que-cuenta-solo-la-clase-de-siempre: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 22 parches; 8 diferidos para Héctor en el spec
   35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 28 parches; diferidos para Héctor en el spec (BUZON_DE_PETICIONES y las constantes de SM-C6 sin valor; EXPERIENCE.md 3.2.6 por bmad-ux)
-  35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog
+  35-9-la-obra-con-derechos-vigentes-se-vende-sola: review  # v9-ralph 2026-11-15: la Obra con derechos vigentes se vende sola (derechosDeLaObra, lo cotejado solo de la clase de siempre, sin Gratis ni Cómo citar ni Cómo empieza, veto del incipit, curar-primero, AD-27 por los umbrales); dos pasadas de revisión; espaciado de la venta sola aceptado por delegación de Héctor (14/11), pendiente de bmad-ux; PLAZO_DE_PROTECCION_AÑOS y AÑO_DE_REFERENCIA sin valor
   35-10-la-siembra-acotada-desde-brainyquote: review  # v9-ralph 2026-11-14: dos pasadas, 31 parches; con la traducción propia que decidió Héctor el 14/11 (FR-68 enmendado; la planificación v9.2 ya la recoge y la 35.11 la ajustó); semilla vacía, la siembra real es de Héctor
   35-11-la-traducción-propia-como-la-decidió-héctor: review  # v9-ralph 2026-11-15: la traducción propia como la decidió Héctor (sin línea en la página, partida {texto, lengua}, doble aprobación con corpus/aprobaciones-de-atribuidas.yml, sustitución por atribuida texto, segunda muestra de SM-C6); dos pasadas de revisión; supuestos aceptados por delegación de Héctor (14/11): orden de commits, LENGUAS_DE_PARTIDA, población por el fichero de hoy; pendientes de bmad-architecture en el spec
   epic-35-retrospective: optional
