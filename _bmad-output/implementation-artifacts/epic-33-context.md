@@ -44,7 +44,8 @@ Héctor prepara la afiliación de libros sin que arranque ningún plazo de venta
 ## Cross-Story Dependencies
 
 - **33.1** no depende de nada; construible sobre la principal con `TIENDAS` vacío.
-- **33.2** va detrás de la **32.4** («Dónde leer esta obra» ya plegado, antes del listado, con su grupo «Gratis» y su rótulo de grupo, y el bloque de la 22.9 dentro tras «Gratis») y de la **33.1** (una edición de tienda sin marca declarable). Sin esas dos, no empieza. La 32.4 es de la Épica 32, que va detrás de la 29, la 34.0, la 30.3, la 30.5 y la 31.1.
+- **33.2** va detrás de la **32.4** («Dónde leer esta obra» ya plegado, antes del listado, con su grupo «Gratis» y su rótulo de grupo, y el bloque de la 22.9 dentro tras «Gratis») y de la **33.1** (una edición de tienda sin marca declarable). Sin esas dos, no empieza. Las dos están ya en la rama: la 33.1 en revisión, y la 32.4 llegó con la Épica 32 fundida en la principal (2026-11-15).
 - **33.3** no depende de las otras dos; lee la serie de demanda tal como la escribe la Historia 20.3.
-- Ninguna espera a las Épicas 25 y 28 de la v8. La 35.9 consume de aquí las tiendas sin marca (33.1), `edicionesPorFormato` (33.2) y `curar-primero` (33.3).
+- Ninguna espera a las Épicas 25 y 28 de la v8. Los paneles de la v9.3 (Fichas, Épica 36) vienen después: las ediciones en venta conservan su presentación dentro de su `data-ingreso`.
+- Pregunta abierta de la épica: si el orden de las tiendas dentro de un formato es el de `TIENDAS` (lo que asume la 33.2) o el de la ficha. La 35.9 consume de aquí las tiendas sin marca (33.1), `edicionesPorFormato` (33.2) y `curar-primero` (33.3).
 - `AGENTS.md` § Encender la afiliación de libros se pone al día con la 33.1 (tienda sin marca, la puerta) y la 33.2 (grupos, congelación que oculta, prueba de los dos estados); § Leer la demanda por página gana el párrafo de la orden con la 33.3.
