@@ -62,4 +62,4 @@ export const SITIO = process.env.SITE_URL?.trim() || `https://${DOMINIO}`;
  * retirada (`src/components/LineaDeRetirada.astro`, Historia 35.8), que para la construcción sin
  * ella: un alias dedicado y desechable, nunca una dirección personal.
  */
-export const BUZON_DE_PETICIONES: string | undefined = undefined;
+export const BUZON_DE_PETICIONES: string | undefined = 'hector.gonzalez@work-it.fr';
