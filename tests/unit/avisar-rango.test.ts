@@ -55,7 +55,10 @@ const BATMAN = '/personaje/batman/';
 const BREVEDAD = '/obra/seneca/brevedad/';
 const IRA = '/obra/seneca/ira/';
 
-const UMBRALES = await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
+// Historia 35.9 — el estado de partida es «sin plazo», tenga el árbol el valor que le dé Héctor.
+const UMBRALES = (await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8'))
+  .replace(/^export const PLAZO_DE_PROTECCION_AÑOS: number \| undefined = [^;\n]+;/mu, 'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;')
+  .replace(/^export const AÑO_DE_REFERENCIA: number \| undefined = [^;\n]+;/mu, 'export const AÑO_DE_REFERENCIA: number | undefined = undefined;');
 const SIN_CONGELAR = 'export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = undefined;';
 const congelado = (nombres: string[]) =>
   UMBRALES.replace(

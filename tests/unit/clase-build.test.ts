@@ -176,14 +176,15 @@ describe('Historia 35.1 — la clase en el build', () => {
 
   it('con plazo en la copia, la Cita de siempre de un Autor protegido rompe nombrando la Cita', async () => {
     const umbrales = readFileSync(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
-    // Sustituye el valor que tengan, sea cual sea: ninguna prueba fija el de las constantes.
+    // Sustituye el valor que tengan, sea cual sea: ninguna prueba fija el de las constantes. El 81 no es
+    // ningún valor de Héctor: es uno distinto del suyo, para que el parche siempre cambie algo.
     const parcheado = umbrales
       .replace(
         /^export const PLAZO_DE_PROTECCION_AÑOS: number \| undefined = [^;\n]+;/mu,
-        'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = 70;',
+        'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = 81;',
       )
       .replace(/^export const AÑO_DE_REFERENCIA: number \| undefined = [^;\n]+;/mu, 'export const AÑO_DE_REFERENCIA: number | undefined = 2026;');
-    expect(parcheado.match(/^export const (PLAZO_DE_PROTECCION_AÑOS|AÑO_DE_REFERENCIA): number \| undefined = (70|2026);$/gmu)).toHaveLength(2);
+    expect(parcheado.match(/^export const (PLAZO_DE_PROTECCION_AÑOS|AÑO_DE_REFERENCIA): number \| undefined = (81|2026);$/gmu)).toHaveLength(2);
     const r = await construirConCorpus(
       {
         ...BASE,

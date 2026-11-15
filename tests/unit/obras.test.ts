@@ -1898,7 +1898,8 @@ describe('35.9 — la Obra con derechos vigentes', () => {
     expect(derechosDeLaObra(deBatman, AUTORES)).toBe(true);
     expect(derechosDeLaObra(deAutor('viva--la-obra', 'viva'), AUTORES)).toBe(true);
     expect(derechosDeLaObra(deAutor('larra--la-obra', 'larra'), AUTORES)).toBe(false);
-    expect(derechosDeLaObra(deAutor('reciente--la-obra', 'reciente'), AUTORES)).toBe(false);
+    // Sin plazo, dicho por parámetro: el árbol lo fija Héctor y la prueba no depende de su valor.
+    expect(derechosDeLaObra(deAutor('reciente--la-obra', 'reciente'), AUTORES, {})).toBe(false);
     const conPlazo = { plazo: 70, año: 2026 };
     expect(derechosDeLaObra(deAutor('reciente--la-obra', 'reciente'), AUTORES, conPlazo)).toBe(true);
     expect(derechosDeLaObra(deAutor('larra--la-obra', 'larra'), AUTORES, conPlazo)).toBe(false);

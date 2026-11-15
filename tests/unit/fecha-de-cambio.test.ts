@@ -1944,14 +1944,18 @@ describe('Historia 35.9 — el plazo de los derechos fecha y avisa lo que mueve'
       AÑO_DE_REFERENCIA: 2030,
       PLAZO_DE_PROTECCION_AÑOS: 80,
     });
-    // El fichero del árbol: las dos sin valor (las fija Héctor), y lo lee sin lanzar.
-    expect(versionDeUmbrales(readFileSync(resolve(import.meta.dirname, '../../src/lib/umbrales.ts'), 'utf8'))).toEqual({});
+    // El fichero del árbol se lee sin lanzar, tengan las dos el valor que tengan (las fija Héctor).
+    const delArbol = versionDeUmbrales(readFileSync(resolve(import.meta.dirname, '../../src/lib/umbrales.ts'), 'utf8'));
+    for (const valor of Object.values(delArbol)) expect(typeof valor).toBe('number');
   });
 
   it('`versionDeUmbrales` reconoce las declaraciones del fichero del árbol cuando tienen valor', () => {
-    const arbol = readFileSync(resolve(import.meta.dirname, '../../src/lib/umbrales.ts'), 'utf8');
     const plazo = 'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;';
     const año = 'export const AÑO_DE_REFERENCIA: number | undefined = undefined;';
+    // El árbol, con las dos sin valor sea cual sea el que les dio Héctor.
+    const arbol = readFileSync(resolve(import.meta.dirname, '../../src/lib/umbrales.ts'), 'utf8')
+      .replace(/export const PLAZO_DE_PROTECCION_AÑOS: number \| undefined = [^;]+;/u, plazo)
+      .replace(/export const AÑO_DE_REFERENCIA: number \| undefined = [^;]+;/u, año);
     expect(arbol).toContain(plazo);
     expect(arbol).toContain(año);
     // Sin valor, se omiten: el árbol no da un veredicto que no sea el de «sin plazo».
