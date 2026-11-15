@@ -275,7 +275,7 @@ describe('Historia 35.4 — las Rutas de salida del dueño: el Personaje si lo h
   it('«De la misma obra» de un dueño Personaje: la Obra del Personaje o la del Autor de la Cita, ninguna otra', () => {
     const BATMAN = { tipo: 'personaje', slug: 'batman', nombre: 'Batman' } as const;
     const obraDe = (dueño: { tipo: 'autor' | 'personaje'; slug: string }, nombre: string) =>
-      ({ nombre, dueño, autor: dueño.tipo === 'autor' ? dueño.slug : undefined, titulo: 'Libro', recuento: 8, fuentes: [], edicionCotejada: false, temas: [] }) as unknown as ObraResuelta;
+      ({ nombre, dueño, autor: dueño.tipo === 'autor' ? dueño.slug : undefined, titulo: 'Libro', recuento: 8, fuentes: [], edicionCotejada: false, derechosVigentes: false, temas: [] }) as unknown as ObraResuelta;
     const grupo = (obra: ObraResuelta) => ({
       mismaObra: { obra, citas: [{ ...cita(`${obra.nombre}-0`, 'seneca', obra.nombre), obra }] },
       delDueño: undefined,
@@ -296,7 +296,7 @@ describe('Historia 35.4 — las Rutas de salida del dueño: el Personaje si lo h
 describe('Historia 24.6 — `problemaDeRutasDeSalida`, lo que pararía la construcción', () => {
   const SENECA = { tipo: 'autor', slug: 'seneca', nombre: 'Séneca' } as const;
   const obra = (autor: string, recuento: number) =>
-    ({ nombre: 'seneca--libro', dueño: { tipo: 'autor', slug: autor }, autor, titulo: 'Libro', recuento, fuentes: [], edicionCotejada: false, temas: [] }) as ObraResuelta;
+    ({ nombre: 'seneca--libro', dueño: { tipo: 'autor', slug: autor }, autor, titulo: 'Libro', recuento, fuentes: [], edicionCotejada: false, derechosVigentes: false, temas: [] }) as ObraResuelta;
   const deLaObra = (n: number) => Array.from({ length: n }, (_, i) => cita(`seneca-libro-${i}`, 'seneca', 'seneca--libro'));
   const deOtras = (n: number) => Array.from({ length: n }, (_, i) => cita(`seneca-cartas-${i}`, 'seneca', 'seneca--cartas'));
   const bien = (): RutasDeSalidaDeCita => ({

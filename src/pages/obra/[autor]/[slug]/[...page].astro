@@ -26,6 +26,13 @@
  * `CreativeWork` con su `character`. Desde la 35.5 lleva también «Buscar en esta obra», con el
  * Personaje en lugar del Autor (`?personaje=&obra=`).
  *
+ * Historia 35.9 (FR-70, AD-20 y AD-25 v9.1) — la Obra con derechos vigentes (`obra.derechosVigentes`,
+ * que decide su dueño: todo Personaje, el Autor vivo y, con plazo, el fallecido cuyo plazo corre) no
+ * ofrece «Gratis», ni la frase de lo tomado, ni «Cómo empieza», ni «Cómo citar», y su línea de Ficha
+ * técnica va sin traductor. «Dónde leer esta obra» existe solo con ediciones en venta que pintar
+ * —afiliación encendida y admitida, sin congelación—, y entonces van solas; si no, no hay
+ * desplegable ni hueco.
+ *
  * El parámetro se llama `page` porque `paginate()` lo exige por nombre, como en la Página de
  * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
  */
@@ -120,10 +127,12 @@ export const getStaticPaths = (async ({ paginate }) => {
     // página 1: las 2+ no los pintan.
     // El incipit (32.3), también solo para la página 1, y la edición que encabeza (32.5), de la
     // que la Referencia de Obra toma su rótulo y su traductor: la misma regla que el traductor.
-    const resumen = dondeLeer(citas);
-    const traductor = traductorDeLaEdicionQueEncabeza(citas);
+    // Historia 35.9 — la Obra con derechos vigentes no tiene edición gratuita ni traductor que
+    // nombrar: `dondeLeer` no le da líneas, y la Ficha técnica y la Referencia van sin edición.
+    const resumen = dondeLeer(citas, { derechosVigentes: obra.derechosVigentes });
+    const traductor = obra.derechosVigentes ? undefined : traductorDeLaEdicionQueEncabeza(citas);
     const incipit = incipits.get(obra.nombre);
-    const edicion = edicionQueEncabeza(citas);
+    const edicion = obra.derechosVigentes ? undefined : edicionQueEncabeza(citas);
     return paginas.map((pagina, i) =>
       i === 0 ? { ...pagina, props: { ...pagina.props, dondeLeer: resumen, traductor, incipit, edicion } } : pagina,
     );
@@ -146,14 +155,9 @@ const tarjeta = `/tarjeta/obra/${segmentos.autor}/${segmentos.obra}.png`;
 const canonica = new URL(ruta, Astro.site).href;
 const primera = pagina.currentPage === 1;
 /*
- * «Dónde leer esta obra» va en toda página 1, se indexe o no. La congelación de la familia Obra
- * oculta las ediciones en venta (33.2, AD-25), no el desplegable.
- */
-const conDondeLeer = primera && resumenDondeLeer !== undefined;
-/*
- * Historia 32.5 — «Cómo citar», solo en la página 1; si la Obra lo tiene lo dice `obraTieneComoCitar`.
- * La Referencia nombra al Autor: una Obra de Personaje (35.2) no la lleva hasta que la 35.9 decida
- * sus exclusiones.
+ * Historia 32.5 — «Cómo citar», solo en la página 1; si la Obra lo tiene lo dice `obraTieneComoCitar`
+ * (35.9: no en la de derechos vigentes, que incluye la de todo Personaje). La guarda del Autor solo
+ * estrecha el tipo: la Referencia nombra al Autor, y la Obra de un Personaje ya no la lleva.
  */
 const autorDeLaReferencia = dueño.tipo === 'autor' ? dueño.autor : undefined;
 const conComoCitar = primera && autorDeLaReferencia !== undefined && obraTieneComoCitar(obra);
@@ -178,6 +182,16 @@ const enVenta =
         ),
       }
     : undefined;
+/*
+ * «Dónde leer esta obra» va en toda página 1, se indexe o no. La congelación de la familia Obra
+ * oculta las ediciones en venta (33.2, AD-25), no el desplegable. Historia 35.9 — salvo en la Obra
+ * con derechos vigentes (`ventaSola`), donde el desplegable existe solo si hay ediciones en venta
+ * que pintar: sin ellas, ni `<summary>`, ni rótulo, ni hueco (FR-70).
+ */
+const conDondeLeer =
+  primera &&
+  resumenDondeLeer !== undefined &&
+  (resumenDondeLeer.ventaSola !== true || (enVenta?.grupos.length ?? 0) > 0);
 ---
 
 <Armazon

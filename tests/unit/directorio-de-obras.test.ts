@@ -68,6 +68,7 @@ function obra(nombre: string, titulo: string, recuento: number, año?: number): 
     ...(año === undefined ? {} : { año }),
     fuentes: [],
     edicionCotejada: false,
+    derechosVigentes: false,
     temas: [],
     recuento,
   };

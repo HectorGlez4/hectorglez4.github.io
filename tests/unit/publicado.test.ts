@@ -304,6 +304,7 @@ describe('Historia 35.3 — el Personaje en el conjunto publicable', () => {
     titulo: nombre,
     fuentes: [],
     edicionCotejada: false,
+    derechosVigentes: false,
     temas: [],
     recuento: 1,
   });

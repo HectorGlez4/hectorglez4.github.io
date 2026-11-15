@@ -45,6 +45,7 @@ import {
   ordenDelLibro,
   rutaDeLaObra,
   type AparicionDeCita,
+  type AutorParaDerechos,
   type CitaParaObra,
   type Dueño,
   type FichaDeObra,
@@ -1376,12 +1377,13 @@ export function obrasDelConjunto(
 export function obrasDeLosDatos(
   datos: {
     citas: readonly CitaParaObra[];
-    autores: readonly Pick<Autor, 'slug'>[];
+    /** Historia 35.9 — con lo que juzga sus derechos: `vivo` y `añoFallecimiento`. */
+    autores: readonly AutorParaDerechos[];
     fichas: readonly FichaDeObra[];
   },
   congelacion?: CongelacionDeObras | null,
 ): ObrasDelSitio {
-  return obrasDelConjunto(colgarObras(datos.citas, datos.fichas), datos.autores, congelacion);
+  return obrasDelConjunto(colgarObras(datos.citas, datos.fichas, datos.autores), datos.autores, congelacion);
 }
 
 /**
@@ -2053,7 +2055,18 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
       fichasTecnicas.set(entrada.id, entrada.data);
     }
   }
-  const citas: Cita[] = colgarObras((await getCollection('citas')).map(aplanarCita), fichas, fichasTecnicas);
+  /*
+   * Historia 17.2 — los Autores se leen aquí, antes de colgar las Obras: desde la 35.9 cada Obra
+   * resuelta dice si tiene derechos vigentes, y eso lo decide su dueño (`derechosDeLaObra`).
+   */
+  const entradasDeAutor = await getCollection('autores');
+  const autoresLeidos = entradasDeAutor.map(aplanarAutor);
+  const citas: Cita[] = colgarObras(
+    (await getCollection('citas')).map(aplanarCita),
+    fichas,
+    autoresLeidos,
+    fichasTecnicas,
+  );
   /*
    * Las Colecciones **declaradas** viven en esta variable local y no salen de aquí.
    *
@@ -2070,7 +2083,6 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
    * biografías solo se consulta si alguien la declara: vacía, `getCollection` imprimiría un
    * aviso de colección inexistente en cada construcción.
    */
-  const entradasDeAutor = await getCollection('autores');
   /*
    * Historia 35.3 — los Personajes, solo si alguna Cita publicada declara uno: sin ninguno, la
    * colección no se consulta y la construcción no cambia.
@@ -2089,7 +2101,7 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
       ? []
       : (await getCollection('biografias')).map((e) => ({ id: e.id, ...e.data }));
   const autores = resolverAtribuciones(
-    entradasDeAutor.map(aplanarAutor),
+    autoresLeidos,
     biografiasDeclaradas,
     biografias,
   );

@@ -5,8 +5,9 @@
  *
  * Héctor cura las ediciones en venta ficha a ficha (`npm run obra -- edicion`), y esta orden le
  * dice por dónde empezar: las Obras publicadas **con edición cotejada** —la edición en venta
- * nunca va sola (FR-54)—, con cuántas ediciones declara ya cada una y cuántas son de una tienda
- * sin marca, ordenadas por la demanda de la ventana de 28 días más reciente de
+ * nunca va sola (FR-54)— y, desde la Historia 35.9 (FR-62 v9.1), las **con derechos vigentes**,
+ * cuyas ediciones van solas (FR-70), también la de un Personaje sin Autor; con cuántas ediciones
+ * declara ya cada una y cuántas son de una tienda sin marca, ordenadas por la demanda de la ventana de 28 días más reciente de
  * `corpus/serie-de-demanda.yml`. No propone ediciones ni tiendas, ni sugiere encender un Modelo
  * ni solicitar una cuenta: eso es de Héctor.
  *
@@ -190,6 +191,11 @@ export interface CandidataDeCuracion {
   deTiendaSinMarca: number;
   /** Si la familia Obra está congelada (SM-11). */
   congelada: boolean;
+  /**
+   * Historia 35.9 — si la Obra tiene derechos vigentes: se propone aunque no tenga edición
+   * cotejada, porque sus ediciones en venta van solas (FR-70), y la línea lo dice.
+   */
+  derechosVigentes: boolean;
   /** Ausentes cuando no hay cifra: nunca un 0 por una lectura que no existe. */
   impresiones?: number;
   clics?: number;
@@ -200,7 +206,10 @@ export type InformeDeCuracion =
   | {
       congelada: false;
       candidatas: CandidataDeCuracion[];
-      /** Obras publicadas que no se proponen por no tener edición cotejada. */
+      /**
+       * Obras publicadas que no se proponen: de dominio público y sin edición cotejada, donde la
+       * edición en venta iría sola.
+       */
       fuera: number;
       ventana: VentanaDeCuracion;
       /** Filas de la ventana cuyo slug no es una Cita publicada o no resuelve a ninguna Obra. */
@@ -208,8 +217,10 @@ export type InformeDeCuracion =
     };
 
 /**
- * Las candidatas y su orden. `citas` son las Citas publicadas de un Autor publicado con su Obra
- * colgada (`colgarObras`); `obras`, las publicadas (`obrasDeLosDatos(...).publicadas`).
+ * Las candidatas y su orden. `citas` son las Citas publicadas con su Obra colgada (`colgarObras`),
+ * con el filtro de `obrasDelConjunto`: de un Autor publicado o, sin Autor, de un Personaje;
+ * `obras`, las publicadas (`obrasDeLosDatos(...).publicadas`). Se proponen las cotejadas y las de
+ * derechos vigentes (Historia 35.9); las demás cuentan en `fuera`.
  */
 export function componerCuracion(datos: {
   obras: readonly ObraResuelta[];
@@ -244,8 +255,8 @@ export function componerCuracion(datos: {
     }
   }
 
-  const cotejadas = datos.obras.filter((o) => o.edicionCotejada);
-  const candidatas = cotejadas.map((obra): CandidataDeCuracion => {
+  const propuestas = datos.obras.filter((o) => o.edicionCotejada || o.derechosVigentes);
+  const candidatas = propuestas.map((obra): CandidataDeCuracion => {
     const ediciones = obra.ediciones ?? [];
     // Historia 35.2 — una Obra de Personaje puede no saber su Autor: se nombra por su dueño.
     const quien = obra.autor ?? obra.dueño.slug;
@@ -257,6 +268,7 @@ export function componerCuracion(datos: {
       ediciones: ediciones.length,
       deTiendaSinMarca: ediciones.filter((e) => sinMarca.has(e.tienda)).length,
       congelada: false,
+      derechosVigentes: obra.derechosVigentes,
       ...(ventana.conCifra ? (demanda.get(obra.nombre) ?? { impresiones: 0, clics: 0 }) : {}),
     };
   });
@@ -268,7 +280,7 @@ export function componerCuracion(datos: {
       : porFicha,
   );
 
-  return { congelada: false, candidatas, fuera: datos.obras.length - cotejadas.length, ventana, noCuentan };
+  return { congelada: false, candidatas, fuera: datos.obras.length - propuestas.length, ventana, noCuentan };
 }
 
 const plural = (n: number, una: string, varias: string) => `${n} ${n === 1 ? una : varias}`;
@@ -283,7 +295,8 @@ export function lineasDeCuracion(informe: InformeDeCuracion): string[] {
   }
   const { candidatas, ventana } = informe;
   const lineas = [
-    `Qué Obras curar primero: ${plural(candidatas.length, 'Obra publicada', 'Obras publicadas')} con edición cotejada.`,
+    `Qué Obras curar primero: ${plural(candidatas.length, 'Obra publicada', 'Obras publicadas')} con edición cotejada ` +
+      'o con derechos vigentes.',
   ];
   if (ventana.conCifra) {
     lineas.push(
@@ -308,9 +321,13 @@ export function lineasDeCuracion(informe: InformeDeCuracion): string[] {
     const ediciones =
       plural(c.ediciones, 'edición declarada', 'ediciones declaradas') +
       (c.deTiendaSinMarca > 0 ? ` (${c.deTiendaSinMarca} de tienda sin marca)` : '');
-    lineas.push(`${i + 1}. ${c.ficha} · ${c.titulo} · ${c.autor} — ${demanda} · ${ediciones}`);
+    // Historia 35.9 — la de derechos vigentes lo dice: sus ediciones van solas, sin cotejada.
+    const vigentes = c.derechosVigentes ? ' · con derechos vigentes: sus ediciones van solas' : '';
+    lineas.push(`${i + 1}. ${c.ficha} · ${c.titulo} · ${c.autor} — ${demanda} · ${ediciones}${vigentes}`);
   });
-  lineas.push(`Fuera por no tener edición cotejada: ${plural(informe.fuera, 'Obra', 'Obras')}.`);
+  lineas.push(
+    `Fuera por no tener edición cotejada, de dominio público: ${plural(informe.fuera, 'Obra', 'Obras')}.`,
+  );
   if (ventana.conCifra) {
     lineas.push(
       `Citas de la ventana que no cuentan (no publicadas o sin Obra): ${informe.noCuentan}.`,
@@ -377,7 +394,11 @@ export async function curarPrimero(
   const congelacion =
     opciones.congelacion === undefined ? congelacionVigente() : (opciones.congelacion ?? undefined);
   const delSitio = new Set(autores.map((a) => a.slug));
-  const colgadas = colgarObras(citas, fichas).filter((c) => c.autor !== undefined && delSitio.has(c.autor));
+  // Historia 35.9 — el filtro de `obrasDelConjunto`: la Cita de un Personaje sin Autor cuenta por
+  // su Personaje, para que su Obra, con derechos vigentes, reciba su demanda.
+  const colgadas = colgarObras(citas, fichas, autores).filter((c) =>
+    c.autor === undefined ? c.personaje !== undefined : delSitio.has(c.autor),
+  );
   // `null`: sin congelación para las indexables, que esta orden no lee; las `publicadas` no
   // dependen de ella. La congelación de la orden es la de arriba, y corta antes de proponer.
   const { publicadas } = obrasDeLosDatos({ citas, autores, fichas }, null);

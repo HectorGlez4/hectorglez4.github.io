@@ -57,7 +57,11 @@
  *     `corpus/wikidata/vigentes.yml`, solo las claves de las entidades cuya etiqueta pinta
  *     (género P136 y lengua P407; el autor P50 se coteja y no se pinta). Si su documento no se
  *     deja leer, compone `vigentes.yml` entero: antes fechar de más que de menos. Desde la
- *     Historia 32.5, de su Autor también el nombre de «Cómo citar» (`NOMBRE_EN_REFERENCIA`).
+ *     Historia 32.5, de su Autor también el nombre de «Cómo citar» (`NOMBRE_EN_REFERENCIA`). Desde la
+ *     Historia 35.9, si su dueño es un Autor fallecido, **`src/lib/umbrales.ts`**, con un solo campo
+ *     derivado: su veredicto de derechos (`derechosEnLosUmbrales`), que mueven `PLAZO_DE_PROTECCION_AÑOS`
+ *     y `AÑO_DE_REFERENCIA`; con él, también las Páginas de Cita de sus atribuidas. Mover el plazo
+ *     fecha y avisa solo las Obras cuyo veredicto cambia con el Corpus de hoy, nunca la portada.
  *   · **Directorio de Autores** (Historia 26.3) — lo que pinta: de cada Autor con alguna Cita, el
  *     nombre, los años y la clave de orden (`ordenAlfabetico`), que lo ordena y lo agrupa; de cada
  *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
@@ -129,6 +133,12 @@ import {
   type FichaDeObra,
 } from '../../src/lib/obras.ts';
 import { ESTILOS_DE_REFERENCIA, nombreEnReferencia } from '../../src/lib/atribucion.ts';
+import {
+  derechosVigentes,
+  dueñoAutor,
+  type DueñoDeDerechos,
+  type ReferenciaDeDerechos,
+} from '../../src/lib/clase.ts';
 import { documentoDeCita, documentosDeCita } from './cotejo.ts';
 import { obraDeIndice } from './indice.ts';
 import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
@@ -218,6 +228,70 @@ export const NOMBRE_EN_REFERENCIA: CampoDerivado = {
           ),
         ),
 };
+
+/**
+ * El fichero que guarda el plazo de protección y el año de referencia — Historia 35.9: fuera del
+ * Corpus y sin familia de fichero (no avisa la portada), compone por su veredicto de derechos la
+ * Página de Obra de un Autor fallecido y las Páginas de Cita de sus atribuidas.
+ */
+export const FICHERO_DE_LOS_UMBRALES = 'src/lib/umbrales.ts';
+
+/** Las dos constantes de `umbrales.ts` de las que sale el veredicto de derechos (`src/lib/clase.ts`). */
+export const CONSTANTES_DE_LOS_DERECHOS = ['PLAZO_DE_PROTECCION_AÑOS', 'AÑO_DE_REFERENCIA'] as const;
+
+/**
+ * Las constantes de los derechos de una versión de `umbrales.ts`, leídas de su texto — Historia
+ * 35.9. Una constante en `undefined` o sin declarar se omite; un número es su valor; cualquier otra
+ * cosa se guarda tal cual, y el veredicto la cuenta como indeterminable. Nunca lanza: el historial
+ * y el aviso la leen de cada commit, también de los anteriores a la constante.
+ */
+export function versionDeUmbrales(texto: string): Readonly<Record<string, unknown>> {
+  const version: Record<string, unknown> = {};
+  for (const nombre of CONSTANTES_DE_LOS_DERECHOS) {
+    const m = new RegExp(`export const ${nombre}(?:\\s*:[^=\\n]+)?\\s*=\\s*([^;\\n]+);`, 'u').exec(texto);
+    const crudo = m?.[1]?.trim();
+    if (crudo === undefined || crudo === 'undefined') continue;
+    version[nombre] = /^\d+(?:\.\d+)?$/u.test(crudo) ? Number(crudo) : crudo;
+  }
+  return version;
+}
+
+/** La referencia de los derechos de una versión de `umbrales.ts`; lanza ante un valor que no es número. */
+function referenciaDe(version: Readonly<Record<string, unknown>>): ReferenciaDeDerechos {
+  const referencia: ReferenciaDeDerechos = {};
+  const plazo = version.PLAZO_DE_PROTECCION_AÑOS;
+  const año = version.AÑO_DE_REFERENCIA;
+  for (const valor of [plazo, año]) {
+    if (valor !== undefined && typeof valor !== 'number') throw new Error(`${String(valor)} no es un número`);
+  }
+  if (typeof plazo === 'number') referencia.plazo = plazo;
+  if (typeof año === 'number') referencia.año = año;
+  return referencia;
+}
+
+/** Lo que el veredicto vale cuando no se puede dar —plazo sin año, un valor que no es número—. */
+const VEREDICTO_INDETERMINABLE = '¿?';
+
+/**
+ * El veredicto de derechos de un dueño sobre una versión de `umbrales.ts` — Historia 35.9, AD-27
+ * v9.1: un campo derivado de las dos constantes de los derechos, juzgado con `derechosVigentes`, la
+ * función del sitio. Una versión con plazo y sin año —o con un valor que no es número— da un valor
+ * propio, que cuenta como cambio frente a cualquier veredicto, y nunca lanza. El nombre lleva el
+ * dueño: dos Autores con años distintos son dos campos (la memoria de las fechas los separa).
+ */
+export function derechosEnLosUmbrales(dueño: DueñoDeDerechos): CampoDerivado {
+  return {
+    derivado: `derechosVigentes(${JSON.stringify(dueño)})`,
+    de: CONSTANTES_DE_LOS_DERECHOS,
+    valor: (version) => {
+      try {
+        return derechosVigentes(dueño, referenciaDe(version));
+      } catch {
+        return VEREDICTO_INDETERMINABLE;
+      }
+    },
+  };
+}
 
 /**
  * Si una transición cambió alguno de los campos dados — **la** regla de AD-27.
@@ -452,6 +526,11 @@ export interface CitaParaFechar {
   obraDeclarada?: string;
   /** El identificador de su Fuente: con la obra, nombra sus documentos (`documentosDeCita`). */
   fuente?: string;
+  /**
+   * Historia 35.9 — si es atribuida (`esAtribuida`): su Página de Cita compone `umbrales.ts` con
+   * la Obra de un Autor fallecido, por su veredicto de derechos.
+   */
+  atribuida?: true;
   /** El fichero del que salió, tal como lo nombra quien leyó el corpus. */
   ruta: string;
 }
@@ -487,6 +566,15 @@ export interface EntidadParaFechar {
   ruta: string;
 }
 
+/**
+ * Un Autor, con lo que decide sus derechos — Historia 35.9: `vivo` o su año de fallecimiento. Sin
+ * ellos no compone `umbrales.ts` con ninguna Obra suya.
+ */
+export interface AutorParaFechar extends EntidadParaFechar {
+  vivo?: true;
+  añoFallecimiento?: number;
+}
+
 /** Una Colección declara a mano los slugs de Cita que agrega. */
 export interface ColeccionParaFechar extends EntidadParaFechar {
   miembros: readonly string[];
@@ -510,7 +598,7 @@ export interface BajasParaFechar {
  */
 export interface CorpusParaFechar {
   citas: readonly CitaParaFechar[];
-  autores: readonly EntidadParaFechar[];
+  autores: readonly AutorParaFechar[];
   /** Los Personajes — Historia 35.2. Opcional: un corpus sin Personajes no la trae. */
   personajes?: readonly EntidadParaFechar[];
   temas: readonly EntidadParaFechar[];
@@ -521,6 +609,11 @@ export interface CorpusParaFechar {
   documentos?: readonly string[];
   /** La ruta de `corpus/wikidata/vigentes.yml` — Historia 32.2. */
   vigentesDeWikidata?: string;
+  /**
+   * La ruta de `src/lib/umbrales.ts` — Historia 35.9: compone por su veredicto de derechos las
+   * Obras de un Autor fallecido. Sin ella, ninguna.
+   */
+  umbrales?: string;
   /** Las bajas, que salen del historial y no del disco — Historia 24.8. */
   bajas?: BajasParaFechar;
 }
@@ -555,6 +648,7 @@ export type Relacion = ReadonlyMap<string, Superficie>;
  */
 export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Superficie> {
   const ficheroDeAutor = new Map(corpus.autores.map((autor) => [autor.slug, autor.ruta]));
+  const autorPorSlug = new Map(corpus.autores.map((autor) => [autor.slug, autor]));
   const ficheroDePersonaje = new Map((corpus.personajes ?? []).map((p) => [p.slug, p.ruta]));
   const deAutor = (slug: string | undefined) => (slug === undefined ? undefined : ficheroDeAutor.get(slug));
   const dePersonaje = (slug: string | undefined) => (slug === undefined ? undefined : ficheroDePersonaje.get(slug));
@@ -794,6 +888,20 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     componer(ruta, dePersonaje(obra.personaje), 'personaje');
     // Sus documentos, con el índice que los ordena (Historia 24.9) como uno de ellos.
     for (const documento of documentosDeObra.get(obra.nombre) ?? []) componer(ruta, documento, 'documento');
+    /*
+     * Historia 35.9 — la Obra de un Autor fallecido tiene derechos vigentes según el plazo y el año
+     * de `umbrales.ts`: los compone por su veredicto, y con ella las Páginas de Cita de sus
+     * atribuidas. Un Personaje o un Autor vivo los tienen siempre, y un Autor sin año de
+     * fallecimiento nunca: ningún plazo los mueve, y no componen el fichero.
+     */
+    const autor = obra.personaje === undefined ? autorPorSlug.get(obra.autor ?? '') : undefined;
+    if (autor !== undefined && autor.vivo !== true && autor.añoFallecimiento !== undefined) {
+      const veredicto = [derechosEnLosUmbrales(dueñoAutor(autor))];
+      componerCampos(ruta, corpus.umbrales, veredicto);
+      for (const cita of citas) {
+        if (cita.atribuida === true) componerCampos(rutaDeCita(cita.slug), corpus.umbrales, veredicto);
+      }
+    }
   }
 
   /*
@@ -881,7 +989,9 @@ function fechaDelComponente(
 ): FechaDeCambio | undefined {
   // Ordenados: `unir` compone los campos en el orden en que llegan, y el mismo conjunto tiene
   // que dar la misma llave.
-  const llave = `${fichero}\u0000${campos === CUALQUIER_CAMBIO ? '*' : [...campos].sort().join(',')}`;
+  // Un campo derivado entra por su nombre: dos derivados distintos del mismo fichero no comparten llave.
+  const nombres = campos === CUALQUIER_CAMBIO ? [] : campos.map((c) => (typeof c === 'string' ? c : `=${c.derivado}`));
+  const llave = `${fichero}\u0000${campos === CUALQUIER_CAMBIO ? '*' : nombres.sort().join(',')}`;
   if (memoria.has(llave)) return memoria.get(llave);
   let masReciente: FechaDeCambio | undefined;
   for (const transicion of historial.get(fichero) ?? []) {
@@ -1004,6 +1114,7 @@ export function conRutas(corpus: CorpusParaFechar, traducir: (ruta: string) => s
     ...(corpus.obras === undefined ? {} : { obras: corpus.obras.map(obra) }),
     ...(corpus.documentos === undefined ? {} : { documentos: corpus.documentos.map(traducir) }),
     ...(corpus.vigentesDeWikidata === undefined ? {} : { vigentesDeWikidata: traducir(corpus.vigentesDeWikidata) }),
+    ...(corpus.umbrales === undefined ? {} : { umbrales: traducir(corpus.umbrales) }),
     ...(corpus.bajas === undefined
       ? {}
       : {

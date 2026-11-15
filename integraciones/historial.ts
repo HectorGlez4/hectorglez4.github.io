@@ -84,7 +84,9 @@ import {
   separarFrontmatter,
 } from '../tools/lib/corpus.ts';
 import { colgarObras } from '../src/lib/obras.ts';
+import { esAtribuida } from '../src/lib/clase.ts';
 import {
+  FICHERO_DE_LOS_UMBRALES,
   VERSION_OPACA,
   bajasDelHistorial,
   coberturaInsuficiente,
@@ -94,6 +96,7 @@ import {
   type FechaDeCambio,
   type TransicionFechada,
   type Version,
+  versionDeUmbrales,
 } from '../tools/lib/cambios.ts';
 import { FAMILIAS_DE_FICHERO, type FamiliaDeFichero } from '../tools/lib/avisar.ts';
 import { obraDeIndice } from '../tools/lib/indice.ts';
@@ -237,6 +240,8 @@ export function entradasCrudas(salida: string): { fecha: FechaDeCambio | undefin
  * de menos.
  */
 export function analizarVersion(fichero: string, contenido: string): Version {
+  // Historia 35.9 — de `umbrales.ts` solo cuentan las constantes de los derechos (AD-27 v9.1).
+  if (esElDeLosUmbrales(fichero)) return versionDeUmbrales(contenido);
   try {
     const extension = extname(fichero);
     const datos =
@@ -252,6 +257,20 @@ export function analizarVersion(fichero: string, contenido: string): Version {
   } catch {
     return VERSION_OPACA;
   }
+}
+
+/** Si un fichero —relativo o absoluto— es `src/lib/umbrales.ts`. */
+export function esElDeLosUmbrales(fichero: string): boolean {
+  const normal = fichero.split('\\').join('/');
+  return normal === FICHERO_DE_LOS_UMBRALES || normal.endsWith(`/${FICHERO_DE_LOS_UMBRALES}`);
+}
+
+/**
+ * La versión de un lado de una transición. `umbrales.ts` no tiene alta ni baja que contar: que no
+ * exista es que sus constantes no tienen valor, y así su creación no fecha ninguna Obra (35.9).
+ */
+export function versionDelLado(fichero: string, version: Version | null): Version | null {
+  return version === null && esElDeLosUmbrales(fichero) ? {} : version;
 }
 
 /**
@@ -393,8 +412,8 @@ export async function historialDeLosFicheros(
   for (const { fecha, absoluta, entrada, opaca } of crudas) {
     const transicion: TransicionFechada = {
       fecha,
-      antes: version(entrada.antes, opaca),
-      despues: version(entrada.despues, opaca),
+      antes: versionDelLado(entrada.fichero, version(entrada.antes, opaca)),
+      despues: versionDelLado(entrada.fichero, version(entrada.despues, opaca)),
     };
     const lista = historial.get(absoluta);
     if (lista === undefined) historial.set(absoluta, [transicion]);
@@ -451,7 +470,7 @@ export async function corpusParaFechar(
     opciones.documentos === undefined ? documentosEnDisco(rutas.fuentes) : Promise.resolve(opciones.documentos),
   ]);
   // Historia 22.4 — la Obra de cada Cita, resuelta como la resuelve el sitio.
-  const citas = colgarObras(leidas, fichas);
+  const citas = colgarObras(leidas, fichas, autores);
   /*
    * Historia 32.2 — de cada ficha atada a Wikidata, su documento y las entidades que pinta su
    * línea de Ficha técnica. Leer para fechar nunca lanza por esto: un documento que no se deja
@@ -486,10 +505,18 @@ export async function corpusParaFechar(
         // El frontmatter se lee crudo, sin el `default([])` del esquema: una Cita sin `temas`
         // llega con el campo ausente y no con la lista vacía.
         temas: cita.temas ?? [],
+        // Historia 35.9 — la atribuida compone `umbrales.ts` con la Obra de un Autor fallecido.
+        ...(esAtribuida(cita) ? { atribuida: true as const } : {}),
         ruta: resolve(cita.ruta),
       };
     }),
-    autores: autores.map((autor) => ({ slug: autor.slug, ruta: resolve(autor.ruta) })),
+    // Historia 35.9 — con lo que decide sus derechos, para el veredicto de sus Obras.
+    autores: autores.map((autor) => ({
+      slug: autor.slug,
+      ...(autor.vivo === true ? { vivo: true as const } : {}),
+      ...(typeof autor.añoFallecimiento === 'number' ? { añoFallecimiento: autor.añoFallecimiento } : {}),
+      ruta: resolve(autor.ruta),
+    })),
     personajes: personajes.map((personaje) => ({ slug: personaje.slug, ruta: resolve(personaje.ruta) })),
     temas: temas.map((tema) => ({ slug: tema.slug, ruta: resolve(tema.ruta) })),
     colecciones: colecciones.map((coleccion) => ({
@@ -511,6 +538,8 @@ export async function corpusParaFechar(
     documentos: documentos.map((documento) => resolve(documento)),
     // Solo con alguna ficha atada: sin ninguna, `vigentes.yml` no compone ninguna superficie.
     ...(deWikidata.size > 0 ? { vigentesDeWikidata: resolve(rutas.vigentesDeWikidata) } : {}),
+    // Historia 35.9 — `umbrales.ts`, que compone por su veredicto las Obras de un Autor fallecido.
+    umbrales: resolve(raiz, FICHERO_DE_LOS_UMBRALES),
   };
 }
 
@@ -560,7 +589,8 @@ export async function fechasDeLasSuperficies(
       corpusParaFechar(raiz),
       historialDeLosFicheros(
         tope,
-        ambitos.map(([directorio]) => directorio),
+        // Historia 35.9 — y `umbrales.ts`, sin familia: su veredicto de derechos fecha Obras.
+        [...ambitos.map(([directorio]) => directorio), resolve(raiz, FICHERO_DE_LOS_UMBRALES)],
         { opacos },
       ),
     ]);

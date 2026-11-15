@@ -902,7 +902,11 @@ npm run obra -- curar-primero   # informa. NO escribe nada.
 ```
 
 Lee las Citas publicadas, los Autores, las fichas de Obra y esta serie, y lista las Obras
-publicadas **con edición cotejada** —las demás se cuentan, sin listarlas—, cada una con su
+publicadas **con edición cotejada** y, desde la Historia 35.9 (FR-62 v9.1), las **con derechos
+vigentes** —cuyas ediciones van solas (FR-70); también la de un Personaje sin Autor, cuyas Citas
+cuentan por su Personaje, con el filtro de `obrasDelConjunto`—, cuya línea lo dice («con derechos
+vigentes: sus ediciones van solas»); las demás, de dominio público y sin cotejada, se cuentan sin
+listarlas («Fuera por no tener edición cotejada, de dominio público»). Cada una sale con su
 ficha, su título, su Autor, cuántas ediciones declara y, si alguna lo es, cuántas son de una
 tienda sin marca. La
 regla vive solo en `tools/lib/curarPrimero.ts`, pura y con los efectos inyectados (AD-22). Ordena
@@ -1459,7 +1463,9 @@ npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"
 Se niega con 1, sin escribir, si la ficha no existe; si el documento no es un `.txt` de
 `corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está en
 la unión de `documentosDeCita` de sus Citas publicadas); si su forma de líneas es `indeterminada`;
-si `desde` —colapsado— no se localiza; si la Fuente de su cabecera no es de `FUENTES`, no permite
+si `desde` —colapsado— no se localiza; si la Obra tiene derechos vigentes (Historia 35.9, AD-30 v9.1:
+`derechosDeLaObra`, decidido primero por `ofreceIncipit` con su motivo `derechos-vigentes`, antes
+de mirar el documento); si la Fuente de su cabecera no es de `FUENTES`, no permite
 reutilizar o es mutable, o su `url:` no es `http(s)` (va tal cual al `href`); si el nombre del
 documento designa en `corpus/fuentes/` otro fichero que el tecleado (la ficha guarda solo el
 nombre); o si la ficha ya declara ese mismo incipit. Con 2, la forma (otra cantidad de argumentos,
@@ -1472,7 +1478,9 @@ orden del libro ni del primer documento. El build lo repite desde el cargador `i
 solo los documentos que las fichas declaran y **rompe** con «Regla incumplida» nombrando la ficha si
 el documento falta, no se deja analizar o es biografía, si su forma es `indeterminada`, si `desde`
 ya no se localiza o si la Fuente o el `url:` de su cabecera no valen (lo mismo que la orden); no repite el casado, para que retirar la última Cita de ese documento no rompa la
-construcción siguiente. El corte es de `incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de
+construcción siguiente. Desde la 35.9 el cargador no ofrece el incipit de una Obra con derechos
+vigentes, y `integraciones/obras.ts` **rompe** ante la ficha con derechos vigentes que lo declare,
+nombrándola (`fallosDeIncipitConDerechos`): son las tres puertas del veto. El corte es de `incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de
 frase o de verso**: unidades enteras mientras quepan en `MAX_CARACTERES_DEL_INCIPIT`, parado antes
 del pie de licencia de Wikisource; si se ofrece lo decide solo `ofreceIncipit` (sin tope, no; si la
 primera frase o el primer verso no cabe, no). La página 1 de la Obra lo pinta en
@@ -1704,7 +1712,17 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
 - **Página de Obra** = su ficha (`autor`, `titulo`, `formas`, `nota`, `ediciones`), sus Citas, su
   Autor y **sus documentos**: la unión de `documentosDeCita` de sus Citas sobre los nombres de
   `corpus/fuentes/`, más el documento de su `incipit` si lo declara (32.3), sea o no de sus Citas.
-  `nota` y `ediciones` solo fechan la Página de Obra.
+  `nota` y `ediciones` solo fechan la Página de Obra. **Desde la 35.9**, la Obra de un Autor con año
+  de fallecimiento —no la de un Autor vivo ni la de un Personaje, que tienen derechos siempre— compone
+  además `src/lib/umbrales.ts` (`FICHERO_DE_LOS_UMBRALES`, sin familia de fichero) con un solo campo
+  derivado, su veredicto de derechos (`derechosEnLosUmbrales` de `tools/lib/cambios.ts`, con
+  `derechosVigentes` sobre `PLAZO_DE_PROTECCION_AÑOS` y `AÑO_DE_REFERENCIA` de cada versión, leídas por
+  `versionDeUmbrales`), y con ella las Páginas de Cita de sus atribuidas. Un commit que solo mueva una
+  de las dos constantes fecha (`integraciones/historial.ts` lee el historial de ese fichero) y avisa
+  (`tools/avisar.ts` lo toma como cambio del rango) **solo** las Obras cuyo veredicto cambia con el
+  Corpus de hoy y esas Páginas de Cita: la portada no, porque el fichero no tiene familia. Una versión
+  con plazo y sin año cuenta como cambio sin lanzar, y que el fichero no exista es lo mismo que sus
+  constantes sin valor: su creación no fecha nada. La regla de indexables (`reglaCambiada`) no cambia.
 - **Lo que la relación todavía no compone**, y no conviene dar por exhaustivo (diferido en el spec
   de la 24.8): la Página de Obra pinta el nombre de los Temas de sus Citas y no compone sus
   ficheros de Tema —renombrar un Tema no la fecha ni la avisa; decidirlo es de Héctor—; el título
@@ -1798,9 +1816,12 @@ Obra no pinta nada, ni rótulo ni hueco, y las Rutas de salida siguen a comparti
   pasará `3`. `Rotulo.astro` admite `nivel`, por omisión `2`.
 - Lo que dice lo compone `contenidoDeTarjetaDeObra` de `src/lib/atribucion.ts`, con el año y el
   recuento de la Obra resuelta: el componente no cuenta nada. La fila dice «Ver la obra y dónde
-  leerla» si `edicionCotejada` —alguna Cita de la Obra tiene Fuente— y «Ver la obra» si no; las
-  `ediciones` de la ficha y la afiliación no cuentan, y la tarjeta sale idéntica con el Modelo
-  encendido o apagado. No aloja ningún Modelo (sin `data-ingreso`) ni lleva guion.
+  leerla» si `edicionCotejada` —alguna Cita de la clase de siempre de la Obra tiene Fuente; desde la
+  35.9 la de una atribuida no cuenta— y «Ver la obra» si no; las `ediciones` de la ficha y la
+  afiliación no cuentan, y la tarjeta sale idéntica con el Modelo encendido o apagado. Por eso la
+  Obra con derechos vigentes (Historia 35.9, FR-70), que vende sus ediciones solas, dice «Ver la
+  obra ›» aunque su página diga dónde conseguirla (decisión de Héctor del 2026-11-06). No aloja
+  ningún Modelo (sin `data-ingreso`) ni lleva guion.
 - La fila es `src/components/FilaDeBloque.astro`, escrita una vez con el trato de la Lista de
   Obras y que reutilizarán «Siguiente» (24.5), los cierres (24.6), los Directorios y la portada:
   `zona` obligatoria del vocabulario (aquí `tarjeta-de-obra`, en el `<li>`) y el glifo de avance
@@ -1894,7 +1915,9 @@ La página 1 de toda Obra —se indexe o no— lleva su «Cómo citar»: un desp
 los Temas (o «Buscar en esta obra», sin ellos) y antes de la nota, en su propio contenedor
 `data-pagefind-ignore="all"` a 5 × `--unidad` (decisión 1b, delegada por Héctor el 2026-11-14, en
 la 32.4: arriba echaba de la primera pantalla la primera Tarjeta). Las 2+ no lo llevan. Lo pregunta
-`obraTieneComoCitar` (`src/lib/obras.ts`; hoy `true`, la 35.9 añade las exclusiones).
+`obraTieneComoCitar` (`src/lib/obras.ts`): toda Obra salvo la que tiene derechos vigentes —desde
+la 35.9, `!obra.derechosVigentes`, que cubre también la de todo Personaje—, porque una Referencia sin
+edición identificable no sirve a quien cita (FR-65, FR-70).
 
 - Lo compone `referenciaDeObra`/`referenciasDeObra` de `src/lib/atribucion.ts`, hermanas de
   `referenciaDeCita`: Autor (`nombreEnReferencia`), título de la ficha, año de la Obra, la edición
@@ -2433,7 +2456,8 @@ esquema rechaza toda edición: ninguna ficha puede declarar una.
    código 1 y sin escribir si la familia Obra está congelada (`CONGELACION_DE_OBRAS`, SM-11), si
    la tienda no es del conjunto o si el esquema la rechaza (otro dominio, un puerto, el
    parámetro de la marca en cualquier capitalización); con 2, la forma de la invocación. Si la
-   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará. Una tienda
+   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará —salvo si tiene
+   derechos vigentes, donde se pintará sola (35.9) y no avisa—. Una tienda
    sin marca admite ediciones con las mismas reglas, y el parte dice que la edición no se
    pintará hasta que Héctor declare la marca y encienda el Modelo.
    `quitar-edicion <ficha> <n>` la quita (1 si no hay esa posición).
@@ -2445,7 +2469,18 @@ esquema rechaza toda edición: ninguna ficha puede declarar una.
    (`revisarDeclaracionDeIngreso`; `urlDeEdicion` solo acepta por su tipo una `TiendaConMarca`).
    Una edición solo se pinta en una Obra con alguna Cita cotejada —la edición en venta nunca va
    sola (FR-54)—; si no la hay, el build avisa «Ediciones sin edición cotejada» nombrando la
-   ficha. Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
+   ficha. **La excepción es la Obra con derechos vigentes** (Historia 35.9, FR-70, AD-20 y AD-25
+   v9.1): la de todo Personaje, la de un Autor vivo y, con plazo, la de un fallecido cuyo plazo
+   corre. Lo decide `derechosDeLaObra` de `src/lib/obras.ts` (el dueño de la ficha juzgado por
+   `derechosVigentes` de `src/lib/clase.ts`; nunca la ficha), y la Obra resuelta lo lleva en
+   `derechosVigentes`. Su página 1 no tiene «Gratis», ni frase de lo tomado, ni «Ninguna de sus citas
+   tiene todavía documento cotejado.», ni «Cómo empieza», ni «Cómo citar», y su línea de Ficha técnica
+   va sin traductor; con el Modelo encendido y admitido y sin congelación, «Dónde leer esta obra» —el
+   mismo rótulo y el mismo `Desplegable`— lleva **solo** sus ediciones en venta, por formato y por
+   tienda, en un `data-ingreso`; si no, no hay desplegable ni hueco (`dondeLeer` da `ventaSola` y la
+   página decide que exista), y el build no avisa de ella. Lo cotejado es de la clase de siempre: la
+   Fuente de una atribuida no hace línea de «Gratis», no cuenta en `fuentes` ni en `edicionCotejada`
+   ni encabeza la edición, y sí cuenta en el total de la frase de lo tomado. Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
    ediciones o sin ellas: lo construye en cuatro variantes `tests/unit/ediciones-en-venta.test.ts`.
    **Con la familia Obra congelada** (`congelacionVigente()`, SM-11) ninguna Página de Obra pinta
    ediciones aunque el Modelo esté encendido: la página no las compone, la ficha las conserva y

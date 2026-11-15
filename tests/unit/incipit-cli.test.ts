@@ -104,6 +104,18 @@ async function correr(rutas: Rutas, argumentos: string[]) {
 }
 
 describe('Historia 32.3 — npm run obra -- incipit', () => {
+  it('35.9 — se niega con 1, sin escribir, si la Obra tiene derechos vigentes, nombrando la ficha', async () => {
+    const rutas = await preparado();
+    // El mismo Corpus con su Autor vivo: su Obra tiene derechos vigentes y no ofrece cómo empieza.
+    await writeFile(join(rutas.autores, 'seneca.yml'), 'nombre: Séneca\nvivo: true\nsemblanza: Filósofo.\nordenAlfabetico: Séneca\n', 'utf8');
+    const antes = await fichaYaml(rutas);
+    const r = await correr(rutas, ['incipit', FICHA, docDe(rutas), 'La mayor parte']);
+    expect(r.codigo).toBe(1);
+    expect(r.error).toContain(`«${FICHA}»: la Obra tiene derechos vigentes`);
+    expect(r.error).toContain('No se ha escrito nada.');
+    expect(await fichaYaml(rutas)).toBe(antes);
+  });
+
   it('escribe el incipit colapsado tras lo demás, y la ficha reabre con el esquema del build', async () => {
     const rutas = await preparado();
     const hecho = await correr(rutas, ['incipit', FICHA, docDe(rutas), '  La mayor   parte ']);

@@ -52,6 +52,7 @@ describe('Historia 24.5 — `siguienteCita`, sin construir', () => {
     titulo: nombre,
     fuentes: ['wikisource-es'],
     edicionCotejada: true,
+    derechosVigentes: false,
     temas: [],
     recuento,
   });

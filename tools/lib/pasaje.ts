@@ -209,7 +209,12 @@ function parrafosDelTrozo(opciones: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Por qué una Obra con incipit declarado no lo enseña. */
-export type MotivoSinIncipit = 'sin-tope' | 'primera-no-cabe' | 'forma-indeterminada' | 'sin-texto';
+export type MotivoSinIncipit =
+  | 'derechos-vigentes'
+  | 'sin-tope'
+  | 'primera-no-cabe'
+  | 'forma-indeterminada'
+  | 'sin-texto';
 
 /** La forma ante la que no se sabe qué es una frase ni un verso. */
 const FORMA_INDETERMINADA: FormaDeLineas = FORMAS_DE_LINEAS[4];
@@ -224,13 +229,16 @@ const FIN_DE_FRASE = /[.?!…][»”"’')\]]*(?= |$)/gu;
  * Si se ofrece un incipit — Historia 32.3. Es el **único** punto que lo decide: sin tope
  * (`MAX_CARACTERES_DEL_INCIPIT` en `undefined`), no; si la primera unidad —la primera frase o el
  * primer verso— pasa del tope en puntos de código, no (el incipit nunca se recorta); igual al
- * tope, sí. Recibe un objeto para que la 35.9 lo amplíe (la Obra con derechos vigentes).
+ * tope, sí. Historia 35.9 (AD-30 v9.1, FR-70) — y antes que nada, una Obra con derechos vigentes
+ * (`derechosDeLaObra`) no lo ofrece nunca, con su propio motivo, aunque el tope sea absurdo.
  */
 export function ofreceIncipit(opciones: {
   tope: number | undefined;
   primera: string;
+  derechosVigentes?: boolean;
 }): { ofrece: true } | { ofrece: false; motivo: Exclude<MotivoSinIncipit, 'forma-indeterminada' | 'sin-texto'> } {
   const { tope, primera } = opciones;
+  if (opciones.derechosVigentes === true) return { ofrece: false, motivo: 'derechos-vigentes' };
   if (tope === undefined) return { ofrece: false, motivo: 'sin-tope' };
   // Un tope que no es un entero positivo no es un tope: con `NaN` ninguna comparación cortaría y
   // saldría el documento entero. Lo da Héctor en `umbrales.ts`; mal dado, se para la construcción.

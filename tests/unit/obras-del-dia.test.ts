@@ -33,6 +33,7 @@ const obra = (autorSlug: string, slug: string, recuento: number): ObraResuelta =
   titulo: `Título ${slug}`,
   fuentes: [],
   edicionCotejada: false,
+  derechosVigentes: false,
   temas: [],
   recuento,
 });

@@ -21,6 +21,7 @@ import {
   colapsar,
   colgarObras,
   avisosDeEdicionesSinCotejada,
+  derechosDeLaObra,
   fichaDeCita,
   congelacionVigente,
   dueñoDeCita,
@@ -61,7 +62,7 @@ import {
   type Rutas,
 } from './corpus.ts';
 import { FICHERO_DEL_CENSO, colapsarEspacios, documentosDeCita } from './cotejo.ts';
-import { type MotivoSinIncipit } from './pasaje.ts';
+import { ofreceIncipit, type MotivoSinIncipit } from './pasaje.ts';
 import {
   fuenteDelIncipit,
   incipitDelDocumento,
@@ -1065,12 +1066,15 @@ function lineasDeEdiciones(
  */
 async function avisoSinCotejada(rutas: Rutas, ficha: FichaDeObra): Promise<string[]> {
   let citas: Awaited<ReturnType<typeof leerCitas>>;
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
   try {
     citas = await leerCitas(rutas.citas);
+    autores = await leerAutores(rutas);
   } catch (fallo) {
     return [`Aviso: no se pudo comprobar si la Obra tiene alguna Cita cotejada: ${texto(fallo)}`];
   }
-  return avisosDeEdicionesSinCotejada([ficha], citas).length === 0
+  // Historia 35.9 — la Obra con derechos vigentes no avisa: sus ediciones van solas (FR-70).
+  return avisosDeEdicionesSinCotejada([ficha], citas, autores).length === 0
     ? []
     : [
         'Aviso: ninguna Cita publicada de esta Obra tiene documento cotejado, así que sus ' +
@@ -1357,8 +1361,11 @@ export async function citasConObra<C extends CitaParaObra>(
   { ok: true; citas: (C & { obra?: ObraResuelta })[] } | { ok: false; motivos: string[] }
 > {
   let fichas: FichaDeObra[];
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
   try {
     fichas = await leerFichasDeObra(rutas);
+    // Historia 35.9 — la Obra resuelta dice sus derechos, que decide su dueño.
+    autores = await leerAutores(rutas);
   } catch (fallo) {
     return {
       ok: false,
@@ -1370,6 +1377,9 @@ export async function citasConObra<C extends CitaParaObra>(
   }
   // Con la regla de dos pasos: lo que ninguna ficha real resuelve recibe una provisional.
   const sinFicha = citas.filter((c) => fichasDeCita(c, fichas).length === 0);
+  // Historia 35.9 — salvo la de un Autor que no está en el Corpus: sin él no hay derechos que
+  // juzgar (`derechosDeLaObra` lanzaría), y esa Cita la rechaza después quien la firma.
+  const conAutor = new Set(autores.map((a) => a.slug));
   const provisionales: FichaDeObra[] = obrasDeCitas(sinFicha)
     .map((o) => ({
       /*
@@ -1384,7 +1394,13 @@ export async function citasConObra<C extends CitaParaObra>(
       titulo: grafiaPorOmision(o.grafias),
       formas: [o.forma],
     }));
-  return { ok: true, citas: colgarObras(citas, [...fichas, ...provisionales]) };
+  const juzgables = provisionales.filter((f) => f.personaje !== undefined || conAutor.has(f.autor ?? ''));
+  try {
+    return { ok: true, citas: colgarObras(citas, [...fichas, ...juzgables], autores) };
+  } catch (fallo) {
+    // Una ficha real cuyo Autor no está: el build no la deja pasar, y aquí se dice en vez de lanzar.
+    return { ok: false, motivos: [texto(fallo), 'No se ha compuesto nada.'] };
+  }
 }
 
 /** El dueño de una ficha provisional: el de sus Citas, como lo escribiría `sembrar`. */
@@ -1879,6 +1895,8 @@ const FALLO_DE_LA_FUENTE_DEL_INCIPIT: Record<FalloDeLaFuenteDelIncipit, string> 
 
 /** Por qué un incipit que se sostiene no saldría en la página, como lo dice el parte. */
 const MOTIVO_SIN_INCIPIT: Record<MotivoSinIncipit, string> = {
+  'derechos-vigentes':
+    'la Obra tiene derechos vigentes: una Obra con derechos vigentes no ofrece cómo empieza (FR-70, AD-30).',
   'sin-tope': 'MAX_CARACTERES_DEL_INCIPIT no tiene valor: la página no lo enseña.',
   'primera-no-cabe': 'su primera frase —o su primer verso— pasa de MAX_CARACTERES_DEL_INCIPIT: la página no lo enseña.',
   'forma-indeterminada': 'la forma de sus líneas es indeterminada: la página no lo enseña.',
@@ -1893,7 +1911,10 @@ const MOTIVO_SIN_INCIPIT: Record<MotivoSinIncipit, string> = {
  * Se niega —código 1, nada escrito— si la ficha no existe; si el documento no es un `.txt` de
  * `corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está
  * en la unión de `documentosDeCita` de sus Citas publicadas: el casado del cotejo); si su forma es
- * `indeterminada`; si `desde` no se localiza; o si la ficha ya declara ese mismo incipit. El build
+ * `indeterminada`; si `desde` no se localiza; o si la ficha ya declara ese mismo incipit. Historia
+ * 35.9 — y antes de mirar el documento, si la Obra tiene derechos vigentes (`derechosDeLaObra`,
+ * decidido por `ofreceIncipit`): esa Obra no ofrece cómo empieza, y el build rompe ante la ficha que
+ * lo declare. El build
  * repite la forma y la localización con la misma función (`incipitDelDocumento`), pero no el
  * casado. El parte dice la forma y el incipit que saldría con el tope de hoy, o por qué no sale.
  */
@@ -1909,6 +1930,18 @@ export async function declararIncipit(
   const activa = await fichaActiva(rutas, nombreDeFicha, esquema);
   if (!activa.ok) return { ok: false, motivos: [...activa.motivos, NADA_ESCRITO] };
   const { ficha, fichas } = activa;
+
+  // Historia 35.9 — la Obra con derechos vigentes no lleva incipit: lo decide `ofreceIncipit`, primero.
+  let conDerechos: boolean;
+  try {
+    conDerechos = derechosDeLaObra(ficha, await leerAutores(rutas));
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  const veto = ofreceIncipit({ tope, primera: '', derechosVigentes: conDerechos });
+  if (!veto.ofrece && veto.motivo === 'derechos-vigentes') {
+    return { ok: false, motivos: [`«${ficha.nombre}»: ${MOTIVO_SIN_INCIPIT['derechos-vigentes']}`, NADA_ESCRITO] };
+  }
 
   const ruta = resolve(documento);
   const dentro = relative(resolve(rutas.fuentes), ruta);

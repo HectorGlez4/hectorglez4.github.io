@@ -26,6 +26,7 @@ import {
   contenidoDeTarjetaDeObra,
 } from '../../src/lib/atribucion.ts';
 import { formaDeObra, resolverObras, type FichaDeObra } from '../../src/lib/obras.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 import { componerDocumento, nombreDeDocumento } from '../../tools/lib/documento.ts';
 
@@ -89,7 +90,7 @@ describe('Historia 24.4 — lo que dice la tarjeta, sin construir', () => {
 
   /** Lo que la tarjeta dice de la Obra que resuelven `citas`, resuelta como en el build. */
   function contenidoDe(nombreDelAutor: string, f: FichaDeObra, citas: CitaDePrueba[]) {
-    const obra = resolverObras(citas, [f]).get(f.nombre);
+    const obra = resolverObras(citas, [f], CUALQUIER_AUTOR).get(f.nombre);
     expect(obra, f.nombre).toBeDefined();
     return contenidoDeTarjetaDeObra({ nombre: nombreDelAutor }, obra!);
   }

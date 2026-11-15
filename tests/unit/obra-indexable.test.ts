@@ -48,6 +48,7 @@ import {
   rutasDelSitemap,
   titularDeDesajustes,
 } from '../../tools/lib/indexables.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /**
  * Historia 22.4 — la Obra tiene página, y solo se indexa si no repite otra (FR-52).
@@ -86,7 +87,7 @@ function citasDe(titulo: string, n: number, desde = 0): Cita[] {
 }
 
 function conjunto(citas: Cita[]): ConjuntoPublicable {
-  return { citas: colgarObras(citas, FICHAS), autores: [AUTOR], temas: [], colecciones: [], personajes: [] };
+  return { citas: colgarObras(citas, FICHAS, CUALQUIER_AUTOR), autores: [AUTOR], temas: [], colecciones: [], personajes: [] };
 }
 
 describe('FR-52 — la regla, pura', () => {
@@ -509,6 +510,7 @@ describe('la Atribución en piezas: el título siempre es el enlace', () => {
     titulo: 'Oráculo',
     fuentes: [],
     edicionCotejada: false,
+    derechosVigentes: false,
     temas: [],
     recuento: 1,
   };

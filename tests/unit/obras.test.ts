@@ -35,6 +35,10 @@ import {
   prefijosDeFormas,
   obrasDeCitas,
   dondeLeer,
+  derechosDeLaObra,
+  fallosDeIncipitConDerechos,
+  avisosDeEdicionesSinCotejada,
+  ordenDelLibro,
   entradaComun,
   ROTULO_DE_FUENTE_SIN_NOMBRE,
   type CitaParaDondeLeer,
@@ -64,6 +68,7 @@ import { aprobar } from '../../tools/lib/revision.ts';
 import { darDeAltaLote } from '../../tools/alta.ts';
 import { retirarAutor } from '../../tools/lib/gestion.ts';
 import { NOMBRE_DEL_TEMA_PUBLICADO, TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado } from './ayuda/relleno.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /** Historia 22.1 — cada Obra tiene ficha antes de tener URL. */
 
@@ -1013,7 +1018,7 @@ describe('22.3 — la Obra resuelta, pura', () => {
 
   it('reunida: las dos grafías resuelven la misma Obra, con el título de la ficha', () => {
     const citas = [citaConAño('a', 'Artículos'), citaConAño('b', 'Artículos de costumbres')];
-    const obras = resolverObras(citas, [DOS]);
+    const obras = resolverObras(citas, [DOS], CUALQUIER_AUTOR);
     expect(obraDeCita(citas[0], [DOS], obras)?.titulo).toBe('Artículos');
     expect(obraDeCita(citas[1], [DOS], obras)?.titulo).toBe('Artículos');
     expect(obras.get('larra--articulos')?.recuento).toBe(2);
@@ -1022,21 +1027,21 @@ describe('22.3 — la Obra resuelta, pura', () => {
   it('el título sigue la regla de tituloEfectivo', () => {
     const otra = { ...DOS, titulo: 'Artículos varios' };
     const citas = [citaConAño('a', 'Artículos de costumbres'), citaConAño('b', 'Artículos de costumbres'), citaConAño('c', 'Artículos')];
-    expect(resolverObras(citas, [otra]).get(otra.nombre)?.titulo).toBe(
+    expect(resolverObras(citas, [otra], CUALQUIER_AUTOR).get(otra.nombre)?.titulo).toBe(
       tituloEfectivo(otra, [otra], citas),
     );
-    expect(resolverObras(citas, [otra]).get(otra.nombre)?.titulo).toBe('Artículos de costumbres');
+    expect(resolverObras(citas, [otra], CUALQUIER_AUTOR).get(otra.nombre)?.titulo).toBe('Artículos de costumbres');
   });
 
   it('año común: dos Citas con 1898 dan 1898', () => {
     const citas = [citaConAño('a', 'Artículos', { año: 1898 }), citaConAño('b', 'Artículos', { año: 1898 }), citaConAño('c', 'Artículos')];
-    expect(resolverObras(citas, [DOS]).get(DOS.nombre)?.año).toBe(1898);
+    expect(resolverObras(citas, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)?.año).toBe(1898);
     expect(avisosDeAñosDeObras([DOS], citas)).toEqual([]);
   });
 
   it('años distintos: se omite el año y se avisa nombrando ficha y años', () => {
     const citas = [citaConAño('a', 'Artículos', { año: 1902 }), citaConAño('b', 'Artículos', { año: 1898 })];
-    const obra = resolverObras(citas, [DOS]).get(DOS.nombre)!;
+    const obra = resolverObras(citas, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)!;
     expect(obra).not.toHaveProperty('año');
     const avisos = avisosDeAñosDeObras([DOS], citas);
     expect(avisos).toHaveLength(1);
@@ -1047,9 +1052,9 @@ describe('22.3 — la Obra resuelta, pura', () => {
 
   it('traducción: el año de la traducción no aporta año a la Obra', () => {
     const citas = [citaConAño('a', 'Artículos', { traduccion: { traductor: 'Fulano', año: 1909 } })];
-    expect(resolverObras(citas, [DOS]).get(DOS.nombre)).not.toHaveProperty('año');
+    expect(resolverObras(citas, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)).not.toHaveProperty('año');
     const mezcla = [...citas, citaConAño('b', 'Artículos', { año: 1835 })];
-    expect(resolverObras(mezcla, [DOS]).get(DOS.nombre)?.año).toBe(1835);
+    expect(resolverObras(mezcla, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)?.año).toBe(1835);
     expect(avisosDeAñosDeObras([DOS], mezcla)).toEqual([]);
   });
 
@@ -1059,24 +1064,24 @@ describe('22.3 — la Obra resuelta, pura', () => {
       citaConAño('b', 'Artículos', { fuente: 'wikisource', temas: ['la-patria'] }),
       citaConAño('c', 'Artículos de costumbres', { fuente: 'cervantes', temas: ['el-amor'] }),
     ];
-    const obra = resolverObras(citas, [DOS]).get(DOS.nombre)!;
+    const obra = resolverObras(citas, [DOS], CUALQUIER_AUTOR).get(DOS.nombre)!;
     expect(obra.fuentes).toEqual(['cervantes', 'wikisource']);
     expect(obra.edicionCotejada).toBe(true);
     expect(obra.temas).toEqual(['el-amor', 'el-tiempo', 'la-patria']);
     expect(obra.recuento).toBe(3);
 
-    const sin = resolverObras([citaConAño('d', 'Artículos')], [DOS]).get(DOS.nombre)!;
+    const sin = resolverObras([citaConAño('d', 'Artículos')], [DOS], CUALQUIER_AUTOR).get(DOS.nombre)!;
     expect(sin.edicionCotejada).toBe(false);
     expect(sin.fuentes).toEqual([]);
   });
 
   it('una ficha sin Citas resuelve con recuento 0 y su título', () => {
-    const obra = resolverObras([], [DOS]).get(DOS.nombre)!;
+    const obra = resolverObras([], [DOS], CUALQUIER_AUTOR).get(DOS.nombre)!;
     expect(obra).toMatchObject({ titulo: 'Artículos', recuento: 0, fuentes: [], temas: [] });
   });
 
   it('sin obra: la Cita no lleva el campo', () => {
-    const [colgada] = colgarObras([{ slug: 'x', autor: 'larra', procedencia: { año: 1835 } }], [DOS]);
+    const [colgada] = colgarObras([{ slug: 'x', autor: 'larra', procedencia: { año: 1835 } }], [DOS], CUALQUIER_AUTOR);
     expect(colgada).not.toHaveProperty('obra');
   });
 
@@ -1092,7 +1097,7 @@ describe('22.3 — la Obra resuelta, pura', () => {
     });
     const [conAño, otraConAño, sinAño] = colgarObras(
       [base('a', 'Artículos', 1835), base('b', 'Artículos de costumbres', 1835), base('c', 'Artículos de costumbres')],
-      [DOS],
+      [DOS], CUALQUIER_AUTOR,
     );
     expect(conAño.obra?.año).toBe(1835);
     expect(textoParaCopiar(otraConAño, AUTOR, undefined)).toBe('«Texto.» — Mariano José de Larra, Artículos, 1835.');
@@ -1232,9 +1237,9 @@ describe('22.3 — citasConObra, del lado de tools/', () => {
 describe('22.3 — colgarObras no arrastra una Obra vieja', () => {
   it('quita el obra previo cuando ninguna ficha resuelve ya la Cita', () => {
     const DOS = ficha('larra--articulos', 'larra', 'Artículos', ['articulos']);
-    const [colgada] = colgarObras([{ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } }], [DOS]);
+    const [colgada] = colgarObras([{ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } }], [DOS], CUALQUIER_AUTOR);
     expect(colgada.obra?.titulo).toBe('Artículos');
-    const [otraVez] = colgarObras([colgada], []);
+    const [otraVez] = colgarObras([colgada], [], CUALQUIER_AUTOR);
     expect(otraVez).not.toHaveProperty('obra');
     expect(otraVez).toEqual({ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } });
   });
@@ -1655,7 +1660,7 @@ describe('35.2 — el dueño de la ficha y de la Cita, y la resolución en dos p
 
   it('la Obra resuelta lleva su dueño; la ruta sale del nombre de la ficha, como siempre', () => {
     const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
-    const [resuelta] = resolverObras([], [delPersonaje]).values();
+    const [resuelta] = resolverObras([], [delPersonaje], CUALQUIER_AUTOR).values();
     expect(resuelta.dueño).toEqual({ tipo: 'personaje', slug: 'batman' });
     expect(resuelta.autor).toBe('kane');
     expect(rutaDeLaObra(resuelta)).toBe('/obra/batman/la-noche/');
@@ -1679,7 +1684,7 @@ describe('35.2 — el dueño de la ficha y de la Cita, y la resolución en dos p
         base('kane-a', { autor: 'kane' }, 'Otra'),
         base('kane-b', { autor: 'kane' }, 'Otra'),
       ],
-      [delPersonaje, delAutor],
+      [delPersonaje, delAutor], CUALQUIER_AUTOR,
     );
     expect(obrasIndexables(citas, null).map((o) => o.nombre)).toEqual(['batman--la-noche']);
   });
@@ -1852,7 +1857,148 @@ describe('edicionQueEncabeza — Historia 32.5, FR-48', () => {
     expect(edicionQueEncabeza([])).toBeUndefined();
   });
 
-  it('toda Obra lleva «Cómo citar» (la 35.9 añadirá las exclusiones)', () => {
-    expect(obraTieneComoCitar({ nombre: 'seneca--cartas-a-lucilio' })).toBe(true);
+  it('35.9 — toda Obra lleva «Cómo citar» salvo la que tiene derechos vigentes (también la de un Personaje)', () => {
+    expect(obraTieneComoCitar({ derechosVigentes: false })).toBe(true);
+    expect(obraTieneComoCitar({ derechosVigentes: true })).toBe(false);
+  });
+});
+
+/**
+ * Historia 35.9 — la Obra con derechos vigentes (FR-70, AD-20 y AD-25 v9.1): una sola regla,
+ * `derechosDeLaObra`, sobre el dueño de la ficha; lo cotejado, solo de la clase de siempre; y las
+ * exclusiones con nombre de «Dónde leer esta obra», «Cómo citar», el aviso y el incipit.
+ */
+describe('35.9 — la Obra con derechos vigentes', () => {
+  const deAutor = (nombre: string, autor: string, extra: Partial<FichaDeObra> = {}): FichaDeObra => ({
+    ...ficha(nombre, autor, 'La obra', ['la obra']),
+    ...extra,
+  });
+  const deBatman: FichaDeObra = {
+    nombre: 'batman--la-obra',
+    ruta: 'corpus/obras/batman--la-obra.yml',
+    personaje: 'batman',
+    personajes: ['batman'],
+    titulo: 'La obra',
+    formas: ['la obra'],
+  };
+  const AUTORES = [
+    { slug: 'viva', vivo: true },
+    { slug: 'larra', añoFallecimiento: 1837 },
+    { slug: 'reciente', añoFallecimiento: 1980 },
+  ];
+  const FUENTE = { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/La_obra' };
+  const cita = (slug: string, autor: string, extra: Record<string, unknown> = {}) => ({
+    slug,
+    autor,
+    procedencia: { obra: 'La obra' },
+    ...extra,
+  });
+
+  it('un Personaje dueño, siempre; un Autor vivo, siempre; uno fallecido, solo con plazo que corre', () => {
+    expect(derechosDeLaObra(deBatman, AUTORES)).toBe(true);
+    expect(derechosDeLaObra(deAutor('viva--la-obra', 'viva'), AUTORES)).toBe(true);
+    expect(derechosDeLaObra(deAutor('larra--la-obra', 'larra'), AUTORES)).toBe(false);
+    expect(derechosDeLaObra(deAutor('reciente--la-obra', 'reciente'), AUTORES)).toBe(false);
+    const conPlazo = { plazo: 70, año: 2026 };
+    expect(derechosDeLaObra(deAutor('reciente--la-obra', 'reciente'), AUTORES, conPlazo)).toBe(true);
+    expect(derechosDeLaObra(deAutor('larra--la-obra', 'larra'), AUTORES, conPlazo)).toBe(false);
+  });
+
+  it('un Autor dueño que no está: `derechosDeLaObra`, `resolverObras` y `colgarObras` lanzan nombrando la ficha', () => {
+    const huerfana = deAutor('nadie--la-obra', 'nadie');
+    expect(() => derechosDeLaObra(huerfana, AUTORES)).toThrow(/corpus\/obras\/nadie--la-obra\.yml.*«nadie»/u);
+    expect(() => resolverObras([], [huerfana], AUTORES)).toThrow(/nadie--la-obra/u);
+    expect(() => colgarObras([cita('nadie-a', 'nadie')], [huerfana], AUTORES)).toThrow(/nadie--la-obra/u);
+    // Una de Personaje no busca a su Autor: el `autor` de su ficha es informativo.
+    expect(() => resolverObras([], [{ ...deBatman, autor: 'nadie' }], AUTORES)).not.toThrow();
+  });
+
+  it('la Obra resuelta lo lleva en `derechosVigentes`, y lo cotejado es de la clase de siempre', () => {
+    const viva = deAutor('viva--la-obra', 'viva');
+    const larra = deAutor('larra--la-obra', 'larra');
+    const obras = resolverObras(
+      [
+        cita('viva-a', 'viva', { clase: 'atribuida', fuente: FUENTE }),
+        cita('larra-a', 'larra', { fuente: FUENTE }),
+        cita('larra-b', 'larra', { clase: 'atribuida', fuente: { id: 'otra-fuente', url: 'https://otra.example/x' } }),
+      ],
+      [viva, larra],
+      AUTORES,
+    );
+    expect(obras.get('viva--la-obra')).toMatchObject({ derechosVigentes: true, edicionCotejada: false, fuentes: [], recuento: 1 });
+    expect(obras.get('larra--la-obra')).toMatchObject({
+      derechosVigentes: false,
+      edicionCotejada: true,
+      fuentes: ['wikisource-es'],
+      recuento: 2,
+    });
+    expect(resolverObras([], [deBatman], AUTORES).get('batman--la-obra')?.derechosVigentes).toBe(true);
+  });
+
+  it('dominio público con una atribuida con Fuente: una línea de una Cita, y «se tomó 1 de sus 2 citas»', () => {
+    const resumen = dondeLeer([{ fuente: FUENTE }, { fuente: { ...FUENTE, url: 'https://es.wikisource.org/wiki/Otra' }, clase: 'atribuida' }]);
+    expect(resumen.lineas).toHaveLength(1);
+    expect(resumen.lineas[0]).toMatchObject({ citas: 1, paginas: 1 });
+    expect(resumen).toMatchObject({ total: 2, citasSinDocumento: 1 });
+    expect(resumen).not.toHaveProperty('ventaSola');
+    expect(textoDeLoTomado(resumen.lineas[0].citas, resumen.total)).toBe('De esta edición se tomó 1 de sus 2 citas.');
+  });
+
+  it('con derechos vigentes `dondeLeer` no da ninguna línea, y lo dice con `ventaSola`', () => {
+    expect(dondeLeer([{ fuente: FUENTE }, {}], { derechosVigentes: true })).toEqual({
+      lineas: [],
+      citasSinDocumento: 2,
+      total: 2,
+      ventaSola: true,
+    });
+    expect(dondeLeer([{ fuente: FUENTE }], { derechosVigentes: false })).not.toHaveProperty('ventaSola');
+  });
+
+  it('la edición que encabeza y su traductor ignoran la Fuente de una atribuida', () => {
+    const atribuida: CitaParaDondeLeer = {
+      fuente: FUENTE,
+      procedencia: { traduccion: { traductor: 'Ana Ruiz' } },
+      clase: 'atribuida',
+    };
+    expect(edicionQueEncabeza([atribuida])).toBeUndefined();
+    expect(traductorDeLaEdicionQueEncabeza([atribuida, atribuida])).toBeUndefined();
+  });
+
+  it('«Ediciones sin edición cotejada» no avisa de la Obra con derechos vigentes, y sí de la de dominio público', () => {
+    const edicion = { tienda: TIENDA_DE_PRUEBA.clave, formato: 'impresa' as const, url: 'https://x' };
+    const viva = deAutor('viva--la-obra', 'viva', { ediciones: [edicion] });
+    const larra = deAutor('larra--la-obra', 'larra', { ediciones: [edicion] });
+    const citas = [
+      cita('viva-a', 'viva', { clase: 'atribuida' }),
+      // Una atribuida con Fuente no es edición cotejada: la de Larra avisa.
+      cita('larra-a', 'larra', { clase: 'atribuida', fuente: FUENTE }),
+    ];
+    const avisos = avisosDeEdicionesSinCotejada([viva, larra], citas, AUTORES).join('\n');
+    expect(avisos).toContain('corpus/obras/larra--la-obra.yml');
+    expect(avisos).not.toContain('viva--la-obra');
+    // La ficha cuyo Autor no está no avisa ni lanza: la para `fallosDeObras`.
+    expect(() => avisosDeEdicionesSinCotejada([deAutor('nadie--la-obra', 'nadie', { ediciones: [edicion] })], [], AUTORES)).not.toThrow();
+  });
+
+  it('«incipit» en una Obra con derechos vigentes rompe, nombrando la ficha; en la de dominio público, no', () => {
+    const incipit = { documento: 'wikisource-es--la-obra', desde: 'Había' };
+    const fallos = fallosDeIncipitConDerechos(
+      [
+        deAutor('viva--la-obra', 'viva', { incipit }),
+        deAutor('larra--la-obra', 'larra', { incipit }),
+        { ...deBatman, incipit },
+        deAutor('nadie--la-obra', 'nadie', { incipit }),
+      ],
+      AUTORES,
+    );
+    expect(fallos).toHaveLength(2);
+    expect(fallos.join('\n')).toContain('corpus/obras/viva--la-obra.yml → declara «incipit» y la Obra tiene derechos vigentes');
+    expect(fallos.join('\n')).toContain('corpus/obras/batman--la-obra.yml');
+    expect(fallos.join('\n')).not.toContain('larra--la-obra');
+  });
+
+  it('el orden del libro de una Obra con derechos vigentes es por slug: el cargador no sitúa atribuidas', () => {
+    const citas = [{ slug: 'viva-c', fuente: FUENTE }, { slug: 'viva-a' }, { slug: 'viva-b', fuente: FUENTE }];
+    expect(ordenDelLibro(citas, new Map(), new Map()).map((c) => c.slug)).toEqual(['viva-a', 'viva-b', 'viva-c']);
   });
 });

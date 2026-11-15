@@ -193,10 +193,12 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
   };
 
   // La portada, con cualquier cambio del Corpus que no sea un documento de Fuente o de Wikidata:
-  // los dos solo componen la Página de Obra, y la portada no pinta ninguno (24.8, 32.2).
+  // los dos solo componen la Página de Obra, y la portada no pinta ninguno (24.8, 32.2). Un
+  // fichero sin familia —`src/lib/umbrales.ts`, que desde la 35.9 llega como cambio por su
+  // veredicto de derechos— no es del Corpus y tampoco la avisa.
   const portada = entrada.cambios.some((cambio) => {
     const familia = familiaDeFichero(cambio.fichero);
-    return familia !== 'documento' && familia !== 'wikidata';
+    return familia !== undefined && familia !== 'documento' && familia !== 'wikidata';
   });
   const rutas = new Set<string>(portada ? ['/'] : []);
   const tocadas = new Set<string>([

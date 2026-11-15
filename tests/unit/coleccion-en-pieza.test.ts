@@ -11,6 +11,7 @@ import {
 } from '../../src/lib/publicado.ts';
 import { SUPERFICIES, rutaDeColeccion, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { MAX_CARACTERES_IMAGEN, MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /**
  * Historia 13.3 — qué Citas de una Colección entran en su Pieza, sobre lo puro.
@@ -54,7 +55,7 @@ const cita = (slug: string, texto: string, autor = 'seneca'): Cita =>
         aptaParaPortada: false,
       },
     ],
-    [FICHA],
+    [FICHA], CUALQUIER_AUTOR,
   )[0];
 
 const breve = (i: number): Cita =>

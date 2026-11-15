@@ -16,7 +16,7 @@
 import { existsSync } from 'node:fs';
 import { colgarObras } from '../../src/lib/obras.ts';
 import { enUnaLinea } from '../../src/lib/verso.ts';
-import { leerCitas, leerFichasDeObra, type Rutas } from './corpus.ts';
+import { leerAutores, leerCitas, leerFichasDeObra, type Rutas } from './corpus.ts';
 import {
   CLASES_DE_COINCIDENCIA,
   cifraDeParecido,
@@ -75,9 +75,12 @@ export async function casiDuplicados(rutas: Rutas, fichas: readonly string[] = [
   }
   let citas: Awaited<ReturnType<typeof leerCitas>>;
   let activas: Awaited<ReturnType<typeof leerFichasDeObra>>;
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
   try {
     citas = await leerCitas(rutas.citas);
     activas = await leerFichasDeObra(rutas);
+    // Historia 35.9 — `colgarObras` resuelve también los derechos de cada Obra, por su dueño.
+    autores = await leerAutores(rutas);
   } catch (fallo) {
     return {
       ok: false,
@@ -99,7 +102,7 @@ export async function casiDuplicados(rutas: Rutas, fichas: readonly string[] = [
   const pedidas = new Set(fichas);
 
   const porObra = new Map<string, { titulo: string; citas: { slug: string; texto: string }[] }>();
-  for (const cita of colgarObras(citas, activas)) {
+  for (const cita of colgarObras(citas, activas, autores)) {
     if (cita.obra === undefined) continue;
     if (pedidas.size > 0 && !pedidas.has(cita.obra.nombre)) continue;
     const grupo = porObra.get(cita.obra.nombre) ?? { titulo: cita.obra.titulo, citas: [] };

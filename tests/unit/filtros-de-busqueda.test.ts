@@ -24,6 +24,7 @@ const obra = (nombre: string, autor: string, titulo: string, recuento: number): 
   titulo,
   fuentes: [],
   edicionCotejada: false,
+  derechosVigentes: false,
   temas: [],
   recuento,
 });

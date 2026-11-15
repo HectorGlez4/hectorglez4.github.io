@@ -13,7 +13,10 @@ import {
   type Campo,
   CAMPOS_QUE_PINTA,
   CUALQUIER_CAMBIO,
+  FICHERO_DE_LOS_UMBRALES,
   NOMBRE_EN_REFERENCIA,
+  derechosEnLosUmbrales,
+  versionDeUmbrales,
   VERSION_OPACA,
   bajasDelHistorial,
   relacionDeSuperficies,
@@ -1897,3 +1900,187 @@ describe('Historia 32.3 — el documento del incipit fecha su Página de Obra de
     }
   });
 });
+
+/**
+ * Historia 35.9 — AD-27 v9.1: el plazo de protección y el año de referencia de `umbrales.ts` fechan y
+ * avisan solo las Obras cuyo veredicto de derechos cambia con el Corpus de hoy, y las Páginas de Cita
+ * de sus atribuidas. Ni la portada, ni ninguna otra superficie.
+ */
+describe('Historia 35.9 — el plazo de los derechos fecha y avisa lo que mueve', () => {
+  const UMBRALES = 'src/lib/umbrales.ts';
+  const CORPUS: CorpusParaFechar = {
+    citas: [
+      { slug: 'reciente-de-siempre', autor: 'reciente', obra: 'reciente--la-obra', ruta: 'corpus/citas/reciente--a.md' },
+      { slug: 'reciente-atribuida', autor: 'reciente', obra: 'reciente--la-obra', atribuida: true, ruta: 'corpus/citas/reciente--b.md' },
+      { slug: 'larra-a', autor: 'larra', obra: 'larra--articulos', atribuida: true, ruta: 'corpus/citas/larra--a.md' },
+      { slug: 'viva-a', autor: 'viva', obra: 'viva--la-obra', atribuida: true, ruta: 'corpus/citas/viva--a.md' },
+    ],
+    autores: [
+      { slug: 'reciente', añoFallecimiento: 1980, ruta: 'corpus/autores/reciente.yml' },
+      { slug: 'larra', añoFallecimiento: 1837, ruta: 'corpus/autores/larra.yml' },
+      { slug: 'viva', vivo: true, ruta: 'corpus/autores/viva.yml' },
+    ],
+    temas: [],
+    colecciones: [],
+    obras: [
+      { nombre: 'reciente--la-obra', autor: 'reciente', formas: ['la obra'], ruta: 'corpus/obras/reciente--la-obra.yml' },
+      { nombre: 'larra--articulos', autor: 'larra', formas: ['articulos'], ruta: 'corpus/obras/larra--articulos.yml' },
+      { nombre: 'viva--la-obra', autor: 'viva', formas: ['la obra'], ruta: 'corpus/obras/viva--la-obra.yml' },
+    ],
+    umbrales: UMBRALES,
+  };
+  const SIN_PLAZO = versionDeUmbrales(
+    'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;\nexport const AÑO_DE_REFERENCIA: number | undefined = undefined;\n',
+  );
+  const CON_PLAZO = versionDeUmbrales(
+    'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = 70;\nexport const AÑO_DE_REFERENCIA: number | undefined = 2026;\n',
+  );
+  const SIN_AÑO = versionDeUmbrales('export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = 70;\n');
+
+  it('`versionDeUmbrales` lee las dos constantes, con su tipo o sin él, y omite las que no tienen valor', () => {
+    expect(SIN_PLAZO).toEqual({});
+    expect(CON_PLAZO).toEqual({ PLAZO_DE_PROTECCION_AÑOS: 70, AÑO_DE_REFERENCIA: 2026 });
+    expect(versionDeUmbrales('export const AÑO_DE_REFERENCIA = 2030;\nexport const PLAZO_DE_PROTECCION_AÑOS = 80;')).toEqual({
+      AÑO_DE_REFERENCIA: 2030,
+      PLAZO_DE_PROTECCION_AÑOS: 80,
+    });
+    // El fichero del árbol: las dos sin valor (las fija Héctor), y lo lee sin lanzar.
+    expect(versionDeUmbrales(readFileSync(resolve(import.meta.dirname, '../../src/lib/umbrales.ts'), 'utf8'))).toEqual(
+      expect.any(Object),
+    );
+  });
+
+  it('el veredicto es el de `derechosVigentes`, y plazo sin año cuenta como cambio sin lanzar', () => {
+    const reciente = derechosEnLosUmbrales({ tipo: 'autor', añoFallecimiento: 1980 });
+    const larra = derechosEnLosUmbrales({ tipo: 'autor', añoFallecimiento: 1837 });
+    expect(reciente.valor(SIN_PLAZO)).toBe(false);
+    expect(reciente.valor(CON_PLAZO)).toBe(true);
+    expect(larra.valor(CON_PLAZO)).toBe(false);
+    expect(() => reciente.valor(SIN_AÑO)).not.toThrow();
+    expect(cambiaronLosCampos({ antes: SIN_PLAZO, despues: CON_PLAZO }, [reciente])).toBe(true);
+    expect(cambiaronLosCampos({ antes: SIN_PLAZO, despues: CON_PLAZO }, [larra])).toBe(false);
+    expect(cambiaronLosCampos({ antes: SIN_PLAZO, despues: SIN_AÑO }, [larra])).toBe(true);
+    expect(reciente.derivado).not.toBe(larra.derivado);
+  });
+
+  it('`umbrales.ts` compone la Obra de un Autor fallecido y las Páginas de Cita de sus atribuidas, y nada más', () => {
+    const conUmbrales = [...relacionDeSuperficies(CORPUS)]
+      .filter(([, { componentes }]) => componentes.some((c) => c.fichero === UMBRALES))
+      .map(([ruta]) => ruta)
+      .sort();
+    expect(conUmbrales).toEqual([
+      '/cita/larra-a/',
+      '/cita/reciente-atribuida/',
+      '/obra/larra/articulos/',
+      '/obra/reciente/la-obra/',
+    ]);
+  });
+
+  it('mover el plazo fecha y avisa solo la Obra cuyo veredicto cambia y sus atribuidas, sin portada', () => {
+    const historial: Historial = new Map([
+      [UMBRALES, [{ fecha: '2026-12-01T09:00:00.000Z', antes: SIN_PLAZO, despues: CON_PLAZO }]],
+    ]);
+    const fechadas = [...fechasPorSuperficie(CORPUS, historial).keys()].sort();
+    expect(fechadas).toEqual(['/cita/reciente-atribuida', '/obra/reciente/la-obra']);
+
+    const cambios = [{ fichero: UMBRALES, antes: SIN_PLAZO, despues: CON_PLAZO }];
+    const relacion = relacionDeSuperficies(CORPUS);
+    expect([...rutasAvisadasPor(cambios, relacion)].sort()).toEqual(['/cita/reciente-atribuida/', '/obra/reciente/la-obra/']);
+    const aviso = componerAviso({
+      cambios,
+      reglaCambiada: true,
+      relacionDespues: relacion,
+      relacionAntes: relacion,
+      indexablesAntes: { rutas: ['/obra/reciente/la-obra/'] },
+      indexablesDespues: { rutas: ['/obra/reciente/la-obra/'] },
+    });
+    expect(aviso.rutas.sort()).toEqual(['/cita/reciente-atribuida/', '/obra/reciente/la-obra/']);
+    expect(aviso.rutas).not.toContain('/');
+  });
+
+  it('un plazo sin año en un commit fecha toda Obra de Autor fallecido, sin lanzar', () => {
+    const historial: Historial = new Map([
+      [UMBRALES, [{ fecha: '2026-12-01T09:00:00.000Z', antes: SIN_PLAZO, despues: SIN_AÑO }]],
+    ]);
+    expect([...fechasPorSuperficie(CORPUS, historial).keys()].sort()).toEqual([
+      '/cita/larra-a',
+      '/cita/reciente-atribuida',
+      '/obra/larra/articulos',
+      '/obra/reciente/la-obra',
+    ]);
+  });
+
+  it('desde el disco y git: un commit que solo mueve las constantes fecha la Obra que cambia, y nada más', async () => {
+    const raiz = await temporal('sabiduria-plazo-');
+    const git = gitEn(raiz);
+    const corpus = join(raiz, 'corpus');
+    const umbrales = (plazo: string, año: string) =>
+      writeFile(
+        join(raiz, FICHERO_DE_LOS_UMBRALES),
+        `export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = ${plazo};\nexport const AÑO_DE_REFERENCIA: number | undefined = ${año};\n`,
+        'utf8',
+      );
+    try {
+      await git(['init', '--initial-branch=principal']);
+      for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras']) await mkdir(join(corpus, dir), { recursive: true });
+      await mkdir(join(raiz, 'src', 'lib'), { recursive: true });
+      await writeFile(join(corpus, 'autores', 'reciente.yml'), 'nombre: Reciente\nañoFallecimiento: 1980\n', 'utf8');
+      await writeFile(join(corpus, 'autores', 'larra.yml'), 'nombre: Larra\nañoFallecimiento: 1837\n', 'utf8');
+      await writeFile(join(corpus, 'temas', 'el-tiempo.yml'), 'nombre: El tiempo\n', 'utf8');
+      const citaMd = (slug: string, autor: string, obra: string, atribuida: boolean) =>
+        `---\nslug: ${slug}\nautor: ${autor}\n${atribuida ? 'clase: atribuida\n' : ''}temas:\n  - el-tiempo\nprocedencia:\n  obra: ${obra}\n---\n\nTexto.\n`;
+      await writeFile(join(corpus, 'citas', 'reciente--a.md'), citaMd('reciente-de-siempre', 'reciente', 'La obra', false), 'utf8');
+      await writeFile(join(corpus, 'citas', 'reciente--b.md'), citaMd('reciente-atribuida', 'reciente', 'La obra', true), 'utf8');
+      await writeFile(join(corpus, 'citas', 'larra--a.md'), citaMd('larra-a', 'larra', 'Artículos', false), 'utf8');
+      await writeFile(
+        join(corpus, 'obras', 'reciente--la-obra.yml'),
+        `autor: reciente\ntitulo: La obra\nformas:\n  - "${formaDeObra('La obra')}"\n`,
+        'utf8',
+      );
+      await writeFile(
+        join(corpus, 'obras', 'larra--articulos.yml'),
+        `autor: larra\ntitulo: Artículos\nformas:\n  - "${formaDeObra('Artículos')}"\n`,
+        'utf8',
+      );
+      await umbrales('undefined', 'undefined');
+      await git(['add', 'corpus', 'src']);
+      await git(['commit', '-m', 'el Corpus'], '2024-01-02T09:00:00+0000');
+
+      await umbrales('70', '2026');
+      await git(['add', 'src']);
+      await git(['commit', '-m', 'el plazo'], '2024-03-04T09:00:00+0000');
+
+      const avisos: string[] = [];
+      const fechas = await fechasDeLasSuperficies(raiz, (mensaje) => avisos.push(mensaje));
+      expect(avisos).toEqual([]);
+      expect(fechas.get('/obra/reciente/la-obra')).toBe('2024-03-04T09:00:00.000Z');
+      expect(fechas.get('/cita/reciente-atribuida')).toBe('2024-03-04T09:00:00.000Z');
+      expect(fechas.get('/cita/reciente-de-siempre')).toBe('2024-01-02T09:00:00.000Z');
+      expect(fechas.get('/obra/larra/articulos')).toBe('2024-01-02T09:00:00.000Z');
+      expect(fechas.get('/autor/reciente')).toBe('2024-01-02T09:00:00.000Z');
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+
+  it('el lector del disco lleva a la relación los años del Autor, la clase de la Cita y la ruta de `umbrales.ts`', async () => {
+    const raiz = await temporal('sabiduria-plazo-lector-');
+    const corpus = join(raiz, 'corpus');
+    try {
+      for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras']) await mkdir(join(corpus, dir), { recursive: true });
+      await writeFile(join(corpus, 'autores', 'viva.yml'), 'nombre: Viva\nvivo: true\n', 'utf8');
+      await writeFile(
+        join(corpus, 'citas', 'viva--a.md'),
+        '---\nslug: viva-a\nautor: viva\nclase: atribuida\nprocedencia:\n  obra: La obra\n---\n\nTexto.\n',
+        'utf8',
+      );
+      const leido = await corpusParaFechar(raiz);
+      expect(leido.autores).toEqual([{ slug: 'viva', vivo: true, ruta: resolve(corpus, 'autores', 'viva.yml') }]);
+      expect(leido.citas[0]).toMatchObject({ slug: 'viva-a', atribuida: true });
+      expect(leido.umbrales).toBe(resolve(raiz, FICHERO_DE_LOS_UMBRALES));
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+});
+

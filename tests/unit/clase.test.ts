@@ -210,6 +210,8 @@ describe('35.1 — esAtribuida es el único lector del campo clase', () => {
     'tools/alta.ts': 'la clase ya derivada por claseQueCorresponde de cada publicada',
     'tools/lib/revision.ts': 'la clase de la candidata ya leída por claseDe',
     'tools/lib/casiDuplicados.ts': 'la clase de coincidencia de parecidoEntre (Historia 29.4)',
+    // Llegó con la fusión de la Épica 33 (Historia 33.3); la lista se pone al día en la 35.9.
+    'tools/lib/curarPrimero.ts': 'la clase de una ventana de la serie de demanda (28-dias o mes)',
   };
   const LEE = [/\.clase\b/u, /\[\s*['"`]clase['"`]\s*\]/u, /\{[^{}]*\bclase\b[^{}]*\}\s*=/u];
 

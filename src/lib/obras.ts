@@ -21,6 +21,7 @@
 
 import type { FormatoDeEdicion } from './ediciones.ts';
 import { añoLegible } from './atribucion.ts';
+import { derechosVigentes, dueñoAutor, esAtribuida, type ReferenciaDeDerechos } from './clase.ts';
 import { compararPorClave, normalizar } from './normalizar.ts';
 import { slugDeObra } from './slug.ts';
 import { rutaDeObra } from './superficies.ts';
@@ -318,6 +319,53 @@ export function dueñoDeCita(cita: { slug: string; autor?: string; personaje?: s
   if (cita.autor !== undefined) return { tipo: 'autor', slug: cita.autor };
   if (cita.personaje !== undefined) return { tipo: 'personaje', slug: cita.personaje };
   throw new Error(`La Cita «${cita.slug}» no declara dueño (autor o personaje).`);
+}
+
+/**
+ * Lo que de un Autor hace falta para juzgar los derechos de una Obra suya — Historia 35.9: su slug
+ * y los dos campos de los que `derechosVigentes` decide.
+ */
+export interface AutorParaDerechos {
+  slug: string;
+  vivo?: unknown;
+  añoFallecimiento?: unknown;
+}
+
+/** Los Autores, por slug o en lista: los dos los entregan quienes leen el Corpus. */
+export type AutoresParaDerechos = ReadonlyMap<string, AutorParaDerechos> | readonly AutorParaDerechos[];
+
+function autoresPorSlug(autores: AutoresParaDerechos): ReadonlyMap<string, AutorParaDerechos> {
+  return autores instanceof Map
+    ? autores
+    : new Map((autores as readonly AutorParaDerechos[]).map((a) => [a.slug, a]));
+}
+
+/**
+ * Si una Obra tiene derechos vigentes — Historia 35.9, AD-20 y AD-25 v9.1, FR-70. Es la **única**
+ * regla: el dueño de la ficha (`dueñoDeFicha`) juzgado por `derechosVigentes` de
+ * `src/lib/clase.ts`. Un Personaje dueño, siempre; un Autor, por su ficha de `corpus/autores/`.
+ * Los derechos nunca se leen de la ficha de Obra ni se teclean: se derivan en cada construcción.
+ *
+ * **Lanza**, nombrando la ficha, si su dueño es un Autor que no está entre los dados: sin él no se
+ * puede decir si la Obra se vende sola, y adivinarlo publicaría «Gratis» donde no va.
+ */
+export function derechosDeLaObra(
+  ficha: Pick<FichaDeObra, 'autor' | 'personaje' | 'ruta'>,
+  autores: AutoresParaDerechos,
+  referencia?: ReferenciaDeDerechos,
+): boolean {
+  const dueño = dueñoDeFicha(ficha);
+  if (dueño.tipo === 'personaje') return true;
+  const autor = autoresPorSlug(autores).get(dueño.slug);
+  if (autor === undefined) {
+    throw new Error(
+      `${ficha.ruta}: la Ficha de Obra es de «${dueño.slug}», que no está entre los Autores del Corpus: ` +
+        'sin él no se puede decir si la Obra tiene derechos vigentes.',
+    );
+  }
+  return referencia === undefined
+    ? derechosVigentes(dueñoAutor(autor))
+    : derechosVigentes(dueñoAutor(autor), referencia);
 }
 
 /** Clave del par (dueño, forma): la identidad de una Obra. */
@@ -937,10 +985,22 @@ export interface ObraResuelta {
    * Procedencia de **esa** Cita.
    */
   año?: number;
-  /** Los identificadores de Fuente distintos de sus Citas, ordenados. */
+  /**
+   * Los identificadores de Fuente distintos de sus Citas **de la clase de siempre**, ordenados.
+   * Desde la Historia 35.9 la Fuente de una atribuida no cuenta: lo cotejado es de esa clase.
+   */
   fuentes: string[];
-  /** Si alguna de sus Citas tiene Fuente: hay edición cotejada que enseñar. */
+  /**
+   * Si alguna de sus Citas de la clase de siempre tiene Fuente: hay edición cotejada que enseñar.
+   * Una atribuida con Fuente no la da (Historia 35.9).
+   */
   edicionCotejada: boolean;
+  /**
+   * Si la Obra tiene derechos vigentes — Historia 35.9, FR-70: lo decide `derechosDeLaObra` sobre
+   * su dueño, nunca la ficha. Con ellos la página 1 no ofrece «Gratis», ni «Cómo empieza», ni
+   * «Cómo citar», y sus ediciones en venta van solas.
+   */
+  derechosVigentes: boolean;
   /** La unión de los Temas de sus Citas, ordenada. */
   temas: string[];
   /** Cuántas Citas publicadas la resuelven. */
@@ -952,7 +1012,8 @@ export interface ObraResuelta {
   nota?: string;
   /**
    * Las ediciones en venta de la ficha (22.9). Solo las pinta la página 1 de la Página de Obra,
-   * con la afiliación encendida y alguna edición cotejada (FR-54): nunca van solas.
+   * con la afiliación encendida y alguna edición cotejada (FR-54): nunca van solas, salvo en una
+   * Obra con derechos vigentes, donde van solas (FR-70, Historia 35.9).
    */
   ediciones?: readonly EdicionDeObra[];
   /**
@@ -985,6 +1046,8 @@ export interface CitaParaObra extends CitaConObra {
   procedencia?: { obra?: string; año?: number } | null;
   temas?: readonly string[];
   fuente?: { id: string } | null;
+  /** Historia 35.9 — su clase: lo cotejado cuenta solo la de siempre (`esAtribuida`). */
+  clase?: unknown;
 }
 
 /** El título publicado, con la regla de `tituloEfectivo`, sobre grafías ya contadas. */
@@ -1011,11 +1074,13 @@ function citasPorFicha<C extends CitaConObra>(
 }
 
 /**
- * Si una Cita tiene Fuente: un único criterio para `fuentes` y `edicionCotejada`, que si no
- * podrían decir a la vez «hay edición cotejada» y «ninguna Fuente».
+ * Si una Cita está cotejada: tiene Fuente y es de la clase de siempre. Un único criterio para
+ * `fuentes`, `edicionCotejada` y el aviso de ediciones sin cotejada, que si no podrían decir a la
+ * vez «hay edición cotejada» y «ninguna Fuente». Desde la Historia 35.9 la Fuente de una atribuida
+ * no cuenta: la atribuida no se coteja, y su Fuente no es una edición de la que se tomara.
  */
 function tieneFuente<C extends CitaParaObra>(cita: C): cita is C & { fuente: { id: string } } {
-  return typeof cita.fuente?.id === 'string' && cita.fuente.id !== '';
+  return typeof cita.fuente?.id === 'string' && cita.fuente.id !== '' && !esAtribuida(cita);
 }
 
 /** Los años distintos que declaran las Procedencias de unas Citas, ordenados. */
@@ -1039,8 +1104,11 @@ function añosDeclarados(citas: readonly CitaParaObra[]): number[] {
 export function resolverObras(
   citas: readonly CitaParaObra[],
   fichas: readonly FichaDeObra[],
+  autores: AutoresParaDerechos,
   fichasTecnicas?: ReadonlyMap<string, FichaTecnicaDeObra>,
 ): Map<string, ObraResuelta> {
+  // Historia 35.9 — los derechos de cada Obra, de su dueño: lanza ante un Autor que no está.
+  const porSlug = autoresPorSlug(autores);
   // Un único origen de grafías por ficha: `citasPorFicha`, el mismo del que tira
   // `grafiasPorFicha` y, por ella, `tituloEfectivo`.
   const porFicha = citasPorFicha(fichas, citas);
@@ -1066,6 +1134,7 @@ export function resolverObras(
       ...(años.length === 1 ? { año: años[0] } : {}),
       fuentes,
       edicionCotejada: cotejadas.length > 0,
+      derechosVigentes: derechosDeLaObra(ficha, porSlug),
       temas,
       recuento: suyas.length,
       ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
@@ -1097,9 +1166,10 @@ export function obraDeCita(
 export function colgarObras<C extends CitaParaObra>(
   citas: readonly C[],
   fichas: readonly FichaDeObra[],
+  autores: AutoresParaDerechos,
   fichasTecnicas?: ReadonlyMap<string, FichaTecnicaDeObra>,
 ): (C & { obra?: ObraResuelta })[] {
-  const obras = resolverObras(citas, fichas, fichasTecnicas);
+  const obras = resolverObras(citas, fichas, autores, fichasTecnicas);
   const indice = indiceDeFichas(fichas);
   return citas.map((cita) => {
     const obra = obraDeCita(cita, indice, obras);
@@ -1161,22 +1231,42 @@ export function avisosDeAñoDeFichaTecnica(
 }
 
 /**
+ * Si se puede decir que la ficha tiene derechos vigentes: `undefined` si su Autor dueño no está
+ * entre los dados. Lo usan las revisiones del build, que no lanzan por eso: una ficha cuyo Autor no
+ * existe ya la para `fallosDeObras`, nombrándola.
+ */
+function derechosSiSeSaben(
+  ficha: FichaDeObra,
+  autores: ReadonlyMap<string, AutorParaDerechos>,
+): boolean | undefined {
+  const dueño = dueñoDeFicha(ficha);
+  if (dueño.tipo === 'autor' && !autores.has(dueño.slug)) return undefined;
+  return derechosDeLaObra(ficha, autores);
+}
+
+/**
  * «Ediciones sin edición cotejada» — Historia 22.9, FR-54.
  *
- * Una ficha que declara ediciones en venta y ninguna de cuyas Citas publicadas tiene Fuente:
- * la página no las pinta —la edición en venta nunca va sola ni en lugar de la cotejada—, con
- * la afiliación encendida o apagada. Avisa y no rompe: documentar una Cita lo corrige, y
- * retirar el documento de la última no puede tumbar el sitio.
+ * Una ficha que declara ediciones en venta y ninguna de cuyas Citas publicadas está cotejada (con
+ * Fuente y de la clase de siempre): la página no las pinta —la edición en venta nunca va sola ni en
+ * lugar de la cotejada—, con la afiliación encendida o apagada. Avisa y no rompe: documentar una
+ * Cita lo corrige, y retirar el documento de la última no puede tumbar el sitio.
+ *
+ * Historia 35.9, FR-70 — la excepción es la Obra con derechos vigentes, cuyas ediciones van solas:
+ * no avisa. Tampoco la ficha cuyo Autor no está, que ya para el build por otra regla.
  */
 export function avisosDeEdicionesSinCotejada(
   fichas: readonly FichaDeObra[],
   citas: readonly CitaParaObra[],
+  autores: AutoresParaDerechos,
 ): string[] {
   const porFicha = citasPorFicha(fichas, citas);
+  const porSlug = autoresPorSlug(autores);
   const avisos: string[] = [];
   for (const ficha of [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))) {
     const ediciones = ficha.ediciones ?? [];
     if (ediciones.length === 0) continue;
+    if (derechosSiSeSaben(ficha, porSlug) !== false) continue;
     if ((porFicha.get(ficha.nombre) ?? []).some(tieneFuente)) continue;
     avisos.push(
       `  · Ediciones sin edición cotejada: ${ficha.ruta} → declara ${ediciones.length} ` +
@@ -1185,6 +1275,29 @@ export function avisosDeEdicionesSinCotejada(
     );
   }
   return avisos;
+}
+
+/**
+ * «Incipit en Obra con derechos vigentes» — Historia 35.9, AD-30 v9.1, FR-70.
+ *
+ * Una ficha con derechos vigentes que declara `incipit`: la Obra con derechos vigentes no ofrece
+ * cómo empieza, y el build se para nombrando la ficha. Es la tercera puerta del veto, tras la
+ * orden que lo declara (`npm run obra -- incipit`, que se niega) y el cargador de incipits, que no
+ * lo ofrece. La ficha cuyo Autor no está no se juzga aquí: la para `fallosDeObras`.
+ */
+export function fallosDeIncipitConDerechos(
+  fichas: readonly FichaDeObra[],
+  autores: AutoresParaDerechos,
+): string[] {
+  const porSlug = autoresPorSlug(autores);
+  return [...fichas]
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+    .filter((ficha) => ficha.incipit !== undefined && derechosSiSeSaben(ficha, porSlug) === true)
+    .map(
+      (ficha) =>
+        `  · ${ficha.ruta} → declara «incipit» y la Obra tiene derechos vigentes: una Obra con derechos ` +
+        'vigentes no ofrece cómo empieza (FR-70, AD-30). Quita el campo de la ficha.',
+    );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1483,6 +1596,18 @@ export const ROTULO_DE_FUENTE_SIN_NOMBRE = 'Fuente sin nombre';
 export interface CitaParaDondeLeer {
   fuente?: FuenteParaLeer | null;
   procedencia?: { traduccion?: { traductor: string; año?: number } } | null;
+  /** Historia 35.9 — su clase: la Fuente de una atribuida no es edición cotejada (`esAtribuida`). */
+  clase?: unknown;
+}
+
+/**
+ * La Fuente cotejada de una Cita: la suya si es de la clase de siempre; la de una atribuida no
+ * cuenta (Historia 35.9). Es el criterio de `dondeLeer` y de `edicionQueEncabeza`, el mismo que
+ * `tieneFuente` aplica a la Obra resuelta.
+ */
+function fuenteCotejada(cita: CitaParaDondeLeer): FuenteParaLeer | undefined {
+  if (esAtribuida(cita) || cita.fuente === undefined || cita.fuente === null) return undefined;
+  return cita.fuente;
 }
 
 /** Una línea del grupo «Gratis» de «Dónde leer esta obra»: una Fuente, o una traducción en una Fuente. */
@@ -1506,9 +1631,15 @@ export interface LineaDondeLeer {
 
 export interface ResumenDondeLeer {
   lineas: LineaDondeLeer[];
-  /** Cuántas Citas de la Obra no declaran Fuente: el estado (c) o (d) de UX-DR50. */
+  /** Cuántas Citas de la Obra no están cotejadas: el estado (c) o (d) de UX-DR50. */
   citasSinDocumento: number;
   total: number;
+  /**
+   * Historia 35.9, FR-70 — la Obra tiene derechos vigentes: no hay grupo «Gratis» ni frase de
+   * lo cotejado, y «Dónde leer esta obra» solo existe con ediciones en venta que pintar, que van solas.
+   * Se omite en toda otra Obra.
+   */
+  ventaSola?: true;
 }
 
 /**
@@ -1614,7 +1745,7 @@ export interface EdicionQueEncabeza {
 /**
  * La edición cotejada que encabeza la Obra — Historias 32.2 y 32.5, FR-48, AD-28.
  *
- * Agrupa las Citas **con Fuente** solo por Fuente (sumando sus traductores, a diferencia de
+ * Agrupa las Citas **cotejadas** (con Fuente y de la clase de siempre, 35.9) solo por Fuente (sumando sus traductores, a diferencia de
  * `dondeLeer`, que separa cada traducción), elige la de más Citas y, a igualdad, la de rótulo
  * menor y luego la de identificador menor. Devuelve el rótulo de esa Fuente (`rotuloDeGrupo`) y su
  * traductor solo si **todas** las Citas de esa Fuente lo declaran y es el mismo; sin ninguna Cita
@@ -1626,8 +1757,8 @@ export interface EdicionQueEncabeza {
 export function edicionQueEncabeza(citas: readonly CitaParaDondeLeer[]): EdicionQueEncabeza | undefined {
   const porFuente = new Map<string, { fuentes: FuenteParaLeer[]; traductores: (string | undefined)[] }>();
   for (const cita of citas) {
-    const fuente = cita.fuente;
-    if (fuente === undefined || fuente === null) continue;
+    const fuente = fuenteCotejada(cita);
+    if (fuente === undefined) continue;
     const grupo = porFuente.get(fuente.id) ?? { fuentes: [], traductores: [] };
     grupo.fuentes.push(fuente);
     grupo.traductores.push(cita.procedencia?.traduccion?.traductor);
@@ -1659,22 +1790,26 @@ export function traductorDeLaEdicionQueEncabeza(citas: readonly CitaParaDondeLee
 }
 
 /**
- * Si la Obra lleva «Cómo citar» en su página 1 — Historia 32.5, UX-DR129. Hoy, toda Obra; la
- * Historia 35.9 añadirá aquí sus exclusiones, y la página solo pregunta.
+ * Si la Obra lleva «Cómo citar» en su página 1 — Historias 32.5 y 35.9, UX-DR129. Toda Obra salvo
+ * la que tiene derechos vigentes, que incluye la de un Personaje: una Referencia sin edición
+ * identificable no sirve a quien cita, la misma razón por la que la Cita atribuida no lo lleva
+ * (FR-65, FR-70). La página solo pregunta.
  */
-export function obraTieneComoCitar(obra: Pick<ObraResuelta, 'nombre'>): boolean {
-  void obra;
-  return true;
+export function obraTieneComoCitar(obra: Pick<ObraResuelta, 'derechosVigentes'>): boolean {
+  return !obra.derechosVigentes;
 }
 
 /**
- * Dónde leer una Obra — Historias 22.6 y 32.4, UX-DR125, UX-DR127.
+ * Dónde leer una Obra — Historias 22.6, 32.4 y 35.9, UX-DR125, UX-DR127, FR-70.
  *
- * Es el **punto con nombre** que decide qué ediciones gratuitas enseña «Dónde leer esta obra»: hoy
- * no excluye nada, y lo ampliará la 35.9 (las exclusiones de una Obra con derechos vigentes). Cada
- * línea lleva sus `citas`, de las que sale la frase de lo tomado (`textoDeLoTomado`).
+ * Es el **punto con nombre** que decide qué ediciones gratuitas enseña «Dónde leer esta obra». En
+ * una Obra con derechos vigentes (`opciones.derechosVigentes`) no enseña ninguna: el resumen sale
+ * sin líneas y con `ventaSola`, y la página pinta solo sus ediciones en venta, si las hay. En las
+ * demás, cada línea lleva sus `citas`, de las que sale la frase de lo tomado (`textoDeLoTomado`).
+ * Lo cotejado es de la clase de siempre: la Fuente de una atribuida no hace línea, y la atribuida
+ * cuenta como sin documento (Historia 35.9).
  *
- * Agrupa las Citas **con Fuente** por (Fuente, traductor): una traducción es otra edición, así
+ * Agrupa las Citas **cotejadas** (con Fuente y de la clase de siempre) por (Fuente, traductor): una traducción es otra edición, así
  * que dos traductores en la misma Fuente son dos líneas. Las ordena de más a menos Citas y, a
  * igualdad, por nombre de Fuente. Todo sale de datos ya publicados en cada Cita; nada se
  * consulta ni se compone.
@@ -1683,7 +1818,13 @@ export function obraTieneComoCitar(obra: Pick<ObraResuelta, 'nombre'>): boolean 
  * sin enlace y con el rótulo de reserva, y sus Citas cuentan como cotejadas. Así el estado (c)
  * sale solo cuando de verdad ninguna Cita tiene `fuente`.
  */
-export function dondeLeer(citas: readonly CitaParaDondeLeer[]): ResumenDondeLeer {
+export function dondeLeer(
+  citas: readonly CitaParaDondeLeer[],
+  opciones: { derechosVigentes?: boolean } = {},
+): ResumenDondeLeer {
+  if (opciones.derechosVigentes === true) {
+    return { lineas: [], citasSinDocumento: citas.length, total: citas.length, ventaSola: true };
+  }
   const grupos = new Map<
     string,
     { id: string; fuentes: FuenteParaLeer[]; traducciones: ({ traductor: string; año?: number } | undefined)[] }
@@ -1691,8 +1832,8 @@ export function dondeLeer(citas: readonly CitaParaDondeLeer[]): ResumenDondeLeer
   let citasSinDocumento = 0;
 
   for (const cita of citas) {
-    const fuente = cita.fuente;
-    if (fuente === undefined || fuente === null) {
+    const fuente = fuenteCotejada(cita);
+    if (fuente === undefined) {
       citasSinDocumento += 1;
       continue;
     }

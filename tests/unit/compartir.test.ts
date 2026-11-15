@@ -11,6 +11,7 @@ import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.
 import { citaEnPieza } from '../../src/lib/pieza.ts';
 import type { Cita, Autor } from '../../src/lib/publicado.ts';
 import { colgarObras, type FichaDeObra } from '../../src/lib/obras.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
 
@@ -21,7 +22,7 @@ const raiz = resolve(import.meta.dirname, '../..');
  * superficies sacan el título. Los fixtures se cuelgan igual, con su ficha.
  */
 function conObra(cita: Cita, ficha: Omit<FichaDeObra, 'ruta'>): Cita {
-  return colgarObras([cita], [{ ...ficha, ruta: `corpus/obras/${ficha.nombre}.yml` }])[0];
+  return colgarObras([cita], [{ ...ficha, ruta: `corpus/obras/${ficha.nombre}.yml` }], CUALQUIER_AUTOR)[0];
 }
 
 const CITA = conObra(

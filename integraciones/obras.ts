@@ -43,6 +43,7 @@ import {
   avisosDeAñosDeObras,
   avisosDeEdicionesSinCotejada,
   avisosDeObras,
+  fallosDeIncipitConDerechos,
   clave,
   fallosDeObras,
   formaDeObra,
@@ -133,26 +134,31 @@ export default function fichasDeObra(): AstroIntegration {
       fichasTecnicas.size === 0
         ? []
         : avisosDeAñoDeFichaTecnica(
-            resolverObras(citas, fichas, fichasTecnicas),
+            resolverObras(citas, fichas, fichasDeAutor, fichasTecnicas),
             fichasTecnicas,
             (nombre) => rutaDeFicha.get(nombre) ?? `corpus/obras/${nombre}.yml`,
           );
 
     return {
       // Historia 35.2 — con los Personajes: una ficha puede ser de uno, y nombrar a otros.
-      fallos: fallosDeObras(
-        fichas,
-        citas,
-        autores,
-        documentos,
-        (await leerPersonajes(rutas)).map((p) => p.slug),
-      ),
+      fallos: [
+        ...fallosDeObras(
+          fichas,
+          citas,
+          autores,
+          documentos,
+          (await leerPersonajes(rutas)).map((p) => p.slug),
+        ),
+        // Historia 35.9 — y la ficha con derechos vigentes que declara un incipit (AD-30 v9.1).
+        ...fallosDeIncipitConDerechos(fichas, fichasDeAutor),
+      ],
       // Historia 22.3 — y la Obra cuyas Citas declaran años distintos, que no publica año.
       // Historia 22.9 — y la ficha con ediciones en venta sin ninguna edición cotejada.
       avisos: [
         ...avisosDeObras(fichas, citas),
         ...avisosDeAñosDeObras(fichas, citas),
-        ...avisosDeEdicionesSinCotejada(fichas, citas),
+        // Historia 35.9 — salvo en la Obra con derechos vigentes, donde van solas (FR-70).
+        ...avisosDeEdicionesSinCotejada(fichas, citas, fichasDeAutor),
         // Historia 32.2 — y la Ficha técnica cuyo año de Wikidata no es el de la Obra.
         ...avisosDeFichaTecnica,
       ],

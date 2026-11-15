@@ -73,10 +73,12 @@ import {
   entradasCrudas,
   historialDeLosFicheros,
   soloDeModo,
+  versionDelLado,
   versionesDeBlobs,
 } from '../integraciones/historial.ts';
 import { obrasDelCorpusEnDisco, personajesIndexablesEnDisco } from '../integraciones/indexables.ts';
 import {
+  FICHERO_DE_LOS_UMBRALES,
   VERSION_OPACA,
   bajasDelHistorial,
   conRutas,
@@ -216,8 +218,12 @@ async function corpusDeRevision(raiz: string, revision: string): Promise<string>
   return copia;
 }
 
-/** Lo que el rango tiene que mirar fuera del Corpus: la regla de indexabilidad. */
-const FICHERO_DE_LA_REGLA = 'src/lib/umbrales.ts';
+/**
+ * Lo que el rango tiene que mirar fuera del Corpus: la regla de indexabilidad y, desde la Historia
+ * 35.9, las constantes de los derechos, que componen por su veredicto las Obras de un Autor
+ * fallecido (`derechosEnLosUmbrales` de `tools/lib/cambios.ts`). El mismo fichero.
+ */
+const FICHERO_DE_LA_REGLA = FICHERO_DE_LOS_UMBRALES;
 
 /**
  * La congelación que regía en una revisión, leída de su `umbrales.ts` con el mismo analizador
@@ -354,8 +360,14 @@ async function leerRango(
   // del rango puede haber cambiado de fecha algo que el propio rango deshizo.
   if (delCorpus.length === 0 && !reglaCambiada && opciones.aunSinCambios !== true) return undefined;
 
+  /*
+   * Historia 35.9 — `umbrales.ts` entra también como cambio, con sus dos versiones reducidas a las
+   * constantes de los derechos (`analizarVersion`): la relación lo compone por su veredicto, y
+   * `componerAviso` no le da portada, porque no tiene familia de fichero.
+   */
+  const deLaRegla = entradas.filter((e) => e.fichero === FICHERO_DE_LA_REGLA);
   const pedidos = new Map<string, string>();
-  for (const e of delCorpus) {
+  for (const e of [...delCorpus, ...deLaRegla]) {
     if (familiaDeFichero(e.fichero) === 'documento') continue;
     for (const blob of [e.antes, e.despues]) if (blob !== null) pedidos.set(blob, e.fichero);
   }
@@ -375,9 +387,13 @@ async function leerRango(
   }
   const version = (blob: string | null, opaca: boolean): Version | null =>
     blob === null ? null : opaca ? VERSION_OPACA : (versiones.get(blob) ?? VERSION_OPACA);
-  const cambios: CambioDeFichero[] = delCorpus.map((e) => {
+  const cambios: CambioDeFichero[] = [...delCorpus, ...deLaRegla].map((e) => {
     const opaca = familiaDeFichero(e.fichero) === 'documento';
-    return { fichero: e.fichero, antes: version(e.antes, opaca), despues: version(e.despues, opaca) };
+    return {
+      fichero: e.fichero,
+      antes: versionDelLado(e.fichero, version(e.antes, opaca)),
+      despues: versionDelLado(e.fichero, version(e.despues, opaca)),
+    };
   });
 
   const copias: string[] = [];
@@ -521,7 +537,8 @@ export async function ensayoDelRango(
   const inicio = performance.now();
   const absoluto = await historialDeLosFicheros(
     raiz,
-    FAMILIAS_DE_FICHERO.map(([directorio]) => resolve(raiz, directorio)),
+    // Historia 35.9 — y `umbrales.ts`, como en la fecha del sitemap.
+    [...FAMILIAS_DE_FICHERO.map(([directorio]) => resolve(raiz, directorio)), resolve(raiz, FICHERO_DE_LA_REGLA)],
     { rango: `${desde}..${hasta}`, opacos: [resolve(raiz, DIRECTORIO_DE_DOCUMENTOS)] },
   );
   const msDelHistorial = performance.now() - inicio;

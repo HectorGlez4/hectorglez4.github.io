@@ -110,7 +110,7 @@ export function conjuntoDeLosDatos(datos: DatosDelCorpus): ConjuntoPublicable {
    * Historia 22.4 — con su Obra colgada, como en `conjuntoPublicable`: sin ella,
    * `rutasPublicadas` no enumeraría ninguna Página de Obra.
    */
-  const citas = colgarObras(datos.citas as unknown as Cita[], datos.fichas);
+  const citas = colgarObras(datos.citas as unknown as Cita[], datos.fichas, datos.autores);
   return {
     citas,
     autores: datos.autores as unknown as ConjuntoPublicable['autores'],

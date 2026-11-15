@@ -144,6 +144,7 @@ describe('el censo por familia', () => {
                 titulo: 'Una obra',
                 fuentes: [],
                 edicionCotejada: false,
+                derechosVigentes: false,
                 temas: [],
                 recuento: 1,
               },

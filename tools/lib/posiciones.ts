@@ -26,7 +26,7 @@
  * Sin red (AD-22) y sin escribir nada en `corpus/`.
  */
 
-import type { AparicionDeCita, IncipitDeObra } from '../../src/lib/obras.ts';
+import { derechosDeLaObra, type AparicionDeCita, type IncipitDeObra } from '../../src/lib/obras.ts';
 import { MAX_CARACTERES_DEL_INCIPIT, MAX_CARACTERES_DEL_PASAJE } from '../../src/lib/umbrales.ts';
 import {
   colapsarEspacios,
@@ -37,6 +37,7 @@ import {
   type DocumentosDeFuente,
 } from './cotejo.ts';
 import {
+  leerAutores,
   leerCitas,
   leerDocumentoDeFuente,
   leerDocumentosParaElCotejo,
@@ -47,7 +48,7 @@ import {
 import { esAtribuida } from '../../src/lib/clase.ts';
 import { fuenteDe as fuenteDeclarada } from './fuentes.ts';
 import { formaDeLasLineas, FORMAS_DE_LINEAS, type FormaDeLineas } from './lineas.ts';
-import { incipitDe, pasajeDeAparicion, type MotivoSinIncipit } from './pasaje.ts';
+import { incipitDe, ofreceIncipit, pasajeDeAparicion, type MotivoSinIncipit } from './pasaje.ts';
 
 /**
  * Lo que de una Cita hace falta para situarla, tal y como sale del frontmatter. Los campos se
@@ -308,7 +309,9 @@ const FALLO_DEL_INCIPIT = {
  * incumplida: …» y nombrando cada ficha, si algo no se sostiene. No repite el casado con las
  * Citas: retirar la última Cita de ese documento no puede romper la construcción siguiente. El
  * tope es, si no se dice otro, `MAX_CARACTERES_DEL_INCIPIT`; un incipit que no se ofrece (sin
- * tope, o con la primera unidad demasiado larga) no entra.
+ * tope, o con la primera unidad demasiado larga) no entra. Historia 35.9 — tampoco el de una Obra con
+ * derechos vigentes: `ofreceIncipit` lo decide primero, con los derechos de `derechosDeLaObra`, y el
+ * build ya se para ante esa ficha (`fallosDeIncipitConDerechos`); aquí no se lee su documento.
  */
 export async function leerIncipitsDelCorpus(
   raizDelCorpus: string,
@@ -318,8 +321,16 @@ export async function leerIncipitsDelCorpus(
   const rutas = rutasDelCorpus(raizDelCorpus);
   const incipits = new Map<string, IncipitDeObra>();
   const problemas: string[] = [];
-  for (const ficha of await leerFichasDeObra(rutas)) {
+  const fichas = await leerFichasDeObra(rutas);
+  // Los Autores, solo si alguna ficha declara incipit: sin ninguno, no se abre nada más.
+  const autores = fichas.some((f) => f.incipit !== undefined) ? await leerAutores(rutas) : [];
+  const conAutor = new Set(autores.map((a) => a.slug));
+  for (const ficha of fichas) {
     if (ficha.incipit === undefined) continue;
+    // Una ficha cuyo Autor no está no se juzga aquí: la para `fallosDeObras`, nombrándola.
+    const juzgable = ficha.personaje !== undefined || (ficha.autor !== undefined && conAutor.has(ficha.autor));
+    const veto = ofreceIncipit({ tope, primera: '', derechosVigentes: juzgable && derechosDeLaObra(ficha, autores) });
+    if (!veto.ofrece && veto.motivo === 'derechos-vigentes') continue;
     const { documento, desde } = ficha.incipit;
     const leido = await leerDocumentoDeFuente(rutas, documento);
     if (leido.estado !== 'legible') {

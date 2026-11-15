@@ -33,6 +33,7 @@ function obra(nombre: string, extra: Partial<ObraResuelta> = {}): ObraResuelta {
     titulo: `Título de ${nombre}`,
     fuentes: ['wikisource-es'],
     edicionCotejada: true,
+    derechosVigentes: false,
     temas: [],
     recuento: 1,
     ...extra,
@@ -160,6 +161,50 @@ describe('Historia 33.3 — la ventana de la curación', () => {
   });
 });
 
+describe('Historia 35.9 — la Obra con derechos vigentes también se propone', () => {
+  it('sin edición cotejada, se propone y su línea lo dice; la de dominio público sin cotejada sigue fuera', () => {
+    const informe = abierto(
+      componer([], {
+        obras: [
+          ...OBRAS,
+          obra('viva--la-obra', { edicionCotejada: false, fuentes: [], derechosVigentes: true }),
+          obra('batman--el-caballero', {
+            edicionCotejada: false,
+            fuentes: [],
+            derechosVigentes: true,
+            autor: undefined,
+            dueño: { tipo: 'personaje', slug: 'batman' },
+          }),
+        ],
+        autores: [...AUTORES, { slug: 'viva', nombre: 'Autora Viva' }],
+      }),
+    );
+    expect(informe.candidatas.map((c) => [c.ficha, c.derechosVigentes])).toEqual([
+      ['batman--el-caballero', true],
+      ['cervantes--quijote', false],
+      ['seneca--brevedad', false],
+      ['seneca--cartas', false],
+      ['viva--la-obra', true],
+    ]);
+    expect(informe.fuera).toBe(1);
+    const parte = lineasDeCuracion(informe).join('\n');
+    expect(parte).toContain('5 Obras publicadas con edición cotejada o con derechos vigentes.');
+    expect(parte).toContain('viva--la-obra · Título de viva--la-obra · Autora Viva — sin cifra · 0 ediciones declaradas · con derechos vigentes: sus ediciones van solas');
+    // La de un Personaje sin Autor se nombra por su dueño.
+    expect(parte).toContain('batman--el-caballero · Título de batman--el-caballero · batman — sin cifra');
+    expect(parte).not.toMatch(/seneca--cartas[^\n]*derechos vigentes/u);
+    expect(parte).toContain('Fuera por no tener edición cotejada, de dominio público: 1 Obra.');
+  });
+
+  it('congelada, nada: tampoco la de derechos vigentes', () => {
+    const informe = componer([], {
+      obras: [obra('viva--la-obra', { edicionCotejada: false, derechosVigentes: true })],
+      congelacion: { desde: '2026-12-06', indexables: [] },
+    });
+    expect(informe).toEqual({ congelada: true, desde: '2026-12-06' });
+  });
+});
+
 describe('Historia 33.3 — las candidatas y su orden', () => {
   it('hoy, con la serie vacía: todas «sin cifra», por nombre de ficha, y ninguna demanda 0', () => {
     const informe = abierto(componer([]));
@@ -175,7 +220,7 @@ describe('Historia 33.3 — las candidatas y su orden', () => {
     expect(parte).toContain('No hay orden por demanda que dar');
     expect(parte).toContain('no es de prioridad');
     expect(parte).not.toMatch(/\b0 impresiones|\b0 clics/);
-    expect(parte).toContain('Fuera por no tener edición cotejada: 1 Obra.');
+    expect(parte).toContain('Fuera por no tener edición cotejada, de dominio público: 1 Obra.');
     expect(parte).not.toContain('cervantes--galatea');
     expect(parte).toContain('Miguel de Cervantes');
   });
@@ -368,9 +413,63 @@ describe('Historia 33.3 — npm run obra -- curar-primero sobre disco', () => {
     expect(r.codigo, r.error).toBe(0);
     expect(r.salida).toContain('1. seneca--cartas-a-lucilio · Cartas a Lucilio · Séneca — sin cifra');
     expect(r.salida).toContain('la serie de demanda no tiene ninguna ventana leída');
-    expect(r.salida).toContain('Fuera por no tener edición cotejada: 1 Obra.');
+    expect(r.salida).toContain('Fuera por no tener edición cotejada, de dominio público: 1 Obra.');
     expect(r.salida).not.toContain('brevedad');
     expect(await foto(corpus)).toEqual(antes);
+  });
+
+  it('35.9 — propone la Obra de un Personaje sin Autor y le cuenta su demanda; y la de un Autor vivo', async () => {
+    const corpus = await corpusMinimo();
+    await mkdir(join(corpus, 'personajes'), { recursive: true });
+    await writeFile(join(corpus, 'personajes', 'batman.yml'), 'nombre: Batman\nuniverso: DC Comics\nordenAlfabetico: Batman\n', 'utf8');
+    await writeFile(
+      join(corpus, 'obras', 'batman--el-caballero.yml'),
+      'personaje: batman\npersonajes:\n  - batman\ntitulo: El caballero\nformas:\n  - el caballero\n',
+      'utf8',
+    );
+    await escribirCita(join(corpus, 'citas'), 'batman--soy-la-noche', {
+      texto: 'Soy la noche.',
+      personaje: 'batman',
+      slug: 'batman-soy-la-noche',
+      clase: 'atribuida',
+      procedencia: { obra: 'El caballero', año: 2000 },
+    });
+    await writeFile(join(corpus, 'autores', 'viva.yml'), 'nombre: Autora Viva\nvivo: true\nsemblanza: Escritora.\nordenAlfabetico: Viva\n', 'utf8');
+    await writeFile(
+      join(corpus, 'obras', 'viva--la-obra.yml'),
+      'autor: viva\ntitulo: La obra\nformas:\n  - la obra\n',
+      'utf8',
+    );
+    await escribirCita(join(corpus, 'citas'), 'viva--una', {
+      texto: 'Una frase de hoy.',
+      autor: 'viva',
+      slug: 'viva-una',
+      clase: 'atribuida',
+      procedencia: { obra: 'La obra', año: 2020 },
+    });
+    await writeFile(
+      join(corpus, 'serie-de-demanda.yml'),
+      [
+        '# cabecera',
+        'lecturas:',
+        '  - desde: "2026-10-08"',
+        '    hasta: "2026-11-04"',
+        '    clase: "28-dias"',
+        '    leidoEl: "2026-11-07"',
+        '    citas:',
+        '      - cita: "batman-soy-la-noche"',
+        '        clics: 3',
+        '        impresiones: 30',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    const r = await correr(corpus, ['curar-primero']);
+    expect(r.codigo, r.error).toBe(0);
+    expect(r.salida).toContain('1. batman--el-caballero · El caballero · batman — 30 impresiones, 3 clics');
+    expect(r.salida).toMatch(/batman--el-caballero[^\n]*con derechos vigentes: sus ediciones van solas/u);
+    expect(r.salida).toMatch(/viva--la-obra · La obra · Autora Viva[^\n]*con derechos vigentes/u);
+    expect(r.salida).toContain('Fuera por no tener edición cotejada, de dominio público: 1 Obra.');
   });
 
   it('sin el fichero de la serie, igual que la serie vacía', async () => {

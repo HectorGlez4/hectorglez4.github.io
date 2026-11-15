@@ -24,6 +24,11 @@
  * `data-ingreso`: nunca van solos ni en lugar de la cotejada (FR-54). Sin `enVenta`, todo lo de
  * fuera de su `data-ingreso` es byte a byte igual.
  *
+ * Historia 35.9, FR-70 — en una Obra con derechos vigentes (`resumen.ventaSola`) no hay «Gratis» ni
+ * frase de cotejo: dentro del desplegable van solo las ediciones en venta, por formato y por tienda,
+ * en su `data-ingreso` y sin el margen que las separa de «Gratis». Sin ellas el desplegable no se
+ * pinta: lo decide la página, que solo lo llama si hay alguna.
+ *
  * Fuera del índice de Pagefind lo pone quien lo usa (el contenedor de los desplegables, con
  * `data-pagefind-ignore="all"`): «Licencia CC BY-SA» no puede ser un resultado de búsqueda en
  * cada Obra. Los enlaces sacan del sitio: sin `data-zona` ni `data-sin-zona`.
@@ -48,7 +53,7 @@ interface Props {
   };
 }
 
-const { lineas, total } = Astro.props.resumen;
+const { lineas, total, ventaSola } = Astro.props.resumen;
 const { enVenta } = Astro.props;
 
 /** Lo que sigue al nombre de la Fuente, con la puntuación de la plantilla. */
@@ -66,7 +71,11 @@ function resto(linea: LineaDondeLeer): string {
 
 <Desplegable rotulo={ROTULO_DE_DONDE_LEER}>
   {
-    lineas.length === 0 ? (
+    ventaSola === true ? (
+      enVenta !== undefined && enVenta.grupos.length > 0 && (
+        <EdicionesEnVenta id={enVenta.id} grupos={enVenta.grupos} sola />
+      )
+    ) : lineas.length === 0 ? (
       <p class="sin-cotejo">Ninguna de sus citas tiene todavía documento cotejado.</p>
     ) : (
       <>

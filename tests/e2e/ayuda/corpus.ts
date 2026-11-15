@@ -17,6 +17,7 @@ import { parse } from 'yaml';
 import { colgarObras, type FichaDeObra } from '../../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA, MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
 import { admiteImagen, tramoDe } from '../../../src/lib/tramos.ts';
+import { CUALQUIER_AUTOR } from '../../unit/ayuda/derechos.ts';
 
 const raiz = join(new URL('../../..', import.meta.url).pathname, 'corpus');
 
@@ -221,7 +222,7 @@ function citasResueltas(): CitaResuelta[] {
       const ficha = parse(readFileSync(join(raiz, 'obras', fichero), 'utf8')) as Omit<FichaDeObra, 'nombre' | 'ruta'>;
       return { ...ficha, nombre: fichero.replace(/\.ya?ml$/, ''), ruta: `corpus/obras/${fichero}` };
     });
-  return colgarObras(citas, fichas).map((c) => ({
+  return colgarObras(citas, fichas, CUALQUIER_AUTOR).map((c) => ({
     slug: c.slug,
     autor: c.autor,
     texto: c.texto,

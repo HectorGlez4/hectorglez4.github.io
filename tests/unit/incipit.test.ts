@@ -56,6 +56,18 @@ describe('32.3 — ofreceIncipit, el único punto que decide', () => {
     expect(conAstral.length).toBe(8);
     expect(ofreceIncipit({ tope: 7, primera: conAstral })).toEqual({ ofrece: true });
   });
+
+  it('35.9 — una Obra con derechos vigentes, no, con su motivo y antes que nada: ni el tope se juzga', () => {
+    expect(ofreceIncipit({ tope: [...PRIMERA].length, primera: PRIMERA, derechosVigentes: true })).toEqual({
+      ofrece: false,
+      motivo: 'derechos-vigentes',
+    });
+    expect(ofreceIncipit({ tope: Number.NaN, primera: PRIMERA, derechosVigentes: true })).toEqual({
+      ofrece: false,
+      motivo: 'derechos-vigentes',
+    });
+    expect(ofreceIncipit({ tope: [...PRIMERA].length, primera: PRIMERA, derechosVigentes: false })).toEqual({ ofrece: true });
+  });
 });
 
 describe('32.3 — incipitDe, el corte en frase o verso', () => {

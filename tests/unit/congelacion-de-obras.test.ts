@@ -3,6 +3,7 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /**
  * Historia 22.8 — la congelación de la familia Obra, **declarada**: lo que pasa en el código
@@ -60,7 +61,7 @@ describe('con la congelación declarada', () => {
 
   it('una Obra nueva que cumple FR-52 no entra: no está en la lista', () => {
     // Criticón, con 3 de 9, cumple la regla, pero no se indexaba al congelar.
-    const citas = colgarObras([...citasDe('Oráculo', 3), ...citasDe('Criticón', 3), ...citasDe('El héroe', 3)], FICHAS);
+    const citas = colgarObras([...citasDe('Oráculo', 3), ...citasDe('Criticón', 3), ...citasDe('El héroe', 3)], FICHAS, CUALQUIER_AUTOR);
     expect(obrasIndexables(citas).map((o) => o.nombre)).toEqual(['gracian--heroe', 'gracian--oraculo']);
     // Sin congelación, la regla sola la deja entrar.
     expect(obrasIndexables(citas, null).map((o) => o.nombre)).toContain('gracian--criticon');
@@ -70,7 +71,7 @@ describe('con la congelación declarada', () => {
 
   it('una Obra de la lista que deja de cumplir la regla sale', () => {
     // El héroe, con una sola Cita, ya no cumple FR-52 aunque esté en la lista.
-    const citas = colgarObras([...citasDe('Oráculo', 3), ...citasDe('El héroe', 1), ...citasDe('Criticón', 3)], FICHAS);
+    const citas = colgarObras([...citasDe('Oráculo', 3), ...citasDe('El héroe', 1), ...citasDe('Criticón', 3)], FICHAS, CUALQUIER_AUTOR);
     expect(obrasIndexables(citas).map((o) => o.nombre)).toEqual(['gracian--oraculo']);
   });
 

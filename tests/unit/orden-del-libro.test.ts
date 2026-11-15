@@ -46,6 +46,7 @@ import {
   separarFrontmatter,
   type CitaEnCorpus,
 } from '../../tools/lib/corpus.ts';
+import { CUALQUIER_AUTOR } from './ayuda/derechos.ts';
 
 /**
  * Historia 24.1 — la Página de Obra lista sus Citas en el orden del libro.
@@ -782,7 +783,7 @@ describe('24.1 — el Corpus real, sin construir', () => {
 
   it('alguna Obra de varias Citas documentadas sale distinta del orden por slug', async () => {
     const fichas = await leerFichasDeObra(rutas);
-    const conObra = colgarObras(citas, fichas);
+    const conObra = colgarObras(citas, fichas, CUALQUIER_AUTOR);
     const porObra = new Map<string, typeof conObra>();
     for (const c of conObra) {
       if (c.obra === undefined) continue;
@@ -809,7 +810,7 @@ describe('24.1 — el Corpus real, sin construir', () => {
   it('en cada Obra real, documento y posición nunca retroceden dentro de una Fuente', async () => {
     const fichas = await leerFichasDeObra(rutas);
     const porObra = new Map<string, CitaEnCorpus[]>();
-    for (const c of colgarObras(citas, fichas)) {
+    for (const c of colgarObras(citas, fichas, CUALQUIER_AUTOR)) {
       if (c.obra === undefined) continue;
       porObra.set(c.obra.nombre, [...(porObra.get(c.obra.nombre) ?? []), c]);
     }
@@ -988,8 +989,10 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     const deCotejo = /import\s*\{([^}]*)\}\s*from\s*'\.\/cotejo\.ts'/.exec(codigo)?.[1] ?? '';
     // De `corpus.ts`, solo los lectores: ninguna de sus funciones que escriben en `corpus/`.
     const nombres = (lista: string) => lista.split(',').map((n) => n.trim()).filter((n) => n !== '').sort();
-    // La 32.3 añade los dos lectores del incipit: las fichas y un solo documento.
+    // La 32.3 añade los dos lectores del incipit: las fichas y un solo documento. La 35.9, los
+    // Autores: el incipit de una Obra con derechos vigentes no se ofrece (`derechosDeLaObra`).
     expect(nombres(deCorpus)).toEqual([
+      'leerAutores',
       'leerCitas',
       'leerDocumentoDeFuente',
       'leerDocumentosParaElCotejo',
@@ -1091,7 +1094,7 @@ describe('24.9 — las cuatro Obras del Corpus real, sin construir', () => {
     indices = await leerOrdenDeLosIndices(rutas);
     posiciones = posicionesDeCitas(citas, documentos);
     porObra = new Map();
-    for (const c of colgarObras(citas, fichas)) {
+    for (const c of colgarObras(citas, fichas, CUALQUIER_AUTOR)) {
       if (c.obra !== undefined) porObra.set(c.obra.nombre, [...(porObra.get(c.obra.nombre) ?? []), c]);
     }
   });
