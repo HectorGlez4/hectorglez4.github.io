@@ -145,6 +145,19 @@ OBRAS_DE_D.forEach((obra, i) => {
     obra,
   );
 });
+// Historia 36.2 — D dice además una Cita sin obra: su Lista de Obras lleva el pie y el panel cierra
+// en `texto` (atribuida con solo el año en su Procedencia y sin Fuente: ninguna Obra la reclama).
+CORPUS['citas/vivo--c-de-d-sin-obra.md'] = citaValida({
+  texto: textoPropio('De D sin obra', 777),
+  slug: 'vivo-c-de-d-sin-obra',
+  autor: 'vivo',
+  personaje: 'd',
+  clase: 'atribuida',
+  estadoDerechos: undefined,
+  ...ATESTIGUADA,
+  procedencia: { año: 2000 },
+  fuente: undefined,
+});
 for (let i = 1; i <= CITAS_POR_PAGINA; i += 1) {
   CORPUS[`citas/vivo--de-a-${pad(i)}.md`] = atribuida(
     `vivo-de-a-${pad(i)}`,
@@ -307,7 +320,17 @@ describe('Historia 35.3 — la Página de Personaje construida', () => {
         .join(';');
     expect(de('.panel-autor h1'), '.panel-autor h1').toMatch(/color:\s*var\(--sobre-contenedor-autor\)/u);
     expect(de('.obras-del-personaje>.lista-de-obras')).toMatch(/margin-top:\s*var\(--unidad\)/u);
+    expect(reglas.some((r) => r.selectores.includes('.obras-del-personaje')), 'la regla existe').toBe(true);
     expect(de('.obras-del-personaje')).not.toMatch(/margin-top/u);
+  });
+
+  it('Historia 36.2 — con Citas sin obra, la Lista de Obras y su pie van en el panel de la Obra, que cierra en `texto`', () => {
+    const panel = /<div class="panel panel-obra cierre-texto"[^>]*>\s*<section class="obras-del-personaje"[\s\S]*?<\/section>\s*<\/div>/u.exec(
+      main('/personaje/d/'),
+    )?.[0];
+    expect(panel).toBeDefined();
+    expect(panel).toMatch(/<p class="sin-obra"[^>]*>Y una cita sin obra documentada\.<\/p>/u);
+    expect(main('/personaje/a/')).toContain('<div class="panel panel-obra cierre-fila"');
   });
 
   it('la semblanza de una biografía, fuera de Pagefind y con su atribución visible (AD-26, AD-28)', () => {

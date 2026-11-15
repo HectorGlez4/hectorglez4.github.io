@@ -99,7 +99,7 @@ const BREVEDAD = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
 const IRA = '/obra/seneca/de-la-ira/';
 /**
  * La apertura del contenedor de «Cómo citar», al pie y —desde la 36.2— dentro del Panel de bloque
- * de las herramientas, que pone el aire (`.pagina > .buscar-en + .panel` o la regla de entre
+ * de las herramientas, que pone el aire (`.pagina > :not(.panel) + .panel` o la regla de entre
  * paneles), sin el `>`: Astro le añade la clase de ámbito de la página.
  */
 const APERTURA = '<div class="panel panel-herramientas cierre-fila"';

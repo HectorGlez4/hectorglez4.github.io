@@ -253,7 +253,7 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
       // Panel de bloque desde la 36.2.
       const fin = pagina.indexOf('</form>', formulario) + '</form>'.length;
       expect(pagina.slice(fin).trimStart(), ruta).toMatch(
-        /^<div class="panel [^"]*"[^>]*>(?:<section class="temas"|<div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Cómo citar<)/,
+        /^(?:<div class="panel panel-tema [^"]*"[^>]*><section class="temas"|<div class="panel panel-herramientas [^"]*"[^>]*><div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Cómo citar<)/,
       );
     }
   });
