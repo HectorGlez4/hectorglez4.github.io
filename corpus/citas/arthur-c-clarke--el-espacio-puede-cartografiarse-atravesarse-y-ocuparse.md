@@ -1,0 +1,20 @@
+---
+texto: "El espacio puede cartografiarse, atravesarse y ocuparse sin límite definible, pero nunca podrá ser conquistado."
+autor: "arthur-c-clarke"
+temas:
+  - "la-humildad"
+slug: "arthur-c-clarke-el-espacio-puede-cartografiarse-atravesarse-y-ocuparse"
+procedencia:
+  obra: "Nunca conquistaremos el espacio (artículo en Science Digest)"
+  año: 1960
+clase: "atribuida"
+atestiguaciones:
+  - url: "https://en.wikiquote.org/wiki/Arthur_C._Clarke"
+    consultadaEl: "2026-11-16"
+  - url: "https://clarkefoundation.org/arthur-c-clarke-biography/"
+    consultadaEl: "2026-11-16"
+origen: "traduccion-propia"
+partida:
+  texto: "Space can be mapped and crossed and occupied without definable limit; but it can never be conquered."
+  lengua: "en"
+---
