@@ -981,10 +981,12 @@ describe('el registro de señales en corpus/', () => {
     expect(CABECERA_DE_SENALES).toMatch(/npm run canal -- senal/);
   });
 
-  it('el fichero versionado es la cabecera y la lista vacía', () => {
+  // Nació con la cabecera y la lista vacía; desde el 2026-11-15 trae las primeras señales propias
+  // de verdad. Lo que se exige ahora es que siga empezando por su cabecera y se deje leer entero.
+  it('el fichero versionado empieza por su cabecera y se deja leer', async () => {
     const versionado = readFileSync(resolve(RAIZ, 'corpus', FICHERO_DE_SENALES), 'utf8');
-    expect(versionado).toBe(CABECERA_DE_SENALES);
-    expect(parsearYaml(versionado)).toEqual({ senales: null });
+    expect(versionado.startsWith(CABECERA_DE_SENALES)).toBe(true);
+    await expect(leerSenalesExternas(rutasDelCorpus(resolve(RAIZ, 'corpus')))).resolves.toBeInstanceOf(Array);
   });
 
   it('es metadato del Corpus, no una colección', () => {
