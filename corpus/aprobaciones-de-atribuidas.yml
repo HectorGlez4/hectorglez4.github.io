@@ -2154,3 +2154,44 @@ aprobaciones:
   - { slug: "roland-barthes-no-puede-haber-pues-libertad-sino-fuera", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
   - { slug: "roland-barthes-sapientia-ningun-poder-un-poco-de-saber", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
   - { slug: "roland-barthes-un-poco-de-mal-confesado-exime-de", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "akio-morita-creo-que-es-un-gran-error-pensar", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "akio-morita-la-gente-necesita-dinero-pero-tambien-quiere", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "akio-morita-no-temas-cometer-un-error-pero-asegurate", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "akio-morita-si-vas-por-la-vida-convencido-de", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "akio-morita-una-empresa-no-llegara-a-ninguna-parte", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "ayrton-senna-creo-en-la-capacidad-de-concentrarse-con", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "ayrton-senna-el-miedo-forma-parte-de-nuestra-vida", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "ayrton-senna-en-cuanto-tocas-ese-limite-algo-sucede", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "ayrton-senna-no-tengo-idolos-admiro-el-trabajo-la", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "ayrton-senna-tengo-miedo-a-la-muerte-y-al", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "ayrton-senna-todos-buscamos-emociones-solo-es-cuestion-de", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "carlos-drummond-de-andrade-como-las-plantas-la-amistad-no-debe", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "carlos-drummond-de-andrade-la-amistad-es-un-medio-de-aislarnos", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "carlos-drummond-de-andrade-la-caja-fuerte-del-banco-contiene-solo", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "carlos-drummond-de-andrade-ser-feliz-sin-motivo-es-la-forma", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "carlos-drummond-de-andrade-solo-es-luchador-quien-sabe-luchar-consigo", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "konrad-adenauer-la-paciencia-es-el-arma-mas-fuerte", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "oscar-niemeyer-creo-que-toda-persona-tiene-un-lado", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "oscar-niemeyer-la-arquitectura-debe-usarse-con-valentia-sin", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "oscar-niemeyer-la-vida-es-dificil-la-vida-nos", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "oscar-niemeyer-la-vida-es-un-soplo-uno-viene", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "oscar-niemeyer-uno-quiere-informarse-mejor-sobre-todo-aprender", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "vinicius-de-moraes-amad-porque-no-hay-nada-mejor-para", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "vinicius-de-moraes-cada-poeta-es-una-cosa-en-si", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "vinicius-de-moraes-hay-personas-con-quienes-las-palabras-son", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "vinicius-de-moraes-hombre-y-mujer-son-en-su-constante", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "vinicius-de-moraes-la-mayor-soledad-es-la-del-ser", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "vinicius-de-moraes-la-muerte-me-espera-oculta-en-algun", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "vinicius-de-moraes-la-pasion-no-se-vende-nunca", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "vinicius-de-moraes-solo-la-poesia-puede-salvar-el-mundo", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-en-la-duda-a-favor-de-la", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-entiendo-una-politica-para-la-paz-como", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-la-guerra-no-debe-ser-un-medio", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-la-guerra-ya-no-es-la-ultima", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-nada-viene-por-si-solo-y-poco", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-no-buscamos-admiradores-necesitamos-personas-que-piensen", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-no-estamos-al-final-de-nuestra-democracia", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-no-podemos-crear-la-democracia-perfecta-queremos", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-no-somos-unos-escogidos-somos-unos-elegidos", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-queremos-atrevernos-a-mas-democracia", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
+  - { slug: "willy-brandt-si-he-de-decir-que-me-importa", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-19" }
