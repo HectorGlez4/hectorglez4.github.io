@@ -1858,3 +1858,16 @@ aprobaciones:
   - { slug: "zora-neale-hurston-no-no-lloro-por-el-mundo-estoy", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
   - { slug: "zora-neale-hurston-para-mi-la-amargura-es-el-olor", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
   - { slug: "zora-neale-hurston-si-quieres-esa-buena-sensacion-que-da", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "marianne-williamson-nuestro-miedo-mas-profundo-no-es-ser", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "marianne-williamson-que-juegues-a-ser-pequeno-no-sirve", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "marianne-williamson-todos-estamos-destinados-a-brillar-como-los", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-cuando-estas-midiendo-la-vida-no-la", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-el-sacrificio-es-parte-de-la-vida", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-el-unico-tiempo-que-desperdiciamos-es-el", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-guardar-la-ira-es-un-veneno-te", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-los-desconocidos-son-solo-familia-que-aun", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-los-muertos-se-sientan-a-nuestra-mesa", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-nunca-es-demasiado-tarde-ni-demasiado-pronto", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-puedes-pasarte-la-vida-entera-coleccionando-dias", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-todos-anoramos-lo-que-hemos-perdido-pero", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
+  - { slug: "mitch-albom-todos-los-finales-son-tambien-comienzos-solo", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-18" }
