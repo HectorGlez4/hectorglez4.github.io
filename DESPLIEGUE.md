@@ -148,9 +148,13 @@ recachear cada diez minutos, y eso se redujo de 460 KiB a ~99 KiB recortando `su
 
 ### El techo de peso del hospedaje
 
-GitHub Pages admite **1 GB por sitio publicado**, y `dist/` crece unos 95 KB por Cita nueva
-—29 KB de su página, 64 KB de su Tarjeta Social y uno de Pagefind y listados— cuando su Autor
-y su Obra ya tienen página; un Autor o una Obra nuevos añaden además la suya y su Tarjeta. Pasar el
+GitHub Pages admite **1 GB por sitio publicado**, y `dist/` crece unos 58 KB por Cita nueva
+—29 KB de su página, 28 KB de su Tarjeta Social y uno de Pagefind y listados— cuando su Autor
+y su Obra ya tienen página; un Autor o una Obra nuevos añaden además la suya y su Tarjeta (unos
+16 KB la de listado). La Tarjeta pesaba 64 KB hasta el 2026-11-19, cuando pasó a codificarse con
+paleta de 256 colores (`src/lib/rasterizado.ts`, decisión de Héctor): con 6.899 Tarjetas de Cita,
+`dist/` bajó de 917,6 MiB juzgados —por encima del tope— a 622,9 MiB, y `tarjeta/` de 514 MiB a
+219,8 MiB, el 35,3 % de lo juzgado. En una muestra de 203 tarjetas construidas ningún canal se movió más de 3/255, y una prueba de `tests/unit/tarjeta.test.ts` lo vigila. Pasar el
 techo no se ve al construir, se ve al publicar, y sin decir cuánto sobra. Por eso
 `npm run build` termina con un paso que lo mide (Historia 24.2):
 
@@ -199,9 +203,13 @@ quiera, en un diff de una línea.
 las Tarjetas Sociales, 298 MiB —el 66,9 % de lo juzgado— en 5.113 ficheros; 5.116 PNG. A
 95 KB por Cita, el aviso salta hacia las 7.800 Citas, el tope hacia las 9.400 y el techo
 hacia las 10.000. **Son cotas, no previsiones**: cuentan solo lo que añade una Cita, y cada
-Autor u Obra nuevos que traiga la siembra suma su página y su Tarjeta (otros 64 KB), así que
+Autor u Obra nuevos que traiga la siembra suma su página y su Tarjeta (otros 64 KB entonces), así que
 los umbrales pueden llegar con menos Citas, nunca con más. La Épica 24 engorda la Página de Cita: **tras la 24.6 se vuelve a medir y
 Héctor revisa los valores.**
+
+**Desde el 2026-11-19**, con las Tarjetas codificadas con paleta y 6.898 Citas, lo juzgado pesa
+622,9 MiB. A 58 KB por Cita, quedan hacia 2.200 Citas hasta el aviso, 4.800 hasta el tope y
+5.800 hasta el techo, con la misma salvedad: cotas, no previsiones.
 
 Es una construcción local, sin `MEDICION_ENDPOINT` ni `SITE_URL`. La del flujo de publicación
 pesa algo más, pero desde la Historia 23.1 apenas: el emisor de la medición ya no va en línea

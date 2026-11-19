@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import sharp from 'sharp';
+import { pngDeTarjeta } from '../../src/lib/rasterizado.ts';
 import { agruparPorClave, directorioDeAutores, directorioDeObras } from '../../src/lib/directorios.ts';
 import {
   SUPERFICIES_SIN_SEMBLANZA,
@@ -673,7 +673,7 @@ describe('Historia 26.4 — `/obras/` construido', () => {
     for (const prohibido of [NOTA, SEMBLANZA_DE_EPICTETO, SEMBLANZA_DE_MACHADO, SEMBLANZA_DE_SENECA]) {
       expect(svg).not.toContain(prohibido);
     }
-    expect(construido.equals(await sharp(Buffer.from(svg)).png().toBuffer())).toBe(true);
+    expect(construido.equals(await pngDeTarjeta(svg))).toBe(true);
   });
 
   it('ni Cita, ni semblanza, ni nota de ficha, ni «frases», ni la línea sin obra, ni glifo de avance', () => {

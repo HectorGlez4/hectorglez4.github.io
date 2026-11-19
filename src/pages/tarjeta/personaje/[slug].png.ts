@@ -12,7 +12,7 @@
  * Un Personaje declarado sin Citas publicadas no tiene página, y su tarjeta no la enlazaría nadie.
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
-import sharp from 'sharp';
+import { pngDeTarjeta } from '../../../lib/rasterizado.ts';
 import { conjuntoPublicable, personajesPublicados } from '../../../lib/publicado.ts';
 import {
   datosDeTarjetaDePersonaje,
@@ -31,7 +31,7 @@ export const getStaticPaths = (async () => {
 
 export const GET: APIRoute = async ({ props }) => {
   const svg = svgDeTarjetaDeListado(props as DatosDeTarjetaDeListado);
-  const png = await sharp(Buffer.from(svg)).png().toBuffer();
+  const png = await pngDeTarjeta(svg);
 
   return new Response(new Uint8Array(png), {
     headers: {

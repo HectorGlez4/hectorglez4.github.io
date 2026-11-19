@@ -17,7 +17,7 @@
  * indexa es un fichero que no mira nadie.
  */
 import type { APIRoute } from 'astro';
-import sharp from 'sharp';
+import { pngDeTarjeta } from '../../lib/rasterizado.ts';
 import { DESCRIPCION_DEL_SITIO, MARCA } from '../../lib/marca.ts';
 import { svgDeTarjetaDeListado } from '../../lib/tarjeta.ts';
 
@@ -27,7 +27,7 @@ export const GET: APIRoute = async () => {
     bajada: DESCRIPCION_DEL_SITIO,
     conMarca: false,
   });
-  const png = await sharp(Buffer.from(svg)).png().toBuffer();
+  const png = await pngDeTarjeta(svg);
 
   return new Response(new Uint8Array(png), {
     headers: {

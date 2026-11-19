@@ -80,6 +80,8 @@ describe('Historia 10.1 — la Cita larga también tiene Tarjeta', () => {
       expect(bytes.subarray(1, 4).toString()).toBe('PNG');
       expect(bytes.readUInt32BE(16)).toBe(1200);
       expect(bytes.readUInt32BE(20)).toBe(630);
+      // Con paleta (tipo de color 3): es lo que mantiene dist/ bajo el tope de peso.
+      expect(bytes[25]).toBe(3);
       expect(bytes.length).toBeGreaterThan(5000);
     }
   });

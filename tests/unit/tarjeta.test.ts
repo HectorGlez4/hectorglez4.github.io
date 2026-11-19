@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 import sharp from 'sharp';
+import { pngDeTarjeta } from '../../src/lib/rasterizado.ts';
 import {
   ALTO,
   ANCHO,
@@ -153,8 +154,72 @@ describe('Historia 10.1 — sharp está declarada, no heredada', () => {
     const pkg = JSON.parse(readFileSync(resolve(raiz, 'package.json'), 'utf8'));
     expect(pkg.dependencies.sharp).toBeTruthy();
 
+    const rasterizado = readFileSync(resolve(raiz, 'src/lib/rasterizado.ts'), 'utf8');
+    expect(rasterizado).toContain("from 'sharp'");
+
+    // El endpoint no rasteriza por su cuenta: llama al único dueño de la codificación.
     const endpoint = readFileSync(resolve(raiz, 'src/pages/tarjeta/[slug].png.ts'), 'utf8');
-    expect(endpoint).toContain("from 'sharp'");
+    expect(endpoint).toContain("from '../../lib/rasterizado.ts'");
+    expect(endpoint).not.toContain("from 'sharp'");
+  });
+});
+
+describe('Tarjetas Sociales con paleta — un solo dueño de la codificación', () => {
+  /** Ancho, alto y tipo de color del IHDR, que empieza en el byte 16 de todo PNG. */
+  const cabecera = (png: Buffer) => ({
+    ancho: png.readUInt32BE(16),
+    alto: png.readUInt32BE(20),
+    tipoDeColor: png[25],
+  });
+
+  it('la Tarjeta de Cita sale con paleta (tipo de color 3) y mide 1200×630', async () => {
+    const png = await pngDeTarjeta(svgDeTarjeta(CORTA));
+    expect(cabecera(png)).toEqual({ ancho: 1200, alto: 630, tipoDeColor: 3 });
+    // Sin alfa: un PNG con paleta podría traerlo en un fragmento tRNS.
+    expect(png.includes(Buffer.from('tRNS'))).toBe(false);
+  });
+
+  it('la Tarjeta de listado, igual', async () => {
+    const png = await pngDeTarjeta(svgDeTarjetaDeListado({ titulo: MARCA, bajada: 'Citas célebres', conMarca: false }));
+    expect(cabecera(png)).toEqual({ ancho: 1200, alto: 630, tipoDeColor: 3 });
+  });
+
+  it('el mismo SVG da los mismos bytes', async () => {
+    const svg = svgDeTarjeta(CORTA);
+    const [uno, dos] = await Promise.all([pngDeTarjeta(svg), pngDeTarjeta(svg)]);
+    expect(uno.equals(dos)).toBe(true);
+  });
+
+  it('la paleta no mueve ningún canal más de 3/255 respecto del raster sin pérdida', async () => {
+    for (const svg of [
+      svgDeTarjeta(CORTA),
+      svgDeTarjetaDeListado({ titulo: MARCA, bajada: 'Citas célebres', conMarca: false }),
+    ]) {
+      const exacto = await sharp(Buffer.from(svg)).removeAlpha().raw().toBuffer();
+      const conPaleta = await sharp(await pngDeTarjeta(svg)).removeAlpha().raw().toBuffer();
+      expect(conPaleta.length).toBe(exacto.length);
+      let maximo = 0;
+      for (let i = 0; i < exacto.length; i++) maximo = Math.max(maximo, Math.abs(exacto[i]! - conPaleta[i]!));
+      expect(maximo).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it('ningún endpoint de src/pages/tarjeta/ codifica por su cuenta', () => {
+    const carpeta = resolve(raiz, 'src/pages/tarjeta');
+    const endpoints = readdirSync(carpeta, { recursive: true, encoding: 'utf8' })
+      .filter((f) => f.endsWith('.png.ts'))
+      .map((f) => relative(carpeta, join(carpeta, f)));
+    expect(endpoints.length).toBeGreaterThanOrEqual(9);
+    for (const fichero of endpoints) {
+      const fuente = readFileSync(resolve(raiz, 'src/pages/tarjeta', fichero), 'utf8');
+      expect(fuente, fichero).toContain('pngDeTarjeta(svg)');
+      expect(fuente, fichero).not.toContain("from 'sharp'");
+      expect(fuente, fichero).not.toMatch(/\.png\(/);
+    }
+  });
+
+  it('tarjeta.ts sigue puro (AD-5): no importa sharp', () => {
+    expect(readFileSync(resolve(raiz, 'src/lib/tarjeta.ts'), 'utf8')).not.toContain("from 'sharp'");
   });
 });
 
@@ -332,7 +397,7 @@ describe('Historia 22.7 — la Tarjeta de Obra', () => {
 
   it('función del contenido: los mismos datos dan los mismos bytes de PNG', async () => {
     const rasterizar = () =>
-      sharp(Buffer.from(svgDeTarjetaDeListado(datosDeTarjetaDeObra(CARTAS, SENECA)))).png().toBuffer();
+      pngDeTarjeta(svgDeTarjetaDeListado(datosDeTarjetaDeObra(CARTAS, SENECA)));
     const [uno, dos] = await Promise.all([rasterizar(), rasterizar()]);
     expect(uno.equals(dos)).toBe(true);
   });

@@ -10,7 +10,7 @@ import {
   recuentoDeAutores,
   recuentoDeCitas,
 } from '../../src/lib/atribucion.ts';
-import sharp from 'sharp';
+import { pngDeTarjeta } from '../../src/lib/rasterizado.ts';
 import { datosDeTarjetaDelDirectorioDeAutores, svgDeTarjetaDeListado } from '../../src/lib/tarjeta.ts';
 import { tituloDelDirectorioDeAutores } from '../../src/lib/marca.ts';
 import {
@@ -469,7 +469,7 @@ describe('Historia 26.3 — `/autores/` construido', () => {
      */
     expect(svgEsperado()).toContain('5 autores');
     const construido = readFileSync(join(proyecto, 'dist', 'tarjeta', 'directorio', 'autores.png'));
-    const esperado = await sharp(Buffer.from(svgEsperado())).png().toBuffer();
+    const esperado = await pngDeTarjeta(svgEsperado());
     expect(construido.equals(esperado)).toBe(true);
   });
 
@@ -492,7 +492,7 @@ describe('Historia 26.3 — `/autores/` construido', () => {
          */
         const construido = readFileSync(join(proyecto, 'dist', ...ruta.split('/').filter(Boolean)));
         const svg = svgEsperado();
-        expect(construido.equals(await sharp(Buffer.from(svg)).png().toBuffer()), ruta).toBe(true);
+        expect(construido.equals(await pngDeTarjeta(svg)), ruta).toBe(true);
         for (const semblanza of Object.values(SEMBLANZAS)) expect(svg, ruta).not.toContain(semblanza);
         expect(svg.toLowerCase(), ruta).not.toContain('frase');
         continue;

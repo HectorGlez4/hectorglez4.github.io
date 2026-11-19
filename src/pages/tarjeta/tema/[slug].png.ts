@@ -15,7 +15,7 @@
  * previsualización prometa una cosa y la página diga otra es el fallo que esto evita.
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
-import sharp from 'sharp';
+import { pngDeTarjeta } from '../../../lib/rasterizado.ts';
 import { conjuntoPublicable, temasPublicados } from '../../../lib/publicado.ts';
 import { svgDeTarjetaDeListado } from '../../../lib/tarjeta.ts';
 
@@ -35,7 +35,7 @@ export const getStaticPaths = (async () => {
 
 export const GET: APIRoute = async ({ props }) => {
   const svg = svgDeTarjetaDeListado(props as Parameters<typeof svgDeTarjetaDeListado>[0]);
-  const png = await sharp(Buffer.from(svg)).png().toBuffer();
+  const png = await pngDeTarjeta(svg);
 
   return new Response(new Uint8Array(png), {
     headers: {

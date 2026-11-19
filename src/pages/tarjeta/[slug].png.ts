@@ -17,7 +17,7 @@
  * y tampoco tarjeta.
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
-import sharp from 'sharp';
+import { pngDeTarjeta } from '../../lib/rasterizado.ts';
 import { conjuntoPublicable } from '../../lib/publicado.ts';
 import { svgDeTarjeta } from '../../lib/tarjeta.ts';
 import { firmaDeCita, procedenciaCompuesta } from '../../lib/atribucion.ts';
@@ -56,7 +56,7 @@ export const GET: APIRoute = async ({ props }) => {
     // Historia 29.3 — el fallo nombra la Cita: es lo que Héctor necesita para decidir.
     throw new Error(`Tarjeta Social de «${slug}»: ${error instanceof Error ? error.message : String(error)}`);
   }
-  const png = await sharp(Buffer.from(svg)).png().toBuffer();
+  const png = await pngDeTarjeta(svg);
 
   return new Response(new Uint8Array(png), {
     headers: {

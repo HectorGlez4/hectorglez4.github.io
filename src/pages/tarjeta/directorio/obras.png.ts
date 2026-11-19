@@ -12,7 +12,7 @@
  * el build (AD-15), y dos construcciones del mismo commit dan los mismos bytes.
  */
 import type { APIRoute } from 'astro';
-import sharp from 'sharp';
+import { pngDeTarjeta } from '../../../lib/rasterizado.ts';
 import { conjuntoPublicable } from '../../../lib/publicado.ts';
 import { directorioDeObras } from '../../../lib/directorios.ts';
 import { datosDeTarjetaDelDirectorioDeObras, svgDeTarjetaDeListado } from '../../../lib/tarjeta.ts';
@@ -21,7 +21,7 @@ export const GET: APIRoute = async () => {
   const conjunto = await conjuntoPublicable();
   const { obras } = directorioDeObras(conjunto.autores, conjunto.citas, conjunto.personajes);
   const svg = svgDeTarjetaDeListado(datosDeTarjetaDelDirectorioDeObras(obras));
-  const png = await sharp(Buffer.from(svg)).png().toBuffer();
+  const png = await pngDeTarjeta(svg);
 
   return new Response(new Uint8Array(png), {
     headers: {

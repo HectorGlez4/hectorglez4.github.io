@@ -13,7 +13,7 @@
  * mismos bytes.
  */
 import type { APIRoute } from 'astro';
-import sharp from 'sharp';
+import { pngDeTarjeta } from '../../../lib/rasterizado.ts';
 import { conjuntoPublicable } from '../../../lib/publicado.ts';
 import { directorioDeAutores } from '../../../lib/directorios.ts';
 import { datosDeTarjetaDelDirectorioDeAutores, svgDeTarjetaDeListado } from '../../../lib/tarjeta.ts';
@@ -22,7 +22,7 @@ export const GET: APIRoute = async () => {
   const conjunto = await conjuntoPublicable();
   const { autores } = directorioDeAutores(conjunto.autores, conjunto.citas, conjunto.personajes);
   const svg = svgDeTarjetaDeListado(datosDeTarjetaDelDirectorioDeAutores(autores));
-  const png = await sharp(Buffer.from(svg)).png().toBuffer();
+  const png = await pngDeTarjeta(svg);
 
   return new Response(new Uint8Array(png), {
     headers: {

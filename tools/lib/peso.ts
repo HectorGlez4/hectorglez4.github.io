@@ -1,7 +1,8 @@
 /**
  * El peso de lo que se despliega, frente al techo del alojamiento — Historia 24.2, AD-9, AD-16.
  *
- * GitHub Pages admite 1 GB por sitio y `dist/` crece unos 95 KB por Cita nueva, así que una
+ * GitHub Pages admite 1 GB por sitio y `dist/` crece unos 58 KB por Cita nueva
+ * (95 KB antes de codificar las Tarjetas con paleta, el 2026-11-19), así que una
  * sesión de siembra puede dejar el sitio por encima del techo, y eso no se ve al construir:
  * se ve al publicar, cuando el despliegue falla sin decir cuánto sobra. Este módulo decide,
  * sobre el listado de `dist/` ya leído, cuánto pesa lo que se despliega y si cruza el aviso o

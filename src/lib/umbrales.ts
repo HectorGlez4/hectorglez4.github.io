@@ -1002,7 +1002,9 @@ export const TECHO_DE_PESO_DEL_ALOJAMIENTO = 1_000_000_000;
  * juzgado pesaba 466.839.655 bytes (445,2 MiB), y crece unos 95 KB por Cita nueva, dos tercios
  * de ellos de su Tarjeta Social: el aviso salta hacia las 7.800 Citas como mucho, porque cada
  * Autor u Obra nuevos suman además su página y su Tarjeta. La Épica 24 engorda la Página de
- * Cita, así que se vuelve a medir tras la 24.6 y los valores se revisan entonces.
+ * Cita, así que se vuelve a medir tras la 24.6 y los valores se revisan entonces. Desde el
+ * 2026-11-19 las Tarjetas se codifican con paleta (`src/lib/rasterizado.ts`) y una Cita nueva
+ * suma unos 58 KB: con 6.898 Citas, lo juzgado bajó de 917,6 MiB a 622,9 MiB.
  *
  * **El aviso no decide nada**: la construcción sigue y, en el flujo de publicación, despliega.
  * Dice que queda margen antes de que el tope de abajo pare el despliegue; qué hacer con él
