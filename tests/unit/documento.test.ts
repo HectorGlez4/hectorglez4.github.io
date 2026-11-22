@@ -2156,7 +2156,10 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     const contenido = readFileSync(join(raiz, 'corpus/citas', fichero), 'utf8');
     // Un fichero sin frontmatter no tumba el bloque: se queda sin campos y lo dice la
     // prueba que cuenta cuántas Citas se leyeron.
-    const frontmatter = (parsearYaml(contenido.split('---')[1] ?? '') ?? {}) as {
+    // El delimitador es una línea `---` entera: una URL de atestiguación puede llevar
+    // guiones seguidos («from----a-personal-credo»), y partir por la subcadena la cortaba.
+    const delimitado = /^---\r?\n([\s\S]*?)\r?\n---\r?$/m.exec(contenido)?.[1] ?? '';
+    const frontmatter = (parsearYaml(delimitado) ?? {}) as {
       autor?: string;
       procedencia?: { obra?: string };
       fuente?: { url?: string };
