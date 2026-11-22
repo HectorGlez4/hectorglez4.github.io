@@ -2779,3 +2779,46 @@ aprobaciones:
   - { slug: "wole-soyinka-la-justicia-es-la-primera-condicion-de", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
   - { slug: "wole-soyinka-los-libros-y-toda-forma-de-escritura", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
   - { slug: "wole-soyinka-un-tigre-no-proclama-su-tigritud-se", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-cada-generacion-debe-reconocer-y-abrazar-la", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-el-fuego-vivo-engendra-ceniza-fria-e", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-el-lenguaje-es-un-chivo-expiatorio-muy", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-el-mundo-no-tiene-fin-y-lo", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-el-problema-de-nigeria-es-simple-y", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-entre-los-suyos-se-respetaba-la-edad", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-es-el-narrador-de-hecho-quien-nos", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-es-el-relato-lo-que-sobrevive-al", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-es-mas-dificil-y-mas-amargo-cuando", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-existe-el-poder-absoluto-sobre-el-relato", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-existe-una-obligacion-moral-creo-yo-de", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-la-memoria-es-necesaria-si-sobrevivir-ha", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-lo-que-tienes-que-aceptar-es-que", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-los-escritores-no-son-solo-escritores-tambien", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-los-proverbios-son-el-aceite-de-palma", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-mientras-hacemos-nuestras-buenas-obras-no-olvidemos", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-no-podemos-pisotear-la-humanidad-de-los", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-no-veo-como-puede-llamarse-arte-al", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-si-no-te-gusta-la-historia-que", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-si-tuvieramos-imaginacion-suficiente-para-ponernos-en", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "chinua-achebe-ver-el-mundo-desde-la-posicion-del", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "jackie-chan-no-debo-rendirme-la-vida-me-derriba", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "jerry-seinfeld-el-esfuerzo-siempre-produce-un-valor-positivo", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "jerry-seinfeld-el-mejor-consejo-es-que-hagas-tu", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "jerry-seinfeld-en-la-vida-no-hay-suficientes-cosas", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "jerry-seinfeld-la-fascinacion-es-mucho-mejor-que-la", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "jerry-seinfeld-las-mejores-cosas-de-mi-vida-han", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "jerry-seinfeld-limitate-a-estar-dispuesto-a-hacer-tu", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "jerry-seinfeld-no-pienses-en-tener-piensa-en-llegar", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "julie-andrews-al-hacerte-mayor-te-vuelves-menos-propenso", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "julie-andrews-buena-parte-de-mi-vida-llego-en", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "julie-andrews-el-exito-aterra-como-la-felicidad-a", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "julie-andrews-el-matrimonio-es-un-gran-grafico-de", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "julie-andrews-todas-las-carreras-suben-y-bajan-como", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "nadine-gordimer-escribir-es-darle-sentido-a-la-vida", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "nadine-gordimer-la-responsabilidad-es-lo-que-aguarda-fuera", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "nadine-gordimer-la-verdad-no-siempre-es-belleza-pero", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "nadine-gordimer-nada-factico-que-yo-escriba-o-diga", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "steve-martin-con-los-anos-he-aprendido-que-no", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "steve-martin-la-perseverancia-es-un-gran-sustituto-del", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "steve-martin-lo-dificil-era-ser-bueno-bueno-de", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "steve-martin-se-tan-bueno-que-no-puedan-ignorarte", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
+  - { slug: "steve-martin-yo-buscaba-la-originalidad-comica-y-la", propone: "claude-opus-sesion-principal", aprueba: "claude-sonnet-revisor", fecha: "2026-11-22" }
