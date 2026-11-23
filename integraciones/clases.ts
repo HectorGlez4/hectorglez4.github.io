@@ -55,6 +55,9 @@ function relativaALaRaiz(raiz: string, ruta: string): string {
   return normalizada.startsWith(`${prefijo}/`) ? normalizada.slice(prefijo.length + 1) : normalizada;
 }
 
+/** Cuántos `git show` corren a la vez al leer las traducciones propias en `HEAD`. */
+const GIT_SHOW_A_LA_VEZ = 32;
+
 const ejecutarGit = (cwd: string, args: string[]) =>
   promisify(execFile)('git', args, { cwd, maxBuffer: 256 * 1024 * 1024 });
 
@@ -129,9 +132,20 @@ export async function instantesDeLasAprobaciones(
       return undefined;
     }
   };
-  const textosEnHead = await Promise.all(
-    rutasDeLasPropias.map(async (ruta) => textoEnHead(await contenidoEnHead(estado.tope as string, ruta))),
-  );
+  /*
+   * De `GIT_SHOW_A_LA_VEZ` en `GIT_SHOW_A_LA_VEZ`, nunca todas a la vez: con miles de traducciones
+   * propias, un `git show` por cada una lanzado de golpe agota los descriptores del proceso y
+   * `spawn` lanza EBADF de forma síncrona —antes de que exista la promesa—, que tumba el build.
+   */
+  const textosEnHead: unknown[] = [];
+  for (let desde = 0; desde < rutasDeLasPropias.length; desde += GIT_SHOW_A_LA_VEZ) {
+    const tanda = rutasDeLasPropias.slice(desde, desde + GIT_SHOW_A_LA_VEZ);
+    textosEnHead.push(
+      ...(await Promise.all(
+        tanda.map(async (ruta) => textoEnHead(await contenidoEnHead(estado.tope as string, ruta))),
+      )),
+    );
+  }
   const textos = new Map<string, Instante>();
   propias.forEach((propia, i) => {
     if (textosEnHead[i] !== propia.texto) {
