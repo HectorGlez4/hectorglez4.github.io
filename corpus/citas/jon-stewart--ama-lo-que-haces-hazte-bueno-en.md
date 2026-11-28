@@ -1,0 +1,20 @@
+---
+texto: "Ama lo que haces. Hazte bueno en ello. La competencia es un bien escaso en estos tiempos."
+autor: "jon-stewart"
+temas:
+  - "el-trabajo"
+slug: "jon-stewart-ama-lo-que-haces-hazte-bueno-en"
+procedencia:
+  obra: "Discurso de graduación en el College of William & Mary"
+  año: 2004
+clase: "atribuida"
+atestiguaciones:
+  - url: "https://www.wm.edu/news/stories/2004/jon-stewarts-84-commencement-address.php"
+    consultadaEl: "2026-11-28"
+  - url: "https://singjupost.com/full-transcript-jon-stewart-2004-commencement-speech-at-the-college-of-william-and-mary/"
+    consultadaEl: "2026-11-28"
+origen: "traduccion-propia"
+partida:
+  texto: "Love what you do. Get good at it. Competence is a rare commodity in this day and age."
+  lengua: "en"
+---
